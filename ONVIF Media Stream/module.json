@@ -1,0 +1,16 @@
+{
+    "id": "{FA889450-38B6-7E20-D4DC-F2C6D0B074FB}",
+    "name": "ONVIF Media Stream",
+    "type": 3,
+    "vendor": "ONVIF",
+    "aliases": [],
+    "parentRequirements": [
+        "{9B9C8DA6-BC89-21BC-3E8C-BA6E534ABC37}"
+    ],
+    "childRequirements": [],
+    "implemented": [
+        "{E23DD2CD-F098-268A-CE49-1CC04FE8060B}"
+    ],
+    "prefix": "ONVIF",
+    "url": "https://github.com/Nall-chan/ONFIV/ONVIFMediaStream"
+}

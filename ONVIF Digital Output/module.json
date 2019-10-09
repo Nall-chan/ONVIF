@@ -1,0 +1,16 @@
+{
+    "id": "{A44B3114-1F72-1FD1-96FB-D7E970BD8614}",
+    "name": "ONVIF Digital Output",
+    "type": 3,
+    "vendor": "ONVIF",
+    "aliases": [],
+    "parentRequirements": [
+        "{9B9C8DA6-BC89-21BC-3E8C-BA6E534ABC37}"
+    ],
+    "childRequirements": [],
+    "implemented": [
+        "{E23DD2CD-F098-268A-CE49-1CC04FE8060B}"
+    ],
+    "prefix": "ONVIF",
+    "url": "https://github.com/Nall-chan/ONFIV/ONVIFDigitalOutput"
+}

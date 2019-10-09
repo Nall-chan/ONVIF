@@ -1,0 +1,16 @@
+{
+    "id": "{185D3991-7819-35B7-03F9-DF8DD5D386CD}",
+    "name": "ONVIF PTZ",
+    "type": 3,
+    "vendor": "ONVIF",
+    "aliases": [],
+    "parentRequirements": [
+        "{9B9C8DA6-BC89-21BC-3E8C-BA6E534ABC37}"
+    ],
+    "childRequirements": [],
+    "implemented": [
+        "{E23DD2CD-F098-268A-CE49-1CC04FE8060B}"
+    ],
+    "prefix": "ONVIF",
+    "url": "https://github.com/Nall-chan/ONFIV/ONVIFPTZ"
+}

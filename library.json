@@ -1,0 +1,12 @@
+{
+    "id": "{2AC20A41-9AF6-B698-BFC0-50427AB234DE}",
+    "author": "Michael Tröger",
+    "name": "ONVIF Library",
+    "url": "https://github.com/Nall-chan/ONFIV",
+    "compatibility": {
+        "version": "5.2"
+    },
+    "version": "0.9",
+    "build": 100,
+    "date": 0
+}

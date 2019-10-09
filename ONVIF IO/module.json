@@ -1,0 +1,16 @@
+{
+    "id": "{F40CA9A7-3B4D-4B26-7214-3A94B6074DFB}",
+    "name": "ONVIF IO",
+    "type": 1,
+    "vendor": "",
+    "aliases": [],
+    "parentRequirements": [],
+    "childRequirements": [
+        "{E23DD2CD-F098-268A-CE49-1CC04FE8060B}"
+    ],
+    "implemented": [
+        "{9B9C8DA6-BC89-21BC-3E8C-BA6E534ABC37}"
+    ],
+    "prefix": "ONVIF",
+    "url": "https://github.com/Nall-chan/ONFIV/ONVIFIO"
+}
