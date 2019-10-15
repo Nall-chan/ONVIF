@@ -1,0 +1,16 @@
+{
+    "id": "{3E7839DC-5CC9-30A0-F48A-58DF2339EADD}",
+    "name": "ONVIF Discovery",
+    "type": 5,
+    "vendor": "ONVIF",
+    "aliases": [],
+    "parentRequirements": [
+
+    ],
+    "childRequirements": [],
+    "implemented": [
+
+    ],
+    "prefix": "ONVIF",
+    "url": "https://github.com/Nall-chan/ONFIV/ONVIFDiscovery"
+}

@@ -1,5 +1,18 @@
 {
-    "elements": [],
-    "actions": [],
-    "status": []
+    "elements": [
+        {
+            "type": "Select",
+            "name": "VideoSource",
+            "caption": "VideoSource",
+            "options": [
+            ]
+        },
+        {
+            "type": "Select",
+            "name": "Profile",
+            "caption": "Stream-Profile",
+            "options": [
+            ]
+        }
+    ]
 }

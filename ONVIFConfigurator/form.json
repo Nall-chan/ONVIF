@@ -1,0 +1,33 @@
+{
+    "actions": [
+        {
+            "type": "Configurator",
+            "name": "Configurator",
+            "add": false,
+            "delete": true,
+            "sort": {
+                "column": "type",
+                "direction": "ascending"
+            },
+            "columns": [
+                {
+                    "caption": "Type",
+                    "name": "type",
+                    "width": "160px"
+                }, {
+                    "caption": "VideoSource",
+                    "name": "videosource",
+                    "width": "120px"
+                }, {
+                    "caption": "Name",
+                    "name": "name",
+                    "width": "300px"
+                }, {
+                    "caption": "Location",
+                    "name": "location",
+                    "width": "auto"
+                }
+            ],
+            "values": []
+        }]
+}

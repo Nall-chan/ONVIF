@@ -1,0 +1,64 @@
+{
+    "elements": [
+        {
+            "type": "ExpansionPanel",
+            "caption": "Optional credentials",
+            "items": [
+                { 
+                    "type": "RowLayout",
+                    "items": [
+                        {
+                            "name": "Username",
+                            "type": "ValidationTextBox",
+                            "caption": "Username"
+                        },
+                        {
+                            "name": "Password",
+                            "type": "PasswordTextBox",
+                            "caption": "Password"
+                        }
+                    ]
+                }
+            ]
+        }
+    ],
+    "actions": [
+        {
+            "type": "Configurator",
+            "name": "Discovery",
+            "add": false,
+            "delete": true,
+            "sort": {
+                "column": "IPAddress",
+                "direction": "ascending"
+            },
+            "columns": [{
+                    "caption": "Host",
+                    "name": "IPAddress",
+                    "width": "150px"
+                }, {
+                    "caption": "Name",
+                    "name": "name",
+                    "width": "auto"
+                }, {
+                    "caption": "Manufacturer",
+                    "name": "Manufacturer",
+                    "width": "180px"
+                }, {
+                    "caption": "Model",
+                    "name": "Model",
+                    "width": "250px"
+                }, {
+                    "caption": "Firmware",
+                    "name": "FirmwareVersion",
+                    "width": "150px"
+                }, {
+                    "caption": "Serial Number",
+                    "name": "SerialNumber",
+                    "width": "150px"
+                }
+            ],
+            "values": []
+        }
+    ]
+}

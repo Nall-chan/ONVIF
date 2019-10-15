@@ -1,3 +1,0 @@
-[submodule "libs/onvif-client-php"]
-	path = libs/onvif-client-php
-	url = https://github.com/mapbuh/onvif-client-php

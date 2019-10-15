@@ -1,0 +1,16 @@
+{
+    "id": "{C6A79C49-19D5-8D45-FFE5-5D77165FAEE6}",
+    "name": "ONVIF Configurator",
+    "type": 4,
+    "vendor": "ONVIF",
+    "aliases": [],
+    "parentRequirements": [
+        "{9B9C8DA6-BC89-21BC-3E8C-BA6E534ABC37}"
+    ],
+    "childRequirements": [],
+    "implemented": [
+        "{E23DD2CD-F098-268A-CE49-1CC04FE8060B}"
+    ],
+    "prefix": "ONVIF",
+    "url": "https://github.com/Nall-chan/ONFIV/ONVIFConfigurator"
+}

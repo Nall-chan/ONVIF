@@ -1,0 +1,170 @@
+<?php
+
+declare(strict_types=1);
+
+eval('declare(strict_types=1);namespace ONVIFModuleBase {?>' . file_get_contents(__DIR__ . '/../libs/helper/BufferHelper.php') . '}');
+eval('declare(strict_types=1);namespace ONVIFModuleBase {?>' . file_get_contents(__DIR__ . '/../libs/helper/VariableProfileHelper.php') . '}');
+eval('declare(strict_types=1);namespace ONVIFModuleBase {?>' . file_get_contents(__DIR__ . '/../libs/helper/VariableHelper.php') . '}');
+eval('declare(strict_types=1);namespace ONVIFModuleBase {?>' . file_get_contents(__DIR__ . '/../libs/helper/DebugHelper.php') . '}');
+eval('declare(strict_types=1);namespace ONVIFModuleBase {?>' . file_get_contents(__DIR__ . '/../libs/helper/ParentIOHelper.php') . '}');
+eval('declare(strict_types=1);namespace ONVIFModuleBase {?>' . file_get_contents(__DIR__ . '/../libs/helper/AttributeArrayHelper.php') . '}');
+
+/**
+ * @property int $ParentID 
+ */
+class ONVIFModuleBase extends IPSModule
+{
+
+    use \ONVIFModuleBase\BufferHelper,
+        \ONVIFModuleBase\VariableProfileHelper,
+        \ONVIFModuleBase\VariableHelper,
+        \ONVIFModuleBase\DebugHelper,
+        \ONVIFModuleBase\AttributeArrayHelper,
+        \ONVIFModuleBase\InstanceStatus {
+        \ONVIFModuleBase\InstanceStatus::MessageSink as IOMessageSink; // MessageSink gibt es sowohl hier in der Klasse, als auch im Trait InstanceStatus. Hier wird für die Methode im Trait ein Alias benannt.
+        \ONVIFModuleBase\InstanceStatus::RegisterParent as IORegisterParent;
+        \ONVIFModuleBase\InstanceStatus::RequestAction as IORequestAction;
+    }
+    const wsdl = '';
+
+    public function Create()
+    {
+        //Never delete this line!
+        parent::Create();
+        $this->RequireParent('{F40CA9A7-3B4D-4B26-7214-3A94B6074DFB}');
+    }
+
+    public function Destroy()
+    {
+        //Never delete this line!
+        parent::Destroy();
+    }
+
+    public function ApplyChanges()
+    {
+        //Never delete this line!
+        parent::ApplyChanges();
+        $this->RegisterMessage(0, IPS_KERNELSTARTED);
+        $this->RegisterMessage($this->InstanceID, FM_CONNECT);
+        $this->RegisterMessage($this->InstanceID, FM_DISCONNECT);
+        if (IPS_GetKernelRunlevel() != KR_READY) {
+            return;
+        }
+        $this->RegisterParent();
+    }
+
+    protected function KernelReady()
+    {
+        $this->RegisterParent();
+    }
+
+    protected function RegisterParent()
+    {
+        $this->IORegisterParent();
+    }
+
+    public function RequestAction($Ident, $Value)
+    {
+        if ($this->IORequestAction($Ident, $Value)) {
+            return true;
+        }
+        return false;
+    }
+
+    public function MessageSink($TimeStamp, $SenderID, $Message, $Data)
+    {
+        $this->IOMessageSink($TimeStamp, $SenderID, $Message, $Data);
+
+        switch ($Message) {
+            case IPS_KERNELSTARTED:
+                $this->KernelReady();
+                break;
+        }
+    }
+
+    /**
+     * Wird ausgeführt wenn sich der Status vom Parent ändert.
+     */
+    protected function IOChangeState($State)
+    {
+        if ($State == IS_ACTIVE) {
+            $this->ApplyChanges();
+        }
+    }
+
+    protected function GetCapabilities()
+    {
+        if ($this->HasActiveParent()) {
+            $Data = json_encode(['DataID' => '{9B9C8DA6-BC89-21BC-3E8C-BA6E534ABC37}', 'Function' => 'GetCapabilities']);
+            $anwser = $this->SendDataToParent($Data);
+            if ($anwser === false) {
+                $this->SendDebug('GetCapabilities', 'No valid answer', 0);
+                throw new Exception($this->Translate('No valid answer.'), E_USER_NOTICE);
+            }
+            return unserialize($anwser);
+        }
+        return ['VideoSources' => [], 'HasOutput' => false, 'HasInput' => false];
+    }
+
+    protected function GetCredentials()
+    {
+        if ($this->HasActiveParent()) {
+            $Data = json_encode(['DataID' => '{9B9C8DA6-BC89-21BC-3E8C-BA6E534ABC37}', 'Function' => 'GetCredentials']);
+            $anwser = $this->SendDataToParent($Data);
+            if ($anwser === false) {
+                $this->SendDebug('GetCredentials', 'No valid answer', 0);
+                throw new Exception($this->Translate('No valid answer.'), E_USER_NOTICE);
+            }
+            return unserialize($anwser);
+        }
+        return ['Username' => '', 'Password' => ''];
+    }
+
+    protected function SendData(string $URI, string $Function, bool $UseLogin = false, array $Params = [])
+    {
+        $this->SendDebug('Send URI', $URI, 0);
+        $this->SendDebug('Send Function', $Function, 0);
+        $this->SendDebug('Send Params', $Params, 0);
+        $this->SendDebug('Forward useLogin', $UseLogin, 0);
+        $Ret = $this->SendDataToParent(json_encode(['DataID' => '{9B9C8DA6-BC89-21BC-3E8C-BA6E534ABC37}', 'URI' => $URI, 'Function' => $Function, 'Params' => $Params, 'useLogin' => $UseLogin, 'wsdl' => static::wsdl]));
+        if ($Ret === false) {
+            return false;
+        }
+        $Result = unserialize($Ret);
+        if (is_a($Result, 'SoapFault')) {
+            trigger_error($Result->getMessage(), E_USER_WARNING);
+            return false;
+        }
+        $this->SendDebug('Result', $Result, 0);
+        return $Result;
+    }
+
+    public function ReceiveData($JSONString)
+    {
+        $Data = json_decode($JSONString, true);
+        unset($Data['DataID']);
+        $this->SendDebug('Receive', $Data, 0);
+        return $Data;
+    }
+
+    protected static function unparse_url($parsed_url)
+    {
+        $scheme = isset($parsed_url['scheme']) ? $parsed_url['scheme'] . '://' : '';
+        $host = isset($parsed_url['host']) ? $parsed_url['host'] : '';
+        $port = isset($parsed_url['port']) ? ':' . $parsed_url['port'] : '';
+        $user = isset($parsed_url['user']) ? $parsed_url['user'] : '';
+        $pass = isset($parsed_url['pass']) ? ':' . $parsed_url['pass'] : '';
+        $pass = ($user || $pass) ? "$pass@" : '';
+        $path = isset($parsed_url['path']) ? $parsed_url['path'] : '';
+        $query = isset($parsed_url['query']) ? '?' . $parsed_url['query'] : '';
+        $fragment = isset($parsed_url['fragment']) ? '#' . $parsed_url['fragment'] : '';
+        return "$scheme$user$pass$host$port$path$query$fragment";
+    }
+
+    protected function ModulErrorHandler($errno, $errstr)
+    {
+        $this->SendDebug('ERROR', utf8_decode($errstr), 0);
+        echo $errstr;
+    }
+
+}

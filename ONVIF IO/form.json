@@ -1,5 +1,125 @@
 {
-    "elements": [],
-    "actions": [],
-    "status": []
+    "elements": [
+        {
+            "name": "Address",
+            "type": "ValidationTextBox",
+            "caption": "Address"
+        }, { 
+            "type": "RowLayout",
+            "items": [
+                {
+                    "name": "Username",
+                    "type": "ValidationTextBox",
+                    "caption": "Username"
+                },
+                {
+                    "name": "Password",
+                    "type": "PasswordTextBox",
+                    "caption": "Password"
+                }
+            ]
+        },
+        {
+            "name": "NATAddress",
+            "type": "ValidationTextBox",
+            "caption": "NAT Address",
+            "visible": false
+        }
+    ],
+    "actions": [
+        {
+            "name": "EventRow",
+            "type": "RowLayout",
+            "items": [
+                {
+                    "type": "Label",
+                    "width": "200px",
+                    "caption": "Event hook:"
+                },
+                {
+                    "name": "Eventhook",
+                    "type": "Label",
+                    "link": false,
+                    "caption": ""
+                }
+            ]
+        },
+        {
+            "name": "SubscriptionReferenceRow",
+            "type": "RowLayout",
+            "items": [
+                {
+                    "type": "Label",
+                    "width": "200px",
+                    "caption": "SubscriptionReference:"
+                },
+                {
+                    "name": "SubscriptionReference",
+                    "type": "Label",
+                    "link": false,
+                    "caption": ""
+                }
+            ]
+        },
+        {
+            "type": "List",
+            "name": "Events",
+            "add": false,
+            "delete": false,
+            "sort": {
+                "column": "Topic",
+                "direction": "ascending"
+            },
+            "columns": [{
+                    "caption": "Topic",
+                    "name": "Topic",
+                    "width": "auto"
+                }, {
+                    "caption": "Name of source",
+                    "name": "SourceName",
+                    "width": "200px"
+                }, {
+                    "caption": "Type of source",
+                    "name": "SourceType",
+                    "width": "200px"
+                }, {
+                    "caption": "Name of data",
+                    "name": "DataName",
+                    "width": "200px"
+                }, {
+                    "caption": "Type of data",
+                    "name": "DataType",
+                    "width": "200px"
+                }
+            ],
+            "values": []
+        }
+    ],
+    "status": [
+        {
+            "code": 102,
+            "icon": "active",
+            "caption": "Interface connected"
+        },
+        {
+            "code": 104,
+            "icon": "inactive",
+            "caption": "Interface disconnected"
+        },
+        {
+            "code": 201,
+            "icon": "error",
+            "caption": "Address is invalid"
+        },
+        {
+            "code": 202,
+            "icon": "error",
+            "caption": "Device not reachable"
+        },
+        {
+            "code": 203,
+            "icon": "error",
+            "caption": "Connection lost"
+        }
+    ]
 }
