@@ -90,26 +90,27 @@ class ONVIFIO extends IPSModule
             $Form['actions'][2]['values'] = $EventList;
             $this->UpdateFormField('Events', 'visible', true);
             $this->SetStatus(IS_EBASE + 2);
-        }
-        if ($this->GetCapabilities()) {
-            if ($this->GetEventProperties()) { // events are valid
-                $this->RegisterHook('/hook/ONFIVEvents/IO/' . $this->InstanceID);
-                if ($this->GetConsumerAddress() === false) { // we cannot receive events :(
-                    $this->WriteAttributeString('SubscriptionReference', '');
-                    $this->WriteAttributeString('SubscriptionId', '');
-                    $this->UpdateFormField('SubscriptionReferenceRow', 'visible', true);
-                    $this->UpdateFormField('SubscriptionReference', 'caption', '');
-                } else { // yeah, we can receive events
-                    $this->Subscribe();
+        } else {
+            if ($this->GetCapabilities()) {
+                if ($this->GetEventProperties()) { // events are valid
+                    $this->RegisterHook('/hook/ONFIVEvents/IO/' . $this->InstanceID);
+                    if ($this->GetConsumerAddress() === false) { // we cannot receive events :(
+                        $this->WriteAttributeString('SubscriptionReference', '');
+                        $this->WriteAttributeString('SubscriptionId', '');
+                        $this->UpdateFormField('SubscriptionReferenceRow', 'visible', true);
+                        $this->UpdateFormField('SubscriptionReference', 'caption', '');
+                    } else { // yeah, we can receive events
+                        @$this->Subscribe();
+                    }
+                } else { // events not possible
+                    $this->UpdateFormField('Eventhook', 'caption', 'This device not support events.');
+                    $this->UpdateFormField('SubscriptionReferenceRow', 'visible', false);
+                    $this->UpdateFormField('Events', 'values', json_encode([]));
+                    $this->UpdateFormField('Events', 'visible', false);
+                    $this->UnregisterHook('/hook/ONFIVEvents/IO/' . $this->InstanceID);
+                    $this->WriteAttributeArray('EventProperties', []);
+                    $this->WriteAttributeString('ConsumerAddress', '');
                 }
-            } else { // events not possible
-                $this->UpdateFormField('Eventhook', 'caption', 'This device not support events.');
-                $this->UpdateFormField('SubscriptionReferenceRow', 'visible', false);
-                $this->UpdateFormField('Events', 'values', json_encode([]));
-                $this->UpdateFormField('Events', 'visible', false);
-                $this->UnregisterHook('/hook/ONFIVEvents/IO/' . $this->InstanceID);
-                $this->WriteAttributeArray('EventProperties', []);
-                $this->WriteAttributeString('ConsumerAddress', '');
             }
             $this->SetStatus(IS_ACTIVE);
         }
