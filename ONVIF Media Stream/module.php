@@ -22,10 +22,12 @@ class ONVIFMediaStream extends ONVIFModuleBase
         parent::ApplyChanges();
         if ($this->ReadPropertyString('VideoSource') == '') {
             $this->SetStatus(IS_INACTIVE);
+            $this->SetMedia('');
             return;
         }
         if ($this->ReadPropertyString('Profile') == '') {
             $this->SetStatus(IS_INACTIVE);
+            $this->SetMedia('');
             return;
         }
         if (IPS_GetKernelRunlevel() != KR_READY) {
@@ -37,6 +39,7 @@ class ONVIFMediaStream extends ONVIFModuleBase
             $this->SetMedia($StreamURL);
             $this->SetStatus(IS_ACTIVE);
         } else {
+            $this->SetMedia('');
             $this->SetStatus(IS_EBASE + 1);
         }
     }
@@ -82,6 +85,10 @@ class ONVIFMediaStream extends ONVIFModuleBase
         $Form['elements'][0]['options'] = $VideoSourcesOptions;
 
         $ProfileOptions = [];
+        $ProfileOptions[] = [
+            'caption' => 'none',
+            'value'   => ''
+        ];
         $ActualProfile = null;
         foreach ($Profiles as $Profile) {
             $ProfileOptions[] = [

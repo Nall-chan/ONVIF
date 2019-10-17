@@ -1,6 +1,11 @@
 {
     "elements": [
         {
+            "type": "CheckBox",
+            "name": "Open",
+            "caption": "Open"
+        },
+        {
             "name": "Address",
             "type": "ValidationTextBox",
             "caption": "Address"
@@ -104,7 +109,7 @@
         {
             "code": 104,
             "icon": "inactive",
-            "caption": "Interface disconnected"
+            "caption": "Interface closed"
         },
         {
             "code": 201,

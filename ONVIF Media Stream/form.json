@@ -14,5 +14,22 @@
             "options": [
             ]
         }
+    ],
+    "status": [
+        {
+            "code": 102,
+            "icon": "active",
+            "caption": "Configuration is valid"
+        },
+        {
+            "code": 104,
+            "icon": "inactive",
+            "caption": "Configuration invalid"
+        },
+        {
+            "code": 201,
+            "icon": "error",
+            "caption": "Stream could not be determined"
+        }
     ]
 }

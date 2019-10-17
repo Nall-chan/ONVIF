@@ -31,7 +31,7 @@ class ONVIFModuleBase extends IPSModule
     {
         //Never delete this line!
         parent::Create();
-        $this->RequireParent('{F40CA9A7-3B4D-4B26-7214-3A94B6074DFB}');
+        //$this->RequireParent('{F40CA9A7-3B4D-4B26-7214-3A94B6074DFB}');
     }
 
     public function Destroy()
@@ -51,6 +51,7 @@ class ONVIFModuleBase extends IPSModule
             return;
         }
         $this->RegisterParent();
+        $this->ReloadForm();
     }
 
     protected function KernelReady()

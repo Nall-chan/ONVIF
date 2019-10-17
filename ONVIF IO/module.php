@@ -10,6 +10,7 @@ require_once dirname(__DIR__) . '/libs/onvif-client-php/inc/ONVIF.inc.php';
 
 /**
  * @property string $Host
+ * @property bool isConnected
  */
 class ONVIFIO extends IPSModule
 {
@@ -36,6 +37,8 @@ class ONVIFIO extends IPSModule
         $this->RegisterAttributeBoolean('HasOutput', false);
         $this->RegisterTimer('RenewSubscription', 0, 'IPS_RequestAction(' . $this->InstanceID . ',"Renew",true);');
         $this->Host = '';
+        $this->isConnected = false;
+        $this->RegisterMessage(0, IPS_KERNELMESSAGE);
     }
 
     public function Destroy()
@@ -44,15 +47,41 @@ class ONVIFIO extends IPSModule
         parent::Destroy();
     }
 
+    public function MessageSink($TimeStamp, $SenderID, $Message, $Data)
+    {
+        switch ($Message) {
+            case IPS_KERNELMESSAGE:
+                if ($Data[0] == KR_READY) {
+                    $this->KernelReady();
+                }
+                break;
+        }
+    }
+
+    private function KernelReady()
+    {
+        $this->UnregisterMessage(0, IPS_KERNELMESSAGE);
+        $this->ApplyChanges();
+    }
+
     public function ApplyChanges()
     {
-        $this->SetTimerInterval('RenewSubscription', 0);
-
         //Never delete this line!
         parent::ApplyChanges();
+        if (IPS_GetKernelRunlevel() != KR_READY) {
+            return;
+        }
+        $this->SetTimerInterval('RenewSubscription', 0);
+
+        if ($this->isConnected) {
+            // todo
+            // subscribe beenden!
+        }
+
         $this->Host = '';
         if (!$this->ReadPropertyBoolean('Open')) {
             $this->SetStatus(IS_INACTIVE);
+            $this->LogMessage('Interface closed', KL_MESSAGE);
             return;
         }
 
@@ -62,14 +91,13 @@ class ONVIFIO extends IPSModule
             $this->SetStatus(IS_EBASE + 1);
             $this->SetSummary('');
             $this->WriteAttributeString('ConsumerAddress', '');
+            $this->LogMessage('Address is invalid', KL_ERROR);
             return;
         }
         $Host = $Url['scheme'] . '://' . $Url['host'] . $Url['port'];
         $this->SetSummary($Host);
         $this->Host = $Host;
-        if (IPS_GetKernelRunlevel() != KR_READY) {
-            return;
-        }
+
         if (!$this->GetVideoSources()) { // not reachable
             $this->UpdateFormField('Eventhook', 'caption', $this->ReadAttributeString('ConsumerAddress'));
             $this->WriteAttributeString('SubscriptionReference', '');
@@ -87,9 +115,10 @@ class ONVIFIO extends IPSModule
                     'DataType'   => $ListEvent['Data']['Type']
                 ];
             }
-            $Form['actions'][2]['values'] = $EventList;
+            $this->UpdateFormField('Events', 'values', json_encode($EventList));
             $this->UpdateFormField('Events', 'visible', true);
             $this->SetStatus(IS_EBASE + 2);
+            $this->LogMessage('Device not reachable', KL_ERROR);
         } else {
             if ($this->GetCapabilities()) {
                 if ($this->GetEventProperties()) { // events are valid
@@ -112,6 +141,7 @@ class ONVIFIO extends IPSModule
                     $this->WriteAttributeString('ConsumerAddress', '');
                 }
             }
+            $this->LogMessage('Interface connected', KL_MESSAGE);
             $this->SetStatus(IS_ACTIVE);
         }
     }
@@ -161,6 +191,7 @@ class ONVIFIO extends IPSModule
         if (is_a($ret, 'SoapFault')) {
             //trigger_error($ret->getMessage(), E_USER_WARNING);
             $this->SetStatus(IS_EBASE + 3);
+            $this->LogMessage('Connection lost', KL_ERROR);
             return false;
         }
         $SubscriptionReference = $ret->SubscriptionReference->Address->{'_'};
@@ -203,6 +234,7 @@ class ONVIFIO extends IPSModule
         if (is_a($ret, 'SoapFault')) {
             trigger_error($ret->getMessage(), E_USER_WARNING);
             $this->SetStatus(IS_EBASE + 3);
+            $this->LogMessage('Connection lost', KL_ERROR);
             $this->SetTimerInterval('RenewSubscription', 0);
             return false;
         }
@@ -220,16 +252,36 @@ class ONVIFIO extends IPSModule
 
         $xml = new DOMDocument();
         $xml->loadXML($Response);
-        $xs_ns = $xml->lookupPrefix('http://www.w3.org/2001/XMLSchema');
-        $tt_ns = $xml->lookupPrefix('http://www.onvif.org/ver10/schema');
-        $wstop_ns = $xml->lookupPrefix('http://docs.oasis-open.org/wsn/t-1');
+        $xs_ns = '';
+        if (strpos($Response, 'xmlns:xs') > 0) {
+            $xs_ns = 'xs';
+        }
+        if (strpos($Response, 'xmlns:xsd') > 0) {
+            $xs_ns = 'xsd';
+        }
+        if ($xs_ns == '') {
+            $xs_ns = $xml->lookupPrefix('http://www.w3.org/2001/XMLSchema');
+        }
+
+        if (strpos($Response, 'xmlns:tt') > 0) {
+            $tt_ns = 'tt';
+        } else {
+            $tt_ns = $xml->lookupPrefix('http://www.onvif.org/ver10/schema');
+        }
+
+        if (strpos($Response, 'xmlns:wstop') > 0) {
+            $wstop_ns = 'wstop';
+        } else {
+            $wstop_ns = $xml->lookupPrefix('http://docs.oasis-open.org/wsn/t-1');
+        }
+
         $xpath = new DOMXPath($xml);
         $xpath->registerNamespace($xs_ns, 'http://www.w3.org/2001/XMLSchema');
         $xpath->registerNamespace($tt_ns, 'http://www.onvif.org/ver10/schema');
         $xpath->registerNamespace($wstop_ns, 'http://docs.oasis-open.org/wsn/t-1');
-        $query = '//wstop:TopicSet';
+        $query = '//' . $wstop_ns . ':TopicSet';
         $prefixPathlen = strlen($xpath->query($query, NULL, true)[0]->getNodePath());
-        $query = "//*[@" . $wstop_ns . ":topic='true']/" . $tt_ns . ":MessageDescription/" . $tt_ns . ":Data/" . $tt_ns . ":SimpleItemDescription[@Type='" . $xs_ns . ":boolean' or @Type='" . $xs_ns . ":string' or @Type='" . $xs_ns . ":int']";
+        $query = "//*[@" . $wstop_ns . ":topic='true']/" . $tt_ns . ":MessageDescription/" . $tt_ns . ":Data/" . $tt_ns . ":SimpleItemDescription[@Type='" . $xs_ns . ":boolean' or @Type='" . $xs_ns . ":string' or @Type='" . $xs_ns . ":int' or @Type='" . $tt_ns . ":RelayLogicalState']";
         $wsTopics = $xpath->query($query);
         $Path = [];
         foreach ($wsTopics as $wsData) {
@@ -388,7 +440,7 @@ class ONVIFIO extends IPSModule
         $this->SendDebug('GetConfigurationForm', 'Start', 0);
         $Form = json_decode(file_get_contents(__DIR__ . '/form.json'), true);
         if (IPS_GetOption('NATSupport')) {
-            $Form['elements'][2]['visible'] = true;
+            $Form['elements'][3]['visible'] = true;
         }
         $ConsumerAddress = $this->ReadAttributeString('ConsumerAddress');
         if ($ConsumerAddress == '') {
@@ -423,6 +475,10 @@ class ONVIFIO extends IPSModule
 
     protected function ProcessHookData()
     {
+        if ($this->ReadPropertyBoolean('Open') == false) {
+            header("HTTP/1.0 404 Not found");
+            return;
+        }
         $Data = file_get_contents("php://input");
         //header("HTTP/1.0 200 OK");
         $this->SendDebug('Event', $Data, 0);
