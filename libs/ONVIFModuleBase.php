@@ -112,13 +112,13 @@ class ONVIFModuleBase extends IPSModule
         }
     }
 
-    protected function GetEvents(string $Pattern = '', int $InstanceID = -1)
+    protected function GetEvents(string $Pattern = '', int $InstanceID = -1, array $SkippedTopics = [])
     {
         if ($this->HasActiveParent()) {
             if ($InstanceID == -1) {
                 $InstanceID = $this->InstanceID;
             }
-            $Data = json_encode(['DataID' => '{9B9C8DA6-BC89-21BC-3E8C-BA6E534ABC37}', 'Function' => 'GetEvents', 'Pattern' => $Pattern, 'Instance' => $InstanceID]);
+            $Data = json_encode(['DataID' => '{9B9C8DA6-BC89-21BC-3E8C-BA6E534ABC37}', 'Function' => 'GetEvents', 'Pattern' => $Pattern, 'Instance' => $InstanceID, 'SkippedTopics' => $SkippedTopics]);
             $anwser = $this->SendDataToParent($Data);
             if ($anwser === false) {
                 return [];
@@ -198,14 +198,7 @@ class ONVIFModuleBase extends IPSModule
     protected function GetConfigurationFormEventTopic(array $Form, bool $AddNothingIndex = false, array $SkippedTopics = [])
     {
 //        if (static::TopicFilter != '') {
-        $Events = $this->GetEvents(static::TopicFilter, 0);
-        foreach ($SkippedTopics as $SkippedTopic) {
-            foreach (array_keys($Events) as $Topic) {
-                if (strpos($Topic, $SkippedTopic) !== false) {
-                    unset($Events[$Topic]);
-                }
-            }
-        }
+        $Events = $this->GetEvents(static::TopicFilter, 0, $SkippedTopics);
         $this->SendDebug('GetEvents', $SkippedTopics, 0);
         $this->SendDebug('GetEvents', $Events, 0);
         if (count($Events) == 0) {

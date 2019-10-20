@@ -41,6 +41,9 @@ class ONVIFIO extends IPSModule
         $this->Host = '';
         $this->isConnected = false;
         $this->RegisterMessage(0, IPS_KERNELMESSAGE);
+        if (IPS_GetKernelRunlevel() == KR_READY) {
+            $this->RegisterMessage($this->InstanceID, FM_CHILDREMOVED);
+        }
     }
 
     public function Destroy()
@@ -57,12 +60,27 @@ class ONVIFIO extends IPSModule
                     $this->KernelReady();
                 }
                 break;
+            case FM_CHILDREMOVED:
+                $this->lock('EventProperties');
+                $Events = $this->ReadAttributeArray('EventProperties');
+                foreach ($Events as &$Event) {
+                    $Index = array_search($Data[0], $Event['Receivers']);
+                    if ($Index !== false) {
+                        unset($Event['Receivers'][$Index]);
+                    }
+                }
+                $this->WriteAttributeArray('EventProperties', $Events);
+                $this->unlock('EventProperties');
+                $this->ReloadForm();
+                break;
         }
     }
 
     private function KernelReady()
     {
         $this->UnregisterMessage(0, IPS_KERNELMESSAGE);
+        $this->RegisterMessage($this->InstanceID, FM_CHILDREMOVED);
+        $this->LogMessage('RegisterMessage', KL_DEBUG);
         $this->ApplyChanges();
     }
 
@@ -400,10 +418,19 @@ class ONVIFIO extends IPSModule
                 $this->lock('EventProperties');
             }
             $Events = $this->ReadAttributeArray('EventProperties');
+            $SkippedTopics = $Data['SkippedTopics'];
+
             $FoundEvents = [];
             if ($Data['Pattern'] == '') {
                 if ($Data['Instance'] == 0) {
                     //$FoundEvents = $Events;
+                    foreach ($SkippedTopics as $SkippedTopic) {
+                        foreach (array_keys($Events) as $Topic) {
+                            if (strpos($Topic, $SkippedTopic) !== false) {
+                                unset($Events[$Topic]);
+                            }
+                        }
+                    }
                     foreach (array_keys($Events) as $FullTopic) {
                         $TopicParts = explode('/', $FullTopic);
                         array_pop($TopicParts);
@@ -566,8 +593,14 @@ class ONVIFIO extends IPSModule
                     ];
                 }
             }
+            if ($ListEvent['SourceType'] != '') {
+                $ListEvent['SourceType'] = substr(stristr($ListEvent['SourceType'], ':'), 1);
+            }
+            if ($ListEvent['DataType'] != '') {
+                $ListEvent['DataType'] = substr(stristr($ListEvent['DataType'], ':'), 1);
+            }
             $EventList [] = [
-                'Topic'      => $ListTopic,
+                'Topic'      => substr(stristr($ListTopic, ':'), 1),
                 'SourceName' => $ListEvent['SourceName'],
                 'SourceType' => $ListEvent['SourceType'],
                 'DataName'   => $ListEvent['DataName'],
