@@ -7,6 +7,7 @@ require_once __DIR__ . '/../libs/ONVIFModuleBase.php';
 class ONVIFMediaStream extends ONVIFModuleBase
 {
     const wsdl = 'media-mod.wsdl';
+    const TopicFilter = 'videosource';
 
     public function Create()
     {
@@ -19,6 +20,10 @@ class ONVIFMediaStream extends ONVIFModuleBase
     public function ApplyChanges()
     {
         //Never delete this line!
+
+        if ($this->ReadPropertyString('VideoSource') != '') {
+            $this->Addfilter = '.*"SourceValue":"' . $this->ReadPropertyString('VideoSource') . '"';
+        }
         parent::ApplyChanges();
         if ($this->ReadPropertyString('VideoSource') == '') {
             $this->SetStatus(IS_INACTIVE);
@@ -100,6 +105,7 @@ class ONVIFMediaStream extends ONVIFModuleBase
         }
         $Form['elements'][0]['options'] = $VideoSourcesOptions;
         $Form['elements'][1]['options'] = $ProfileOptions;
+        $Form['elements'][2] = $this->GetConfigurationFormEventTopic($Form['elements'][2], true);
         $Actions = [];
         if ($ActualProfile != null) {
             if (isset($ActualProfile['VideoSourceConfiguration']['Name'])) {
@@ -268,6 +274,42 @@ class ONVIFMediaStream extends ONVIFModuleBase
             IPS_SetIdent($mId, 'STREAM');
         }
         IPS_SetMediaFile($mId, $StreamURL, false);
+    }
+
+    public function ReceiveData($JSONString)
+    {
+        $Data = json_decode($JSONString, true);
+        unset($Data['DataID']);
+        $this->SendDebug('ReceiveEvent', $Data, 0);
+        $EventProperties = $this->ReadAttributeArray('EventProperties');
+        if (!array_key_exists($Data['Topic'], $EventProperties)) {
+            return false;
+        }
+        $EventProperty = $EventProperties[$Data['Topic']];
+        $Name = str_replace($this->ReadPropertyString('EventTopic'), '', $Data['Topic']) . ' - ' . $Data['DataName'];
+        $Ident = str_replace([' - ', '/', '-', ':'], ['_', '_', '_', ''], $Name);
+        switch (stristr($EventProperty['DataType'], ':')) {
+            case ':boolean':
+            case ':bool':
+                $this->RegisterVariableBoolean($Ident, $Name, '', 0);
+                $this->SetValue($Ident, ($Data['DataValue'] == 'true'));
+                break;
+            case ':float':
+            case ':double':
+                $this->RegisterVariableFloat($Ident, $Name, '', 0);
+                $this->SetValue($Ident, (float) $Data['DataValue']);
+                break;
+            case ':integer':
+            case ':int':
+                $this->RegisterVariableInteger($Ident, $Name, '', 0);
+                $this->SetValue($Ident, (int) $Data['DataValue']);
+                break;
+            case ':string':
+                $this->RegisterVariableString($Ident, $Name, '', 0);
+                $this->SetValue($Ident, $Data['DataValue']);
+                break;
+        }
+        return true;
     }
 
 }

@@ -238,7 +238,6 @@ class ONVIFIO extends IPSModule
         $Response = '';
         $ret = $this->SendData('', 'event-mod.wsdl', 'GetEventProperties', true, [], $Response);
         if (is_a($ret, 'SoapFault')) {
-            //trigger_error($ret->getMessage(), E_USER_WARNING);
             return false;
         }
 
@@ -278,11 +277,14 @@ class ONVIFIO extends IPSModule
         $Path = [];
         foreach ($wsTopics as $wsData) {
             $Topic = substr($wsData->parentNode->parentNode->parentNode->getNodePath(), $prefixPathlen + 1);
-            $Path[$Topic]['Data'] = ['Name' => $wsData->attributes->getNamedItem("Name")->nodeValue, 'Type' => $wsData->attributes->getNamedItem("Type")->nodeValue];
+            $Path[$Topic]['DataName'] = $wsData->attributes->getNamedItem("Name")->nodeValue;
+            $Path[$Topic]['DataType'] = $wsData->attributes->getNamedItem("Type")->nodeValue;
             $wsSource = $xpath->query("../../" . $tt_ns . ":Source/" . $tt_ns . ":SimpleItemDescription", $wsData, true);
-            $Path[$Topic]['Source'] = ['Name' => '', 'Type' => ''];
+            $Path[$Topic]['SourceName'] = '';
+            $Path[$Topic]['SourceType'] = '';
             if (count($wsSource) == 1) {
-                $Path[$Topic]['Source'] = ['Name' => $wsSource[0]->attributes->getNamedItem("Name")->nodeValue, 'Type' => $wsSource[0]->attributes->getNamedItem("Type")->nodeValue];
+                $Path[$Topic]['SourceName'] = $wsSource[0]->attributes->getNamedItem("Name")->nodeValue;
+                $Path[$Topic]['SourceType'] = $wsSource[0]->attributes->getNamedItem("Type")->nodeValue;
             }
             $Path[$Topic]['Receivers'] = [];
         }
@@ -300,7 +302,6 @@ class ONVIFIO extends IPSModule
     {
         $ret = $this->SendData('', 'media-mod.wsdl', 'GetVideoSources', true);
         if (is_a($ret, 'SoapFault')) {
-            //trigger_error($ret->getMessage(), E_USER_WARNING);
             return false;
         }
         $VideoSources = [];
@@ -325,14 +326,6 @@ class ONVIFIO extends IPSModule
         return true;
     }
 
-    /*  protected function FilterVideoSource(&$Profile, $Index, $VideoSourceToken)
-      {
-      if ($Profile['VideoSourceConfiguration']['SourceToken'] == $VideoSourceToken)
-      {
-
-      }
-      }
-     */
     protected function FilterProfile(&$VideoSourcesItem, $VideoSourcesIndex, $Profile)
     {
         $PossibleProfiles = array_filter($Profile, function($Profile) use($VideoSourcesItem) {
@@ -353,8 +346,6 @@ class ONVIFIO extends IPSModule
             return false;
         }
         $res = json_decode(json_encode($ret), true);
-        //$this->SendDebug('GetProfiles', $res, 0);
-        //$Result = array_filter($res['Profiles'], [$this, 'FilterVideoSource']);
         array_walk($VideoSources, [$this, 'FilterProfile'], $res['Profiles']);
         return $VideoSources;
     }
@@ -363,7 +354,6 @@ class ONVIFIO extends IPSModule
     {
         $Result = $this->SendData('', 'devicemgmt-mod.wsdl', 'GetCapabilities', true);
         if (is_a($Result, 'SoapFault')) {
-            //trigger_error($ret->getMessage(), E_USER_WARNING);
             return false;
         }
         $ret = json_decode(json_encode($Result), true);
@@ -413,14 +403,45 @@ class ONVIFIO extends IPSModule
             $FoundEvents = [];
             if ($Data['Pattern'] == '') {
                 if ($Data['Instance'] == 0) {
-                    $FoundEvents = $Events;
+                    //$FoundEvents = $Events;
+                    foreach (array_keys($Events) as $FullTopic) {
+                        $TopicParts = explode('/', $FullTopic);
+                        array_pop($TopicParts);
+                        $Topic = '';
+                        foreach ($TopicParts as $TopicPart) {
+                            $Topic .= $TopicPart . '/';
+                            $FoundEvents[$Topic] = [];
+                        }
+                        $FoundEvents[$FullTopic] = [];
+                    }
                 }
             } else {
-                foreach (array_keys($Events) as $Topic) {
-                    if (stripos($Topic, $Data['Pattern']) !== false) {
-                        $FoundEvents[$Topic] = $Events[$Topic];
-                        if (($Data['Instance'] != 0) and ( !in_array($Data['Instance'], $Events[$Topic]['Receivers']))) {
-                            $Events[$Topic]['Receivers'][] = $Data['Instance'];
+                if (array_key_exists($Data['Pattern'], $Events)) {
+                    $FoundEvents[$Data['Pattern']] = $Events[$Data['Pattern']];
+                    if (($Data['Instance'] != 0) and ( !in_array($Data['Instance'], $Events[$Data['Pattern']]['Receivers']))) {
+                        $Events[$Data['Pattern']]['Receivers'][] = $Data['Instance'];
+                    }
+                } else {
+                    foreach (array_keys($Events) as $FullTopic) {
+                        if (stripos($FullTopic, $Data['Pattern']) !== false) {
+                            $TopicParts = explode('/', $FullTopic);
+                            foreach ($TopicParts as $TopicPart) {
+                                if (stripos($TopicPart, $Data['Pattern']) === false) {
+                                    array_pop($TopicParts);
+                                } else {
+                                    break;
+                                }
+                            }
+                            array_pop($TopicParts);
+                            $Topic = '';
+                            foreach ($TopicParts as $TopicPart) {
+                                $Topic .= $TopicPart . '/';
+                                $FoundEvents[$Topic] = [];
+                            }
+                            $FoundEvents[$FullTopic] = $Events[$FullTopic];
+                            if (($Data['Instance'] != 0) and ( !in_array($Data['Instance'], $Events[$FullTopic]['Receivers']))) {
+                                $Events[$FullTopic]['Receivers'][] = $Data['Instance'];
+                            }
                         }
                     }
                 }
@@ -520,9 +541,6 @@ class ONVIFIO extends IPSModule
         }
         $Form['actions'][0]['items'][1]['caption'] = $ConsumerAddress;
         $SubscriptionReference = $this->ReadAttributeString('SubscriptionReference');
-        /* if ($SubscriptionReference == '') {
-          $SubscriptionReference = 'Invalid';
-          } */
         $Form['actions'][1]['items'][1]['caption'] = $SubscriptionReference;
         $EventList = $this->GetEventReceiverFormValues();
         $Form['actions'][2]['values'] = $EventList;
@@ -550,10 +568,10 @@ class ONVIFIO extends IPSModule
             }
             $EventList [] = [
                 'Topic'      => $ListTopic,
-                'SourceName' => $ListEvent['Source']['Name'],
-                'SourceType' => $ListEvent['Source']['Type'],
-                'DataName'   => $ListEvent['Data']['Name'],
-                'DataType'   => $ListEvent['Data']['Type'],
+                'SourceName' => $ListEvent['SourceName'],
+                'SourceType' => $ListEvent['SourceType'],
+                'DataName'   => $ListEvent['DataName'],
+                'DataType'   => $ListEvent['DataType'],
                 'rowColor'   => (count($Receivers) > 0 ? '#FFFFFF' : ''),
                 'Used'       => (count($Receivers) > 0) ? 'Yes' : 'No',
                 'Receivers'  => $Receivers
@@ -580,9 +598,11 @@ class ONVIFIO extends IPSModule
             $NotificationMessage = $NotificationDataChilds->Message->children('tt', true)->Message;
             $NotificationSourceAttributes = ((array) $NotificationMessage->Source->children('tt', true)[0]->attributes())['@attributes'];
             $NotificationDataAttributes = ((array) $NotificationMessage->Data->children('tt', true)[0]->attributes())['@attributes'];
-            $EventData[] = ['Topic'  => $NotificatioTopic,
-                'Source' => $NotificationSourceAttributes,
-                'Data'   => $NotificationDataAttributes
+            $EventData[] = ['Topic'       => $NotificatioTopic,
+                'SourceName'  => $NotificationSourceAttributes['Name'],
+                'SourceValue' => $NotificationSourceAttributes['Value'],
+                'DataName'    => $NotificationDataAttributes['Name'],
+                'DataValue'   => $NotificationDataAttributes['Value']
             ];
         }
         $this->SendDebug('Event', $EventData, 0);

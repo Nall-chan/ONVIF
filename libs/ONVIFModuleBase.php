@@ -28,12 +28,15 @@ class ONVIFModuleBase extends IPSModule
     const wsdl = '';
     const TopicFilter = '';
 
+    protected $Addfilter = '';
+
     public function Create()
     {
         //Never delete this line!
         parent::Create();
         //$this->RequireParent('{F40CA9A7-3B4D-4B26-7214-3A94B6074DFB}');
         $this->RegisterPropertyString('EventTopic', '');
+        $this->RegisterAttributeArray('EventProperties', []);
     }
 
     public function Destroy()
@@ -53,7 +56,7 @@ class ONVIFModuleBase extends IPSModule
         if ($EventTopic == '') {
             $EventTopic = 'NOTHING';
         }
-        $TopicFilter = '.*"Topic":"' . preg_quote(substr(json_encode($EventTopic), 1, -1)) . '".*';
+        $TopicFilter = '.*"Topic":"' . preg_quote(substr(json_encode($EventTopic), 1, -1)) . $this->Addfilter . '.*';
         $this->SetReceiveDataFilter($TopicFilter);
         $this->SendDebug('SetReceiveDataFilter', $TopicFilter, 0);
         $this->LogMessage('SetReceiveDataFilter: ' . $TopicFilter, KL_DEBUG);
@@ -62,6 +65,10 @@ class ONVIFModuleBase extends IPSModule
             return;
         }
         $this->RegisterParent();
+        $Events = $this->GetEvents($this->ReadPropertyString('EventTopic'));
+        $this->WriteAttributeArray('EventProperties', $Events);
+        $this->SendDebug('RegisterEvents', $Events, 0);
+
         //$this->ReloadForm();
     }
 
@@ -101,6 +108,7 @@ class ONVIFModuleBase extends IPSModule
     {
         if ($State == IS_ACTIVE) {
             $this->ApplyChanges();
+            $this->ReloadForm();
         }
     }
 
@@ -167,14 +175,6 @@ class ONVIFModuleBase extends IPSModule
         return $Result;
     }
 
-    public function ReceiveData($JSONString)
-    {
-        $Data = json_decode($JSONString, true);
-        unset($Data['DataID']);
-        $this->SendDebug('Receive', $Data, 0);
-        return $Data;
-    }
-
     protected static function unparse_url($parsed_url)
     {
         $scheme = isset($parsed_url['scheme']) ? $parsed_url['scheme'] . '://' : '';
@@ -195,30 +195,45 @@ class ONVIFModuleBase extends IPSModule
         echo $errstr;
     }
 
-    protected function GetConfigurationFormEventTopic(array $Form)
+    protected function GetConfigurationFormEventTopic(array $Form, bool $AddNothingIndex = false, array $SkippedTopics = [])
     {
-        if (static::TopicFilter != '') {
-            $Events = $this->GetEvents(static::TopicFilter, 0);
-            $this->SendDebug('GetEvents', $Events, 0);
-            if (count($Events) == 0) {
-                unset($Form['options']);
-                $Form['type'] = 'ValidationTextBox';
-                $Form['enabled'] = true;
-            } else {
-                $SelectTopic = [];
-                foreach (array_keys($Events) as $Topic) {
-                    $SelectTopic[] = [
-                        'caption' => $Topic,
-                        'value'   => $Topic
-                    ];
-                }
-                $Form['options'] = $SelectTopic;
-                $Form['enabled'] = (count($Events) > 1);
-                if ($this->ReadPropertyString('EventTopic') == '') {
-                    $Form['enabled'] = true;
+//        if (static::TopicFilter != '') {
+        $Events = $this->GetEvents(static::TopicFilter, 0);
+        foreach ($SkippedTopics as $SkippedTopic) {
+            foreach (array_keys($Events) as $Topic) {
+                if (strpos($Topic, $SkippedTopic) !== false) {
+                    unset($Events[$Topic]);
                 }
             }
         }
+        $this->SendDebug('GetEvents', $SkippedTopics, 0);
+        $this->SendDebug('GetEvents', $Events, 0);
+        if (count($Events) == 0) {
+            unset($Form['options']);
+            $Form['type'] = 'ValidationTextBox';
+            $Form['enabled'] = true;
+        } else {
+            if ($AddNothingIndex) {
+                $SelectTopic[] = [
+                    'caption' => 'nothing',
+                    'value'   => ''
+                ];
+            } else {
+                $SelectTopic = [];
+            }
+            foreach (array_keys($Events) as $Topic) {
+                $SelectTopic[] = [
+                    'caption' => $Topic,
+                    'value'   => $Topic
+                ];
+            }
+            $Form['options'] = $SelectTopic;
+            $Form['enabled'] = (count($Events) > 1);
+            if ($this->ReadPropertyString('EventTopic') == '') {
+                $Form['enabled'] = true;
+            }
+        }
+        //      }
         return $Form;
     }
 

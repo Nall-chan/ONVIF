@@ -1,4 +1,4 @@
-# ONVIF Motion Detector
+# ONVIF Events
 Beschreibung des Moduls.
 
 ### Inhaltsverzeichnis
@@ -21,12 +21,12 @@ Beschreibung des Moduls.
 
 ### 3. Software-Installation
 
-* Über den Module Store das 'ONVIF Motion Detector'-Modul installieren.
+* Über den Module Store das 'ONVIF'-Modul installieren.
 * Alternativ über das Module Control folgende URL hinzufügen
 
 ### 4. Einrichten der Instanzen in IP-Symcon
 
- Unter 'Instanz hinzufügen' ist das 'ONVIF Motion Detector'-Modul unter dem Hersteller 'ONVIF' aufgeführt.
+ Unter 'Instanz hinzufügen' ist das 'ONVIF Events'-Modul unter dem Hersteller 'ONVIF' aufgeführt.
 
 __Konfigurationsseite__:
 

@@ -98,7 +98,7 @@ class ONVIFConfigurator extends ONVIFModuleBase
                 'type'        => 'Media Stream',
                 'videosource' => $VideoSource['VideoSourceToken'],
                 'name'        => 'ONVIF Media Stream',
-                'location'    => ''
+                'Location'    => ''
             ];
             $InstanceID = array_search($VideoSource['VideoSourceToken'], $IPSStreamInstances);
 
@@ -109,8 +109,8 @@ class ONVIFConfigurator extends ONVIFModuleBase
                 $Device['location'] = stristr(IPS_GetLocation($InstanceID), IPS_GetName($InstanceID), true);
             }
             foreach ($VideoSource['Profile'] as $Profile) {
-                $Device['create'][$Profile['Name']] = $StreamCreateParams;
-                $Device['create'][$Profile['Name']]['configuration'] = [
+                $Device['create']['ONVIF Media Stream (' . $VideoSource['VideoSourceToken'] . '/' . $Profile['Name'] . ')'] = $StreamCreateParams;
+                $Device['create']['ONVIF Media Stream (' . $VideoSource['VideoSourceToken'] . '/' . $Profile['Name'] . ')']['configuration'] = [
                     'VideoSource' => $VideoSource['VideoSourceToken'],
                     'Profile'     => $Profile['token']
                 ];
@@ -124,7 +124,7 @@ class ONVIFConfigurator extends ONVIFModuleBase
                 'type'        => 'Media Stream',
                 'videosource' => $VideoSource,
                 'name'        => IPS_GetName($InstanceID),
-                'location'    => stristr(IPS_GetLocation($InstanceID), IPS_GetName($InstanceID), true)
+                'Location'    => stristr(IPS_GetLocation($InstanceID), IPS_GetName($InstanceID), true)
             ];
             $StreamValues[] = $Device;
         }
@@ -168,7 +168,7 @@ class ONVIFConfigurator extends ONVIFModuleBase
                     'type'        => substr(IPS_GetModule($GUID)['ModuleName'], 6),
                     'videosource' => '',
                     'name'        => IPS_GetName($IPSInstance),
-                    'location'    => stristr(IPS_GetLocation($IPSInstance), IPS_GetName($IPSInstance), true)
+                    'Location'    => stristr(IPS_GetLocation($IPSInstance), IPS_GetName($IPSInstance), true)
                 ];
                 if ($isValid) {
                     $InstanceValues['create'] = $CreateParams;
@@ -182,7 +182,7 @@ class ONVIFConfigurator extends ONVIFModuleBase
                     'type'        => substr(IPS_GetModule($GUID)['ModuleName'], 6),
                     'videosource' => '',
                     'name'        => IPS_GetModule($GUID)['ModuleName'],
-                    'location'    => '',
+                    'Location'    => '',
                     'create'      => $CreateParams
                 ];
             }

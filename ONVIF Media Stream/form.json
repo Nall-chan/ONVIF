@@ -13,6 +13,14 @@
             "caption": "Stream-Profile",
             "options": [
             ]
+        },
+        {
+            "type": "Select",
+            "name": "EventTopic",
+            "caption": "Event of input(s)",
+            "options": [
+            ],
+            "enable": false
         }
     ],
     "status": [

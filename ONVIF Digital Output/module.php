@@ -14,17 +14,9 @@ class ONVIFDigitalOutput extends ONVIFModuleBase
         //Never delete this line!
         parent::Create();
         $this->RegisterAttributeArray('RelayOutputs', []);
-        $this->RegisterAttributeBoolean('useRelayLogicalState', false);
         $this->RegisterPropertyBoolean('EmulateStatus', false);
     }
 
-//
-//    public function Destroy()
-//    {
-//        //Never delete this line!
-//        parent::Destroy();
-//    }
-//
     public function ApplyChanges()
     {
         //Never delete this line!
@@ -36,18 +28,14 @@ class ONVIFDigitalOutput extends ONVIFModuleBase
         if ($this->ReadPropertyString('EventTopic') == '') {
             $this->SetStatus(IS_INACTIVE);
         } else {
-            $Events = $this->GetEvents($this->ReadPropertyString('EventTopic'));
-            $this->SendDebug('EventConfig', $Events, 0);
+            $Events = $this->ReadAttributeArray('EventProperties');
             if (count($Events) != 1) {
                 $this->SetStatus(IS_EBASE + 1);
                 echo count($Events);
             } else {
                 $this->SetStatus(IS_ACTIVE);
-                $Event = array_shift($Events);
-                $this->WriteAttributeBoolean('useRelayLogicalState', (strpos($Event['Data']['Type'], 'LogicalState') > 0));
             }
         }
-       // $this->ReloadForm();
     }
 
     protected function GetRelayOutputs()
@@ -83,12 +71,22 @@ class ONVIFDigitalOutput extends ONVIFModuleBase
             restore_error_handler();
             return false;
         }
+        $Events = $this->ReadAttributeArray('EventProperties');
+        $EventProperty = array_pop($Events);
 
-        if ($this->ReadAttributeBoolean('useRelayLogicalState')) {
-            $SendValue = $Value ? 'active' : 'inactive';
-        } else {
-            $SendValue = $Value;
+        switch (stristr($EventProperty['DataType'], ':')) {
+            case ':RelayLogicalState':
+                $SendValue = $Value ? 'active' : 'inactive';
+                break;
+            case ':bool':
+            case ':boolean':
+                $SendValue = $Value;
+                break;
+            default:
+                trigger_error('Unsupported Datatype', E_USER_NOTICE);
+                return false;
         }
+
         $Params = [
             'RelayOutputToken' => $Ident,
             'LogicalState'     => $SendValue
@@ -113,9 +111,26 @@ class ONVIFDigitalOutput extends ONVIFModuleBase
 
     public function ReceiveData($JSONString)
     {
-        $Data = parent::ReceiveData($JSONString);
-        $Ident = $Data['Source']['Value'];
-        $Value = ($Data['Data']['Value'] == 'active');
+        $Data = json_decode($JSONString, true);
+        unset($Data['DataID']);
+        $this->SendDebug('ReceiveEvent', $Data, 0);
+        $Events = $this->ReadAttributeArray('EventProperties');
+        $EventProperty = array_pop($Events);
+
+        switch (stristr($EventProperty['DataType'], ':')) {
+            case ':RelayLogicalState':
+                $Value = $Data['DataValue'] == 'active';
+                break;
+            case ':bool':
+            case ':boolean':
+                $Value = ($Data['DataValue'] == 'true');
+                break;
+            default:
+                trigger_error('Unsupported Datatype', E_USER_NOTICE);
+                return false;
+        }
+        $Ident = $Data['SourceValue'];
+        $this->RegisterVariableBoolean($Ident, $Ident, '~Switch', 0);
         $this->SetValue($Ident, $Value);
     }
 

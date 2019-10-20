@@ -1,0 +1,25 @@
+{
+    "elements": [
+        {
+            "type": "Select",
+            "name": "EventTopic",
+            "caption": "Event(s)",
+            "options": [
+            ],
+            "enable": false
+        }
+    ],
+    "actions": [],
+    "status": [
+        {
+            "code": 102,
+            "icon": "active",
+            "caption": "Configuration is valid"
+        },
+        {
+            "code": 104,
+            "icon": "inactive",
+            "caption": "Event missing"
+        }
+    ]
+}
