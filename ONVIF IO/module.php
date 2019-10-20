@@ -350,6 +350,11 @@ class ONVIFIO extends IPSModule
             return $Profile['VideoSourceConfiguration']['SourceToken'] == $VideoSourcesItem['VideoSourceToken'];
         });
         foreach ($PossibleProfiles as $PossibleProfile) {
+            if (isset($PossibleProfile['VideoEncoderConfiguration']['Encoding'])) {
+                if (strtoupper($PossibleProfile['VideoEncoderConfiguration']['Encoding']) == 'JPEG') {
+                    continue;
+                }
+            }
             $VideoSourcesItem['Profile'][] = [
                 'Name'  => $PossibleProfile['Name'],
                 'token' => $PossibleProfile['token']
