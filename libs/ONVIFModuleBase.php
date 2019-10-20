@@ -26,12 +26,14 @@ class ONVIFModuleBase extends IPSModule
         \ONVIFModuleBase\InstanceStatus::RequestAction as IORequestAction;
     }
     const wsdl = '';
+    const TopicFilter = '';
 
     public function Create()
     {
         //Never delete this line!
         parent::Create();
         //$this->RequireParent('{F40CA9A7-3B4D-4B26-7214-3A94B6074DFB}');
+        $this->RegisterPropertyString('EventTopic', '');
     }
 
     public function Destroy()
@@ -47,11 +49,20 @@ class ONVIFModuleBase extends IPSModule
         $this->RegisterMessage(0, IPS_KERNELSTARTED);
         $this->RegisterMessage($this->InstanceID, FM_CONNECT);
         $this->RegisterMessage($this->InstanceID, FM_DISCONNECT);
+        $EventTopic = $this->ReadPropertyString('EventTopic');
+        if ($EventTopic == '') {
+            $EventTopic = 'NOTHING';
+        }
+        $TopicFilter = '.*"Topic":"' . preg_quote(substr(json_encode($EventTopic), 1, -1)) . '".*';
+        $this->SetReceiveDataFilter($TopicFilter);
+        $this->SendDebug('SetReceiveDataFilter', $TopicFilter, 0);
+        $this->LogMessage('SetReceiveDataFilter: ' . $TopicFilter, KL_DEBUG);
+
         if (IPS_GetKernelRunlevel() != KR_READY) {
             return;
         }
         $this->RegisterParent();
-        $this->ReloadForm();
+        //$this->ReloadForm();
     }
 
     protected function KernelReady()
@@ -91,6 +102,22 @@ class ONVIFModuleBase extends IPSModule
         if ($State == IS_ACTIVE) {
             $this->ApplyChanges();
         }
+    }
+
+    protected function GetEvents(string $Pattern = '', int $InstanceID = -1)
+    {
+        if ($this->HasActiveParent()) {
+            if ($InstanceID == -1) {
+                $InstanceID = $this->InstanceID;
+            }
+            $Data = json_encode(['DataID' => '{9B9C8DA6-BC89-21BC-3E8C-BA6E534ABC37}', 'Function' => 'GetEvents', 'Pattern' => $Pattern, 'Instance' => $InstanceID]);
+            $anwser = $this->SendDataToParent($Data);
+            if ($anwser === false) {
+                return [];
+            }
+            return unserialize($anwser);
+        }
+        return [];
     }
 
     protected function GetCapabilities()
@@ -166,6 +193,33 @@ class ONVIFModuleBase extends IPSModule
     {
         $this->SendDebug('ERROR', utf8_decode($errstr), 0);
         echo $errstr;
+    }
+
+    protected function GetConfigurationFormEventTopic(array $Form)
+    {
+        if (static::TopicFilter != '') {
+            $Events = $this->GetEvents(static::TopicFilter, 0);
+            $this->SendDebug('GetEvents', $Events, 0);
+            if (count($Events) == 0) {
+                unset($Form['options']);
+                $Form['type'] = 'ValidationTextBox';
+                $Form['enabled'] = true;
+            } else {
+                $SelectTopic = [];
+                foreach (array_keys($Events) as $Topic) {
+                    $SelectTopic[] = [
+                        'caption' => $Topic,
+                        'value'   => $Topic
+                    ];
+                }
+                $Form['options'] = $SelectTopic;
+                $Form['enabled'] = (count($Events) > 1);
+                if ($this->ReadPropertyString('EventTopic') == '') {
+                    $Form['enabled'] = true;
+                }
+            }
+        }
+        return $Form;
     }
 
 }

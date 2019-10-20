@@ -45,8 +45,44 @@ class ONVIFConfigurator extends ONVIFModuleBase
         $this->SendDebug('VideoSources', $Capas['VideoSources'], 0);
         $this->SendDebug('HasInput', $Capas['HasInput'], 0);
         $this->SendDebug('HasOutput', $Capas['HasOutput'], 0);
-        $InputValues = $this->GetConfigurationArray(self::GUID_ONVIF_DIGITAL_INPUT, $Capas['HasInput']);
-        $OutputValues = $this->GetConfigurationArray(self::GUID_ONVIF_DIGITAL_OUTPUT, $Capas['HasOutput']);
+
+
+        $InputEvents = $this->GetEvents('input', 0);
+        $this->SendDebug('GetEvents', $InputEvents, 0);
+        $InputTopics = [];
+        foreach (array_keys($InputEvents) as $Topic) {
+            $InputTopics[$Topic] = [
+                'moduleID'      => self::GUID_ONVIF_DIGITAL_INPUT,
+                'configuration' => [
+                    'EventTopic' => $Topic
+                ],
+                'location'      => [$this->Translate('ONVIF Devices'), IPS_GetName($this->InstanceID)]
+            ];
+        }
+        if (count($InputTopics) == 1) {
+            $InputTopics = array_shift($InputTopics);
+        }
+
+        $InputValues = $this->GetConfigurationArray(self::GUID_ONVIF_DIGITAL_INPUT, $Capas['HasInput'], $InputTopics);
+
+        $OutputEvents = $this->GetEvents('relay', 0);
+        $this->SendDebug('GetEvents', $OutputEvents, 0);
+        $OutputTopics = [];
+        foreach (array_keys($OutputEvents) as $Topic) {
+            $OutputTopics[$Topic] = [
+                'moduleID'      => self::GUID_ONVIF_DIGITAL_OUTPUT,
+                'configuration' => [
+                    'EventTopic' => $Topic
+                ],
+                'location'      => [$this->Translate('ONVIF Devices'), IPS_GetName($this->InstanceID)]
+            ];
+        }
+        if (count($OutputTopics) == 1) {
+            $OutputTopics = array_shift($OutputTopics);
+        }
+
+        $OutputValues = $this->GetConfigurationArray(self::GUID_ONVIF_DIGITAL_OUTPUT, $Capas['HasOutput'], $OutputTopics);
+
 
         $StreamCreateParams = [
             'moduleID'      => self::GUID_ONVIF_MEDIA_STREAM,
@@ -60,11 +96,11 @@ class ONVIFConfigurator extends ONVIFModuleBase
             $Device = [
                 'instanceID'  => 0,
                 'type'        => 'Media Stream',
-                'videosource' => $VideoSource,
+                'videosource' => $VideoSource['VideoSourceToken'],
                 'name'        => 'ONVIF Media Stream',
                 'location'    => ''
             ];
-            $InstanceID = array_search($VideoSource, $IPSStreamInstances);
+            $InstanceID = array_search($VideoSource['VideoSourceToken'], $IPSStreamInstances);
 
             if ($InstanceID !== false) {
                 unset($IPSStreamInstances[$InstanceID]);
@@ -72,8 +108,14 @@ class ONVIFConfigurator extends ONVIFModuleBase
                 $Device['name'] = IPS_GetName($InstanceID);
                 $Device['location'] = stristr(IPS_GetLocation($InstanceID), IPS_GetName($InstanceID), true);
             }
-            $Device['create'] = $StreamCreateParams;
-            $Device['create']['configuration']['VideoSource'] = $VideoSource;
+            foreach ($VideoSource['Profile'] as $Profile) {
+                $Device['create'][$Profile['Name']] = $StreamCreateParams;
+                $Device['create'][$Profile['Name']]['configuration'] = [
+                    'VideoSource' => $VideoSource['VideoSourceToken'],
+                    'Profile'     => $Profile['token']
+                ];
+            }
+
             $StreamValues[] = $Device;
         }
         foreach ($IPSStreamInstances as $InstanceID => $VideoSource) {
@@ -114,14 +156,10 @@ class ONVIFConfigurator extends ONVIFModuleBase
         $item1 = IPS_GetProperty($InstanceID, $ConfigParam);
     }
 
-    private function GetConfigurationArray(string $GUID, bool $isValid)
+    private function GetConfigurationArray(string $GUID, bool $isValid, array $CreateParams = [])
     {
         $IPSInstances = $this->GetInstanceList($GUID);
-        $CreateParams = [
-            'moduleID'      => $GUID,
-            'configuration' => new stdClass(),
-            'location'      => [$this->Translate('ONVIF Devices'), IPS_GetName($this->InstanceID)]
-        ];
+
         $Values = [];
         if (count($IPSInstances) > 0) {
             foreach ($IPSInstances as $IPSInstance) {

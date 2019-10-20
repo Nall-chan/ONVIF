@@ -1,5 +1,30 @@
 {
-    "elements": [],
+    "elements": [
+        {
+            "type": "Select",
+            "name": "EventTopic",
+            "caption": "Event of input(s)",
+            "options": [
+            ],
+            "enable": false
+        }
+    ],
     "actions": [],
-    "status": []
+    "status": [
+        {
+            "code": 102,
+            "icon": "active",
+            "caption": "Configuration is valid"
+        },
+        {
+            "code": 104,
+            "icon": "inactive",
+            "caption": "Event missing"
+        },
+        {
+            "code": 201,
+            "icon": "error",
+            "caption": "Event not valid"
+        }
+    ]
 }

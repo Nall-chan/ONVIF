@@ -6,6 +6,7 @@ eval('declare(strict_types=1);namespace ONVIFIO {?>' . file_get_contents(__DIR__
 eval('declare(strict_types=1);namespace ONVIFIO {?>' . file_get_contents(__DIR__ . '/../libs/helper/BufferHelper.php') . '}');
 eval('declare(strict_types=1);namespace ONVIFIO {?>' . file_get_contents(__DIR__ . '/../libs/helper/AttributeArrayHelper.php') . '}');
 eval('declare(strict_types=1);namespace ONVIFIO {?>' . file_get_contents(__DIR__ . '/../libs/helper/WebhookHelper.php') . '}');
+eval('declare(strict_types=1);namespace ONVIFIO {?>' . file_get_contents(__DIR__ . '/../libs/helper/SemaphoreHelper.php') . '}');
 require_once dirname(__DIR__) . '/libs/onvif-client-php/inc/ONVIF.inc.php';
 
 /**
@@ -18,7 +19,8 @@ class ONVIFIO extends IPSModule
     use \ONVIFIO\DebugHelper,
         \ONVIFIO\BufferHelper,
         \ONVIFIO\AttributeArrayHelper,
-        \ONVIFIO\WebhookHelper;
+        \ONVIFIO\WebhookHelper,
+        \ONVIFIO\Semaphore;
     public function Create()
     {
         //Never delete this line!
@@ -104,17 +106,7 @@ class ONVIFIO extends IPSModule
             $this->WriteAttributeString('SubscriptionId', '');
             $this->UpdateFormField('SubscriptionReferenceRow', 'visible', true);
             $this->UpdateFormField('SubscriptionReference', 'caption', '');
-            $Events = $this->ReadAttributeArray('EventProperties');
-            $EventList = [];
-            foreach ($Events as $ListTopic => $ListEvent) {
-                $EventList [] = [
-                    'Topic'      => $ListTopic,
-                    'SourceName' => $ListEvent['Source']['Name'],
-                    'SourceType' => $ListEvent['Source']['Type'],
-                    'DataName'   => $ListEvent['Data']['Name'],
-                    'DataType'   => $ListEvent['Data']['Type']
-                ];
-            }
+            $EventList = $this->GetEventReceiverFormValues();
             $this->UpdateFormField('Events', 'values', json_encode($EventList));
             $this->UpdateFormField('Events', 'visible', true);
             $this->SetStatus(IS_EBASE + 2);
@@ -281,7 +273,7 @@ class ONVIFIO extends IPSModule
         $xpath->registerNamespace($wstop_ns, 'http://docs.oasis-open.org/wsn/t-1');
         $query = '//' . $wstop_ns . ':TopicSet';
         $prefixPathlen = strlen($xpath->query($query, NULL, true)[0]->getNodePath());
-        $query = "//*[@" . $wstop_ns . ":topic='true']/" . $tt_ns . ":MessageDescription/" . $tt_ns . ":Data/" . $tt_ns . ":SimpleItemDescription[@Type='" . $xs_ns . ":boolean' or @Type='" . $xs_ns . ":string' or @Type='" . $xs_ns . ":int' or @Type='" . $tt_ns . ":RelayLogicalState']";
+        $query = "//*[@" . $wstop_ns . ":topic='true']/" . $tt_ns . ":MessageDescription[@IsProperty='true']/" . $tt_ns . ":Data/" . $tt_ns . ":SimpleItemDescription"; //[@Type='" . $xs_ns . ":boolean' or @Type='" . $xs_ns . ":string' or @Type='" . $xs_ns . ":int' or @Type='" . $tt_ns . ":RelayLogicalState']";
         $wsTopics = $xpath->query($query);
         $Path = [];
         foreach ($wsTopics as $wsData) {
@@ -292,18 +284,12 @@ class ONVIFIO extends IPSModule
             if (count($wsSource) == 1) {
                 $Path[$Topic]['Source'] = ['Name' => $wsSource[0]->attributes->getNamedItem("Name")->nodeValue, 'Type' => $wsSource[0]->attributes->getNamedItem("Type")->nodeValue];
             }
+            $Path[$Topic]['Receivers'] = [];
         }
+        $this->lock('EventProperties');
         $this->WriteAttributeArray('EventProperties', $Path);
-        $EventList = [];
-        foreach ($Path as $ListTopic => $ListEvent) {
-            $EventList [] = [
-                'Topic'      => $ListTopic,
-                'SourceName' => $ListEvent['Source']['Name'],
-                'SourceType' => $ListEvent['Source']['Type'],
-                'DataName'   => $ListEvent['Data']['Name'],
-                'DataType'   => $ListEvent['Data']['Type']
-            ];
-        }
+        $this->unlock('EventProperties');
+        $EventList = $this->GetEventReceiverFormValues();
         $this->SendDebug('Update form', json_encode($EventList), 0);
         $this->UpdateFormField('Events', 'values', json_encode($EventList));
         $this->UpdateFormField('Events', 'visible', true);
@@ -320,28 +306,78 @@ class ONVIFIO extends IPSModule
         $VideoSources = [];
         if (is_array($ret->VideoSources)) {
             foreach ($ret->VideoSources as $VideoSource) {
-                $VideoSources[] = $VideoSource->token;
+                $VideoSources[] = [
+                    'VideoSourceToken' => $VideoSource->token,
+                    'Profile'          => []
+                ];
             }
         } else {
-            $VideoSources[] = $ret->VideoSources->token;
+            $VideoSources[] = [
+                'VideoSourceToken' => $ret->VideoSources->token,
+                'Profile'          => []
+            ];
         }
-        $this->SendDebug('VideoSources', $VideoSources, 0);
+        if (count($VideoSources) > 0) {
+            $VideoSources = $this->GetProfiles($VideoSources);
+        }
+        $this->SendDebug('VideoSourcesAttribute', $VideoSources, 0);
         $this->WriteAttributeArray('VideoSources', $VideoSources);
         return true;
     }
 
+    /*  protected function FilterVideoSource(&$Profile, $Index, $VideoSourceToken)
+      {
+      if ($Profile['VideoSourceConfiguration']['SourceToken'] == $VideoSourceToken)
+      {
+
+      }
+      }
+     */
+    protected function FilterProfile(&$VideoSourcesItem, $VideoSourcesIndex, $Profile)
+    {
+        $PossibleProfiles = array_filter($Profile, function($Profile) use($VideoSourcesItem) {
+            return $Profile['VideoSourceConfiguration']['SourceToken'] == $VideoSourcesItem['VideoSourceToken'];
+        });
+        foreach ($PossibleProfiles as $PossibleProfile) {
+            $VideoSourcesItem['Profile'][] = [
+                'Name'  => $PossibleProfile['Name'],
+                'token' => $PossibleProfile['token']
+            ];
+        }
+    }
+
+    protected function GetProfiles(array $VideoSources)
+    {
+        $ret = $this->SendData('', 'media-mod.wsdl', 'GetProfiles', true);
+        if ($ret == false) {
+            return false;
+        }
+        $res = json_decode(json_encode($ret), true);
+        //$this->SendDebug('GetProfiles', $res, 0);
+        //$Result = array_filter($res['Profiles'], [$this, 'FilterVideoSource']);
+        array_walk($VideoSources, [$this, 'FilterProfile'], $res['Profiles']);
+        return $VideoSources;
+    }
+
     protected function GetCapabilities()
     {
-        $ret = $this->SendData('', 'devicemgmt-mod.wsdl', 'GetCapabilities', true);
-        if (is_a($ret, 'SoapFault')) {
+        $Result = $this->SendData('', 'devicemgmt-mod.wsdl', 'GetCapabilities', true);
+        if (is_a($Result, 'SoapFault')) {
             //trigger_error($ret->getMessage(), E_USER_WARNING);
             return false;
         }
-        $ret = json_decode(json_encode($ret), true);
-        $HasInput = isset($ret['Capabilities']['Device']['IO']['InputConnectors']);
-        $HasOutput = isset($ret['Capabilities']['Device']['IO']['RelayOutputs']);
-        if (isset($ret['Capabilities']['Extension']['DeviceIO']['RelayOutputs'])) {
-            $HasOutput = true;
+        $ret = json_decode(json_encode($Result), true);
+        $HasInput = false;
+        $HasOutput = false;
+        if (isset($ret['Capabilities']['Device']['IO']['InputConnectors'])) {
+            $HasInput = ($ret['Capabilities']['Device']['IO']['InputConnectors'] > 0);
+        }
+        if (isset($ret['Capabilities']['Device']['IO']['RelayOutputs'])) {
+            $HasOutput = ($ret['Capabilities']['Device']['IO']['RelayOutputs'] > 0);
+        } else {
+            if (isset($ret['Capabilities']['Extension']['DeviceIO']['RelayOutputs'])) {
+                $HasOutput = ($ret['Capabilities']['Extension']['DeviceIO']['RelayOutputs'] > 0);
+            }
         }
         $this->WriteAttributeBoolean('HasInput', $HasInput);
         $this->WriteAttributeBoolean('HasOutput', $HasOutput);
@@ -358,10 +394,44 @@ class ONVIFIO extends IPSModule
             $Capas['HasInput'] = $this->ReadAttributeBoolean('HasInput');
             return serialize($Capas);
         }
+        if ($Data['Function'] == 'GetCapabilities') {
+            $Capas['VideoSources'] = $this->ReadAttributeArray('VideoSources');
+            $Capas['HasOutput'] = $this->ReadAttributeBoolean('HasOutput');
+            $Capas['HasInput'] = $this->ReadAttributeBoolean('HasInput');
+            return serialize($Capas);
+        }
         if ($Data['Function'] == 'GetCredentials') {
             $Credentials['Username'] = $this->ReadPropertyString('Username');
             $Credentials['Password'] = $this->ReadPropertyString('Password');
             return serialize($Credentials);
+        }
+        if ($Data['Function'] == 'GetEvents') {
+            if ($Data['Instance'] != 0) {
+                $this->lock('EventProperties');
+            }
+            $Events = $this->ReadAttributeArray('EventProperties');
+            $FoundEvents = [];
+            if ($Data['Pattern'] == '') {
+                if ($Data['Instance'] == 0) {
+                    $FoundEvents = $Events;
+                }
+            } else {
+                foreach (array_keys($Events) as $Topic) {
+                    if (stripos($Topic, $Data['Pattern']) !== false) {
+                        $FoundEvents[$Topic] = $Events[$Topic];
+                        if (($Data['Instance'] != 0) and ( !in_array($Data['Instance'], $Events[$Topic]['Receivers']))) {
+                            $Events[$Topic]['Receivers'][] = $Data['Instance'];
+                        }
+                    }
+                }
+            }
+            if ($Data['Instance'] != 0) {
+                $this->WriteAttributeArray('EventProperties', $Events);
+                $this->unlock('EventProperties');
+                $EventList = $this->GetEventReceiverFormValues();
+                $this->UpdateFormField('Events', 'values', json_encode($EventList));
+            }
+            return serialize($FoundEvents);
         }
         if ($this->GetStatus() != IS_ACTIVE) {
             return serialize(false);
@@ -454,23 +524,42 @@ class ONVIFIO extends IPSModule
           $SubscriptionReference = 'Invalid';
           } */
         $Form['actions'][1]['items'][1]['caption'] = $SubscriptionReference;
-        $EventList = [];
-        $Events = $this->ReadAttributeArray('EventProperties');
-        foreach ($Events as $ListTopic => $ListEvent) {
-            $EventList [] = [
-                'Topic'      => $ListTopic,
-                'SourceName' => $ListEvent['Source']['Name'],
-                'SourceType' => $ListEvent['Source']['Type'],
-                'DataName'   => $ListEvent['Data']['Name'],
-                'DataType'   => $ListEvent['Data']['Type']
-            ];
-        }
+        $EventList = $this->GetEventReceiverFormValues();
         $Form['actions'][2]['values'] = $EventList;
         $this->SendDebug('FORM', json_encode($Form), 0);
         $this->SendDebug('FORM', json_last_error_msg(), 0);
         $this->SendDebug('GetConfigurationForm', 'Ende', 0);
 
         return json_encode($Form);
+    }
+
+    protected function GetEventReceiverFormValues()
+    {
+        $EventList = [];
+        $Events = $this->ReadAttributeArray('EventProperties');
+        foreach ($Events as $ListTopic => $ListEvent) {
+            $Receivers = [];
+            foreach ($ListEvent['Receivers'] as $Receiver) {
+                if (IPS_InstanceExists($Receiver)) {
+                    $Receivers[] = [
+                        'instanceID' => $Receiver,
+                        'Name'       => IPS_GetName($Receiver),
+                        'Type'       => substr(IPS_GetInstance($Receiver)['ModuleInfo']['ModuleName'], 6)
+                    ];
+                }
+            }
+            $EventList [] = [
+                'Topic'      => $ListTopic,
+                'SourceName' => $ListEvent['Source']['Name'],
+                'SourceType' => $ListEvent['Source']['Type'],
+                'DataName'   => $ListEvent['Data']['Name'],
+                'DataType'   => $ListEvent['Data']['Type'],
+                'rowColor'   => (count($Receivers) > 0 ? '#FFFFFF' : ''),
+                'Used'       => (count($Receivers) > 0) ? 'Yes' : 'No',
+                'Receivers'  => $Receivers
+            ];
+        }
+        return $EventList;
     }
 
     protected function ProcessHookData()

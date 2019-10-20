@@ -7,12 +7,15 @@ require_once __DIR__ . '/../libs/ONVIFModuleBase.php';
 class ONVIFDigitalOutput extends ONVIFModuleBase
 {
     const wsdl = 'devicemgmt-mod.wsdl';
+    const TopicFilter = 'relay';
 
     public function Create()
     {
         //Never delete this line!
         parent::Create();
         $this->RegisterAttributeArray('RelayOutputs', []);
+        $this->RegisterAttributeBoolean('useRelayLogicalState', false);
+        $this->RegisterPropertyBoolean('EmulateStatus', false);
     }
 
 //
@@ -26,12 +29,25 @@ class ONVIFDigitalOutput extends ONVIFModuleBase
     {
         //Never delete this line!
         parent::ApplyChanges();
-        $this->SetReceiveDataFilter('.*"Topic":"' . preg_quote('tns1:Device\/Trigger\/Relay') . '".*');
-        $this->SendDebug('SetReceiveDataFilter', '.*"Topic":"' . preg_quote('tns1:Device\/Trigger\/Relay') . '".*', 0);
         if (IPS_GetKernelRunlevel() != KR_READY) {
             return;
         }
         @$this->GetRelayOutputs();
+        if ($this->ReadPropertyString('EventTopic') == '') {
+            $this->SetStatus(IS_INACTIVE);
+        } else {
+            $Events = $this->GetEvents($this->ReadPropertyString('EventTopic'));
+            $this->SendDebug('EventConfig', $Events, 0);
+            if (count($Events) != 1) {
+                $this->SetStatus(IS_EBASE + 1);
+                echo count($Events);
+            } else {
+                $this->SetStatus(IS_ACTIVE);
+                $Event = array_shift($Events);
+                $this->WriteAttributeBoolean('useRelayLogicalState', (strpos($Event['Data']['Type'], 'LogicalState') > 0));
+            }
+        }
+       // $this->ReloadForm();
     }
 
     protected function GetRelayOutputs()
@@ -67,15 +83,23 @@ class ONVIFDigitalOutput extends ONVIFModuleBase
             restore_error_handler();
             return false;
         }
+
+        if ($this->ReadAttributeBoolean('useRelayLogicalState')) {
+            $SendValue = $Value ? 'active' : 'inactive';
+        } else {
+            $SendValue = $Value;
+        }
         $Params = [
             'RelayOutputToken' => $Ident,
-            'LogicalState'     => $Value ? 'active' : 'inactive'
+            'LogicalState'     => $SendValue
         ];
         $ret = $this->SendData('', 'SetRelayOutputState', true, $Params);
         if ($ret == false) {
             return false;
         }
-        //$this->SetValue($Ident, $Value);
+        if ($this->ReadPropertyBoolean('EmulateStatus')) {
+            $this->SetValue($Ident, $Value);
+        }
         return true;
     }
 
@@ -98,6 +122,7 @@ class ONVIFDigitalOutput extends ONVIFModuleBase
     public function GetConfigurationForm()
     {
         $Form = json_decode(file_get_contents(__DIR__ . '/form.json'), true);
+        $Form['elements'][0] = $this->GetConfigurationFormEventTopic($Form['elements'][0]);
         $Actions = [['type' => 'TestCenter']];
         $RelayOutputs = $this->ReadAttributeArray('RelayOutputs');
         foreach ($RelayOutputs as $RelayOutput) {

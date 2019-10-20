@@ -47,9 +47,8 @@ class ONVIFMediaStream extends ONVIFModuleBase
     public function GetConfigurationForm()
     {
         $Capas = @$this->GetCapabilities();
-        $Profiles = @$this->GetProfiles();
         $Form = json_decode(file_get_contents(__DIR__ . '/form.json'), true);
-        if (($Capas == false) or ( $Profiles == false)) {
+        if ($Capas == false) {
 
             $Form['actions'][] = [
                 'type'  => 'PopupAlert',
@@ -76,29 +75,30 @@ class ONVIFMediaStream extends ONVIFModuleBase
             ];
         }
         $VideoSourcesOptions = [];
-        foreach ($Capas['VideoSources'] as $VideoSource) {
-            $VideoSourcesOptions[] = [
-                'caption' => $VideoSource,
-                'value'   => $VideoSource
-            ];
-        }
-        $Form['elements'][0]['options'] = $VideoSourcesOptions;
-
         $ProfileOptions = [];
         $ProfileOptions[] = [
             'caption' => 'none',
             'value'   => ''
         ];
         $ActualProfile = null;
-        foreach ($Profiles as $Profile) {
-            $ProfileOptions[] = [
-                'caption' => $Profile['Name'],
-                'value'   => $Profile['token']
+        foreach ($Capas['VideoSources'] as $VideoSource) {
+            $VideoSourcesOptions[] = [
+                'caption' => $VideoSource['VideoSourceToken'],
+                'value'   => $VideoSource['VideoSourceToken']
             ];
-            if ($this->ReadPropertyString('Profile') == $Profile['token']) {
-                $ActualProfile = $Profile;
+            if ($this->ReadPropertyString('VideoSource') == $VideoSource['VideoSourceToken']) {
+                foreach ($VideoSource['Profile'] as $Profile) {
+                    $ProfileOptions[] = [
+                        'caption' => $Profile['Name'],
+                        'value'   => $Profile['token']
+                    ];
+                    if ($this->ReadPropertyString('Profile') == $Profile['token']) {
+                        $ActualProfile = $Profile;
+                    }
+                }
             }
         }
+        $Form['elements'][0]['options'] = $VideoSourcesOptions;
         $Form['elements'][1]['options'] = $ProfileOptions;
         $Actions = [];
         if ($ActualProfile != null) {
@@ -225,25 +225,7 @@ class ONVIFMediaStream extends ONVIFModuleBase
 
     protected function FilterVideoSource($Value)
     {
-        return $Value["VideoSourceConfiguration"]["SourceToken"] == $this->ReadPropertyString('VideoSource');
-    }
-
-    protected function GetProfiles()
-    {
-        $ret = $this->SendData('', 'GetProfiles', true);
-        if ($ret == false) {
-            return false;
-        }
-        $res = json_decode(json_encode($ret), true);
-        $Result = array_filter($res['Profiles'], [$this, 'FilterVideoSource']);
-        $this->SendDebug('GetProfiles', $Result, 0);
-        $this->SetSummary('');
-        foreach ($Result as $Profile) {
-            if ($this->ReadPropertyString('Profile') == $Profile['token']) {
-                $this->SetSummary($Profile['VideoSourceConfiguration']['Name']);
-            }
-        }
-        return $Result;
+        return $Value['VideoSourceConfiguration']['SourceToken'] == $this->ReadPropertyString('VideoSource');
     }
 
     protected function GetStreamUri()

@@ -67,6 +67,7 @@
             ]
         },
         {
+            "caption": "List of possible and used Events:",
             "type": "List",
             "name": "Events",
             "add": false,
@@ -76,6 +77,10 @@
                 "direction": "ascending"
             },
             "columns": [{
+                    "caption": "Used",
+                    "name": "Used",
+                    "width": "50px"
+                }, {
                     "caption": "Topic",
                     "name": "Topic",
                     "width": "auto"
@@ -95,6 +100,36 @@
                     "caption": "Type of data",
                     "name": "DataType",
                     "width": "200px"
+                },
+                {
+                    "caption": "Events are used bei this instances:",
+                    "name": "Receivers",
+                    "visible": false,
+                    "edit": {
+                        "type": "List",
+                        "name": "Eventreciever",
+                        "add": false,
+                        "delete": false,
+                        "sort": {
+                            "column": "instanceID",
+                            "direction": "ascending"
+                        },
+                        "columns": [
+                            {
+                                "caption": "Instance",
+                                "name": "instanceID",
+                                "width": "90px"
+                            }, {
+                                "caption": "Type",
+                                "name": "Type",
+                                "width": "150px"
+                            }, {
+                                "caption": "Name",
+                                "name": "Name",
+                                "width": "auto"
+                            }
+                        ]
+                    }
                 }
             ],
             "values": []
