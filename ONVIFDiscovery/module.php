@@ -30,8 +30,8 @@ class ONVIFDiscovery extends IPSModule
     {
         //Never delete this line!
         parent::Create();
-        $this->RegisterPropertyString('Username', '');
-        $this->RegisterPropertyString('Password', '');
+        $this->RegisterAttributeString('Username', '');
+        $this->RegisterAttributeString('Password', '');
     }
 
     public function Destroy()
@@ -80,41 +80,57 @@ class ONVIFDiscovery extends IPSModule
                 $this->SendDebug('Skip Data', 'UUID incorrect', 0);
                 continue;
             }
-            $xAddrs = self::getProbeMatchXAddrs($xml);
+            $xAddrs = self::getProbeMatchXAddrs($xml, $from);
             $this->SendDebug('Receive from', $from, 0);
             $this->SendDebug('Receive address', $xAddrs, 0);
-            $discoveryList[$from]['Address'] = $xAddrs;
+            $discoveryList[$from] = $xAddrs;
             usleep(10000);
         } while (time() < $discoveryTimeout);
         socket_close($sock);
         $uselogin = false;
-        if (($this->ReadPropertyString('Username') != '') or ( $this->ReadPropertyString('Password') != '')) {
+        if (($this->ReadAttributeString('Username') != '') or ( $this->ReadAttributeString('Password') != '')) {
             $uselogin = true;
         }
         $wsdl = dirname(__DIR__) . DIRECTORY_SEPARATOR . 'libs' . DIRECTORY_SEPARATOR . 'onvif-client-php' . DIRECTORY_SEPARATOR . 'WSDL' . DIRECTORY_SEPARATOR . 'devicemgmt-mod.wsdl';
-        foreach ($discoveryList as $IP => &$Values) {
-            try {
-                if ($uselogin) {
-                    $ONVIFclient = new ONVIF($wsdl, $Values['Address'][0], $this->ReadPropertyString('Username'), $this->ReadPropertyString('Password'));
-                } else {
-                    $ONVIFclient = new ONVIF($wsdl, $Values['Address'][0]);
+        $DevicesOk = [];
+        $DevicesError = [];
+        foreach ($discoveryList as $IP => $IpValues) {
+            $Device = null;
+            $DeviceError = true;
+            foreach ($IpValues as $IpValue) {
+                $this->SendDebug('Request', $IpValue, 0);
+                try {
+                    if ($uselogin) {
+                        $ONVIFclient = new ONVIF($wsdl, $IpValue, $this->ReadAttributeString('Username'), $this->ReadAttributeString('Password'));
+                    } else {
+                        $ONVIFclient = new ONVIF($wsdl, $IpValue);
+                    }
+                    $result = $ONVIFclient->client->GetDeviceInformation();
+                    $this->SendDebug('Read ' . $IpValue, json_encode($result), 0);
+                    if ($Device === null) {
+                        $Device = json_decode(json_encode($result), true);
+                        $DeviceError = false;
+                    }
+                    $Device['Address'][] = $IpValue;
+                } catch (SoapFault $e) {
+                    $this->SendDebug('Soap Error ' . $IpValue, $e->getMessage(), 0);
+                    /* $IpValues = array_merge($IpValues, [
+                      'Manufacturer'    => '<unknown>',
+                      'Model'           => 'unknown ONVIF Device (' . $IP . ')',
+                      'FirmwareVersion' => '',
+                      'SerialNumber'    => ''
+                      ]); */
                 }
-                $result = $ONVIFclient->client->GetDeviceInformation();
-                $this->SendDebug('Read ' . $IP, json_encode($result), 0);
-                $Values = array_merge($Values, json_decode(json_encode($result), true));
-            } catch (SoapFault $e) {
-                $this->SendDebug('Soap Error ' . $IP, $e->getMessage(), 0);
-                $Values = array_merge($Values, [
-                    'Manufacturer'    => '<unknown>',
-                    'Model'           => 'unknown ONVIF Device (' . $IP . ')',
-                    'FirmwareVersion' => '',
-                    'SerialNumber'    => ''
-                ]);
+            }
+            if ($DeviceError) {
+                $DevicesError[] = $IP;
+            } else {
+                $DevicesOk[$IP] = $Device;
             }
         }
 
         $this->SendDebug('Finish discovery', '', 0);
-        return $discoveryList;
+        return [$DevicesOk, $DevicesError];
     }
 
     protected static function relatesToMatch($uuid, $xmlDOMDoc)
@@ -128,7 +144,7 @@ class ONVIFDiscovery extends IPSModule
         return false;
     }
 
-    protected static function getProbeMatchXAddrs($xmlDOMDoc)
+    protected static function getProbeMatchXAddrs($xmlDOMDoc, $ip)
     {
         $matches = [];
         $probeMatchNodes = $xmlDOMDoc->getElementsByTagName('ProbeMatch');
@@ -138,7 +154,11 @@ class ONVIFDiscovery extends IPSModule
                 $matches = array_merge($matches, explode(' ', $addrsNode->nodeValue));
             }
         }
-        return $matches;
+        $filtermatches = array_filter($matches, function($item) use($ip) {
+            return (strpos($item, $ip));
+        });
+        //todo reindex
+        return array_values($filtermatches);
     }
 
     /**
@@ -166,7 +186,9 @@ class ONVIFDiscovery extends IPSModule
      */
     public function GetConfigurationForm()
     {
-        $Devices = $this->DiscoverDevices();
+        $result = $this->DiscoverDevices();
+        $Devices = $result[0];
+        $DevicesError = $result[1];
         /*
           ["192.168.201.119"]=>
           array(6) {
@@ -197,7 +219,6 @@ class ONVIFDiscovery extends IPSModule
                 $DevicesAddress[$InstanceIDConfigurator] = IPS_GetProperty($IO, 'Address');
             }
         }
-        $this->SendDebug('IPS', $DevicesAddress, 0);
         foreach ($Devices as $IP => $Device) {
             $AddDevice = [
                 'instanceID'      => 0,
@@ -209,49 +230,73 @@ class ONVIFDiscovery extends IPSModule
                 'SerialNumber'    => $Device['SerialNumber'],
             ];
             foreach ($Device['Address'] as $Address) {
-                $Scheme = parse_url($Address, PHP_URL_SCHEME);
-                $AddDevice['create'][$Device['Model'] . ' (' . $Scheme . ')'] = [
+                $ConfigIo = [
+                    'Address' => $Address,
+                    'Open'    => true];
+                $InstanceIDConfigurator = array_search($Address, $DevicesAddress);
+
+                if ($InstanceIDConfigurator !== false) {
+                    $AddDevice['name'] = IPS_GetLocation($InstanceIDConfigurator);
+                    $AddDevice['instanceID'] = $InstanceIDConfigurator;
+                    unset($DevicesAddress[$InstanceIDConfigurator]);
+                } else {
+                    $ConfigIo['Username'] = $this->ReadAttributeString('Username');
+                    $ConfigIo['Password'] = $this->ReadAttributeString('Password');
+                }
+                $AddDevice['create'][$Device['Model'] . ' (' . $Address . ')'] = [
                     [
                         'moduleID'      => '{C6A79C49-19D5-8D45-FFE5-5D77165FAEE6}',
                         'configuration' => new stdClass()
                     ],
                     [
                         'moduleID'      => '{F40CA9A7-3B4D-4B26-7214-3A94B6074DFB}',
-                        'configuration' => [
-                            'Address' => $Address,
-                            'Open'    => true]
+                        'configuration' => $ConfigIo
                     ]
                 ];
-
-                $InstanceIDConfigurator = array_search($Address, $DevicesAddress);
-                if ($InstanceIDConfigurator !== false) {
-                    $AddDevice['name'] = IPS_GetLocation($InstanceIDConfigurator);
-                    $AddDevice['instanceID'] = $InstanceIDConfigurator;
-                    unset($DevicesAddress[$InstanceIDConfigurator]);
-                }
             }
             if (count($AddDevice['create']) == 1) {
                 $AddDevice['create'] = array_shift($AddDevice['create']);
             }
             $DeviceValues[] = $AddDevice;
         }
-        $MissingConfigurators = [];
-        foreach ($DevicesAddress as $InstanceIDConfigurator => $Address) {
-            $MissingConfigurators[] = [
-                'IPAddress'       => '',
-                'Manufacturer'    => '',
-                'Model'           => '',
-                'FirmwareVersion' => '',
-                'SerialNumber'    => '',
-                'instanceID'      => $InstanceIDConfigurator,
-                'name'            => IPS_GetLocation($InstanceIDConfigurator)
-            ];
+        /* $MissingConfigurators = [];
+          foreach ($DevicesAddress as $InstanceIDConfigurator => $Address) {
+          $MissingConfigurators[] = [
+          'IPAddress'       => '',
+          'Manufacturer'    => '',
+          'Model'           => '',
+          'FirmwareVersion' => '',
+          'SerialNumber'    => '',
+          'instanceID'      => $InstanceIDConfigurator,
+          'name'            => IPS_GetLocation($InstanceIDConfigurator)
+          ];
+          } */
+        //$Values = $DeviceValues;//array_merge($DeviceValues, $MissingConfigurators);
+        $Form['actions'][0]['items'][0]['items'][0]['value'] = $this->ReadAttributeString('Username');
+        $Form['actions'][0]['items'][0]['items'][1]['value'] = $this->ReadAttributeString('Password');
+        $Form['actions'][1]['values'] = $DeviceValues;
+        if (count($DevicesError) > 0) {
+            $ErrorValues = [];
+            foreach ($DevicesError as $DeviceError) {
+                $ErrorValues[] = ['IPAddress' => $DeviceError];
+            }
+            $Form['actions'][2]['visible'] = true;
+            $Form['actions'][2]['popup']['items'][1]['values'] = $ErrorValues;
         }
-        $Values = array_merge($DeviceValues, $MissingConfigurators);
-        $Form['actions'][0]['values'] = $Values;
         $this->SendDebug('FORM', json_encode($Form), 0);
         $this->SendDebug('FORM', json_last_error_msg(), 0);
         return json_encode($Form);
+    }
+
+    public function RequestAction($Ident, $Value)
+    {
+        if ($Ident != 'Save') {
+            return;
+        }
+        $Data = explode(':', $Value);
+        $this->WriteAttributeString('Username', urldecode($Data[0]));
+        $this->WriteAttributeString('Password', urldecode($Data[1]));
+        $this->ReloadForm();
     }
 
 }

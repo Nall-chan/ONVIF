@@ -1,8 +1,10 @@
 {
-    "elements": [
-        {
+    "elements": [],
+    "actions": [
+        { 
             "type": "ExpansionPanel",
-            "caption": "Optional credentials",
+            "caption": "Credentials",
+            "expanded": true,
             "items": [
                 { 
                     "type": "RowLayout",
@@ -16,13 +18,16 @@
                             "name": "Password",
                             "type": "PasswordTextBox",
                             "caption": "Password"
+                        },
+                        {
+                            "onClick": "IPS_RequestAction($id,'Save',urlencode($Username).':'.urlencode($Password));",
+                            "type": "Button",
+                            "caption": "Save & Reload"
                         }
                     ]
                 }
             ]
-        }
-    ],
-    "actions": [
+        },
         {
             "type": "Configurator",
             "name": "Discovery",
@@ -59,6 +64,35 @@
                 }
             ],
             "values": []
+        },
+        {
+            "type": "PopupAlert",
+            "visible": true,
+            "popup": {
+                "items": [
+                    {
+                        "type": "Label",
+                        "caption": "Some devices could not be determined. Please check the credentials."
+                    },
+                    {
+                        "caption": "List of hosts:",
+                        "type": "List",
+                        "add": false,
+                        "delete": false,
+                        "sort": {
+                            "column": "IPAddress",
+                            "direction": "ascending"
+                        },
+                        "columns": [
+                            {
+                                "caption": "Host",
+                                "name": "IPAddress"
+                            }
+                        ],
+                        "values": []
+                    }
+                ]
+            }
         }
     ]
 }
