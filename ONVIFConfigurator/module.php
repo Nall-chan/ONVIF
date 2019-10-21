@@ -65,7 +65,13 @@ class ONVIFConfigurator extends ONVIFModuleBase
 
         $InputValues = $this->GetConfigurationArray(self::GUID_ONVIF_DIGITAL_INPUT, $Capas['HasInput'], $InputTopics);
 
-        $OutputEvents = $this->GetEvents('relay', 0);
+        $OutputEvents = [];
+        if ($Capas['HasOutput']) {
+            $OutputEvents = $this->GetEvents('relay', 0);
+            if (count($OutputEvents) == 0) {
+                $OutputEvents = $this->GetEvents('port', 0);
+            }
+        }
         $this->SendDebug('GetEvents', $OutputEvents, 0);
         $OutputTopics = [];
         foreach (array_keys($OutputEvents) as $Topic) {
@@ -171,20 +177,25 @@ class ONVIFConfigurator extends ONVIFModuleBase
                     'Location'    => stristr(IPS_GetLocation($IPSInstance), IPS_GetName($IPSInstance), true)
                 ];
                 if ($isValid) {
-                    $InstanceValues['create'] = $CreateParams;
+                    if (count($CreateParams) > 0) {
+                        $InstanceValues['create'] = $CreateParams;
+                    }
                 }
                 $Values[] = $InstanceValues;
             }
         } else {
             if ($isValid) {
-                $Values[] = [
+                $InstanceValues = [
                     'instanceID'  => 0,
                     'type'        => substr(IPS_GetModule($GUID)['ModuleName'], 6),
                     'videosource' => '',
                     'name'        => IPS_GetModule($GUID)['ModuleName'],
-                    'Location'    => '',
-                    'create'      => $CreateParams
+                    'Location'    => ''
                 ];
+                if (count($CreateParams) > 0) {
+                    $InstanceValues['create'] = $CreateParams;
+                }
+                $Values[] = $InstanceValues;
             }
         }
         return $Values;
