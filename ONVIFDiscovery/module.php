@@ -56,11 +56,11 @@ class ONVIFDiscovery extends IPSModule
         $sock = socket_create(AF_INET, SOCK_DGRAM, SOL_UDP);
         socket_set_option($sock, SOL_SOCKET, SO_REUSEADDR, 1);
         socket_set_option($sock, SOL_SOCKET, SO_RCVTIMEO, ['sec' => 0, 'usec' => 100000]);
-        if (defined('IPPROTO_IP') && defined('MCAST_JOIN_GROUP')) {
+        /*if (defined('IPPROTO_IP') && defined('MCAST_JOIN_GROUP')) {
             socket_set_option($sock, IPPROTO_IP, MCAST_JOIN_GROUP, array('group' => self::WS_DISCOVERY_MULTICAST_ADDRESS));
-        } else {
+        } else {*/
             socket_set_option($sock, SOL_SOCKET, SO_BROADCAST, 1);
-        }
+        //}
 
         socket_bind($sock, '0.0.0.0', 0); //self::WS_DISCOVERY_MULTICAST_PORT);
         $this->SendDebug('Start Discovery', '', 0);
