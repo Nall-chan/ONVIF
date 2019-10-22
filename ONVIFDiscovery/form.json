@@ -67,7 +67,7 @@
         },
         {
             "type": "PopupAlert",
-            "visible": true,
+            "visible": false,
             "popup": {
                 "items": [
                     {
