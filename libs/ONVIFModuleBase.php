@@ -34,7 +34,6 @@ class ONVIFModuleBase extends IPSModule
     {
         //Never delete this line!
         parent::Create();
-        //$this->RequireParent('{F40CA9A7-3B4D-4B26-7214-3A94B6074DFB}');
         $this->RegisterPropertyString('EventTopic', '');
         $this->RegisterAttributeArray('EventProperties', []);
     }

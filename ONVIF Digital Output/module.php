@@ -24,18 +24,21 @@ class ONVIFDigitalOutput extends ONVIFModuleBase
         if (IPS_GetKernelRunlevel() != KR_READY) {
             return;
         }
-        @$this->GetRelayOutputs();
         if ($this->ReadPropertyString('EventTopic') == '') {
             $this->SetStatus(IS_INACTIVE);
-        } else {
+            return;
+        }
+        if ($this->HasActiveParent()) {
+            $this->GetRelayOutputs();
             $Events = $this->ReadAttributeArray('EventProperties');
             if (count($Events) != 1) {
                 $this->SetStatus(IS_EBASE + 1);
-                echo count($Events);
             } else {
                 $this->SetStatus(IS_ACTIVE);
             }
+            return;
         }
+        $this->SetStatus(IS_ACTIVE);
     }
 
     protected function GetRelayOutputs()
@@ -44,7 +47,6 @@ class ONVIFDigitalOutput extends ONVIFModuleBase
         if ($ret == false) {
             return false;
         }
-        //$this->LogMessage(print_r($ret), KL_NOTIFY);
         $RelayOutputs = [];
         if (is_array($ret->RelayOutputs)) {
             foreach ($ret->RelayOutputs as $RelayOutput) {
@@ -56,7 +58,6 @@ class ONVIFDigitalOutput extends ONVIFModuleBase
         $this->SendDebug('RelayOutputs', $RelayOutputs, 0);
         $this->WriteAttributeArray('RelayOutputs', $RelayOutputs);
         foreach ($RelayOutputs as $Ident => $RelayOutput) {
-
             $this->RegisterVariableBoolean($Ident, $Ident, '~Switch', 0);
             $this->EnableAction($Ident);
         }

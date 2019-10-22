@@ -56,10 +56,10 @@ class ONVIFDiscovery extends IPSModule
         $sock = socket_create(AF_INET, SOCK_DGRAM, SOL_UDP);
         socket_set_option($sock, SOL_SOCKET, SO_REUSEADDR, 1);
         socket_set_option($sock, SOL_SOCKET, SO_RCVTIMEO, ['sec' => 0, 'usec' => 100000]);
-        /*if (defined('IPPROTO_IP') && defined('MCAST_JOIN_GROUP')) {
-            socket_set_option($sock, IPPROTO_IP, MCAST_JOIN_GROUP, array('group' => self::WS_DISCOVERY_MULTICAST_ADDRESS));
-        } else {*/
-            socket_set_option($sock, SOL_SOCKET, SO_BROADCAST, 1);
+        /* if (defined('IPPROTO_IP') && defined('MCAST_JOIN_GROUP')) {
+          socket_set_option($sock, IPPROTO_IP, MCAST_JOIN_GROUP, array('group' => self::WS_DISCOVERY_MULTICAST_ADDRESS));
+          } else { */
+        socket_set_option($sock, SOL_SOCKET, SO_BROADCAST, 1);
         //}
 
         socket_bind($sock, '0.0.0.0', 0); //self::WS_DISCOVERY_MULTICAST_PORT);
@@ -96,7 +96,8 @@ class ONVIFDiscovery extends IPSModule
         $DevicesError = [];
         foreach ($discoveryList as $IP => $IpValues) {
             $Device = null;
-            $DeviceError = true;
+            $DeviceOk = false;
+            $DeviceError = [];
             foreach ($IpValues as $IpValue) {
                 $this->SendDebug('Request', $IpValue, 0);
                 try {
@@ -109,11 +110,14 @@ class ONVIFDiscovery extends IPSModule
                     $this->SendDebug('Read ' . $IpValue, json_encode($result), 0);
                     if ($Device === null) {
                         $Device = json_decode(json_encode($result), true);
-                        $DeviceError = false;
+                        $DeviceOk = true;
                     }
                     $Device['Address'][] = $IpValue;
                 } catch (SoapFault $e) {
                     $this->SendDebug('Soap Error ' . $IpValue, $e->getMessage(), 0);
+                    $Url = parse_url($IpValue);
+                    $Url['port'] = isset($Url['port']) ? ':' . $Url['port'] : '';
+                    $DeviceError[$Url['scheme'] . '://' . $Url['host'] . $Url['port']] = $e->getMessage();
                     /* $IpValues = array_merge($IpValues, [
                       'Manufacturer'    => '<unknown>',
                       'Model'           => 'unknown ONVIF Device (' . $IP . ')',
@@ -122,10 +126,10 @@ class ONVIFDiscovery extends IPSModule
                       ]); */
                 }
             }
-            if ($DeviceError) {
-                $DevicesError[] = $IP;
-            } else {
+            if ($DeviceOk) {
                 $DevicesOk[$IP] = $Device;
+            } else {
+                $DevicesError = array_merge($DevicesError, $DeviceError);
             }
         }
 
@@ -277,8 +281,8 @@ class ONVIFDiscovery extends IPSModule
         $Form['actions'][1]['values'] = $DeviceValues;
         if (count($DevicesError) > 0) {
             $ErrorValues = [];
-            foreach ($DevicesError as $DeviceError) {
-                $ErrorValues[] = ['IPAddress' => $DeviceError];
+            foreach ($DevicesError as $IPAddress => $ErrorMessage) {
+                $ErrorValues[] = ['IPAddress' => $IPAddress, 'ErrorMessage' => $ErrorMessage];
             }
             $Form['actions'][2]['visible'] = true;
             $Form['actions'][2]['popup']['items'][1]['values'] = $ErrorValues;

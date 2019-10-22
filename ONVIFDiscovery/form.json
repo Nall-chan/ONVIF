@@ -86,7 +86,12 @@
                         "columns": [
                             {
                                 "caption": "Host",
-                                "name": "IPAddress"
+                                "name": "IPAddress",
+                                "width": "200px"
+                            }, {
+                                "caption": "Errormessage",
+                                "name": "ErrorMessage",
+                                "width": "auto"
                             }
                         ],
                         "values": []

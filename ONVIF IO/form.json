@@ -8,7 +8,8 @@
         {
             "name": "Address",
             "type": "ValidationTextBox",
-            "caption": "Address"
+            "caption": "Address",
+            "width": "500px"
         }, { 
             "type": "RowLayout",
             "items": [
@@ -133,6 +134,20 @@
                 }
             ],
             "values": []
+        },
+        {
+            "name": "ErrorPopup",
+            "type": "PopupAlert",
+            "visible": false,
+            "popup": {
+                "items": [
+                    {
+                        "name": "ErrorText",
+                        "type": "Label",
+                        "caption": "Some devices could not be determined. Please check the credentials."
+                    }
+                ]
+            }
         }
     ],
     "status": [

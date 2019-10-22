@@ -21,9 +21,9 @@ class ONVIFMediaStream extends ONVIFModuleBase
     {
         //Never delete this line!
 
-        if ($this->ReadPropertyString('VideoSource') != '') {
-            $this->Addfilter = '.*"SourceValue":"' . $this->ReadPropertyString('VideoSource') . '"';
-        }
+        /* if ($this->ReadPropertyString('VideoSource') != '') {
+          $this->Addfilter = '.*"SourceValue":"' . $this->ReadPropertyString('VideoSource') . '"';
+          } */
         parent::ApplyChanges();
         if ($this->ReadPropertyString('VideoSource') == '') {
             $this->SetStatus(IS_INACTIVE);
@@ -270,7 +270,7 @@ class ONVIFMediaStream extends ONVIFModuleBase
         if ($mId == false) {
             $mId = IPS_CreateMedia(MEDIATYPE_STREAM);
             IPS_SetParent($mId, $this->InstanceID);
-            IPS_SetName($mId, 'STREAM');
+            IPS_SetName($mId, 'Stream');
             IPS_SetIdent($mId, 'STREAM');
         }
         IPS_SetMediaFile($mId, $StreamURL, false);
@@ -285,14 +285,33 @@ class ONVIFMediaStream extends ONVIFModuleBase
         if (!array_key_exists($Data['Topic'], $EventProperties)) {
             return false;
         }
+        if ($Data['SourceName'] != '') {
+            if ($Data['SourceValue'] != $this->ReadPropertyString('VideoSource')) {
+                return false;
+            }
+        }
+
         $EventProperty = $EventProperties[$Data['Topic']];
-        $Name = str_replace($this->ReadPropertyString('EventTopic'), '', $Data['Topic']) . ' - ' . $Data['DataName'];
+        $PreName = str_replace($this->ReadPropertyString('EventTopic'), '', $Data['Topic']);
+        if ($PreName != '') {
+            $Name = $PreName . ' - ' . $Data['DataName'];
+        } else {
+            $Name = $Data['DataName'];
+        }
+
         $Ident = str_replace([' - ', '/', '-', ':'], ['_', '_', '_', ''], $Name);
         switch (stristr($EventProperty['DataType'], ':')) {
             case ':boolean':
             case ':bool':
                 $this->RegisterVariableBoolean($Ident, $Name, '', 0);
-                $this->SetValue($Ident, ($Data['DataValue'] == 'true'));
+                $DataValue = false;
+                if (strtolower($Data['DataValue']) === 'true') {
+                    $DataValue = true;
+                }
+                if (intval($Data['DataValue']) === 1) {
+                    $DataValue = true;
+                }
+                $this->SetValue($Ident, $DataValue);
                 break;
             case ':float':
             case ':double':
