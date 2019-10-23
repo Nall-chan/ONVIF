@@ -100,13 +100,15 @@ class ONVIFDiscovery extends IPSModule
             $DeviceError = [];
             foreach ($IpValues as $IpValue) {
                 $this->SendDebug('Request', $IpValue, 0);
+                if ($uselogin) {
+                    $ONVIFclient = new ONVIF($wsdl, $IpValue, $this->ReadAttributeString('Username'), $this->ReadAttributeString('Password'));
+                } else {
+                    $ONVIFclient = new ONVIF($wsdl, $IpValue);
+                }
                 try {
-                    if ($uselogin) {
-                        $ONVIFclient = new ONVIF($wsdl, $IpValue, $this->ReadAttributeString('Username'), $this->ReadAttributeString('Password'));
-                    } else {
-                        $ONVIFclient = new ONVIF($wsdl, $IpValue);
-                    }
                     $result = $ONVIFclient->client->GetDeviceInformation();
+                    $this->SendDebug('Soap Request ' . $IpValue, $ONVIFclient->client->__getLastRequest(), 0);
+                    $this->SendDebug('Soap Response ' . $IpValue, $ONVIFclient->client->__getLastResponse(), 0);
                     $this->SendDebug('Read ' . $IpValue, json_encode($result), 0);
                     if ($Device === null) {
                         $Device = json_decode(json_encode($result), true);
@@ -114,16 +116,12 @@ class ONVIFDiscovery extends IPSModule
                     }
                     $Device['Address'][] = $IpValue;
                 } catch (SoapFault $e) {
-                    $this->SendDebug('Soap Error ' . $IpValue, $e->getMessage(), 0);
+                    $this->SendDebug('Soap Request Error ' . $IpValue, $ONVIFclient->client->__getLastRequest(), 0);
+                    $this->SendDebug('Soap Response Error ' . $IpValue, $ONVIFclient->client->__getLastResponse(), 0);
+                    $this->SendDebug('Soap Response Error Message ' . $IpValue, $e->getMessage(), 0);
                     $Url = parse_url($IpValue);
                     $Url['port'] = isset($Url['port']) ? ':' . $Url['port'] : '';
                     $DeviceError[$Url['scheme'] . '://' . $Url['host'] . $Url['port']] = $e->getMessage();
-                    /* $IpValues = array_merge($IpValues, [
-                      'Manufacturer'    => '<unknown>',
-                      'Model'           => 'unknown ONVIF Device (' . $IP . ')',
-                      'FirmwareVersion' => '',
-                      'SerialNumber'    => ''
-                      ]); */
                 }
             }
             if ($DeviceOk) {

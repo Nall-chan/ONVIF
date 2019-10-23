@@ -32,24 +32,36 @@ class ONVIF
     public function __construct($wsdl, $service, $username = null, $password = null, $Headers = [])
     {
         $this->wsdl = $wsdl;
-
-        $this->client = new SoapClient($this->wsdl, array(
+        $Options = [
             'trace'              => 1,
             'exceptions'         => true,
             'cache_wsdl'         => WSDL_CACHE_NONE,
             'ssl_method '        => SOAP_SSL_METHOD_TLS,
             'connection_timeout' => 5,
-            'ssl'                => [
-                'verify_peer'       => false,
-                'verify_peer_name'  => false,
-                'allow_self_signed' => true
-            ],
-            'http'               => [
-                'protocol_version' => 1.1,
-                'timeout'          => 5.0
-            ],
             'soap_version'       => SOAP_1_2,
-        ));
+            'stream_context'     => stream_context_create(
+                    [
+                        'ssl'  => [
+                            'verify_peer'       => false,
+                            'verify_peer_name'  => false,
+                            'allow_self_signed' => true
+                        ],
+                        'http' => [
+                            'protocol_version' => 1.1,
+                            'timeout'          => 5.0
+                        ],
+                    ]
+            )
+        ];
+        if (($username != null) or ( $password != null)) {
+            $username = ($username == null ? '' : $username);
+            $password = ($password == null ? '' : $password);
+            $Headers[] = $this->soapClientWSSecurityHeader($username, $password);
+            $Options['login'] = $username;
+            $Options['password'] = $password;
+            $Options['authentication'] = SOAP_AUTHENTICATION_DIGEST;
+        }
+        $this->client = new SoapClient($this->wsdl, $Options);
         $this->client->__setLocation($service);
 
         # unfortunately this extra can be used only in devicemgmt
@@ -66,11 +78,6 @@ class ONVIF
           $this->client->__setSoapHeaders($this->soapClientWSSecurityHeader($username,$password, $camera_ts));
           } else {
          */
-        if (($username != null) or ( $password != null)) {
-            $username = ($username == null ? '' : $username);
-            $password = ($password == null ? '' : $password);
-            $Headers[] = $this->soapClientWSSecurityHeader($username, $password);
-        }
         //}
         $this->client->__setSoapHeaders($Headers);
         return;

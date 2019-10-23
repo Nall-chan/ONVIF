@@ -103,7 +103,7 @@
                     "width": "200px"
                 },
                 {
-                    "caption": "Events are used bei this instances:",
+                    "caption": "Events are used by this instances:",
                     "name": "Receivers",
                     "visible": false,
                     "edit": {
