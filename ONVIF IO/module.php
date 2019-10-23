@@ -585,7 +585,8 @@ class ONVIFIO extends IPSModule
             $this->lastSOAPError = '';
         } catch (SoapFault $e) {
             $this->SendDebug('Soap Request Error', $ONVIFclient->client->__getLastRequest(), 0);
-            $this->SendDebug('Soap Response Error', $e->getMessage(), 0);
+            $this->SendDebug('Soap Response Error', $ONVIFclient->client->__getLastResponse(), 0);
+            $this->SendDebug('Soap Response Error Message', $e->getMessage(), 0);
             $Response = $ONVIFclient->client->__getLastResponse();
             $this->lastSOAPError = $e->getMessage();
             return $e; //
