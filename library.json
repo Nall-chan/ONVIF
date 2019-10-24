@@ -4,7 +4,7 @@
     "name": "ONVIF Library",
     "url": "https://github.com/Nall-chan/ONFIV",
     "compatibility": {
-        "version": "5.3"
+        "version": "5.2"
     },
     "version": "0.91",
     "build": 120,
