@@ -20,10 +20,6 @@ class ONVIFMediaStream extends ONVIFModuleBase
     public function ApplyChanges()
     {
         //Never delete this line!
-
-        /* if ($this->ReadPropertyString('VideoSource') != '') {
-          $this->Addfilter = '.*"SourceValue":"' . $this->ReadPropertyString('VideoSource') . '"';
-          } */
         parent::ApplyChanges();
         if ($this->ReadPropertyString('VideoSource') == '') {
             $this->SetStatus(IS_INACTIVE);
@@ -88,7 +84,7 @@ class ONVIFMediaStream extends ONVIFModuleBase
         $ActualProfile = null;
         foreach ($Capas['VideoSources'] as $VideoSource) {
             $VideoSourcesOptions[] = [
-                'caption' => $VideoSource['VideoSourceToken'],
+                'caption' => $VideoSource['VideoSourceName'],
                 'value'   => $VideoSource['VideoSourceToken']
             ];
             if ($this->ReadPropertyString('VideoSource') == $VideoSource['VideoSourceToken']) {
@@ -229,6 +225,27 @@ class ONVIFMediaStream extends ONVIFModuleBase
         return json_encode($Form);
     }
 
+    protected function RefreshProfileForm($NewVideoSource)
+    {
+        $Capas = $this->GetCapabilities();
+        $ProfileOptions = [];
+        $ProfileOptions[] = [
+            'caption' => 'none',
+            'value'   => ''
+        ];
+        foreach ($Capas['VideoSources'] as $VideoSource) {
+            if ($NewVideoSource == $VideoSource['VideoSourceToken']) {
+                foreach ($VideoSource['Profile'] as $Profile) {
+                    $ProfileOptions[] = [
+                        'caption' => $Profile['Name'],
+                        'value'   => $Profile['token']
+                    ];
+                }
+            }
+        }
+        $this->UpdateFormField('Profile', 'options', json_encode($ProfileOptions));
+    }
+
     protected function FilterVideoSource($Value)
     {
         return $Value['VideoSourceConfiguration']['SourceToken'] == $this->ReadPropertyString('VideoSource');
@@ -236,6 +253,7 @@ class ONVIFMediaStream extends ONVIFModuleBase
 
     protected function GetStreamUri()
     {
+        $Capas = $this->GetCapabilities();
         $Params = [
             'StreamSetup'  => [
                 'Stream'    => 'RTP-Unicast',
@@ -245,7 +263,7 @@ class ONVIFMediaStream extends ONVIFModuleBase
             ],
             'ProfileToken' => $this->ReadPropertyString('Profile')
         ];
-        $ret = $this->SendData('', 'GetStreamUri', true, $Params);
+        $ret = $this->SendData($Capas['XAddr']['Media'], 'GetStreamUri', true, $Params);
         if ($ret == false) {
             return false;
         }
@@ -274,6 +292,17 @@ class ONVIFMediaStream extends ONVIFModuleBase
             IPS_SetIdent($mId, 'STREAM');
         }
         IPS_SetMediaFile($mId, $StreamURL, false);
+    }
+
+    public function RequestAction($Ident, $Value)
+    {
+        if (parent::RequestAction($Ident, $Value)) {
+            return true;
+        }
+        if ($Ident == 'RefreshProfileForm') {
+            $this->RefreshProfileForm($Value);
+        }
+        return true;
     }
 
     public function ReceiveData($JSONString)

@@ -5,7 +5,8 @@
             "name": "VideoSource",
             "caption": "VideoSource",
             "options": [
-            ]
+            ],
+            "onChange": "IPS_RequestAction($id,'RefreshProfileForm',$VideoSource);"
         },
         {
             "type": "Select",

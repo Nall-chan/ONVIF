@@ -28,8 +28,6 @@ class ONVIFModuleBase extends IPSModule
     const wsdl = '';
     const TopicFilter = '';
 
-    protected $Addfilter = '';
-
     public function Create()
     {
         //Never delete this line!
@@ -55,7 +53,7 @@ class ONVIFModuleBase extends IPSModule
         if ($EventTopic == '') {
             $EventTopic = 'NOTHING';
         }
-        $TopicFilter = '.*"Topic":"' . preg_quote(substr(json_encode($EventTopic), 1, -1)) . $this->Addfilter . '.*';
+        $TopicFilter = '.*"Topic":"' . preg_quote(substr(json_encode($EventTopic), 1, -1)) . '.*';
         $this->SetReceiveDataFilter($TopicFilter);
         $this->SendDebug('SetReceiveDataFilter', $TopicFilter, 0);
         $this->LogMessage('SetReceiveDataFilter: ' . $TopicFilter, KL_DEBUG);
@@ -138,7 +136,7 @@ class ONVIFModuleBase extends IPSModule
             }
             return unserialize($anwser);
         }
-        return ['VideoSources' => [], 'HasOutput' => false, 'HasInput' => false];
+        return ['VideoSources' => [], 'HasOutput' => false, 'HasInput' => false, 'XAddr' => []];
     }
 
     protected function GetCredentials()
@@ -196,7 +194,6 @@ class ONVIFModuleBase extends IPSModule
 
     protected function GetConfigurationFormEventTopic(array $Form, bool $AddNothingIndex = false, array $SkippedTopics = [])
     {
-//        if (static::TopicFilter != '') {
         $Events = $this->GetEvents(static::TopicFilter, 0, $SkippedTopics);
         $this->SendDebug('GetEvents', $SkippedTopics, 0);
         $this->SendDebug('GetEvents', $Events, 0);
@@ -225,7 +222,6 @@ class ONVIFModuleBase extends IPSModule
                 $Form['enabled'] = true;
             }
         }
-        //      }
         return $Form;
     }
 

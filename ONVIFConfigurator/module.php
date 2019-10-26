@@ -103,7 +103,7 @@ class ONVIFConfigurator extends ONVIFModuleBase
                 'instanceID'  => 0,
                 'type'        => 'Media Stream',
                 'videosource' => $VideoSource['VideoSourceToken'],
-                'name'        => 'ONVIF Media Stream',
+                'name'        => $VideoSource['VideoSourceName'],
                 'Location'    => ''
             ];
             $InstanceID = array_search($VideoSource['VideoSourceToken'], $IPSStreamInstances);
@@ -112,16 +112,20 @@ class ONVIFConfigurator extends ONVIFModuleBase
                 unset($IPSStreamInstances[$InstanceID]);
                 $Device['instanceID'] = $InstanceID;
                 $Device['name'] = IPS_GetName($InstanceID);
-                $Device['location'] = stristr(IPS_GetLocation($InstanceID), IPS_GetName($InstanceID), true);
+                $Device['Location'] = stristr(IPS_GetLocation($InstanceID), IPS_GetName($InstanceID), true);
             }
+            $Create = [];
             foreach ($VideoSource['Profile'] as $Profile) {
-                $Device['create']['ONVIF Media Stream (' . $VideoSource['VideoSourceToken'] . '/' . $Profile['Name'] . ')'] = $StreamCreateParams;
-                $Device['create']['ONVIF Media Stream (' . $VideoSource['VideoSourceToken'] . '/' . $Profile['Name'] . ')']['configuration'] = [
+                $Create[$VideoSource['VideoSourceName'] . ' (' . $Profile['Name'] . ')'] = $StreamCreateParams;
+                $Create[$VideoSource['VideoSourceName'] . ' (' . $Profile['Name'] . ')']['configuration'] = [
                     'VideoSource' => $VideoSource['VideoSourceToken'],
                     'Profile'     => $Profile['token']
                 ];
             }
-
+            if (count($Create) == 1) {
+                $Create = array_shift($Create);
+            }
+            $Device['create'] = $Create;
             $StreamValues[] = $Device;
         }
         foreach ($IPSStreamInstances as $InstanceID => $VideoSource) {
@@ -189,7 +193,7 @@ class ONVIFConfigurator extends ONVIFModuleBase
                     'instanceID'  => 0,
                     'type'        => substr(IPS_GetModule($GUID)['ModuleName'], 6),
                     'videosource' => '',
-                    'name'        => IPS_GetModule($GUID)['ModuleName'],
+                    'name'        => substr(IPS_GetModule($GUID)['ModuleName'], 6),
                     'Location'    => ''
                 ];
                 if (count($CreateParams) > 0) {
