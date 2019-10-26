@@ -59,7 +59,7 @@ class ONVIF
             $Headers[] = $this->soapClientWSSecurityHeader($username, $password);
             $Options['login'] = $username;
             $Options['password'] = $password;
-            $Options['authentication'] = SOAP_AUTHENTICATION_DIGEST;
+           // $Options['authentication'] = SOAP_AUTHENTICATION_DIGEST;
         }
         $this->client = new SoapClient($this->wsdl, $Options);
         $this->client->__setLocation($service);
