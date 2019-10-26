@@ -3,7 +3,7 @@
         {
             "type": "Select",
             "name": "VideoSource",
-            "caption": "VideoSource",
+            "caption": "Videosource",
             "options": [
             ],
             "onChange": "IPS_RequestAction($id,'RefreshProfileForm',$VideoSource);"
@@ -18,7 +18,7 @@
         {
             "type": "Select",
             "name": "EventTopic",
-            "caption": "Event of input(s)",
+            "caption": "Event of videosource",
             "options": [
             ],
             "enable": false

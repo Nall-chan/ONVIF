@@ -136,7 +136,19 @@ class ONVIFModuleBase extends IPSModule
             }
             return unserialize($anwser);
         }
-        return ['VideoSources' => [], 'HasOutput' => false, 'HasInput' => false, 'XAddr' => []];
+        return [
+            'VideoSources' => [],
+            'HasOutput'    => false,
+            'HasInput'     => false,
+            'XAddr'        => [
+                'Events'    => '',
+                'Media'     => '',
+                'PTZ'       => '',
+                'Imaging'   => '',
+                'Recording' => '',
+                'Replay'    => ''
+            ]
+        ];
     }
 
     protected function GetCredentials()

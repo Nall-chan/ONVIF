@@ -175,6 +175,15 @@ class ONVIFIO extends IPSModule
                     }
                 } else {
                     //Attribute löschen
+                    $XAddr = [
+                        'Events'    => '',
+                        'Media'     => $this->ReadPropertyString('Address'),
+                        'PTZ'       => '',
+                        'Imaging'   => '',
+                        'Recording' => '',
+                        'Replay'    => ''
+                    ];
+                    $this->WriteAttributeArray('XAddr', $XAddr);
                     $this->EventsNotSupported();
                 }
             }
@@ -195,12 +204,13 @@ class ONVIFIO extends IPSModule
         $this->UnregisterHook('/hook/ONFIVEvents/IO/' . $this->InstanceID);
         $this->WriteAttributeArray('EventProperties', []);
         $this->WriteAttributeString('ConsumerAddress', '');
-        $this->ShowLastError('This device does not support ONVIF events.');
+        $this->ShowLastError('This device does not support ONVIF events.','Info:');
     }
 
-    protected function ShowLastError(string $ErrorMessage)
+    protected function ShowLastError(string $ErrorMessage, string $ErrorTitle = 'Answer from Device:')
     {
         IPS_Sleep(500);
+        $this->UpdateFormField('ErrorTitle', 'caption', $ErrorTitle);
         $this->UpdateFormField('ErrorText', 'caption', $ErrorMessage);
         $this->UpdateFormField('ErrorPopup', 'visible', true);
     }
@@ -273,7 +283,7 @@ class ONVIFIO extends IPSModule
         $ReferenceUrl = parse_url($SubscriptionReference)['host'];
         if (strpos($this->ReadPropertyString('Address'), $ReferenceUrl) === false) {
             $this->LogMessage('This device send a invalid Subscription-Reference.', KL_WARNING);
-            $this->ShowLastError('This device send a invalid Subscription-Reference.');
+            $this->ShowLastError('This device send a invalid Subscription-Reference.','Warning:');
             return false;
         }
         $this->isSubscribed = true;
@@ -676,7 +686,6 @@ class ONVIFIO extends IPSModule
     public function GetConfigurationForm()
     {
 
-        $this->SendDebug('GetConfigurationForm', 'Start', 0);
         $Form = json_decode(file_get_contents(__DIR__ . '/form.json'), true);
         if (IPS_GetOption('NATSupport')) {
             $Form['elements'][3]['visible'] = true;
@@ -694,8 +703,6 @@ class ONVIFIO extends IPSModule
         $Form['actions'][2]['values'] = $EventList;
         $this->SendDebug('FORM', json_encode($Form), 0);
         $this->SendDebug('FORM', json_last_error_msg(), 0);
-        $this->SendDebug('GetConfigurationForm', 'Ende', 0);
-
         return json_encode($Form);
     }
 

@@ -142,9 +142,14 @@
             "popup": {
                 "items": [
                     {
+                        "name": "ErrorTitle",
+                        "type": "Label",
+                        "caption": ""
+                    },
+                    {
                         "name": "ErrorText",
                         "type": "Label",
-                        "caption": "Some devices could not be determined. Please check the credentials."
+                        "caption": ""
                     }
                 ]
             }
