@@ -152,7 +152,7 @@ class ONVIFIO extends IPSModule
         }
 
         if ($ReloadCapas) {
-            if (!$this->GetVideoSources()) {
+            if (!$this->GetProfiles()) {
                 $this->LogMessage($this->lastSOAPError, KL_ERROR);
                 $this->ShowLastError($this->lastSOAPError);
                 $this->SetStatus(IS_EBASE + 2);
@@ -204,7 +204,7 @@ class ONVIFIO extends IPSModule
         $this->UnregisterHook('/hook/ONFIVEvents/IO/' . $this->InstanceID);
         $this->WriteAttributeArray('EventProperties', []);
         $this->WriteAttributeString('ConsumerAddress', '');
-        $this->ShowLastError('This device does not support ONVIF events.','Info:');
+        $this->ShowLastError('This device does not support ONVIF events.', 'Info:');
     }
 
     protected function ShowLastError(string $ErrorMessage, string $ErrorTitle = 'Answer from Device:')
@@ -283,7 +283,7 @@ class ONVIFIO extends IPSModule
         $ReferenceUrl = parse_url($SubscriptionReference)['host'];
         if (strpos($this->ReadPropertyString('Address'), $ReferenceUrl) === false) {
             $this->LogMessage('This device send a invalid Subscription-Reference.', KL_WARNING);
-            $this->ShowLastError('This device send a invalid Subscription-Reference.','Warning:');
+            $this->ShowLastError('This device send a invalid Subscription-Reference.', 'Warning:');
             return false;
         }
         $this->isSubscribed = true;
@@ -400,64 +400,36 @@ class ONVIFIO extends IPSModule
         return true;
     }
 
-    protected function GetVideoSources()
-    {
-        $ret = $this->SendData('', 'media-mod.wsdl', 'GetVideoSources', true);
-        if (is_a($ret, 'SoapFault')) {
-            return false;
-        }
-        $VideoSources = [];
-        if (is_array($ret->VideoSources)) {
-            foreach ($ret->VideoSources as $VideoSource) {
-                $VideoSources[] = [
-                    'VideoSourceToken' => $VideoSource->token,
-                    'Profile'          => []
-                ];
-            }
-        } else {
-            $VideoSources[] = [
-                'VideoSourceToken' => $ret->VideoSources->token,
-                'Profile'          => []
-            ];
-        }
-        if (count($VideoSources) > 0) {
-            $VideoSources = $this->GetProfiles($VideoSources);
-        }
-        $this->SendDebug('VideoSourcesAttribute', $VideoSources, 0);
-        $this->WriteAttributeArray('VideoSources', $VideoSources);
-        return true;
-    }
-
-    protected function FilterProfile(&$VideoSourcesItem, $VideoSourcesIndex, $Profile)
-    {
-        $PossibleProfiles = array_filter($Profile, function($Profile) use($VideoSourcesItem) {
-            return $Profile['VideoSourceConfiguration']['SourceToken'] == $VideoSourcesItem['VideoSourceToken'];
-        });
-
-        foreach ($PossibleProfiles as $PossibleProfile) {
-            if (isset($PossibleProfile['VideoEncoderConfiguration']['Encoding'])) {
-                if (strtoupper($PossibleProfile['VideoEncoderConfiguration']['Encoding']) == 'JPEG') {
-                    continue;
-                }
-            }
-            $VideoSourcesItem['VideoSourceName'] = $PossibleProfile['VideoSourceConfiguration']['Name'];
-            $VideoSourcesItem['Profile'][] = [
-                'Name'     => $PossibleProfile['VideoEncoderConfiguration']['Name'],
-                'token'    => $PossibleProfile['token'],
-                'ptztoken' => isset($PossibleProfile['PTZConfiguration']['token']) ? $PossibleProfile['PTZConfiguration']['token'] : ''
-            ];
-        }
-    }
-
-    protected function GetProfiles(array $VideoSources)
+    protected function GetProfiles()
     {
         $ret = $this->SendData('', 'media-mod.wsdl', 'GetProfiles', true);
         if (is_a($ret, 'SoapFault')) {
             return false;
         }
-        $res = json_decode(json_encode($ret), true);
-        array_walk($VideoSources, [$this, 'FilterProfile'], $res['Profiles']);
-        return $VideoSources;
+        $res = json_decode(json_encode($ret), true)['Profiles'];
+        $Profiles = array_filter($res, function($Profile) {
+        if (isset($Profile['VideoEncoderConfiguration']['Encoding'])) {
+                if (strtoupper($Profile['VideoEncoderConfiguration']['Encoding']) == 'JPEG') {
+                    return false;
+                }
+            }
+            return true;
+        });
+        $VideoSourcesItems=[];
+        foreach ($Profiles as $Profile){
+            $VideoSourcesItems[$Profile['VideoSourceConfiguration']['SourceToken']]['VideoSourceToken']=$Profile['VideoSourceConfiguration']['SourceToken'];
+            $VideoSourcesItems[$Profile['VideoSourceConfiguration']['SourceToken']]['VideoSourceName']=$Profile['VideoSourceConfiguration']['Name'];
+            $VideoSourcesItems[$Profile['VideoSourceConfiguration']['SourceToken']]['Profile'][]=[
+                'Name'     => $Profile['VideoEncoderConfiguration']['Name'],
+                'token'    => $Profile['token'],
+                'ptztoken' => isset($Profile['PTZConfiguration']['token']) ? $Profile['PTZConfiguration']['token'] : ''
+            ];
+            
+        }
+        $VideoSources = array_values($VideoSourcesItems);
+        $this->SendDebug('VideoSourcesAttribute', $VideoSources, 0);
+        $this->WriteAttributeArray('VideoSources', $VideoSources);
+        return true;
     }
 
     protected function GetCapabilities()
