@@ -33,6 +33,7 @@ class ONVIFIO extends IPSModule
         $this->RegisterPropertyString('Password', '');
         $this->RegisterPropertyString('NATAddress', '');
         $this->RegisterAttributeArray('VideoSources', []);
+        $this->RegisterAttributeInteger('Timestamp_Offset', 0);
         /*        $this->RegisterAttributeString('XAddrMedia', '');
           $this->RegisterAttributeString('XAddrImageing', '');
           $this->RegisterAttributeString('XAddrEvents', '');
@@ -136,6 +137,7 @@ class ONVIFIO extends IPSModule
         $this->SendDebug('ReloadCapas', $ReloadCapas, 0);
         $this->SetSummary($Host);
         $this->Host = $Host;
+        $this->GetSystemDateAndTime(); // können nicht alle, also nicht weiter beachten. Wird aber für login benötigt, damit Zeitdifferenzen berücksichtigt werden.
         if (!$this->GetDeviceInformation()) { // not reachable
             $this->UpdateFormField('Eventhook', 'caption', $this->ReadAttributeString('ConsumerAddress'));
             $this->WriteAttributeString('SubscriptionReference', '');
@@ -178,7 +180,7 @@ class ONVIFIO extends IPSModule
                     $XAddr = [
                         'Events'    => '',
                         'Media'     => $this->ReadPropertyString('Address'),
-                        'PTZ'       => '',
+                        'PTZ'       => $this->ReadPropertyString('Address'),
                         'Imaging'   => '',
                         'Recording' => '',
                         'Replay'    => ''
@@ -355,7 +357,14 @@ class ONVIFIO extends IPSModule
         if ($xs_ns == '') {
             $xs_ns = $xml->lookupPrefix('http://www.w3.org/2001/XMLSchema');
         }
-
+        if ($xs_ns == '') {
+            if (strpos($Response, 'xs:') > 0) {
+                $xs_ns = 'xs';
+            }
+            if (strpos($Response, 'xsd:') > 0) {
+                $xs_ns = 'xsd';
+            }
+        }
         if (strpos($Response, 'xmlns:tt') > 0) {
             $tt_ns = 'tt';
         } else {
@@ -408,23 +417,22 @@ class ONVIFIO extends IPSModule
         }
         $res = json_decode(json_encode($ret), true)['Profiles'];
         $Profiles = array_filter($res, function($Profile) {
-        if (isset($Profile['VideoEncoderConfiguration']['Encoding'])) {
+            if (isset($Profile['VideoEncoderConfiguration']['Encoding'])) {
                 if (strtoupper($Profile['VideoEncoderConfiguration']['Encoding']) == 'JPEG') {
                     return false;
                 }
             }
             return true;
         });
-        $VideoSourcesItems=[];
-        foreach ($Profiles as $Profile){
-            $VideoSourcesItems[$Profile['VideoSourceConfiguration']['SourceToken']]['VideoSourceToken']=$Profile['VideoSourceConfiguration']['SourceToken'];
-            $VideoSourcesItems[$Profile['VideoSourceConfiguration']['SourceToken']]['VideoSourceName']=$Profile['VideoSourceConfiguration']['Name'];
-            $VideoSourcesItems[$Profile['VideoSourceConfiguration']['SourceToken']]['Profile'][]=[
+        $VideoSourcesItems = [];
+        foreach ($Profiles as $Profile) {
+            $VideoSourcesItems[$Profile['VideoSourceConfiguration']['SourceToken']]['VideoSourceToken'] = $Profile['VideoSourceConfiguration']['SourceToken'];
+            $VideoSourcesItems[$Profile['VideoSourceConfiguration']['SourceToken']]['VideoSourceName'] = $Profile['VideoSourceConfiguration']['Name'];
+            $VideoSourcesItems[$Profile['VideoSourceConfiguration']['SourceToken']]['Profile'][] = [
                 'Name'     => $Profile['VideoEncoderConfiguration']['Name'],
                 'token'    => $Profile['token'],
                 'ptztoken' => isset($Profile['PTZConfiguration']['token']) ? $Profile['PTZConfiguration']['token'] : ''
             ];
-            
         }
         $VideoSources = array_values($VideoSourcesItems);
         $this->SendDebug('VideoSourcesAttribute', $VideoSources, 0);
@@ -498,6 +506,42 @@ class ONVIFIO extends IPSModule
         }
         $res = json_decode(json_encode($ret), true);
         return true;
+    }
+
+    protected function GetSystemDateAndTime()
+    {
+        $camera_datetime = $this->SendData('', 'devicemgmt-mod.wsdl', 'GetSystemDateAndTime');
+        if (is_a($camera_datetime, 'SoapFault')) {
+            $this->WriteAttributeInteger('Timestamp_Offset', 0);
+            return false;
+        }
+        if (property_exists($camera_datetime->SystemDateAndTime, 'UTCDateTime')) {
+            $camera_ts = gmmktime(
+                    $camera_datetime->SystemDateAndTime->UTCDateTime->Time->Hour,
+                    $camera_datetime->SystemDateAndTime->UTCDateTime->Time->Minute,
+                    $camera_datetime->SystemDateAndTime->UTCDateTime->Time->Second,
+                    $camera_datetime->SystemDateAndTime->UTCDateTime->Date->Month,
+                    $camera_datetime->SystemDateAndTime->UTCDateTime->Date->Day,
+                    $camera_datetime->SystemDateAndTime->UTCDateTime->Date->Year
+            );
+            $this->WriteAttributeInteger('Timestamp_Offset', time() - $camera_ts);
+            $this->SendDebug('TimeDiff', time() - $camera_ts, 0);
+            return true;
+        }
+        if (property_exists($camera_datetime->SystemDateAndTime, 'LocalDateTime')) {
+            $camera_ts = mktime(
+                    $camera_datetime->SystemDateAndTime->LocalDateTime->Time->Hour,
+                    $camera_datetime->SystemDateAndTime->LocalDateTime->Time->Minute,
+                    $camera_datetime->SystemDateAndTime->LocalDateTime->Time->Second,
+                    $camera_datetime->SystemDateAndTime->LocalDateTime->Date->Month,
+                    $camera_datetime->SystemDateAndTime->LocalDateTime->Date->Day,
+                    $camera_datetime->SystemDateAndTime->LocalDateTime->Date->Year
+            );
+            $this->WriteAttributeInteger('Timestamp_Offset', time() - $camera_ts);
+            $this->SendDebug('TimeDiff', time() - $camera_ts, 0);
+            return true;
+        }
+        return false;
     }
 
     public function ForwardData($JSONString)
@@ -629,7 +673,7 @@ class ONVIFIO extends IPSModule
         $this->SendDebug('Send Params', $Params, 0);
         $wsdl = dirname(__DIR__) . DIRECTORY_SEPARATOR . 'libs' . DIRECTORY_SEPARATOR . 'onvif-client-php' . DIRECTORY_SEPARATOR . 'WSDL' . DIRECTORY_SEPARATOR . $wsdl;
         if ($UseLogin) {
-            $ONVIFclient = new ONVIF($wsdl, $URI, $this->ReadPropertyString('Username'), $this->ReadPropertyString('Password'), $Header);
+            $ONVIFclient = new ONVIF($wsdl, $URI, $this->ReadPropertyString('Username'), $this->ReadPropertyString('Password'), $Header, $this->ReadAttributeInteger('Timestamp_Offset'));
         } else {
             $ONVIFclient = new ONVIF($wsdl, $URI, null, null, $Header);
         }

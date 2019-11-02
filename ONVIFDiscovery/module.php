@@ -101,7 +101,8 @@ class ONVIFDiscovery extends IPSModule
             foreach ($IpValues as $IpValue) {
                 $this->SendDebug('Request', $IpValue, 0);
                 if ($uselogin) {
-                    $ONVIFclient = new ONVIF($wsdl, $IpValue, $this->ReadAttributeString('Username'), $this->ReadAttributeString('Password'));
+                    $offset = $this->GetTimeOffset($IpValue);
+                    $ONVIFclient = new ONVIF($wsdl, $IpValue, $this->ReadAttributeString('Username'), $this->ReadAttributeString('Password'), [], $offset);
                 } else {
                     $ONVIFclient = new ONVIF($wsdl, $IpValue);
                 }
@@ -181,6 +182,41 @@ class ONVIFDiscovery extends IPSModule
                                                                 mt_rand(0, 0xffff),
                                                                         mt_rand(0, 0xffff)
         );
+    }
+
+    protected function GetTimeOffset(string $IpValue)
+    {
+        $wsdl = dirname(__DIR__) . DIRECTORY_SEPARATOR . 'libs' . DIRECTORY_SEPARATOR . 'onvif-client-php' . DIRECTORY_SEPARATOR . 'WSDL' . DIRECTORY_SEPARATOR . 'devicemgmt-mod.wsdl';
+        $ONVIFclient = new ONVIF($wsdl, $IpValue);
+        try {
+            $camera_datetime = $ONVIFclient->client->GetSystemDateAndTime();
+        } catch (SoapFault $e) {
+            return 0;
+        }
+
+        if (property_exists($camera_datetime->SystemDateAndTime, 'UTCDateTime')) {
+            $camera_ts = gmmktime(
+                    $camera_datetime->SystemDateAndTime->UTCDateTime->Time->Hour,
+                    $camera_datetime->SystemDateAndTime->UTCDateTime->Time->Minute,
+                    $camera_datetime->SystemDateAndTime->UTCDateTime->Time->Second,
+                    $camera_datetime->SystemDateAndTime->UTCDateTime->Date->Month,
+                    $camera_datetime->SystemDateAndTime->UTCDateTime->Date->Day,
+                    $camera_datetime->SystemDateAndTime->UTCDateTime->Date->Year
+            );
+            return time() - $camera_ts;
+        }
+        if (property_exists($camera_datetime->SystemDateAndTime, 'LocalDateTime')) {
+            $camera_ts = mktime(
+                    $camera_datetime->SystemDateAndTime->LocalDateTime->Time->Hour,
+                    $camera_datetime->SystemDateAndTime->LocalDateTime->Time->Minute,
+                    $camera_datetime->SystemDateAndTime->LocalDateTime->Time->Second,
+                    $camera_datetime->SystemDateAndTime->LocalDateTime->Date->Month,
+                    $camera_datetime->SystemDateAndTime->LocalDateTime->Date->Day,
+                    $camera_datetime->SystemDateAndTime->LocalDateTime->Date->Year
+            );
+            return time() - $camera_ts;
+        }
+        return 0;
     }
 
     /**

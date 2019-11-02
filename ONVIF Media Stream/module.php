@@ -82,6 +82,7 @@ class ONVIFMediaStream extends ONVIFModuleBase
             'value'   => ''
         ];
         $ActualProfile = null;
+        $this->SendDebug('Capas', $Capas['VideoSources'], 0);
         foreach ($Capas['VideoSources'] as $VideoSource) {
             $VideoSourcesOptions[] = [
                 'caption' => $VideoSource['VideoSourceName'],

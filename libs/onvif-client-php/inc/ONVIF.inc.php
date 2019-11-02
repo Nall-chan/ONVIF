@@ -29,7 +29,7 @@ class ONVIF
      * @param string $username Camera username
      * @param string $password Camera password
      */
-    public function __construct($wsdl, $service, $username = null, $password = null, $Headers = [])
+    public function __construct($wsdl, $service, $username = null, $password = null, $Headers = [], $ts_offset=0)
     {
         $this->wsdl = $wsdl;
         $Options = [
@@ -37,7 +37,7 @@ class ONVIF
             'exceptions'         => true,
             'cache_wsdl'         => WSDL_CACHE_NONE,
             'ssl_method '        => SOAP_SSL_METHOD_TLS,
-            'connection_timeout' => 5,
+            'connection_timeout' => 3,
             'soap_version'       => SOAP_1_2,
             'stream_context'     => stream_context_create(
                     [
@@ -48,7 +48,7 @@ class ONVIF
                         ],
                         'http' => [
                             'protocol_version' => 1.1,
-                            'timeout'          => 5.0
+                            'timeout'          => 2
                         ],
                     ]
             )
@@ -56,41 +56,26 @@ class ONVIF
         if (($username != null) or ( $password != null)) {
             $username = ($username == null ? '' : $username);
             $password = ($password == null ? '' : $password);
-            $Headers[] = $this->soapClientWSSecurityHeader($username, $password);
+            $Headers[] = $this->soapClientWSSecurityHeader($username, $password, $ts_offset);
             $Options['login'] = $username;
             $Options['password'] = $password;
             $Options['authentication'] = SOAP_AUTHENTICATION_DIGEST;
         }
         $this->client = new SoapClient($this->wsdl, $Options);
         $this->client->__setLocation($service);
-
-        # unfortunately this extra can be used only in devicemgmt
-        /* 	if ( get_called_class() == 'ONVIFDevicemgmt' ) {
-          $camera_datetime = $this->get_system_date_and_time();
-          $camera_ts = gmmktime(
-          $camera_datetime->SystemDateAndTime->UTCDateTime->Time->Hour,
-          $camera_datetime->SystemDateAndTime->UTCDateTime->Time->Minute,
-          $camera_datetime->SystemDateAndTime->UTCDateTime->Time->Second,
-          $camera_datetime->SystemDateAndTime->UTCDateTime->Date->Month,
-          $camera_datetime->SystemDateAndTime->UTCDateTime->Date->Day,
-          $camera_datetime->SystemDateAndTime->UTCDateTime->Date->Year
-          );
-          $this->client->__setSoapHeaders($this->soapClientWSSecurityHeader($username,$password, $camera_ts));
-          } else {
-         */
-        //}
         $this->client->__setSoapHeaders($Headers);
+        ini_set('default_socket_timeout', '2');
         return;
     }
 
-    protected function soapClientWSSecurityHeader($user, $password, $ts = 0)
+    protected function soapClientWSSecurityHeader($user, $password, $ts_offset = 0)
     {
-        if ($ts == 0) {
-            $ts = time();
-        }
+
+        $ts = time()- $ts_offset;
+
         // Creating date using yyyy-mm-ddThh:mm:ssZ format
         $tm_created = gmdate('Y-m-d\TH:i:s\Z', $ts);
-#		$tm_expires = gmdate('Y-m-d\TH:i:s\Z', $ts + 180 ); //only necessary if using the timestamp element
+
         // Generating and encoding a random number
         $simple_nonce = mt_rand();
         $encoded_nonce = base64_encode($simple_nonce);
