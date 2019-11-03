@@ -37,7 +37,7 @@ class ONVIF
             'exceptions'         => true,
             'cache_wsdl'         => WSDL_CACHE_NONE,
             'ssl_method '        => SOAP_SSL_METHOD_TLS,
-            'connection_timeout' => 3,
+            'connection_timeout' => 5,
             'soap_version'       => SOAP_1_2,
             'stream_context'     => stream_context_create(
                     [
@@ -48,7 +48,7 @@ class ONVIF
                         ],
                         'http' => [
                             'protocol_version' => 1.1,
-                            'timeout'          => 2
+                            'timeout'          => 5
                         ],
                     ]
             )
@@ -64,7 +64,7 @@ class ONVIF
         $this->client = new SoapClient($this->wsdl, $Options);
         $this->client->__setLocation($service);
         $this->client->__setSoapHeaders($Headers);
-        ini_set('default_socket_timeout', '2');
+        ini_set('default_socket_timeout', '5');
         return;
     }
 

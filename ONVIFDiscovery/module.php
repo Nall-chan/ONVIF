@@ -3,12 +3,22 @@
 declare(strict_types=1);
 
 eval('declare(strict_types=1);namespace ONVIFDiscovery {?>' . file_get_contents(__DIR__ . '/../libs/helper/DebugHelper.php') . '}');
+eval('declare(strict_types=1);namespace ONVIFDiscovery {?>' . file_get_contents(__DIR__ . '/../libs/helper/BufferHelper.php') . '}');
+eval('declare(strict_types=1);namespace ONVIFDiscovery {?>' . file_get_contents(__DIR__ . '/../libs/helper/SemaphoreHelper.php') . '}');
 require_once dirname(__DIR__) . '/libs/onvif-client-php/inc/ONVIF.inc.php';
 
+/**
+ * @property array $Devices
+ * @property array $DevicesError
+ * @property int $DevicesTotal
+ * @property int $DevicesProcessed
+ */
 class ONVIFDiscovery extends IPSModule
 {
 
-    use \ONVIFDiscovery\DebugHelper;
+    use \ONVIFDiscovery\BufferHelper,
+        \ONVIFDiscovery\DebugHelper,
+        \ONVIFDiscovery\Semaphore;
     const WS_DISCOVERY_MESSAGE = '<?xml version="1.0" encoding="UTF-8"?><e:Envelope xmlns:e="http://www.w3.org/2003/05/soap-envelope" xmlns:w="http://schemas.xmlsoap.org/ws/2004/08/addressing" xmlns:d="http://schemas.xmlsoap.org/ws/2005/04/discovery" xmlns:dn="http://www.onvif.org/ver10/network/wsdl"><e:Header><w:MessageID>uuid:[UUID]</w:MessageID><w:To e:mustUnderstand="true">urn:schemas-xmlsoap-org:ws:2005:04:discovery</w:To><w:Action e:mustUnderstand="true">http://schemas.xmlsoap.org/ws/2005/04/discovery/Probe</w:Action></e:Header><e:Body><d:Probe><d:Types>dn:NetworkVideoTransmitter</d:Types></d:Probe></e:Body></e:Envelope>';
 
     /**
@@ -32,6 +42,10 @@ class ONVIFDiscovery extends IPSModule
         parent::Create();
         $this->RegisterAttributeString('Username', '');
         $this->RegisterAttributeString('Password', '');
+        $this->Devices = [];
+        $this->DevicesError = [];
+        $this->DevicesTotal = 0;
+        $this->DevicesProcessed = 0;
     }
 
     public function Destroy()
@@ -44,6 +58,34 @@ class ONVIFDiscovery extends IPSModule
     {
         //Never delete this line!
         parent::ApplyChanges();
+        //Hier den Scan starten. Passiert ja nur beim starten von IPS oder wenn die Instanz erstellt wurde.
+        $this->Discover();
+    }
+
+    protected function Discover()
+    {
+        $this->LogMessage($this->Translate('Background discovery of ONVIF devices started'), KL_NOTIFY);
+        $this->Devices = [];
+        $this->DevicesError = [];
+        $this->DevicesTotal = 0;
+        $this->DevicesProcessed = 0;
+        $this->ReloadForm();
+        $discoveryList = $this->DiscoverDevices();
+        $this->DevicesTotal = count($discoveryList);
+        $this->DevicesProcessed = 0;
+        $this->UpdateFormField('ScanProgress', 'maximum', count($discoveryList));
+        $this->UpdateFormField('ScanProgress', 'current', 0);
+        $this->UpdateFormField('ScanProgress', 'caption', '0 / ' . count($discoveryList));
+        $this->LogMessage(sprintf($this->Translate('Background discovery of ONVIF found %d devices'), count($discoveryList)), KL_NOTIFY);
+        $i = 0;
+        foreach ($discoveryList as $IP => $Device) {
+            $i++;
+            $ScriptText = 'IPS_RequestAction(' . $this->InstanceID . ', \'ScanDevice\',\'' . serialize(['IP' => $IP, 'xAddrs' => $Device]) . '\');';
+            IPS_RunScriptText($ScriptText);
+            if ($i % 3) {
+                IPS_Sleep(400);
+            }
+        }
     }
 
     protected function DiscoverDevices()
@@ -87,53 +129,71 @@ class ONVIFDiscovery extends IPSModule
             usleep(10000);
         } while (time() < $discoveryTimeout);
         socket_close($sock);
+        return $discoveryList;
+    }
+
+    protected function ScanDevice(string $IP, array $IpValues)
+    {
         $uselogin = false;
         if (($this->ReadAttributeString('Username') != '') or ( $this->ReadAttributeString('Password') != '')) {
             $uselogin = true;
         }
         $wsdl = dirname(__DIR__) . DIRECTORY_SEPARATOR . 'libs' . DIRECTORY_SEPARATOR . 'onvif-client-php' . DIRECTORY_SEPARATOR . 'WSDL' . DIRECTORY_SEPARATOR . 'devicemgmt-mod.wsdl';
-        $DevicesOk = [];
-        $DevicesError = [];
-        foreach ($discoveryList as $IP => $IpValues) {
-            $Device = null;
-            $DeviceOk = false;
-            $DeviceError = [];
-            foreach ($IpValues as $IpValue) {
-                $this->SendDebug('Request', $IpValue, 0);
-                if ($uselogin) {
-                    $offset = $this->GetTimeOffset($IpValue);
-                    $ONVIFclient = new ONVIF($wsdl, $IpValue, $this->ReadAttributeString('Username'), $this->ReadAttributeString('Password'), [], $offset);
-                } else {
-                    $ONVIFclient = new ONVIF($wsdl, $IpValue);
-                }
-                try {
-                    $result = $ONVIFclient->client->GetDeviceInformation();
-                    $this->SendDebug('Soap Request ' . $IpValue, $ONVIFclient->client->__getLastRequest(), 0);
-                    $this->SendDebug('Soap Response ' . $IpValue, $ONVIFclient->client->__getLastResponse(), 0);
-                    $this->SendDebug('Read ' . $IpValue, json_encode($result), 0);
-                    if ($Device === null) {
-                        $Device = json_decode(json_encode($result), true);
-                        $DeviceOk = true;
-                    }
-                    $Device['Address'][] = $IpValue;
-                } catch (SoapFault $e) {
-                    $this->SendDebug('Soap Request Error ' . $IpValue, $ONVIFclient->client->__getLastRequest(), 0);
-                    $this->SendDebug('Soap Response Error ' . $IpValue, $ONVIFclient->client->__getLastResponse(), 0);
-                    $this->SendDebug('Soap Response Error Message ' . $IpValue, $e->getMessage(), 0);
-                    $Url = parse_url($IpValue);
-                    $Url['port'] = isset($Url['port']) ? ':' . $Url['port'] : '';
-                    $DeviceError[$Url['scheme'] . '://' . $Url['host'] . $Url['port']] = $e->getMessage();
-                }
-            }
-            if ($DeviceOk) {
-                $DevicesOk[$IP] = $Device;
+        //$DevicesOk = [];
+        //$DevicesError = [];
+        $this->LogMessage(sprintf($this->Translate('Scan of ONVIF device (%s) started'), $IP), KL_NOTIFY);
+        $Device = null;
+        $DeviceOk = false;
+        $DeviceError = [];
+        foreach ($IpValues as $IpValue) {
+            $this->SendDebug('Request', $IpValue, 0);
+            if ($uselogin) {
+                $offset = $this->GetTimeOffset($IpValue);
+                $ONVIFclient = new ONVIF($wsdl, $IpValue, $this->ReadAttributeString('Username'), $this->ReadAttributeString('Password'), [], $offset);
             } else {
-                $DevicesError = array_merge($DevicesError, $DeviceError);
+                $ONVIFclient = new ONVIF($wsdl, $IpValue);
+            }
+            try {
+                $result = $ONVIFclient->client->GetDeviceInformation();
+                $this->SendDebug('Soap Request ' . $IpValue, $ONVIFclient->client->__getLastRequest(), 0);
+                $this->SendDebug('Soap Response ' . $IpValue, $ONVIFclient->client->__getLastResponse(), 0);
+                $this->SendDebug('Read ' . $IpValue, json_encode($result), 0);
+                if ($Device === null) {
+                    $Device = json_decode(json_encode($result), true);
+                    $DeviceOk = true;
+                }
+                $Device['Address'][] = $IpValue;
+            } catch (SoapFault $e) {
+                $this->SendDebug('Soap Request Error ' . $IpValue, $ONVIFclient->client->__getLastRequest(), 0);
+                $this->SendDebug('Soap Response Error ' . $IpValue, $ONVIFclient->client->__getLastResponse(), 0);
+                $this->SendDebug('Soap Response Error Message ' . $IpValue, $e->getMessage(), 0);
+                $Url = parse_url($IpValue);
+                $Url['port'] = isset($Url['port']) ? ':' . $Url['port'] : '';
+                $DeviceError[$Url['scheme'] . '://' . $Url['host'] . $Url['port']] = $e->getMessage();
             }
         }
-
-        $this->SendDebug('Finish discovery', '', 0);
-        return [$DevicesOk, $DevicesError];
+        if ($DeviceOk) {
+            $this->lock('Devices');
+            $this->Devices = array_merge($this->Devices, [$IP => $Device]);
+            $this->unlock('Devices');
+        } else {
+            $this->lock('DevicesError');
+            $this->DevicesError = array_merge($this->DevicesError, $DeviceError);
+            $this->unlock('DevicesError');
+        }
+        $this->lock('ScanProgress');
+        $DevicesProcessed = $this->DevicesProcessed;
+        $DevicesProcessed++;
+        $this->DevicesProcessed = $DevicesProcessed;
+        $this->UpdateFormField('ScanProgress', 'current', $DevicesProcessed);
+        $this->UpdateFormField('ScanProgress', 'caption', $DevicesProcessed . ' / ' . $this->DevicesTotal);
+        $this->unlock('ScanProgress');
+        $this->LogMessage(sprintf($this->Translate('Scanprogress of ONVIF devices: %d / %d '), $DevicesProcessed, $this->DevicesTotal), KL_NOTIFY);
+        $this->SendDebug('Scan finish', $IP, 0);
+        if ($DevicesProcessed == $this->DevicesTotal) {
+            $this->LogMessage($this->Translate('End of background discrovery of ONVIF devices'), KL_NOTIFY);
+            $this->ReloadForm();
+        }
     }
 
     protected static function relatesToMatch($uuid, $xmlDOMDoc)
@@ -224,29 +284,8 @@ class ONVIFDiscovery extends IPSModule
      */
     public function GetConfigurationForm()
     {
-        $result = $this->DiscoverDevices();
-        $Devices = $result[0];
-        $DevicesError = $result[1];
-        /*
-          ["192.168.201.119"]=>
-          array(6) {
-          ["Address"]=>
-          array(1) {
-          [0]=>
-          string(48) "http://192.168.201.119:8899/onvif/device_service"
-          }
-          ["Manufacturer"]=>
-          string(5) "IPCAM"
-          ["Model"]=>
-          string(5) "IPCAM"
-          ["FirmwareVersion"]=>
-          string(13) "HS-Camera_No1"
-          ["SerialNumber"]=>
-          string(12) "1cbfce8525cb"
-          ["HardwareId"]=>
-          string(36) "00048461-8461-a427-6127-1cbfce8525cb"
-          }
-         */
+        $Devices = $this->Devices;
+        $DevicesError = $this->DevicesError;
         $Form = json_decode(file_get_contents(__DIR__ . '/form.json'), true);
         $InstanceIDListConfigurators = IPS_GetInstanceListByModuleID('{C6A79C49-19D5-8D45-FFE5-5D77165FAEE6}');
         $DevicesAddress = [];
@@ -297,30 +336,23 @@ class ONVIFDiscovery extends IPSModule
             }
             $DeviceValues[] = $AddDevice;
         }
-        /* $MissingConfigurators = [];
-          foreach ($DevicesAddress as $InstanceIDConfigurator => $Address) {
-          $MissingConfigurators[] = [
-          'IPAddress'       => '',
-          'Manufacturer'    => '',
-          'Model'           => '',
-          'FirmwareVersion' => '',
-          'SerialNumber'    => '',
-          'instanceID'      => $InstanceIDConfigurator,
-          'name'            => IPS_GetLocation($InstanceIDConfigurator)
-          ];
-          } */
-        //$Values = $DeviceValues;//array_merge($DeviceValues, $MissingConfigurators);
         $Form['actions'][0]['items'][0]['items'][0]['value'] = $this->ReadAttributeString('Username');
         $Form['actions'][0]['items'][0]['items'][1]['value'] = $this->ReadAttributeString('Password');
         $Form['actions'][1]['values'] = $DeviceValues;
-        if (count($DevicesError) > 0) {
-            $ErrorValues = [];
-            foreach ($DevicesError as $IPAddress => $ErrorMessage) {
-                $ErrorValues[] = ['IPAddress' => $IPAddress, 'ErrorMessage' => $ErrorMessage];
+        if ($this->DevicesProcessed == $this->DevicesTotal) {
+            if (count($DevicesError) > 0) {
+                $ErrorValues = [];
+                foreach ($DevicesError as $IPAddress => $ErrorMessage) {
+                    $ErrorValues[] = ['IPAddress' => $IPAddress, 'ErrorMessage' => $ErrorMessage];
+                }
+                $Form['actions'][2]['visible'] = true;
+                $Form['actions'][2]['popup']['items'][1]['values'] = $ErrorValues;
             }
-            $Form['actions'][2]['visible'] = true;
-            $Form['actions'][2]['popup']['items'][1]['values'] = $ErrorValues;
+            if ($this->DevicesTotal != 0) {
+                $Form['actions'][3]['visible'] = false;
+            }
         }
+
         $this->SendDebug('FORM', json_encode($Form), 0);
         $this->SendDebug('FORM', json_last_error_msg(), 0);
         return json_encode($Form);
@@ -328,13 +360,17 @@ class ONVIFDiscovery extends IPSModule
 
     public function RequestAction($Ident, $Value)
     {
-        if ($Ident != 'Save') {
+        if ($Ident == 'Save') {
+            $Data = explode(':', $Value);
+            $this->WriteAttributeString('Username', urldecode($Data[0]));
+            $this->WriteAttributeString('Password', urldecode($Data[1]));
+            $this->ApplyChanges();
             return;
         }
-        $Data = explode(':', $Value);
-        $this->WriteAttributeString('Username', urldecode($Data[0]));
-        $this->WriteAttributeString('Password', urldecode($Data[1]));
-        $this->ReloadForm();
+        if ($Ident == 'ScanDevice') {
+            $Data = unserialize($Value);
+            $this->ScanDevice($Data['IP'], $Data['xAddrs']);
+        }
     }
 
 }

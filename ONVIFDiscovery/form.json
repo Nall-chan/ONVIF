@@ -67,6 +67,7 @@
         },
         {
             "type": "PopupAlert",
+            "name": "ErrorPopup",
             "visible": false,
             "popup": {
                 "items": [
@@ -97,6 +98,25 @@
                         "values": []
                     }
                 ]
+            }
+        },
+        {
+            "type": "PopupAlert",
+            "visible": true,
+            "name": "ProgressPopup",
+            "popup": {
+                "closeCaption": "Wait until this dialog close!",
+                "items": [{
+                        "type": "Label",
+                        "caption": "Determine abilities of the devices."
+                    }, {
+                        "type": "ProgressBar",
+                        "name": "ScanProgress",
+                        "minimum": 0,
+                        "maximum": 1,
+                        "current": 0,
+                        "caption": "wait for end of discovery"
+                    }]
             }
         }
     ]
