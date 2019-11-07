@@ -3,10 +3,18 @@
 declare(strict_types=1);
 
 require_once __DIR__ . '/../libs/ONVIFModuleBase.php';
+eval('declare(strict_types=1);namespace ONVIFMediaStream {?>' . file_get_contents(__DIR__ . '/../libs/helper/WebhookHelper.php') . '}');
 
+/**
+ * @property string $PTZ_token
+ * @property string $PTZ_xAddr
+ */
 class ONVIFMediaStream extends ONVIFModuleBase
 {
+
+    use \ONVIFMediaStream\WebhookHelper;
     const wsdl = 'media-mod.wsdl';
+    const PTZwsdl = 'ptz-mod.wsdl';
     const TopicFilter = 'videosource';
 
     public function Create()
@@ -15,12 +23,29 @@ class ONVIFMediaStream extends ONVIFModuleBase
         parent::Create();
         $this->RegisterPropertyString('VideoSource', '');
         $this->RegisterPropertyString('Profile', '');
+        $this->PTZ_WSDL = '';
+        $this->PTZ_token = '';
+        $this->PTZ_xAddr = '';
+    }
+
+    /**
+     * Interne Funktion des SDK.
+     */
+    public function Destroy()
+    {
+        if (!IPS_InstanceExists($this->InstanceID)) {
+            $this->UnregisterHook('/hook/ONVIF/PTZ/' . $this->InstanceID);
+        }
+        parent::Destroy();
     }
 
     public function ApplyChanges()
     {
         //Never delete this line!
         parent::ApplyChanges();
+        $this->PTZ_WSDL = '';
+        $this->PTZ_token = '';
+        $this->PTZ_xAddr = '';
         if ($this->ReadPropertyString('VideoSource') == '') {
             $this->SetStatus(IS_INACTIVE);
             $this->SetMedia('');
@@ -38,10 +63,18 @@ class ONVIFMediaStream extends ONVIFModuleBase
         $StreamURL = $this->GetStreamUri();
         if ($StreamURL) {
             $this->SetMedia($StreamURL);
+            $this->GetPTZCapas();
             $this->SetStatus(IS_ACTIVE);
         } else {
             $this->SetMedia('');
             $this->SetStatus(IS_EBASE + 1);
+        }
+        if (true) {
+            $this->RegisterHook('/hook/ONVIF/PTZ/' . $this->InstanceID);
+            $this->WritePTZinHTMLBox();
+        } else {
+            $this->UnregisterHook('/hook/ONVIF/PTZ/' . $this->InstanceID);
+            $this->UnregisterVariable('PTZControlHtml');
         }
     }
 
@@ -228,7 +261,10 @@ class ONVIFMediaStream extends ONVIFModuleBase
 
     protected function RefreshProfileForm($NewVideoSource)
     {
-        $Capas = $this->GetCapabilities();
+        $Capas = @$this->GetCapabilities();
+        if ($Capas == false) {
+            return false;
+        }
         $ProfileOptions = [];
         $ProfileOptions[] = [
             'caption' => 'none',
@@ -247,14 +283,104 @@ class ONVIFMediaStream extends ONVIFModuleBase
         $this->UpdateFormField('Profile', 'options', json_encode($ProfileOptions));
     }
 
-    protected function FilterVideoSource($Value)
+    protected function GetPTZCapas()
     {
-        return $Value['VideoSourceConfiguration']['SourceToken'] == $this->ReadPropertyString('VideoSource');
+        if ($this->PTZ_token == '') {
+            return false;
+        }
+        $Params = ['PTZConfigurationToken' => $this->PTZ_token];
+        $ret = $this->SendData($this->PTZ_xAddr, 'GetConfiguration', true, $Params, self::PTZwsdl);
+        return true;
+    }
+
+    public function StartLeft()
+    {
+        $Params = [
+            'ProfileToken' => $this->ReadPropertyString('Profile'),
+            'Velocity'     => [
+                'PanTilt' => [
+                    'x' => 1
+                ]
+            ]
+        ];
+        $ret = $this->SendData($this->PTZ_xAddr, 'ContinuousMove', true, $Params, self::PTZwsdl);
+    }
+
+    public function StartRight()
+    {
+        $Params = [
+            'ProfileToken' => $this->ReadPropertyString('Profile'),
+            'Velocity'     => [
+                'PanTilt' => [
+                    'x' => -1
+                ]
+            ]
+        ];
+        $ret = $this->SendData($this->PTZ_xAddr, 'ContinuousMove', true, $Params, self::PTZwsdl);
+    }
+
+    public function StartUp()
+    {
+        $Params = [
+            'ProfileToken' => $this->ReadPropertyString('Profile'),
+            'Velocity'     => [
+                'PanTilt' => [
+                    'y' => 1
+                ]
+            ]
+        ];
+        $ret = $this->SendData($this->PTZ_xAddr, 'ContinuousMove', true, $Params, self::PTZwsdl);
+    }
+
+    public function StartDown()
+    {
+        $Params = [
+            'ProfileToken' => $this->ReadPropertyString('Profile'),
+            'Velocity'     => [
+                'PanTilt' => [
+                    'y' => -1
+                ]
+            ]
+        ];
+        $ret = $this->SendData($this->PTZ_xAddr, 'ContinuousMove', true, $Params, self::PTZwsdl);
+    }
+
+    public function StopPTZ()
+    {
+        $Params = ['ProfileToken' => $this->ReadPropertyString('Profile')];
+        $ret = $this->SendData($this->PTZ_xAddr, 'Stop', true, $Params, self::PTZwsdl);
+    }
+
+    public function StopPanTilt()
+    {
+        $Params = ['ProfileToken' => $this->ReadPropertyString('Profile'), 'PanTilt' => true];
+        $ret = $this->SendData($this->PTZ_xAddr, 'Stop', true, $Params, self::PTZwsdl);
+    }
+
+    public function StopZoom()
+    {
+        $Params = ['ProfileToken' => $this->ReadPropertyString('Profile'), 'Zoom' => true];
+        $ret = $this->SendData($this->PTZ_xAddr, 'Stop', true, $Params, self::PTZwsdl);
     }
 
     protected function GetStreamUri()
     {
-        $Capas = $this->GetCapabilities();
+        $Capas = @$this->GetCapabilities();
+        if ($Capas == false) {
+            return false;
+        }
+        $this->PTZ_xAddr = $Capas['XAddr']['PTZ'];
+        foreach ($Capas['VideoSources'] as $VideoSource) {
+            if ($this->ReadPropertyString('VideoSource') == $VideoSource['VideoSourceToken']) {
+                foreach ($VideoSource['Profile'] as $Profile) {
+                    if ($Profile['token'] == $this->ReadPropertyString('Profile')) {
+                        $this->PTZ_token = $Profile['ptztoken'];
+                        break;
+                    }
+                }
+                break;
+            }
+        }
         $Params = [
             'StreamSetup'  => [
                 'Stream'    => 'RTP-Unicast',
@@ -295,6 +421,72 @@ class ONVIFMediaStream extends ONVIFModuleBase
         IPS_SetMediaFile($mId, $StreamURL, false);
     }
 
+    protected function WritePTZinHTMLBox()
+    {
+        $mId = @$this->GetIDForIdent('STREAM');
+        if ($mId == false) {
+            return;
+        }
+        $vId = $this->RegisterVariableString('PTZControlHtml', 'PTZ Control for Webfront', '~HTMLBox', 0);
+        IPS_SetHidden($vId, true);
+        $JS = file_get_contents(__DIR__ . '/../libs/PTZControls.js');
+        $this->SetValue('PTZControlHtml', "<script>\r\n" . $JS . 'initPTZ(' . $mId . ',' . $this->InstanceID . ");\r\n</script>\r\n");
+    }
+
+    protected function ProcessHookData()
+    {
+        http_response_code(200);
+        header('Connection: close');
+        header('Server: Symcon ' . IPS_GetKernelVersion());
+        header('X-Powered-By: ONVIF Module');
+        header('Expires: 0');
+        header('Cache-Control: no-cache');
+        header('Content-Type: text/plain');
+        if ($this->GetStatus() != IS_ACTIVE) {
+            echo 'Instance is inactive.';
+            return;
+        }
+        if ((!isset($_GET['action'])) or ( !isset($_GET['value']))) {
+            echo 'Invalid parameters.';
+            return;
+        }
+        switch ($_GET['action']) {
+            case 'StopPTZ':
+                $this->StopPTZ();
+                echo "OK";
+                return;
+            case 'StartPTZ':
+                switch ($_GET['value']) {
+                    case 'left':
+                        $this->StartLeft();
+                        echo "OK";
+                        return;
+                    case 'right':
+                        $this->StartRight();
+                        echo "OK";
+                        return;
+                    case 'top':
+                        $this->StartUp();
+                        echo "OK";
+                        return;
+                    case 'bottom':
+                        $this->StartDown();
+                        echo "OK";
+                        return;
+                    case 'bottom':
+                        $this->StartDown();
+                        echo "OK";
+                        return;
+                    default:
+                        echo 'Invalid parameters.';
+                        return;
+                }
+                break;
+        }
+        echo 'Invalid parameters.';
+        return;
+    }
+
     public function RequestAction($Ident, $Value)
     {
         if (parent::RequestAction($Ident, $Value)) {
@@ -320,45 +512,8 @@ class ONVIFMediaStream extends ONVIFModuleBase
                 return false;
             }
         }
-
-        $EventProperty = $EventProperties[$Data['Topic']];
         $PreName = str_replace($this->ReadPropertyString('EventTopic'), '', $Data['Topic']);
-        if ($PreName != '') {
-            $Name = $PreName . ' - ' . $Data['DataName'];
-        } else {
-            $Name = $Data['DataName'];
-        }
-
-        $Ident = str_replace([' - ', '/', '-', ':'], ['_', '_', '_', ''], $Name);
-        switch (stristr($EventProperty['DataType'], ':')) {
-            case ':boolean':
-            case ':bool':
-                $this->RegisterVariableBoolean($Ident, $Name, '', 0);
-                $DataValue = false;
-                if (strtolower($Data['DataValue']) === 'true') {
-                    $DataValue = true;
-                }
-                if (intval($Data['DataValue']) === 1) {
-                    $DataValue = true;
-                }
-                $this->SetValue($Ident, $DataValue);
-                break;
-            case ':float':
-            case ':double':
-                $this->RegisterVariableFloat($Ident, $Name, '', 0);
-                $this->SetValue($Ident, (float) $Data['DataValue']);
-                break;
-            case ':integer':
-            case ':int':
-                $this->RegisterVariableInteger($Ident, $Name, '', 0);
-                $this->SetValue($Ident, (int) $Data['DataValue']);
-                break;
-            case ':string':
-                $this->RegisterVariableString($Ident, $Name, '', 0);
-                $this->SetValue($Ident, $Data['DataValue']);
-                break;
-        }
-        return true;
+        return $this->SetEventStatusVariable($PreName, $EventProperties[$Data['Topic']], $Data);
     }
 
 }

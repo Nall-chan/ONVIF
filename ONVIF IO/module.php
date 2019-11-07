@@ -57,9 +57,14 @@ class ONVIFIO extends IPSModule
         }
     }
 
+    /**
+     * Interne Funktion des SDK.
+     */
     public function Destroy()
     {
-        //Never delete this line!
+        if (!IPS_InstanceExists($this->InstanceID)) {
+            $this->UnregisterHook('/hook/ONVIFEvents/IO/' . $this->InstanceID);
+        }
         parent::Destroy();
     }
 
@@ -163,7 +168,7 @@ class ONVIFIO extends IPSModule
                 if ($this->GetCapabilities()) {
                     // Prüfen ob XAddrEvents gesetzt ist
                     if ($this->GetEventProperties()) { // events are valid
-                        $this->RegisterHook('/hook/ONFIVEvents/IO/' . $this->InstanceID);
+                        $this->RegisterHook('/hook/ONVIFEvents/IO/' . $this->InstanceID);
                         if ($this->GetConsumerAddress()) { // yeah, we can receive events
                             $this->Subscribe();
                         } else { // we cannot receive events :(
@@ -203,7 +208,7 @@ class ONVIFIO extends IPSModule
         $this->UpdateFormField('SubscriptionReferenceRow', 'visible', false);
         $this->UpdateFormField('Events', 'values', json_encode([]));
         $this->UpdateFormField('Events', 'visible', false);
-        $this->UnregisterHook('/hook/ONFIVEvents/IO/' . $this->InstanceID);
+        $this->UnregisterHook('/hook/ONVIFEvents/IO/' . $this->InstanceID);
         $this->WriteAttributeArray('EventProperties', []);
         $this->WriteAttributeString('ConsumerAddress', '');
         $this->ShowLastError('This device does not support ONVIF events.', 'Info:');
@@ -224,7 +229,7 @@ class ONVIFIO extends IPSModule
             $scheme = isset($parsed_url['scheme']) ? $parsed_url['scheme'] . '://' : 'http://';
             $host = isset($parsed_url['host']) ? $parsed_url['host'] : '';
             $port = isset($parsed_url['port']) ? ':' . $parsed_url['port'] : ':3777';
-            $Url = $scheme . $host . $port . '/hook/ONFIVEvents/IO/' . $this->InstanceID;
+            $Url = $scheme . $host . $port . '/hook/ONVIFEvents/IO/' . $this->InstanceID;
             $this->SendDebug('NAT enabled ConsumerAddress', $Url, 0);
         } else {
             $sock = socket_create(AF_INET, SOCK_STREAM, SOL_TCP);
@@ -241,7 +246,7 @@ class ONVIFIO extends IPSModule
                 $this->WriteAttributeString('ConsumerAddress', 'Invalid');
                 return false;
             }
-            $Url = 'http://' . $ip . ':3777/hook/ONFIVEvents/IO/' . $this->InstanceID;
+            $Url = 'http://' . $ip . ':3777/hook/ONVIFEvents/IO/' . $this->InstanceID;
             $this->SendDebug('ConsumerAddress', $Url, 0);
         }
         $this->UpdateFormField('Eventhook', 'caption', $Url);
@@ -760,9 +765,23 @@ class ONVIFIO extends IPSModule
     protected function ProcessHookData()
     {
         if ($this->ReadPropertyBoolean('Open') == false) {
-            header("HTTP/1.0 404 Not found");
+            http_response_code(404);
+            header('Connection: close');
+            header('Server: Symcon ' . IPS_GetKernelVersion());
+            header('X-Powered-By: ONVIF Module');
+            header('Expires: 0');
+            header('Cache-Control: no-cache');
+            header('Content-Type: text/plain');
+            echo 'File not found!';
             return;
         }
+        http_response_code(200);
+        header('Connection: close');
+        header('Server: Symcon ' . IPS_GetKernelVersion());
+        header('X-Powered-By: ONVIF Module');
+        header('Expires: 0');
+        header('Cache-Control: no-cache');
+        header('Content-Type: text/plain');
 
         $Data = file_get_contents("php://input");
         $this->SendDebug('Event', $Data, 0);
