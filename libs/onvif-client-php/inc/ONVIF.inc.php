@@ -111,7 +111,7 @@ class ONVIF
 
         // Generating and encoding a random number
         $simple_nonce = mt_rand();
-        $encoded_nonce = base64_encode($simple_nonce);
+        $encoded_nonce = base64_encode((string)$simple_nonce);
 
         // Compiling WSS string
         $passdigest = base64_encode(sha1($simple_nonce . $tm_created . $password, true));

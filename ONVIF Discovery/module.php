@@ -59,8 +59,6 @@ class ONVIFDiscovery extends IPSModule
      */
     public function MessageSink($TimeStamp, $SenderID, $Message, $Data)
     {
-        $this->IOMessageSink($TimeStamp, $SenderID, $Message, $Data);
-
         switch ($Message) {
             case IPS_KERNELSTARTED:
                 $this->ApplyChanges();
