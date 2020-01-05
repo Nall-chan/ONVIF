@@ -46,6 +46,7 @@ class ONVIFDiscovery extends IPSModule
         $this->DevicesError = [];
         $this->DevicesTotal = 0;
         $this->DevicesProcessed = 0;
+        $this->RegisterMessage(0, IPS_KERNELSTARTED);
     }
 
     public function Destroy()
@@ -54,10 +55,28 @@ class ONVIFDiscovery extends IPSModule
         parent::Destroy();
     }
 
+    /**
+     * Interne Funktion des SDK.
+     */
+    public function MessageSink($TimeStamp, $SenderID, $Message, $Data)
+    {
+        $this->IOMessageSink($TimeStamp, $SenderID, $Message, $Data);
+
+        switch ($Message) {
+            case IPS_KERNELSTARTED:
+                $this->ApplyChanges();
+                break;
+        }
+    }
+
     public function ApplyChanges()
     {
         //Never delete this line!
         parent::ApplyChanges();
+        // Wenn Kernel nicht bereit, dann warten... KR_READY kommt ja gleich
+        if (IPS_GetKernelRunlevel() != KR_READY) {
+            return;
+        }
         //Hier den Scan starten. Passiert ja nur beim starten von IPS oder wenn die Instanz erstellt wurde.
         $this->Discover();
     }
@@ -348,9 +367,7 @@ class ONVIFDiscovery extends IPSModule
                 $Form['actions'][2]['visible'] = true;
                 $Form['actions'][2]['popup']['items'][1]['values'] = $ErrorValues;
             }
-            if ($this->DevicesTotal != 0) {
-                $Form['actions'][3]['visible'] = false;
-            }
+            $Form['actions'][3]['visible'] = false;
         }
 
         $this->SendDebug('FORM', json_encode($Form), 0);
