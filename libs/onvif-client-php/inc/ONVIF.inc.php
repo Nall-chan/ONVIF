@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 /**
  * ONVIF base class
  *
@@ -17,8 +19,8 @@ class ONVIF
 {
     public $wsdl;
     public $version;
-    protected $login;
     public $client;
+    protected $login;
 
     /**
      * If you have troubles authorizing try syncing the time with the camera...
@@ -29,7 +31,7 @@ class ONVIF
      * @param string $username Camera username
      * @param string $password Camera password
      */
-    public function __construct($wsdl, $service, $username = null, $password = null, $Headers = [], $ts_offset=0)
+    public function __construct($wsdl, $service, $username = null, $password = null, $Headers = [], $ts_offset = 0)
     {
         $this->wsdl = $wsdl;
         $Options = [
@@ -40,20 +42,20 @@ class ONVIF
             'connection_timeout' => 5,
             'soap_version'       => SOAP_1_2,
             'stream_context'     => stream_context_create(
-                    [
-                        'ssl'  => [
-                            'verify_peer'       => false,
-                            'verify_peer_name'  => false,
-                            'allow_self_signed' => true
-                        ],
-                        'http' => [
-                            'protocol_version' => 1.1,
-                            'timeout'          => 5
-                        ],
-                    ]
+                [
+                    'ssl'  => [
+                        'verify_peer'       => false,
+                        'verify_peer_name'  => false,
+                        'allow_self_signed' => true
+                    ],
+                    'http' => [
+                        'protocol_version' => 1.1,
+                        'timeout'          => 5
+                    ],
+                ]
             )
         ];
-        if (($username != null) or ( $password != null)) {
+        if (($username != null) || ($password != null)) {
             $username = ($username == null ? '' : $username);
             $password = ($password == null ? '' : $password);
             $Headers[] = $this->soapClientWSSecurityHeader($username, $password, $ts_offset);
@@ -68,10 +70,41 @@ class ONVIF
         return;
     }
 
+    public function obj_dump($object, $level = 1)
+    {
+        foreach ($object as $okey => $oval) {
+            if (is_array($oval) || is_object($oval)) {
+                for ($i = 0; $i < $level * 3; $i++) {
+                    echo ' ';
+                }
+                echo $okey . "\n";
+                $this->obj_dump($oval, $level + 1);
+            } elseif (is_bool($oval)) {
+                for ($i = 0; $i < $level * 3; $i++) {
+                    echo ' ';
+                }
+                printf("%s: %s\n", $okey, $oval ? 'true' : 'false');
+            } else {
+                for ($i = 0; $i < $level * 3; $i++) {
+                    echo ' ';
+                }
+                printf("%s: %s\n", $okey, $oval);
+            }
+        }
+    }
+
+    public function response_dump($name, $response)
+    {
+        echo "================================================================================\n";
+        echo "$name\n";
+        echo "--------------------------------------------------------------------------------\n";
+        $this->obj_dump($response, 1);
+        echo "================================================================================\n";
+    }
+
     protected function soapClientWSSecurityHeader($user, $password, $ts_offset = 0)
     {
-
-        $ts = time()- $ts_offset;
+        $ts = time() - $ts_offset;
 
         // Creating date using yyyy-mm-ddThh:mm:ssZ format
         $tm_created = gmdate('Y-m-d\TH:i:s\Z', $ts);
@@ -98,7 +131,7 @@ class ONVIF
         $timestamp = $security->addChild('wsu:Timestamp', null, $ns_wsu);
         $timestamp->addAttribute('wsu:Id', 'Timestamp-28');
         $timestamp->addChild('wsu:Created', $tm_created, $ns_wsu);
-#		$timestamp->addChild('wsu:Expires', $tm_expires, $ns_wsu);
+        #		$timestamp->addChild('wsu:Expires', $tm_expires, $ns_wsu);
 
         $usernameToken = $security->addChild('wsse:UsernameToken', null, $ns_wsse);
         $usernameToken->addChild('wsse:Username', $user, $ns_wsse);
@@ -113,37 +146,4 @@ class ONVIF
 
         return new SoapHeader($ns_wsse, 'Security', new SoapVar($auth, XSD_ANYXML), true);
     }
-
-    function obj_dump($object, $level = 1)
-    {
-        foreach ($object as $okey => $oval) {
-            if (is_array($oval) or is_object($oval)) {
-                for ($i = 0; $i < $level * 3; $i++) {
-                    print " ";
-                }
-                print $okey . "\n";
-                $this->obj_dump($oval, $level + 1);
-            } elseif (is_bool($oval)) {
-                for ($i = 0; $i < $level * 3; $i++) {
-                    print " ";
-                }
-                printf("%s: %s\n", $okey, $oval ? 'true' : 'false' );
-            } else {
-                for ($i = 0; $i < $level * 3; $i++) {
-                    print " ";
-                }
-                printf("%s: %s\n", $okey, $oval);
-            }
-        }
-    }
-
-    function response_dump($name, $response)
-    {
-        print "================================================================================\n";
-        print "$name\n";
-        print "--------------------------------------------------------------------------------\n";
-        $this->obj_dump($response, 1);
-        print "================================================================================\n";
-    }
-
 }

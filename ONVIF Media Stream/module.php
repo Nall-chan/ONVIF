@@ -11,7 +11,6 @@ eval('declare(strict_types=1);namespace ONVIFMediaStream {?>' . file_get_content
  */
 class ONVIFMediaStream extends ONVIFModuleBase
 {
-
     use \ONVIFMediaStream\WebhookHelper;
     const wsdl = 'media-mod.wsdl';
     const PTZwsdl = 'ptz-mod.wsdl';
@@ -83,7 +82,6 @@ class ONVIFMediaStream extends ONVIFModuleBase
         $Capas = @$this->GetCapabilities();
         $Form = json_decode(file_get_contents(__DIR__ . '/form.json'), true);
         if ($Capas == false) {
-
             $Form['actions'][] = [
                 'type'  => 'PopupAlert',
                 'popup' => [
@@ -400,7 +398,7 @@ class ONVIFMediaStream extends ONVIFModuleBase
         }
         $Uri = parse_url($res['MediaUri']['Uri']);
         $Credentials = $this->GetCredentials();
-        if (($Credentials['Username'] != '') or ( $Credentials['Password'] != '')) {
+        if (($Credentials['Username'] != '') or ($Credentials['Password'] != '')) {
             $Uri['user'] = $Credentials['Username'];
             $Uri['pass'] = $Credentials['Password'];
         }
@@ -446,7 +444,7 @@ class ONVIFMediaStream extends ONVIFModuleBase
             echo 'Instance is inactive.';
             return;
         }
-        if ((!isset($_GET['action'])) or ( !isset($_GET['value']))) {
+        if ((!isset($_GET['action'])) or (!isset($_GET['value']))) {
             echo 'Invalid parameters.';
             return;
         }
@@ -515,5 +513,4 @@ class ONVIFMediaStream extends ONVIFModuleBase
         $PreName = str_replace($this->ReadPropertyString('EventTopic'), '', $Data['Topic']);
         return $this->SetEventStatusVariable($PreName, $EventProperties[$Data['Topic']], $Data);
     }
-
 }

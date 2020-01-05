@@ -15,7 +15,6 @@ require_once dirname(__DIR__) . '/libs/onvif-client-php/inc/ONVIF.inc.php';
  */
 class ONVIFIO extends IPSModule
 {
-
     use \ONVIFIO\DebugHelper,
         \ONVIFIO\BufferHelper,
         \ONVIFIO\AttributeArrayHelper,
@@ -335,7 +334,6 @@ class ONVIFIO extends IPSModule
 
     protected function Unsubscribe()
     {
-        
     }
 
     protected function GetEventProperties()
@@ -387,7 +385,7 @@ class ONVIFIO extends IPSModule
         $xpath->registerNamespace($tt_ns, 'http://www.onvif.org/ver10/schema');
         $xpath->registerNamespace($wstop_ns, 'http://docs.oasis-open.org/wsn/t-1');
         $query = '//' . $wstop_ns . ':TopicSet';
-        $prefixPathlen = strlen($xpath->query($query, NULL, true)[0]->getNodePath());
+        $prefixPathlen = strlen($xpath->query($query, null, true)[0]->getNodePath());
         $query = "//*[@" . $wstop_ns . ":topic='true']/" . $tt_ns . ":MessageDescription[@IsProperty='true']/" . $tt_ns . ":Data/" . $tt_ns . ":SimpleItemDescription"; //[@Type='" . $xs_ns . ":boolean' or @Type='" . $xs_ns . ":string' or @Type='" . $xs_ns . ":int' or @Type='" . $tt_ns . ":RelayLogicalState']";
         $wsTopics = $xpath->query($query);
         $Path = [];
@@ -421,7 +419,7 @@ class ONVIFIO extends IPSModule
             return false;
         }
         $res = json_decode(json_encode($ret), true)['Profiles'];
-        $Profiles = array_filter($res, function($Profile) {
+        $Profiles = array_filter($res, function ($Profile) {
             if (isset($Profile['VideoEncoderConfiguration']['Encoding'])) {
                 if (strtoupper($Profile['VideoEncoderConfiguration']['Encoding']) == 'JPEG') {
                     return false;
@@ -522,12 +520,12 @@ class ONVIFIO extends IPSModule
         }
         if (property_exists($camera_datetime->SystemDateAndTime, 'UTCDateTime')) {
             $camera_ts = gmmktime(
-                    $camera_datetime->SystemDateAndTime->UTCDateTime->Time->Hour,
-                    $camera_datetime->SystemDateAndTime->UTCDateTime->Time->Minute,
-                    $camera_datetime->SystemDateAndTime->UTCDateTime->Time->Second,
-                    $camera_datetime->SystemDateAndTime->UTCDateTime->Date->Month,
-                    $camera_datetime->SystemDateAndTime->UTCDateTime->Date->Day,
-                    $camera_datetime->SystemDateAndTime->UTCDateTime->Date->Year
+                $camera_datetime->SystemDateAndTime->UTCDateTime->Time->Hour,
+                $camera_datetime->SystemDateAndTime->UTCDateTime->Time->Minute,
+                $camera_datetime->SystemDateAndTime->UTCDateTime->Time->Second,
+                $camera_datetime->SystemDateAndTime->UTCDateTime->Date->Month,
+                $camera_datetime->SystemDateAndTime->UTCDateTime->Date->Day,
+                $camera_datetime->SystemDateAndTime->UTCDateTime->Date->Year
             );
             $this->WriteAttributeInteger('Timestamp_Offset', time() - $camera_ts);
             $this->SendDebug('TimeDiff', time() - $camera_ts, 0);
@@ -535,12 +533,12 @@ class ONVIFIO extends IPSModule
         }
         if (property_exists($camera_datetime->SystemDateAndTime, 'LocalDateTime')) {
             $camera_ts = mktime(
-                    $camera_datetime->SystemDateAndTime->LocalDateTime->Time->Hour,
-                    $camera_datetime->SystemDateAndTime->LocalDateTime->Time->Minute,
-                    $camera_datetime->SystemDateAndTime->LocalDateTime->Time->Second,
-                    $camera_datetime->SystemDateAndTime->LocalDateTime->Date->Month,
-                    $camera_datetime->SystemDateAndTime->LocalDateTime->Date->Day,
-                    $camera_datetime->SystemDateAndTime->LocalDateTime->Date->Year
+                $camera_datetime->SystemDateAndTime->LocalDateTime->Time->Hour,
+                $camera_datetime->SystemDateAndTime->LocalDateTime->Time->Minute,
+                $camera_datetime->SystemDateAndTime->LocalDateTime->Time->Second,
+                $camera_datetime->SystemDateAndTime->LocalDateTime->Date->Month,
+                $camera_datetime->SystemDateAndTime->LocalDateTime->Date->Day,
+                $camera_datetime->SystemDateAndTime->LocalDateTime->Date->Year
             );
             $this->WriteAttributeInteger('Timestamp_Offset', time() - $camera_ts);
             $this->SendDebug('TimeDiff', time() - $camera_ts, 0);
@@ -597,7 +595,7 @@ class ONVIFIO extends IPSModule
             } else {
                 if (array_key_exists($Data['Pattern'], $Events)) {
                     $FoundEvents[$Data['Pattern']] = $Events[$Data['Pattern']];
-                    if (($Data['Instance'] != 0) and ( !in_array($Data['Instance'], $Events[$Data['Pattern']]['Receivers']))) {
+                    if (($Data['Instance'] != 0) and (!in_array($Data['Instance'], $Events[$Data['Pattern']]['Receivers']))) {
                         $Events[$Data['Pattern']]['Receivers'][] = $Data['Instance'];
                     }
                 } else {
@@ -618,7 +616,7 @@ class ONVIFIO extends IPSModule
                                 $FoundEvents[$Topic] = [];
                             }
                             $FoundEvents[$FullTopic] = $Events[$FullTopic];
-                            if (($Data['Instance'] != 0) and ( !in_array($Data['Instance'], $Events[$FullTopic]['Receivers']))) {
+                            if (($Data['Instance'] != 0) and (!in_array($Data['Instance'], $Events[$FullTopic]['Receivers']))) {
                                 $Events[$FullTopic]['Receivers'][] = $Data['Instance'];
                             }
                         }
@@ -656,7 +654,7 @@ class ONVIFIO extends IPSModule
     }
 
     /**
-     * 
+     *
      * @param string $URI
      * @param string $wsdl
      * @param string $Function
@@ -706,7 +704,6 @@ class ONVIFIO extends IPSModule
 
     public function GetConfigurationForm()
     {
-
         $Form = json_decode(file_get_contents(__DIR__ . '/form.json'), true);
         if (IPS_GetOption('NATSupport')) {
             $Form['elements'][3]['visible'] = true;
@@ -818,5 +815,4 @@ class ONVIFIO extends IPSModule
             $this->SendDataToChildren(json_encode($EventData));
         }
     }
-
 }
