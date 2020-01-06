@@ -6,4 +6,4 @@
 	url = https://github.com/Nall-chan/StylePHP
 [submodule "tests/stubs"]
 	path = tests/stubs
-	url = https://github.com/symcon/SymconStubs
+url=https://github.com/Nall-chan/SymconStubs
