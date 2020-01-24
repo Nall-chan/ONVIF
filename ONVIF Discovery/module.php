@@ -352,6 +352,9 @@ class ONVIFDiscovery extends IPSModule
             }
             $DeviceValues[] = $AddDevice;
         }
+        // Todo
+        // Konfiguratoren in Symcon ohne Device fehlen:
+        // DevicesAddress
         $Form['actions'][0]['items'][0]['items'][0]['value'] = $this->ReadAttributeString('Username');
         $Form['actions'][0]['items'][0]['items'][1]['value'] = $this->ReadAttributeString('Password');
         $Form['actions'][1]['values'] = $DeviceValues;
