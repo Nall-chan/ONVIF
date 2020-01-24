@@ -155,8 +155,7 @@ class ONVIFIO extends IPSModule
 
         if ($ReloadCapas) {
             if (!$this->GetProfiles()) {
-                $this->LogMessage($this->lastSOAPError, KL_ERROR);
-                $this->ShowLastError($this->lastSOAPError);
+
                 $this->SetStatus(IS_EBASE + 2);
                 return;
             } else {
@@ -282,7 +281,7 @@ class ONVIFIO extends IPSModule
         } else {
             $this->WriteAttributeString('SubscriptionId', '');
         }
-        $ReferenceUrl = parse_url($SubscriptionReference)['host'];
+        $ReferenceUrl = parse_url($SubscriptionReference,PHP_URL_HOST);
         if (strpos($this->ReadPropertyString('Address'), $ReferenceUrl) === false) {
             $this->LogMessage('This device send a invalid Subscription-Reference.', KL_WARNING);
             $this->ShowLastError('This device send a invalid Subscription-Reference.', 'Warning:');
@@ -413,6 +412,8 @@ class ONVIFIO extends IPSModule
     {
         $ret = $this->SendData('', 'media-mod.wsdl', 'GetProfiles', true);
         if (is_a($ret, 'SoapFault')) {
+            $this->LogMessage($this->lastSOAPError, KL_ERROR);
+            $this->ShowLastError($this->lastSOAPError);
             return false;
         }
         $res = json_decode(json_encode($ret), true)['Profiles'];
@@ -426,6 +427,9 @@ class ONVIFIO extends IPSModule
         });
         $VideoSourcesItems = [];
         foreach ($Profiles as $Profile) {
+            if (!array_key_exists('VideoEncoderConfiguration',$Profile)){
+                continue;
+            }
             $VideoSourcesItems[$Profile['VideoSourceConfiguration']['SourceToken']]['VideoSourceToken'] = $Profile['VideoSourceConfiguration']['SourceToken'];
             $VideoSourcesItems[$Profile['VideoSourceConfiguration']['SourceToken']]['VideoSourceName'] = $Profile['VideoSourceConfiguration']['Name'];
             $VideoSourcesItems[$Profile['VideoSourceConfiguration']['SourceToken']]['Profile'][] = [
