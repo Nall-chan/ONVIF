@@ -56,7 +56,7 @@ class ONVIFModuleBase extends IPSModule
         $TopicFilter = '.*"Topic":"' . preg_quote(substr(json_encode($EventTopic), 1, -1)) . '.*';
         $this->SetReceiveDataFilter($TopicFilter);
         $this->SendDebug('SetReceiveDataFilter', $TopicFilter, 0);
-        $this->LogMessage('SetReceiveDataFilter: ' . $TopicFilter, KL_DEBUG);
+        //$this->LogMessage('SetReceiveDataFilter: ' . $TopicFilter, KL_DEBUG);
 
         if (IPS_GetKernelRunlevel() != KR_READY) {
             return;

@@ -1,8 +1,21 @@
 {
     "translations": {
         "de": {
-            "Translation 1": "Übersetzung 1",
-            "Translation 2": "Übersetzung 2"
+            "Credentials": "Anmeldedaten",
+            "Username": "Benutzername",
+            "Password": "Passwort",
+            "Save & Reload": "Speichern & Neuladen",
+            "Manufacturer": "Hersteller",
+            "Serial Number": "Seriennummer",
+            "Some devices could not be determined. Please check the credentials.": "Einige Geräte konnten nicht ermittelt werden. Bitte überprüfen Sie die Zugangsdaten.",
+            "Please wait!": "Bitte warten!",
+            "Determine abilities of the devices:": "Ermittle die Fähigkeiten der Geräte:",
+            "(Wait for end of discovery)": "(Warte auf Ende der Suche)",
+            "Background discovery of ONVIF devices started": "Die Hintergrundsuche von ONVIF-Geräten wurde gestartet",
+            "Background discovery of ONVIF found %d devices": "Die Hintergrundsuche von ONVIF hat %d Geräte gefunden",
+            "Scan of ONVIF device (%s) started": "Überprüfung von ONVIF-Geräte ($s) gestartet",
+            "Scan progress of ONVIF devices: %d / %d ": "Scan-Fortschritt von ONVIF-Geräten: %d / %d ",
+            "End of background discovery of ONVIF devices": "Ende der Hintergrundsuche von ONVIF-Geräten"
         }
     }
 }

@@ -1,8 +1,13 @@
 {
     "translations": {
         "de": {
-            "Translation 1": "Übersetzung 1",
-            "Translation 2": "Übersetzung 2"
+            "Type": "Typ",
+            "VideoSource": "Video-Quelle",
+            "Location": "Lokation",
+            "Error on read of capabilities.": "Fehler beim Lesen der Funktionen.",
+            "Instance has no active parent.": "Instanz hat kein aktives übergeordnetes Element.",
+            "ONVIF Devices": "ONVIF-Geräte"
+
         }
     }
 }

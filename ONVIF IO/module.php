@@ -95,7 +95,7 @@ class ONVIFIO extends IPSModule
     {
         $this->UnregisterMessage(0, IPS_KERNELMESSAGE);
         $this->RegisterMessage($this->InstanceID, FM_CHILDREMOVED);
-        $this->LogMessage('RegisterMessage', KL_DEBUG);
+        //$this->LogMessage('RegisterMessage', KL_DEBUG);
         $Url = parse_url($this->ReadPropertyString('Address'));
         $Url['port'] = (isset($Url['port']) ? ':' . $Url['port'] : '');
         if (isset($Url['scheme']) and isset($Url['host'])) {
@@ -121,7 +121,7 @@ class ONVIFIO extends IPSModule
         if (!$this->ReadPropertyBoolean('Open')) {
             $this->Host = '';
             $this->SetStatus(IS_INACTIVE);
-            $this->LogMessage('Interface closed', KL_MESSAGE);
+            $this->LogMessage($this->Translate('Interface closed'), KL_MESSAGE);
             return;
         }
 
@@ -132,7 +132,7 @@ class ONVIFIO extends IPSModule
             $this->SetStatus(IS_EBASE + 1);
             $this->SetSummary('');
             $this->WriteAttributeString('ConsumerAddress', '');
-            $this->LogMessage('Address is invalid', KL_ERROR);
+            $this->LogMessage($this->Translate('Address is invalid'), KL_ERROR);
             return;
         }
         $Host = $Url['scheme'] . '://' . $Url['host'] . $Url['port'];
@@ -195,21 +195,21 @@ class ONVIFIO extends IPSModule
         } else {
             $this->Subscribe();
         }
-        $this->LogMessage('Interface connected', KL_MESSAGE);
+        $this->LogMessage($this->Translate('Interface connected'), KL_MESSAGE);
         $this->SetStatus(IS_ACTIVE);
     }
 
     protected function EventsNotSupported()
     {
         $this->LogMessage('Events not supported: ' . $this->lastSOAPError, KL_MESSAGE);
-        $this->UpdateFormField('Eventhook', 'caption', 'This device not support events.');
+        $this->UpdateFormField('Eventhook', 'caption', $this->Translate('This device not support events.'));
         $this->UpdateFormField('SubscriptionReferenceRow', 'visible', false);
         $this->UpdateFormField('Events', 'values', json_encode([]));
         $this->UpdateFormField('Events', 'visible', false);
         $this->UnregisterHook('/hook/ONVIFEvents/IO/' . $this->InstanceID);
         $this->WriteAttributeArray('EventProperties', []);
         $this->WriteAttributeString('ConsumerAddress', '');
-        $this->ShowLastError('This device does not support ONVIF events.', 'Info:');
+        $this->ShowLastError($this->Translate('This device does not support ONVIF events.'), 'Info:');
     }
 
     protected function ShowLastError(string $ErrorMessage, string $ErrorTitle = 'Answer from Device:')
@@ -240,7 +240,7 @@ class ONVIFIO extends IPSModule
             @socket_close($sock);
             if ($ip == '0.0.0.0') {
                 $this->SendDebug('ConsumerAddress', 'Invalid', 0);
-                $this->UpdateFormField('Eventhook', 'caption', 'Invalid');
+                $this->UpdateFormField('Eventhook', 'caption', $this->Translate('Invalid'));
                 $this->WriteAttributeString('ConsumerAddress', 'Invalid');
                 return false;
             }
@@ -269,7 +269,7 @@ class ONVIFIO extends IPSModule
         if (is_a($ret, 'SoapFault')) {
             //trigger_error($ret->getMessage(), E_USER_WARNING);
             $this->SetStatus(IS_EBASE + 3);
-            $this->LogMessage('Connection lost', KL_ERROR);
+            $this->LogMessage($this->Translate('Connection lost'), KL_ERROR);
             $this->ShowLastError($ret->getMessage());
             return false;
         }
@@ -287,8 +287,8 @@ class ONVIFIO extends IPSModule
         }
         $ReferenceUrl = parse_url($SubscriptionReference,PHP_URL_HOST);
         if (strpos($this->ReadPropertyString('Address'), $ReferenceUrl) === false) {
-            $this->LogMessage('This device send a invalid Subscription-Reference.', KL_WARNING);
-            $this->ShowLastError('This device send a invalid Subscription-Reference.', 'Warning:');
+            $this->LogMessage($this->Translate('This device send a invalid Subscription-Reference.'), KL_WARNING);
+            $this->ShowLastError($this->Translate('This device send a invalid Subscription-Reference.'), 'Warning:');
             return false;
         }
         $this->isSubscribed = true;
@@ -301,7 +301,7 @@ class ONVIFIO extends IPSModule
         $SubscriptionReference = $this->ReadAttributeString('SubscriptionReference');
         if ($SubscriptionReference == '') {
             $this->SendDebug('ERROR Renew', 'No SubscriptionReference', 0);
-            $this->LogMessage('Call Renew with no SubscriptionReference', KL_ERROR);
+            $this->LogMessage($this->Translate('Call Renew with no SubscriptionReference'), KL_ERROR);
             return $this->Subscribe();
         }
         $Action = '<wsa5:Action xmlns:wsa5="http://www.w3.org/2005/08/addressing">http://docs.oasis-open.org/wsn/bw-2/SubscriptionManager/RenewRequest</wsa5:Action>';
@@ -323,14 +323,16 @@ class ONVIFIO extends IPSModule
         if (is_a($ret, 'SoapFault')) {
             trigger_error($ret->getMessage(), E_USER_WARNING);
             $this->SetStatus(IS_EBASE + 3);
-            $this->LogMessage('Connection lost', KL_ERROR);
+            $this->LogMessage($this->Translate('Connection lost'), KL_ERROR);
             $this->isSubscribed = false;
             $this->SetTimerInterval('RenewSubscription', 0);
             return false;
         }
         return true;
     }
-
+/**@todo Fehlt noch
+ * 
+ */
     protected function Unsubscribe()
     {
     }
@@ -714,7 +716,7 @@ class ONVIFIO extends IPSModule
         }
         $ConsumerAddress = $this->ReadAttributeString('ConsumerAddress');
         if ($ConsumerAddress == '') {
-            $ConsumerAddress = 'This device not support events.';
+            $ConsumerAddress = $this->Translate('This device not support events.');
             $Form['actions'][1]['visible'] = false;
             $Form['actions'][2]['visible'] = false;
         }

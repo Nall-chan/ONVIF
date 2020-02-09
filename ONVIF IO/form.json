@@ -57,7 +57,7 @@
                 {
                     "type": "Label",
                     "width": "200px",
-                    "caption": "SubscriptionReference:"
+                    "caption": "Subscription reference:"
                 },
                 {
                     "name": "SubscriptionReference",
@@ -68,7 +68,7 @@
             ]
         },
         {
-            "caption": "List of possible and used Events:",
+            "caption": "List of possible and used events:",
             "type": "List",
             "name": "Events",
             "add": false,
@@ -80,7 +80,7 @@
             "columns": [{
                     "caption": "Used",
                     "name": "Used",
-                    "width": "50px"
+                    "width": "70px"
                 }, {
                     "caption": "Topic",
                     "name": "Topic",

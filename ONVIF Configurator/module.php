@@ -20,9 +20,9 @@ class ONVIFConfigurator extends ONVIFModuleBase
                 'type'  => 'PopupAlert',
                 'popup' => [
                     'items' => [[
-                    'type'    => 'Label',
-                    'caption' => 'Error on read capabilities.'
-                        ]]
+                        'type'    => 'Label',
+                        'caption' => 'Error on read of capabilities.'
+                    ]]
                 ]
             ];
             $this->SendDebug('FORM', json_encode($Form), 0);
@@ -34,9 +34,9 @@ class ONVIFConfigurator extends ONVIFModuleBase
                 'type'  => 'PopupAlert',
                 'popup' => [
                     'items' => [[
-                    'type'    => 'Label',
-                    'caption' => 'Instance has no active parent.'
-                        ]]
+                        'type'    => 'Label',
+                        'caption' => 'Instance has no active parent.'
+                    ]]
                 ]
             ];
         }
@@ -44,7 +44,6 @@ class ONVIFConfigurator extends ONVIFModuleBase
         $this->SendDebug('VideoSources', $Capas['VideoSources'], 0);
         $this->SendDebug('HasInput', $Capas['HasInput'], 0);
         $this->SendDebug('HasOutput', $Capas['HasOutput'], 0);
-
 
         $InputEvents = $this->GetEvents('input', 0);
         $this->SendDebug('GetEvents', $InputEvents, 0);
@@ -87,7 +86,6 @@ class ONVIFConfigurator extends ONVIFModuleBase
         }
 
         $OutputValues = $this->GetConfigurationArray(self::GUID_ONVIF_DIGITAL_OUTPUT, $Capas['HasOutput'], $OutputTopics);
-
 
         $StreamCreateParams = [
             'moduleID'      => self::GUID_ONVIF_MEDIA_STREAM,

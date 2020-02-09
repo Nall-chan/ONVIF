@@ -84,16 +84,17 @@ class ONVIFDiscovery extends IPSModule
         $this->Devices = [];
         $this->DevicesError = [];
         $this->DevicesTotal = 0;
-        $this->DevicesProcessed = 0;
+        $this->DevicesProcessed = -1;
         $this->ReloadForm();
         $discoveryList = $this->DiscoverDevices();
         $this->DevicesTotal = count($discoveryList);
-        $this->DevicesProcessed = 0;
+        //$this->UpdateFormField('ScanProgress', 'visible', true);
         $this->UpdateFormField('ScanProgress', 'maximum', count($discoveryList));
         $this->UpdateFormField('ScanProgress', 'current', 0);
         $this->UpdateFormField('ScanProgress', 'caption', '0 / ' . count($discoveryList));
         $this->LogMessage(sprintf($this->Translate('Background discovery of ONVIF found %d devices'), count($discoveryList)), KL_NOTIFY);
         $i = 0;
+        $this->DevicesProcessed = 0;
         foreach ($discoveryList as $IP => $Device) {
             $i++;
             $ScriptText = 'IPS_RequestAction(' . $this->InstanceID . ', \'ScanDevice\',\'' . serialize(['IP' => $IP, 'xAddrs' => $Device]) . '\');';
@@ -204,10 +205,10 @@ class ONVIFDiscovery extends IPSModule
         $this->UpdateFormField('ScanProgress', 'current', $DevicesProcessed);
         $this->UpdateFormField('ScanProgress', 'caption', $DevicesProcessed . ' / ' . $this->DevicesTotal);
         $this->unlock('ScanProgress');
-        $this->LogMessage(sprintf($this->Translate('Scanprogress of ONVIF devices: %d / %d '), $DevicesProcessed, $this->DevicesTotal), KL_NOTIFY);
+        $this->LogMessage(sprintf($this->Translate('Scan progress of ONVIF devices: %d / %d '), $DevicesProcessed, $this->DevicesTotal), KL_NOTIFY);
         $this->SendDebug('Scan finish', $IP, 0);
         if ($DevicesProcessed == $this->DevicesTotal) {
-            $this->LogMessage($this->Translate('End of background discrovery of ONVIF devices'), KL_NOTIFY);
+            $this->LogMessage($this->Translate('End of background discovery of ONVIF devices'), KL_NOTIFY);
             $this->ReloadForm();
         }
     }

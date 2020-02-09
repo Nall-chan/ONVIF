@@ -1,12 +1,12 @@
 {
     "elements": [],
     "actions": [
-        { 
+        {
             "type": "ExpansionPanel",
             "caption": "Credentials",
             "expanded": true,
             "items": [
-                { 
+                {
                     "type": "RowLayout",
                     "items": [
                         {
@@ -37,27 +37,33 @@
                 "column": "IPAddress",
                 "direction": "ascending"
             },
-            "columns": [{
+            "columns": [
+                {
                     "caption": "Host",
                     "name": "IPAddress",
                     "width": "150px"
-                }, {
+                },
+                {
                     "caption": "Name",
                     "name": "name",
                     "width": "auto"
-                }, {
+                },
+                {
                     "caption": "Manufacturer",
                     "name": "Manufacturer",
                     "width": "180px"
-                }, {
+                },
+                {
                     "caption": "Model",
                     "name": "Model",
                     "width": "250px"
-                }, {
+                },
+                {
                     "caption": "Firmware",
                     "name": "FirmwareVersion",
                     "width": "150px"
-                }, {
+                },
+                {
                     "caption": "Serial Number",
                     "name": "SerialNumber",
                     "width": "150px"
@@ -89,7 +95,8 @@
                                 "caption": "Host",
                                 "name": "IPAddress",
                                 "width": "200px"
-                            }, {
+                            },
+                            {
                                 "caption": "Errormessage",
                                 "name": "ErrorMessage",
                                 "width": "auto"
@@ -105,18 +112,21 @@
             "visible": true,
             "name": "ProgressPopup",
             "popup": {
-                "closeCaption": "Wait until this dialog close!",
-                "items": [{
+                "closeCaption": "Please wait!",
+                "items": [
+                    {
                         "type": "Label",
-                        "caption": "Determine abilities of the devices."
-                    }, {
+                        "caption": "Determine abilities of the devices:"
+                    },
+                    {
                         "type": "ProgressBar",
                         "name": "ScanProgress",
                         "minimum": 0,
                         "maximum": 1,
                         "current": 0,
-                        "caption": "wait for end of discovery"
-                    }]
+                        "caption": "(Wait for end of discovery)"
+                    }
+                ]
             }
         }
     ]
