@@ -16,7 +16,6 @@ class ONVIFConfigurator extends ONVIFModuleBase
         $Capas = $this->GetCapabilities();
         $Form = json_decode(file_get_contents(__DIR__ . '/form.json'), true);
         if ($Capas == false) {
-
             $Form['actions'][] = [
                 'type'  => 'PopupAlert',
                 'popup' => [
@@ -204,5 +203,4 @@ class ONVIFConfigurator extends ONVIFModuleBase
         }
         return $Values;
     }
-
 }

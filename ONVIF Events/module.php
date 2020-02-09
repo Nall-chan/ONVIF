@@ -33,6 +33,12 @@ class ONVIFEvents extends ONVIFModuleBase
         $Data = json_decode($JSONString, true);
         unset($Data['DataID']);
         $this->SendDebug('ReceiveEvent', $Data, 0);
+        $EventProperties = $this->ReadAttributeArray('EventProperties');
+        if (!array_key_exists($Data['Topic'], $EventProperties)) {
+            return false;
+        }
+        $PreName = str_replace($this->ReadPropertyString('EventTopic'), '', $Data['Topic']);
+        return $this->SetEventStatusVariable($PreName, $EventProperties[$Data['Topic']], $Data);
     }
 
     public function GetConfigurationForm()
@@ -43,5 +49,4 @@ class ONVIFEvents extends ONVIFModuleBase
         $this->SendDebug('FORM', json_last_error_msg(), 0);
         return json_encode($Form);
     }
-
 }

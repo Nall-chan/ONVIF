@@ -206,5 +206,4 @@ class ONVIFDigitalOutput extends ONVIFModuleBase
 
         return json_encode($Form);
     }
-
 }

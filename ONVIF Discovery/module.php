@@ -15,7 +15,6 @@ require_once dirname(__DIR__) . '/libs/onvif-client-php/inc/ONVIF.inc.php';
  */
 class ONVIFDiscovery extends IPSModule
 {
-
     use \ONVIFDiscovery\BufferHelper,
         \ONVIFDiscovery\DebugHelper,
         \ONVIFDiscovery\Semaphore;
@@ -46,6 +45,7 @@ class ONVIFDiscovery extends IPSModule
         $this->DevicesError = [];
         $this->DevicesTotal = 0;
         $this->DevicesProcessed = 0;
+        $this->RegisterMessage(0, IPS_KERNELSTARTED);
     }
 
     public function Destroy()
@@ -54,10 +54,26 @@ class ONVIFDiscovery extends IPSModule
         parent::Destroy();
     }
 
+    /**
+     * Interne Funktion des SDK.
+     */
+    public function MessageSink($TimeStamp, $SenderID, $Message, $Data)
+    {
+        switch ($Message) {
+            case IPS_KERNELSTARTED:
+                $this->ApplyChanges();
+                break;
+        }
+    }
+
     public function ApplyChanges()
     {
         //Never delete this line!
         parent::ApplyChanges();
+        // Wenn Kernel nicht bereit, dann warten... KR_READY kommt ja gleich
+        if (IPS_GetKernelRunlevel() != KR_READY) {
+            return;
+        }
         //Hier den Scan starten. Passiert ja nur beim starten von IPS oder wenn die Instanz erstellt wurde.
         $this->Discover();
     }
@@ -135,7 +151,7 @@ class ONVIFDiscovery extends IPSModule
     protected function ScanDevice(string $IP, array $IpValues)
     {
         $uselogin = false;
-        if (($this->ReadAttributeString('Username') != '') or ( $this->ReadAttributeString('Password') != '')) {
+        if (($this->ReadAttributeString('Username') != '') or ($this->ReadAttributeString('Password') != '')) {
             $uselogin = true;
         }
         $wsdl = dirname(__DIR__) . DIRECTORY_SEPARATOR . 'libs' . DIRECTORY_SEPARATOR . 'onvif-client-php' . DIRECTORY_SEPARATOR . 'WSDL' . DIRECTORY_SEPARATOR . 'devicemgmt-mod.wsdl';
@@ -217,7 +233,7 @@ class ONVIFDiscovery extends IPSModule
                 $matches = array_merge($matches, explode(' ', $addrsNode->nodeValue));
             }
         }
-        $filtermatches = array_filter($matches, function($item) use($ip) {
+        $filtermatches = array_filter($matches, function ($item) use ($ip) {
             return (strpos($item, $ip));
         });
         //todo reindex
@@ -226,21 +242,21 @@ class ONVIFDiscovery extends IPSModule
 
     /**
      * Roger Stringer's UUID function, http://rogerstringer.com/2013/11/15/generate-uuids-php/
-     * 
+     *
      * @return string A random uuid.
      */
     protected static function uuidV4()
     {
         return sprintf(
-                '%04x%04x-%04x-%04x-%04x-%04x%04x%04x',
-                mt_rand(0, 0xffff),
-                        mt_rand(0, 0xffff),
-                                mt_rand(0, 0xffff),
-                                        mt_rand(0, 0x0fff) | 0x4000, // this sequence must start with 4
+            '%04x%04x-%04x-%04x-%04x-%04x%04x%04x',
+            mt_rand(0, 0xffff),
+            mt_rand(0, 0xffff),
+            mt_rand(0, 0xffff),
+            mt_rand(0, 0x0fff) | 0x4000, // this sequence must start with 4
                                                 mt_rand(0, 0x3fff) | 0x8000, // this sequence can start with 8, 9, A, or B
                                                         mt_rand(0, 0xffff),
-                                                                mt_rand(0, 0xffff),
-                                                                        mt_rand(0, 0xffff)
+            mt_rand(0, 0xffff),
+            mt_rand(0, 0xffff)
         );
     }
 
@@ -256,23 +272,23 @@ class ONVIFDiscovery extends IPSModule
 
         if (property_exists($camera_datetime->SystemDateAndTime, 'UTCDateTime')) {
             $camera_ts = gmmktime(
-                    $camera_datetime->SystemDateAndTime->UTCDateTime->Time->Hour,
-                    $camera_datetime->SystemDateAndTime->UTCDateTime->Time->Minute,
-                    $camera_datetime->SystemDateAndTime->UTCDateTime->Time->Second,
-                    $camera_datetime->SystemDateAndTime->UTCDateTime->Date->Month,
-                    $camera_datetime->SystemDateAndTime->UTCDateTime->Date->Day,
-                    $camera_datetime->SystemDateAndTime->UTCDateTime->Date->Year
+                $camera_datetime->SystemDateAndTime->UTCDateTime->Time->Hour,
+                $camera_datetime->SystemDateAndTime->UTCDateTime->Time->Minute,
+                $camera_datetime->SystemDateAndTime->UTCDateTime->Time->Second,
+                $camera_datetime->SystemDateAndTime->UTCDateTime->Date->Month,
+                $camera_datetime->SystemDateAndTime->UTCDateTime->Date->Day,
+                $camera_datetime->SystemDateAndTime->UTCDateTime->Date->Year
             );
             return time() - $camera_ts;
         }
         if (property_exists($camera_datetime->SystemDateAndTime, 'LocalDateTime')) {
             $camera_ts = mktime(
-                    $camera_datetime->SystemDateAndTime->LocalDateTime->Time->Hour,
-                    $camera_datetime->SystemDateAndTime->LocalDateTime->Time->Minute,
-                    $camera_datetime->SystemDateAndTime->LocalDateTime->Time->Second,
-                    $camera_datetime->SystemDateAndTime->LocalDateTime->Date->Month,
-                    $camera_datetime->SystemDateAndTime->LocalDateTime->Date->Day,
-                    $camera_datetime->SystemDateAndTime->LocalDateTime->Date->Year
+                $camera_datetime->SystemDateAndTime->LocalDateTime->Time->Hour,
+                $camera_datetime->SystemDateAndTime->LocalDateTime->Time->Minute,
+                $camera_datetime->SystemDateAndTime->LocalDateTime->Time->Second,
+                $camera_datetime->SystemDateAndTime->LocalDateTime->Date->Month,
+                $camera_datetime->SystemDateAndTime->LocalDateTime->Date->Day,
+                $camera_datetime->SystemDateAndTime->LocalDateTime->Date->Year
             );
             return time() - $camera_ts;
         }
@@ -336,6 +352,9 @@ class ONVIFDiscovery extends IPSModule
             }
             $DeviceValues[] = $AddDevice;
         }
+        // Todo
+        // Konfiguratoren in Symcon ohne Device fehlen:
+        // DevicesAddress
         $Form['actions'][0]['items'][0]['items'][0]['value'] = $this->ReadAttributeString('Username');
         $Form['actions'][0]['items'][0]['items'][1]['value'] = $this->ReadAttributeString('Password');
         $Form['actions'][1]['values'] = $DeviceValues;
@@ -348,9 +367,7 @@ class ONVIFDiscovery extends IPSModule
                 $Form['actions'][2]['visible'] = true;
                 $Form['actions'][2]['popup']['items'][1]['values'] = $ErrorValues;
             }
-            if ($this->DevicesTotal != 0) {
-                $Form['actions'][3]['visible'] = false;
-            }
+            $Form['actions'][3]['visible'] = false;
         }
 
         $this->SendDebug('FORM', json_encode($Form), 0);
@@ -372,5 +389,4 @@ class ONVIFDiscovery extends IPSModule
             $this->ScanDevice($Data['IP'], $Data['xAddrs']);
         }
     }
-
 }
