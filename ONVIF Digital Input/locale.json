@@ -1,8 +1,9 @@
 {
     "translations": {
         "de": {
-            "Translation 1": "Übersetzung 1",
-            "Translation 2": "Übersetzung 2"
-        }
+            "Event of input(s)": "Ereignis der Eingänge",
+            "Configuration is valid":"Konfiguration ist gültig",
+            "Event missing":"Ereignis fehlt",
+            "Event not valid":"Ereignis ist nicht gültig"    }
     }
 }

@@ -95,7 +95,6 @@ class ONVIFIO extends IPSModule
     {
         $this->UnregisterMessage(0, IPS_KERNELMESSAGE);
         $this->RegisterMessage($this->InstanceID, FM_CHILDREMOVED);
-        //$this->LogMessage('RegisterMessage', KL_DEBUG);
         $Url = parse_url($this->ReadPropertyString('Address'));
         $Url['port'] = (isset($Url['port']) ? ':' . $Url['port'] : '');
         if (isset($Url['scheme']) and isset($Url['host'])) {
@@ -267,7 +266,6 @@ class ONVIFIO extends IPSModule
         $Response = '';
         $ret = $this->SendData($XAddr['Events'], 'event-mod.wsdl', 'Subscribe', true, $Params, $Response);
         if (is_a($ret, 'SoapFault')) {
-            //trigger_error($ret->getMessage(), E_USER_WARNING);
             $this->SetStatus(IS_EBASE + 3);
             $this->LogMessage($this->Translate('Connection lost'), KL_ERROR);
             $this->ShowLastError($ret->getMessage());
@@ -693,7 +691,6 @@ class ONVIFIO extends IPSModule
                 $Result = $ONVIFclient->client->{$Function}($Params);
             }
             $Response = $ONVIFclient->client->__getLastResponse();
-            //$this->SendDebug('Result', $Result, 0);
             $this->SendDebug('Soap Request', $ONVIFclient->client->__getLastRequest(), 0);
             $this->SendDebug('Soap Response', $Response, 0);
             $this->lastSOAPError = '';

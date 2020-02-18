@@ -1,5 +1,5 @@
 # ONVIF Discovery
-Beschreibung des Moduls.
+Erkennt ONVIF kompatible Geräte innerhalb des lokalen LAN.  
 
 ## Inhaltsverzeichnis <!-- omit in toc -->
 

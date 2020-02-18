@@ -68,7 +68,7 @@ class ONVIFDigitalOutput extends ONVIFModuleBase
     {
         if (!array_key_exists($Ident, $this->ReadAttributeArray('RelayOutputs'))) {
             set_error_handler([$this, 'ModulErrorHandler']);
-            trigger_error('Invalid Ident', E_USER_NOTICE);
+            trigger_error($this->Translate('Invalid Ident'), E_USER_NOTICE);
             restore_error_handler();
             return false;
         }
@@ -84,7 +84,7 @@ class ONVIFDigitalOutput extends ONVIFModuleBase
                 $SendValue = $Value;
                 break;
             default:
-                trigger_error('Unsupported Datatype', E_USER_NOTICE);
+                trigger_error($this->Translate('Unsupported Datatype'), E_USER_NOTICE);
                 return false;
         }
 
@@ -127,7 +127,7 @@ class ONVIFDigitalOutput extends ONVIFModuleBase
                 $Value = ($Data['DataValue'] == 'true');
                 break;
             default:
-                trigger_error('Unsupported Datatype', E_USER_NOTICE);
+                trigger_error($this->Translate('Unsupported Datatype'), E_USER_NOTICE);
                 return false;
         }
         $Ident = $Data['SourceValue'];
@@ -144,7 +144,7 @@ class ONVIFDigitalOutput extends ONVIFModuleBase
         foreach ($RelayOutputs as $RelayOutput) {
             $Expansion = [
                 'type'     => 'ExpansionPanel',
-                'caption'  => 'Relay output: ' . $RelayOutput['token'],
+                'caption'  => $this->Translate('Relay output: ') . $RelayOutput['token'],
                 'expanded' => true,
                 'items'    => []
             ];
@@ -155,7 +155,7 @@ class ONVIFDigitalOutput extends ONVIFModuleBase
                         [
                             'type'    => 'Label',
                             'width'   => '100px',
-                            'caption' => 'Mode:'
+                            'caption' => $this->Translate('Mode:')
                         ],
                         [
                             'type'    => 'Label',
@@ -171,7 +171,7 @@ class ONVIFDigitalOutput extends ONVIFModuleBase
                                 [
                                     'type'    => 'Label',
                                     'width'   => '100px',
-                                    'caption' => 'DelayTime:'
+                                    'caption' => $this->Translate('DelayTime:')
                                 ],
                                 [
                                     'type'    => 'Label',
@@ -189,7 +189,7 @@ class ONVIFDigitalOutput extends ONVIFModuleBase
                         [
                             'type'    => 'Label',
                             'width'   => '100px',
-                            'caption' => 'IdleState:'
+                            'caption' => $this->Translate('IdleState:')
                         ],
                         [
                             'type'    => 'Label',

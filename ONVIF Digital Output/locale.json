@@ -1,8 +1,17 @@
 {
     "translations": {
         "de": {
-            "Translation 1": "Übersetzung 1",
-            "Translation 2": "Übersetzung 2"
+            "Event of relay(s)": "Ereignis der Ausgänge",
+            "Emulate Status": "Status simulieren",
+            "Configuration is valid": "Konfiguration ist gültig",
+            "Event missing": "Ereignis fehlt",
+            "Event not valid": "Ereignis ist nicht gültig",
+            "Invalid Ident": "Ungültiger Ident",
+            "Unsupported Datatype": "Nicht unterstützen Datentyp",
+            "Relay output: ": "Relaisausgang: ",
+            "Mode:": "Modus:",
+            "DelayTime:": "Verzögerung:",
+            "IdleState:": "Ruhelage:"
         }
     }
 }

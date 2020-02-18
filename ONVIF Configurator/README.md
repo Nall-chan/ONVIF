@@ -10,7 +10,7 @@ Beschreibung des Moduls.
 
 ## 1. Funktionsumfang
 
-* Unterstützt beim Einrichten der Symcon Instanzen für ein ONVIF-Gerät.  
+* Unterstützt beim Einrichten der verschiedenen Instanzen für ein ONVIF-Gerät.  
 
 ## 2. Vorraussetzungen
 

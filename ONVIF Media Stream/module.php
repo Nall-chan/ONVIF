@@ -22,6 +22,7 @@ class ONVIFMediaStream extends ONVIFModuleBase
         parent::Create();
         $this->RegisterPropertyString('VideoSource', '');
         $this->RegisterPropertyString('Profile', '');
+        $this->RegisterPropertyBoolean('EnablePTZ', false);
         $this->PTZ_WSDL = '';
         $this->PTZ_token = '';
         $this->PTZ_xAddr = '';
@@ -60,15 +61,18 @@ class ONVIFMediaStream extends ONVIFModuleBase
         }
 
         $StreamURL = $this->GetStreamUri();
+        $UsePTZ = $this->ReadPropertyBoolean('EnablePTZ');
         if ($StreamURL) {
             $this->SetMedia($StreamURL);
-            $this->GetPTZCapas();
+            if ($UsePTZ) {
+                $UsePTZ = $this->GetPTZCapas();
+            }
             $this->SetStatus(IS_ACTIVE);
         } else {
             $this->SetMedia('');
             $this->SetStatus(IS_EBASE + 1);
         }
-        if (true) {
+        if ($UsePTZ) {
             $this->RegisterHook('/hook/ONVIF/PTZ/' . $this->InstanceID);
             $this->WritePTZinHTMLBox();
         } else {
@@ -86,9 +90,9 @@ class ONVIFMediaStream extends ONVIFModuleBase
                 'type'  => 'PopupAlert',
                 'popup' => [
                     'items' => [[
-                    'type'    => 'Label',
-                    'caption' => 'Error on read capabilities.'
-                        ]]
+                        'type'    => 'Label',
+                        'caption' => 'Error on read capabilities.'
+                    ]]
                 ]
             ];
             $this->SendDebug('FORM', json_encode($Form), 0);
@@ -100,9 +104,9 @@ class ONVIFMediaStream extends ONVIFModuleBase
                 'type'  => 'PopupAlert',
                 'popup' => [
                     'items' => [[
-                    'type'    => 'Label',
-                    'caption' => 'Instance has no active parent.'
-                        ]]
+                        'type'    => 'Label',
+                        'caption' => 'Instance has no active parent.'
+                    ]]
                 ]
             ];
         }
@@ -143,7 +147,7 @@ class ONVIFMediaStream extends ONVIFModuleBase
                         [
                             'type'    => 'Label',
                             'width'   => '200px',
-                            'caption' => 'VideoSourceName:'
+                            'caption' => $this->Translate('Videosource-Name:')
                         ],
                         [
                             'type'    => 'Label',
@@ -159,7 +163,7 @@ class ONVIFMediaStream extends ONVIFModuleBase
                         [
                             'type'    => 'Label',
                             'width'   => '200px',
-                            'caption' => 'VideoEncoderProfileName:'
+                            'caption' => $this->Translate('Videoencoder-Profilename:')
                         ],
                         [
                             'type'    => 'Label',
@@ -191,7 +195,7 @@ class ONVIFMediaStream extends ONVIFModuleBase
                         [
                             'type'    => 'Label',
                             'width'   => '200px',
-                            'caption' => 'Resolution:'
+                            'caption' => $this->Translate('Resolution:')
                         ],
                         [
                             'type'    => 'Label',
@@ -207,7 +211,7 @@ class ONVIFMediaStream extends ONVIFModuleBase
                         [
                             'type'    => 'Label',
                             'width'   => '200px',
-                            'caption' => 'Framerate:'
+                            'caption' => $this->Translate('Framerate:')
                         ],
                         [
                             'type'    => 'Label',
@@ -223,7 +227,7 @@ class ONVIFMediaStream extends ONVIFModuleBase
                         [
                             'type'    => 'Label',
                             'width'   => '200px',
-                            'caption' => 'Encoding-Interval:'
+                            'caption' => $this->Translate('Encoding-Interval:')
                         ],
                         [
                             'type'    => 'Label',
@@ -239,7 +243,7 @@ class ONVIFMediaStream extends ONVIFModuleBase
                         [
                             'type'    => 'Label',
                             'width'   => '200px',
-                            'caption' => 'BitrateLimit:'
+                            'caption' => $this->Translate('Bitratelimit:')
                         ],
                         [
                             'type'    => 'Label',
@@ -255,6 +259,126 @@ class ONVIFMediaStream extends ONVIFModuleBase
         $this->SendDebug('FORM', json_last_error_msg(), 0);
 
         return json_encode($Form);
+    }
+
+    public function StartLeft()
+    {
+        if (!$this->ReadPropertyBoolean('EnablePTZ')) {
+            return false;
+        }
+        $Params = [
+            'ProfileToken' => $this->ReadPropertyString('Profile'),
+            'Velocity'     => [
+                'PanTilt' => [
+                    'x' => 1
+                ]
+            ]
+        ];
+        $ret = $this->SendData($this->PTZ_xAddr, 'ContinuousMove', true, $Params, self::PTZwsdl);
+    }
+
+    public function StartRight()
+    {
+        if (!$this->ReadPropertyBoolean('EnablePTZ')) {
+            return false;
+        }
+        $Params = [
+            'ProfileToken' => $this->ReadPropertyString('Profile'),
+            'Velocity'     => [
+                'PanTilt' => [
+                    'x' => -1
+                ]
+            ]
+        ];
+        $ret = $this->SendData($this->PTZ_xAddr, 'ContinuousMove', true, $Params, self::PTZwsdl);
+    }
+
+    public function StartUp()
+    {
+        if (!$this->ReadPropertyBoolean('EnablePTZ')) {
+            return false;
+        }
+        $Params = [
+            'ProfileToken' => $this->ReadPropertyString('Profile'),
+            'Velocity'     => [
+                'PanTilt' => [
+                    'y' => 1
+                ]
+            ]
+        ];
+        $ret = $this->SendData($this->PTZ_xAddr, 'ContinuousMove', true, $Params, self::PTZwsdl);
+    }
+
+    public function StartDown()
+    {
+        if (!$this->ReadPropertyBoolean('EnablePTZ')) {
+            return false;
+        }
+        $Params = [
+            'ProfileToken' => $this->ReadPropertyString('Profile'),
+            'Velocity'     => [
+                'PanTilt' => [
+                    'y' => -1
+                ]
+            ]
+        ];
+        $ret = $this->SendData($this->PTZ_xAddr, 'ContinuousMove', true, $Params, self::PTZwsdl);
+    }
+
+    public function StopPTZ()
+    {
+        if (!$this->ReadPropertyBoolean('EnablePTZ')) {
+            return false;
+        }
+        $Params = ['ProfileToken' => $this->ReadPropertyString('Profile')];
+        $ret = $this->SendData($this->PTZ_xAddr, 'Stop', true, $Params, self::PTZwsdl);
+    }
+
+    public function StopPanTilt()
+    {
+        if (!$this->ReadPropertyBoolean('EnablePTZ')) {
+            return false;
+        }
+        $Params = ['ProfileToken' => $this->ReadPropertyString('Profile'), 'PanTilt' => true];
+        $ret = $this->SendData($this->PTZ_xAddr, 'Stop', true, $Params, self::PTZwsdl);
+    }
+
+    public function StopZoom()
+    {
+        if (!$this->ReadPropertyBoolean('EnablePTZ')) {
+            return false;
+        }
+        $Params = ['ProfileToken' => $this->ReadPropertyString('Profile'), 'Zoom' => true];
+        $ret = $this->SendData($this->PTZ_xAddr, 'Stop', true, $Params, self::PTZwsdl);
+    }
+
+    public function RequestAction($Ident, $Value)
+    {
+        if (parent::RequestAction($Ident, $Value)) {
+            return true;
+        }
+        if ($Ident == 'RefreshProfileForm') {
+            $this->RefreshProfileForm($Value);
+        }
+        return true;
+    }
+
+    public function ReceiveData($JSONString)
+    {
+        $Data = json_decode($JSONString, true);
+        unset($Data['DataID']);
+        $this->SendDebug('ReceiveEvent', $Data, 0);
+        $EventProperties = $this->ReadAttributeArray('EventProperties');
+        if (!array_key_exists($Data['Topic'], $EventProperties)) {
+            return false;
+        }
+        if ($Data['SourceName'] != '') {
+            if ($Data['SourceValue'] != $this->ReadPropertyString('VideoSource')) {
+                return false;
+            }
+        }
+        $PreName = str_replace($this->ReadPropertyString('EventTopic'), '', $Data['Topic']);
+        return $this->SetEventStatusVariable($PreName, $EventProperties[$Data['Topic']], $Data);
     }
 
     protected function RefreshProfileForm($NewVideoSource)
@@ -281,6 +405,11 @@ class ONVIFMediaStream extends ONVIFModuleBase
         $this->UpdateFormField('Profile', 'options', json_encode($ProfileOptions));
     }
 
+    /**
+     * @todo Rückgabewert korrekt auswerten und ggfls. Funktion deaktivieren und Form aktualisieren.
+     *
+     * @return void
+     */
     protected function GetPTZCapas()
     {
         if ($this->PTZ_token == '') {
@@ -288,77 +417,10 @@ class ONVIFMediaStream extends ONVIFModuleBase
         }
         $Params = ['PTZConfigurationToken' => $this->PTZ_token];
         $ret = $this->SendData($this->PTZ_xAddr, 'GetConfiguration', true, $Params, self::PTZwsdl);
+        if ($ret == false) {
+            return false;
+        }
         return true;
-    }
-
-    public function StartLeft()
-    {
-        $Params = [
-            'ProfileToken' => $this->ReadPropertyString('Profile'),
-            'Velocity'     => [
-                'PanTilt' => [
-                    'x' => 1
-                ]
-            ]
-        ];
-        $ret = $this->SendData($this->PTZ_xAddr, 'ContinuousMove', true, $Params, self::PTZwsdl);
-    }
-
-    public function StartRight()
-    {
-        $Params = [
-            'ProfileToken' => $this->ReadPropertyString('Profile'),
-            'Velocity'     => [
-                'PanTilt' => [
-                    'x' => -1
-                ]
-            ]
-        ];
-        $ret = $this->SendData($this->PTZ_xAddr, 'ContinuousMove', true, $Params, self::PTZwsdl);
-    }
-
-    public function StartUp()
-    {
-        $Params = [
-            'ProfileToken' => $this->ReadPropertyString('Profile'),
-            'Velocity'     => [
-                'PanTilt' => [
-                    'y' => 1
-                ]
-            ]
-        ];
-        $ret = $this->SendData($this->PTZ_xAddr, 'ContinuousMove', true, $Params, self::PTZwsdl);
-    }
-
-    public function StartDown()
-    {
-        $Params = [
-            'ProfileToken' => $this->ReadPropertyString('Profile'),
-            'Velocity'     => [
-                'PanTilt' => [
-                    'y' => -1
-                ]
-            ]
-        ];
-        $ret = $this->SendData($this->PTZ_xAddr, 'ContinuousMove', true, $Params, self::PTZwsdl);
-    }
-
-    public function StopPTZ()
-    {
-        $Params = ['ProfileToken' => $this->ReadPropertyString('Profile')];
-        $ret = $this->SendData($this->PTZ_xAddr, 'Stop', true, $Params, self::PTZwsdl);
-    }
-
-    public function StopPanTilt()
-    {
-        $Params = ['ProfileToken' => $this->ReadPropertyString('Profile'), 'PanTilt' => true];
-        $ret = $this->SendData($this->PTZ_xAddr, 'Stop', true, $Params, self::PTZwsdl);
-    }
-
-    public function StopZoom()
-    {
-        $Params = ['ProfileToken' => $this->ReadPropertyString('Profile'), 'Zoom' => true];
-        $ret = $this->SendData($this->PTZ_xAddr, 'Stop', true, $Params, self::PTZwsdl);
     }
 
     protected function GetStreamUri()
@@ -398,7 +460,7 @@ class ONVIFMediaStream extends ONVIFModuleBase
         }
         $Uri = parse_url($res['MediaUri']['Uri']);
         $Credentials = $this->GetCredentials();
-        if (($Credentials['Username'] != '') or ($Credentials['Password'] != '')) {
+        if (($Credentials['Username'] != '') || ($Credentials['Password'] != '')) {
             $Uri['user'] = $Credentials['Username'];
             $Uri['pass'] = $Credentials['Password'];
         }
@@ -444,73 +506,44 @@ class ONVIFMediaStream extends ONVIFModuleBase
             echo 'Instance is inactive.';
             return;
         }
-        if ((!isset($_GET['action'])) or (!isset($_GET['value']))) {
-            echo 'Invalid parameters.';
+        if ((!isset($_GET['action'])) || (!isset($_GET['value']))) {
+            echo $this->Translate('Invalid parameters.');
             return;
         }
         switch ($_GET['action']) {
             case 'StopPTZ':
                 $this->StopPTZ();
-                echo "OK";
+                echo 'OK';
                 return;
             case 'StartPTZ':
                 switch ($_GET['value']) {
                     case 'left':
                         $this->StartLeft();
-                        echo "OK";
+                        echo 'OK';
                         return;
                     case 'right':
                         $this->StartRight();
-                        echo "OK";
+                        echo 'OK';
                         return;
                     case 'top':
                         $this->StartUp();
-                        echo "OK";
+                        echo 'OK';
                         return;
                     case 'bottom':
                         $this->StartDown();
-                        echo "OK";
+                        echo 'OK';
                         return;
                     case 'bottom':
                         $this->StartDown();
-                        echo "OK";
+                        echo 'OK';
                         return;
                     default:
-                        echo 'Invalid parameters.';
+                        echo $this->Translate('Invalid parameters.');
                         return;
                 }
                 break;
         }
-        echo 'Invalid parameters.';
+        echo $this->Translate('Invalid parameters.');
         return;
-    }
-
-    public function RequestAction($Ident, $Value)
-    {
-        if (parent::RequestAction($Ident, $Value)) {
-            return true;
-        }
-        if ($Ident == 'RefreshProfileForm') {
-            $this->RefreshProfileForm($Value);
-        }
-        return true;
-    }
-
-    public function ReceiveData($JSONString)
-    {
-        $Data = json_decode($JSONString, true);
-        unset($Data['DataID']);
-        $this->SendDebug('ReceiveEvent', $Data, 0);
-        $EventProperties = $this->ReadAttributeArray('EventProperties');
-        if (!array_key_exists($Data['Topic'], $EventProperties)) {
-            return false;
-        }
-        if ($Data['SourceName'] != '') {
-            if ($Data['SourceValue'] != $this->ReadPropertyString('VideoSource')) {
-                return false;
-            }
-        }
-        $PreName = str_replace($this->ReadPropertyString('EventTopic'), '', $Data['Topic']);
-        return $this->SetEventStatusVariable($PreName, $EventProperties[$Data['Topic']], $Data);
     }
 }
