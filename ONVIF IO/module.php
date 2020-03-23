@@ -296,6 +296,7 @@ class ONVIFIO extends IPSModule
         $Form = json_decode(file_get_contents(__DIR__ . '/form.json'), true);
         if (IPS_GetOption('NATSupport')) {
             $Form['elements'][3]['visible'] = true;
+            $Form['elements'][3]['validate'] = '^.+$';
         }
         $ConsumerAddress = $this->ReadAttributeString('ConsumerAddress');
         if ($ConsumerAddress == '') {

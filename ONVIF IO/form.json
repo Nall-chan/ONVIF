@@ -29,7 +29,7 @@
             "name": "NATAddress",
             "type": "ValidationTextBox",
             "caption": "NAT Address",
-            "validate":"^.+$",
+            "validate":"",
             "visible": false
         }
     ],
