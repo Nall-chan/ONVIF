@@ -15,11 +15,11 @@ require_once dirname(__DIR__) . '/libs/onvif-client-php/inc/ONVIF.inc.php';
  */
 class ONVIFIO extends IPSModule
 {
-    use \ONVIFIO\DebugHelper,
-        \ONVIFIO\BufferHelper,
-        \ONVIFIO\AttributeArrayHelper,
-        \ONVIFIO\WebhookHelper,
-        \ONVIFIO\Semaphore;
+    use \ONVIFIO\DebugHelper;
+    use \ONVIFIO\BufferHelper;
+    use \ONVIFIO\AttributeArrayHelper;
+    use \ONVIFIO\WebhookHelper;
+    use \ONVIFIO\Semaphore;
     protected $lastSOAPError = '';
 
     public function Create()
@@ -91,18 +91,6 @@ class ONVIFIO extends IPSModule
         }
     }
 
-    private function KernelReady()
-    {
-        $this->UnregisterMessage(0, IPS_KERNELMESSAGE);
-        $this->RegisterMessage($this->InstanceID, FM_CHILDREMOVED);
-        $Url = parse_url($this->ReadPropertyString('Address'));
-        $Url['port'] = (isset($Url['port']) ? ':' . $Url['port'] : '');
-        if (isset($Url['scheme']) and isset($Url['host'])) {
-            $this->Host = $Url['scheme'] . '://' . $Url['host'] . $Url['port'];
-        }
-        $this->ApplyChanges();
-    }
-
     public function ApplyChanges()
     {
         //Never delete this line!
@@ -116,7 +104,6 @@ class ONVIFIO extends IPSModule
             $this->Unsubscribe();
         }
 
-
         if (!$this->ReadPropertyBoolean('Open')) {
             $this->Host = '';
             $this->SetStatus(IS_INACTIVE);
@@ -126,7 +113,7 @@ class ONVIFIO extends IPSModule
 
         $Url = parse_url($this->ReadPropertyString('Address'));
         $Url['port'] = (isset($Url['port']) ? ':' . $Url['port'] : '');
-        if (!isset($Url['scheme']) and ! isset($Url['host'])) {
+        if (!isset($Url['scheme']) && !isset($Url['host'])) {
             $this->Host = '';
             $this->SetStatus(IS_EBASE + 1);
             $this->SetSummary('');
@@ -137,6 +124,7 @@ class ONVIFIO extends IPSModule
         $Host = $Url['scheme'] . '://' . $Url['host'] . $Url['port'];
         $ReloadCapas = ($this->Host != $Host);
         $ReloadCapas = $ReloadCapas || ($this->GetStatus() == 202);
+        $ReloadCapas = $ReloadCapas || ($this->ReadAttributeString('ConsumerAddress') == '');
         $this->SendDebug('ReloadCapas', $ReloadCapas, 0);
         $this->SetSummary($Host);
         $this->Host = $Host;
@@ -158,7 +146,6 @@ class ONVIFIO extends IPSModule
 
         if ($ReloadCapas) {
             if (!$this->GetProfiles()) {
-
                 $this->SetStatus(IS_EBASE + 2);
                 return;
             } else {
@@ -196,6 +183,134 @@ class ONVIFIO extends IPSModule
         }
         $this->LogMessage($this->Translate('Interface connected'), KL_MESSAGE);
         $this->SetStatus(IS_ACTIVE);
+    }
+
+    public function ForwardData($JSONString)
+    {
+        $Data = json_decode($JSONString, true);
+        unset($Data['DataID']);
+        if ($Data['Function'] == 'GetCapabilities') {
+            $Capas['VideoSources'] = $this->ReadAttributeArray('VideoSources');
+            $Capas['HasOutput'] = $this->ReadAttributeBoolean('HasOutput');
+            $Capas['HasInput'] = $this->ReadAttributeBoolean('HasInput');
+            $Capas['XAddr'] = $this->ReadAttributeArray('XAddr');
+            return serialize($Capas);
+        }
+        if ($Data['Function'] == 'GetCredentials') {
+            $Credentials['Username'] = $this->ReadPropertyString('Username');
+            $Credentials['Password'] = $this->ReadPropertyString('Password');
+            return serialize($Credentials);
+        }
+        if ($Data['Function'] == 'GetEvents') {
+            if ($Data['Instance'] != 0) {
+                $this->lock('EventProperties');
+            }
+            $Events = $this->ReadAttributeArray('EventProperties');
+            $SkippedTopics = $Data['SkippedTopics'];
+
+            $FoundEvents = [];
+            if ($Data['Pattern'] == '') {
+                if ($Data['Instance'] == 0) {
+                    //$FoundEvents = $Events;
+                    foreach ($SkippedTopics as $SkippedTopic) {
+                        foreach (array_keys($Events) as $Topic) {
+                            if (strpos($Topic, $SkippedTopic) !== false) {
+                                unset($Events[$Topic]);
+                            }
+                        }
+                    }
+                    foreach (array_keys($Events) as $FullTopic) {
+                        $TopicParts = explode('/', $FullTopic);
+                        array_pop($TopicParts);
+                        $Topic = '';
+                        foreach ($TopicParts as $TopicPart) {
+                            $Topic .= $TopicPart . '/';
+                            $FoundEvents[$Topic] = [];
+                        }
+                        $FoundEvents[$FullTopic] = [];
+                    }
+                }
+            } else {
+                if (array_key_exists($Data['Pattern'], $Events)) {
+                    $FoundEvents[$Data['Pattern']] = $Events[$Data['Pattern']];
+                    if (($Data['Instance'] != 0) && (!in_array($Data['Instance'], $Events[$Data['Pattern']]['Receivers']))) {
+                        $Events[$Data['Pattern']]['Receivers'][] = $Data['Instance'];
+                    }
+                } else {
+                    foreach (array_keys($Events) as $FullTopic) {
+                        if (stripos($FullTopic, $Data['Pattern']) !== false) {
+                            $TopicParts = explode('/', $FullTopic);
+                            foreach ($TopicParts as $TopicPart) {
+                                if (stripos($TopicPart, $Data['Pattern']) === false) {
+                                    array_pop($TopicParts);
+                                } else {
+                                    break;
+                                }
+                            }
+                            array_pop($TopicParts);
+                            $Topic = '';
+                            foreach ($TopicParts as $TopicPart) {
+                                $Topic .= $TopicPart . '/';
+                                $FoundEvents[$Topic] = [];
+                            }
+                            $FoundEvents[$FullTopic] = $Events[$FullTopic];
+                            if (($Data['Instance'] != 0) && (!in_array($Data['Instance'], $Events[$FullTopic]['Receivers']))) {
+                                $Events[$FullTopic]['Receivers'][] = $Data['Instance'];
+                            }
+                        }
+                    }
+                }
+            }
+            if ($Data['Instance'] != 0) {
+                $this->WriteAttributeArray('EventProperties', $Events);
+                $this->unlock('EventProperties');
+                $EventList = $this->GetEventReceiverFormValues();
+                $this->UpdateFormField('Events', 'values', json_encode($EventList));
+            }
+            return serialize($FoundEvents);
+        }
+        if ($this->GetStatus() != IS_ACTIVE) {
+            return serialize(false);
+        }
+        $this->SendDebug('Forward URI', $Data['URI'], 0);
+        $this->SendDebug('Forward wsdl', $Data['wsdl'], 0);
+        $this->SendDebug('Forward Function', $Data['Function'], 0);
+        $this->SendDebug('Forward Params', $Data['Params'], 0);
+        $this->SendDebug('Forward useLogin', $Data['useLogin'], 0);
+        $Ret = $this->SendData($Data['URI'], $Data['wsdl'], $Data['Function'], $Data['useLogin'], $Data['Params']);
+        return serialize($Ret);
+    }
+
+    public function RequestAction($Ident, $Value)
+    {
+        if ($Ident == 'Renew') {
+            return $this->Renew();
+        }
+        if ($Ident == 'KernelReady') {
+            return $this->KernelReady();
+        }
+    }
+
+    public function GetConfigurationForm()
+    {
+        $Form = json_decode(file_get_contents(__DIR__ . '/form.json'), true);
+        if (IPS_GetOption('NATSupport')) {
+            $Form['elements'][3]['visible'] = true;
+        }
+        $ConsumerAddress = $this->ReadAttributeString('ConsumerAddress');
+        if ($ConsumerAddress == '') {
+            $ConsumerAddress = $this->Translate('This device not support events.');
+            $Form['actions'][1]['visible'] = false;
+            $Form['actions'][2]['visible'] = false;
+        }
+        $Form['actions'][0]['items'][1]['caption'] = $ConsumerAddress;
+        $SubscriptionReference = $this->ReadAttributeString('SubscriptionReference');
+        $Form['actions'][1]['items'][1]['caption'] = $SubscriptionReference;
+        $EventList = $this->GetEventReceiverFormValues();
+        $Form['actions'][2]['values'] = $EventList;
+        $this->SendDebug('FORM', json_encode($Form), 0);
+        $this->SendDebug('FORM', json_last_error_msg(), 0);
+        return json_encode($Form);
     }
 
     protected function EventsNotSupported()
@@ -283,7 +398,8 @@ class ONVIFIO extends IPSModule
         } else {
             $this->WriteAttributeString('SubscriptionId', '');
         }
-        $ReferenceUrl = parse_url($SubscriptionReference,PHP_URL_HOST);
+        $ReferenceUrl = parse_url($SubscriptionReference, PHP_URL_HOST);
+        $ReferenceUrl = $ReferenceUrl !== null ? $ReferenceUrl : 'INVALID';
         if (strpos($this->ReadPropertyString('Address'), $ReferenceUrl) === false) {
             $this->LogMessage($this->Translate('This device send a invalid Subscription-Reference.'), KL_WARNING);
             $this->ShowLastError($this->Translate('This device send a invalid Subscription-Reference.'), 'Warning:');
@@ -328,9 +444,9 @@ class ONVIFIO extends IPSModule
         }
         return true;
     }
-/**@todo Fehlt noch
- * 
- */
+    /*@todo Fehlt noch
+     *
+     */
     protected function Unsubscribe()
     {
     }
@@ -385,19 +501,19 @@ class ONVIFIO extends IPSModule
         $xpath->registerNamespace($wstop_ns, 'http://docs.oasis-open.org/wsn/t-1');
         $query = '//' . $wstop_ns . ':TopicSet';
         $prefixPathlen = strlen($xpath->query($query, null, true)[0]->getNodePath());
-        $query = "//*[@" . $wstop_ns . ":topic='true']/" . $tt_ns . ":MessageDescription[@IsProperty='true']/" . $tt_ns . ":Data/" . $tt_ns . ":SimpleItemDescription"; //[@Type='" . $xs_ns . ":boolean' or @Type='" . $xs_ns . ":string' or @Type='" . $xs_ns . ":int' or @Type='" . $tt_ns . ":RelayLogicalState']";
+        $query = '//*[@' . $wstop_ns . ":topic='true']/" . $tt_ns . ":MessageDescription[@IsProperty='true']/" . $tt_ns . ':Data/' . $tt_ns . ':SimpleItemDescription'; //[@Type='" . $xs_ns . ":boolean' or @Type='" . $xs_ns . ":string' or @Type='" . $xs_ns . ":int' or @Type='" . $tt_ns . ":RelayLogicalState']";
         $wsTopics = $xpath->query($query);
         $Path = [];
         foreach ($wsTopics as $wsData) {
             $Topic = substr($wsData->parentNode->parentNode->parentNode->getNodePath(), $prefixPathlen + 1);
-            $Path[$Topic]['DataName'] = $wsData->attributes->getNamedItem("Name")->nodeValue;
-            $Path[$Topic]['DataType'] = $wsData->attributes->getNamedItem("Type")->nodeValue;
-            $wsSource = $xpath->query("../../" . $tt_ns . ":Source/" . $tt_ns . ":SimpleItemDescription", $wsData, true);
+            $Path[$Topic]['DataName'] = $wsData->attributes->getNamedItem('Name')->nodeValue;
+            $Path[$Topic]['DataType'] = $wsData->attributes->getNamedItem('Type')->nodeValue;
+            $wsSource = $xpath->query('../../' . $tt_ns . ':Source/' . $tt_ns . ':SimpleItemDescription', $wsData, true);
             $Path[$Topic]['SourceName'] = '';
             $Path[$Topic]['SourceType'] = '';
             if (count($wsSource) == 1) {
-                $Path[$Topic]['SourceName'] = $wsSource[0]->attributes->getNamedItem("Name")->nodeValue;
-                $Path[$Topic]['SourceType'] = $wsSource[0]->attributes->getNamedItem("Type")->nodeValue;
+                $Path[$Topic]['SourceName'] = $wsSource[0]->attributes->getNamedItem('Name')->nodeValue;
+                $Path[$Topic]['SourceType'] = $wsSource[0]->attributes->getNamedItem('Type')->nodeValue;
             }
             $Path[$Topic]['Receivers'] = [];
         }
@@ -420,7 +536,8 @@ class ONVIFIO extends IPSModule
             return false;
         }
         $res = json_decode(json_encode($ret), true)['Profiles'];
-        $Profiles = array_filter($res, function ($Profile) {
+        $Profiles = array_filter($res, function ($Profile)
+        {
             if (isset($Profile['VideoEncoderConfiguration']['Encoding'])) {
                 if (strtoupper($Profile['VideoEncoderConfiguration']['Encoding']) == 'JPEG') {
                     return false;
@@ -430,7 +547,7 @@ class ONVIFIO extends IPSModule
         });
         $VideoSourcesItems = [];
         foreach ($Profiles as $Profile) {
-            if (!array_key_exists('VideoEncoderConfiguration',$Profile)){
+            if (!array_key_exists('VideoEncoderConfiguration', $Profile)) {
                 continue;
             }
             $VideoSourcesItems[$Profile['VideoSourceConfiguration']['SourceToken']]['VideoSourceToken'] = $Profile['VideoSourceConfiguration']['SourceToken'];
@@ -551,112 +668,6 @@ class ONVIFIO extends IPSModule
         return false;
     }
 
-    public function ForwardData($JSONString)
-    {
-        $Data = json_decode($JSONString, true);
-        unset($Data['DataID']);
-        if ($Data['Function'] == 'GetCapabilities') {
-            $Capas['VideoSources'] = $this->ReadAttributeArray('VideoSources');
-            $Capas['HasOutput'] = $this->ReadAttributeBoolean('HasOutput');
-            $Capas['HasInput'] = $this->ReadAttributeBoolean('HasInput');
-            $Capas['XAddr'] = $this->ReadAttributeArray('XAddr');
-            return serialize($Capas);
-        }
-        if ($Data['Function'] == 'GetCredentials') {
-            $Credentials['Username'] = $this->ReadPropertyString('Username');
-            $Credentials['Password'] = $this->ReadPropertyString('Password');
-            return serialize($Credentials);
-        }
-        if ($Data['Function'] == 'GetEvents') {
-            if ($Data['Instance'] != 0) {
-                $this->lock('EventProperties');
-            }
-            $Events = $this->ReadAttributeArray('EventProperties');
-            $SkippedTopics = $Data['SkippedTopics'];
-
-            $FoundEvents = [];
-            if ($Data['Pattern'] == '') {
-                if ($Data['Instance'] == 0) {
-                    //$FoundEvents = $Events;
-                    foreach ($SkippedTopics as $SkippedTopic) {
-                        foreach (array_keys($Events) as $Topic) {
-                            if (strpos($Topic, $SkippedTopic) !== false) {
-                                unset($Events[$Topic]);
-                            }
-                        }
-                    }
-                    foreach (array_keys($Events) as $FullTopic) {
-                        $TopicParts = explode('/', $FullTopic);
-                        array_pop($TopicParts);
-                        $Topic = '';
-                        foreach ($TopicParts as $TopicPart) {
-                            $Topic .= $TopicPart . '/';
-                            $FoundEvents[$Topic] = [];
-                        }
-                        $FoundEvents[$FullTopic] = [];
-                    }
-                }
-            } else {
-                if (array_key_exists($Data['Pattern'], $Events)) {
-                    $FoundEvents[$Data['Pattern']] = $Events[$Data['Pattern']];
-                    if (($Data['Instance'] != 0) and (!in_array($Data['Instance'], $Events[$Data['Pattern']]['Receivers']))) {
-                        $Events[$Data['Pattern']]['Receivers'][] = $Data['Instance'];
-                    }
-                } else {
-                    foreach (array_keys($Events) as $FullTopic) {
-                        if (stripos($FullTopic, $Data['Pattern']) !== false) {
-                            $TopicParts = explode('/', $FullTopic);
-                            foreach ($TopicParts as $TopicPart) {
-                                if (stripos($TopicPart, $Data['Pattern']) === false) {
-                                    array_pop($TopicParts);
-                                } else {
-                                    break;
-                                }
-                            }
-                            array_pop($TopicParts);
-                            $Topic = '';
-                            foreach ($TopicParts as $TopicPart) {
-                                $Topic .= $TopicPart . '/';
-                                $FoundEvents[$Topic] = [];
-                            }
-                            $FoundEvents[$FullTopic] = $Events[$FullTopic];
-                            if (($Data['Instance'] != 0) and (!in_array($Data['Instance'], $Events[$FullTopic]['Receivers']))) {
-                                $Events[$FullTopic]['Receivers'][] = $Data['Instance'];
-                            }
-                        }
-                    }
-                }
-            }
-            if ($Data['Instance'] != 0) {
-                $this->WriteAttributeArray('EventProperties', $Events);
-                $this->unlock('EventProperties');
-                $EventList = $this->GetEventReceiverFormValues();
-                $this->UpdateFormField('Events', 'values', json_encode($EventList));
-            }
-            return serialize($FoundEvents);
-        }
-        if ($this->GetStatus() != IS_ACTIVE) {
-            return serialize(false);
-        }
-        $this->SendDebug('Forward URI', $Data['URI'], 0);
-        $this->SendDebug('Forward wsdl', $Data['wsdl'], 0);
-        $this->SendDebug('Forward Function', $Data['Function'], 0);
-        $this->SendDebug('Forward Params', $Data['Params'], 0);
-        $this->SendDebug('Forward useLogin', $Data['useLogin'], 0);
-        $Ret = $this->SendData($Data['URI'], $Data['wsdl'], $Data['Function'], $Data['useLogin'], $Data['Params']);
-        return serialize($Ret);
-    }
-
-    public function RequestAction($Ident, $Value)
-    {
-        if ($Ident == 'Renew') {
-            return $this->Renew();
-        }
-        if ($Ident == 'KernelReady') {
-            return $this->KernelReady();
-        }
-    }
-
     /**
      *
      * @param string $URI
@@ -700,31 +711,9 @@ class ONVIFIO extends IPSModule
             $this->SendDebug('Soap Response Error Message', $e->getMessage(), 0);
             $Response = $ONVIFclient->client->__getLastResponse();
             $this->lastSOAPError = $e->getMessage();
-            return $e; //
+            return $e;
         }
         return $Result;
-    }
-
-    public function GetConfigurationForm()
-    {
-        $Form = json_decode(file_get_contents(__DIR__ . '/form.json'), true);
-        if (IPS_GetOption('NATSupport')) {
-            $Form['elements'][3]['visible'] = true;
-        }
-        $ConsumerAddress = $this->ReadAttributeString('ConsumerAddress');
-        if ($ConsumerAddress == '') {
-            $ConsumerAddress = $this->Translate('This device not support events.');
-            $Form['actions'][1]['visible'] = false;
-            $Form['actions'][2]['visible'] = false;
-        }
-        $Form['actions'][0]['items'][1]['caption'] = $ConsumerAddress;
-        $SubscriptionReference = $this->ReadAttributeString('SubscriptionReference');
-        $Form['actions'][1]['items'][1]['caption'] = $SubscriptionReference;
-        $EventList = $this->GetEventReceiverFormValues();
-        $Form['actions'][2]['values'] = $EventList;
-        $this->SendDebug('FORM', json_encode($Form), 0);
-        $this->SendDebug('FORM', json_last_error_msg(), 0);
-        return json_encode($Form);
     }
 
     protected function GetEventReceiverFormValues()
@@ -748,7 +737,7 @@ class ONVIFIO extends IPSModule
             if ($ListEvent['DataType'] != '') {
                 $ListEvent['DataType'] = substr(stristr($ListEvent['DataType'], ':'), 1);
             }
-            $EventList [] = [
+            $EventList[] = [
                 'Topic'      => substr(stristr($ListTopic, ':'), 1),
                 'SourceName' => $ListEvent['SourceName'],
                 'SourceType' => $ListEvent['SourceType'],
@@ -783,7 +772,7 @@ class ONVIFIO extends IPSModule
         header('Cache-Control: no-cache');
         header('Content-Type: text/plain');
 
-        $Data = file_get_contents("php://input");
+        $Data = file_get_contents('php://input');
         $this->SendDebug('Event', $Data, 0);
         $xml = simplexml_load_string($Data);
         $Notifications = $xml->xpath('//wsnt:NotificationMessage');
@@ -800,10 +789,10 @@ class ONVIFIO extends IPSModule
             }
             $NotificationDataAttributes = ((array) $NotificationMessage->Data->children('tt', true)[0]->attributes())['@attributes'];
             $EventData[] = ['Topic'       => $NotificatioTopic,
-                'SourceName'  => $NotificationSourceAttributes['Name'],
-                'SourceValue' => $NotificationSourceAttributes['Value'],
-                'DataName'    => $NotificationDataAttributes['Name'],
-                'DataValue'   => $NotificationDataAttributes['Value']
+                'SourceName'              => $NotificationSourceAttributes['Name'],
+                'SourceValue'             => $NotificationSourceAttributes['Value'],
+                'DataName'                => $NotificationDataAttributes['Name'],
+                'DataValue'               => $NotificationDataAttributes['Value']
             ];
         }
         $this->SendDebug('Event', $EventData, 0);
@@ -817,5 +806,17 @@ class ONVIFIO extends IPSModule
             $this->SendDebug('tochild', json_encode($EventData), 0);
             $this->SendDataToChildren(json_encode($EventData));
         }
+    }
+
+    private function KernelReady()
+    {
+        $this->UnregisterMessage(0, IPS_KERNELMESSAGE);
+        $this->RegisterMessage($this->InstanceID, FM_CHILDREMOVED);
+        $Url = parse_url($this->ReadPropertyString('Address'));
+        $Url['port'] = (isset($Url['port']) ? ':' . $Url['port'] : '');
+        if (isset($Url['scheme']) && isset($Url['host'])) {
+            $this->Host = $Url['scheme'] . '://' . $Url['host'] . $Url['port'];
+        }
+        $this->ApplyChanges();
     }
 }
