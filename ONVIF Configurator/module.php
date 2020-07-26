@@ -13,15 +13,15 @@ class ONVIFConfigurator extends ONVIFModuleBase
 
     public function GetConfigurationForm()
     {
-        $Capas = $this->GetCapabilities();
+        $Capabilities = $this->GetCapabilities();
         $Form = json_decode(file_get_contents(__DIR__ . '/form.json'), true);
-        if ($Capas == false) {
+        if ($Capabilities == false) {
             $Form['actions'][] = [
                 'type'  => 'PopupAlert',
                 'popup' => [
                     'items' => [[
                         'type'    => 'Label',
-                        'caption' => 'Error on read of capabilities.'
+                        'caption' => 'Error on read of Capabilities.'
                     ]]
                 ]
             ];
@@ -41,9 +41,9 @@ class ONVIFConfigurator extends ONVIFModuleBase
             ];
         }
 
-        $this->SendDebug('VideoSources', $Capas['VideoSources'], 0);
-        $this->SendDebug('HasInput', $Capas['HasInput'], 0);
-        $this->SendDebug('HasOutput', $Capas['HasOutput'], 0);
+        $this->SendDebug('VideoSources', $Capabilities['VideoSources'], 0);
+        $this->SendDebug('HasInput', $Capabilities['HasInput'], 0);
+        $this->SendDebug('HasOutput', $Capabilities['HasOutput'], 0);
 
         $InputEvents = $this->GetEvents('input', 0);
         $this->SendDebug('GetEvents', $InputEvents, 0);
@@ -61,10 +61,10 @@ class ONVIFConfigurator extends ONVIFModuleBase
             $InputTopics = array_shift($InputTopics);
         }
 
-        $InputValues = $this->GetConfigurationArray(self::GUID_ONVIF_DIGITAL_INPUT, $Capas['HasInput'], $InputTopics);
+        $InputValues = $this->GetConfigurationArray(self::GUID_ONVIF_DIGITAL_INPUT, $Capabilities['HasInput'], $InputTopics);
 
         $OutputEvents = [];
-        if ($Capas['HasOutput']) {
+        if ($Capabilities['HasOutput']) {
             $OutputEvents = $this->GetEvents('relay', 0);
             if (count($OutputEvents) == 0) {
                 $OutputEvents = $this->GetEvents('port', 0);
@@ -85,7 +85,7 @@ class ONVIFConfigurator extends ONVIFModuleBase
             $OutputTopics = array_shift($OutputTopics);
         }
 
-        $OutputValues = $this->GetConfigurationArray(self::GUID_ONVIF_DIGITAL_OUTPUT, $Capas['HasOutput'], $OutputTopics);
+        $OutputValues = $this->GetConfigurationArray(self::GUID_ONVIF_DIGITAL_OUTPUT, $Capabilities['HasOutput'], $OutputTopics);
 
         $StreamCreateParams = [
             'moduleID'      => self::GUID_ONVIF_MEDIA_STREAM,
@@ -95,11 +95,11 @@ class ONVIFConfigurator extends ONVIFModuleBase
         $StreamValues = [];
         $IPSStreamInstances = $this->GetInstanceList(self::GUID_ONVIF_MEDIA_STREAM, 'VideoSource');
 
-        foreach ($Capas['VideoSources'] as $VideoSource) {
+        foreach ($Capabilities['VideoSources'] as $VideoSource) {
             $Device = [
                 'instanceID'  => 0,
                 'type'        => 'Media Stream',
-                'videosource' => $VideoSource['VideoSourceToken'],
+                'VideoSource' => $VideoSource['VideoSourceToken'],
                 'name'        => $VideoSource['VideoSourceName'],
                 'Location'    => ''
             ];
@@ -129,7 +129,7 @@ class ONVIFConfigurator extends ONVIFModuleBase
             $Device = [
                 'instanceID'  => $InstanceID,
                 'type'        => 'Media Stream',
-                'videosource' => $VideoSource,
+                'VideoSource' => $VideoSource,
                 'name'        => IPS_GetName($InstanceID),
                 'Location'    => stristr(IPS_GetLocation($InstanceID), IPS_GetName($InstanceID), true)
             ];
@@ -173,7 +173,7 @@ class ONVIFConfigurator extends ONVIFModuleBase
                 $InstanceValues = [
                     'instanceID'  => $IPSInstance,
                     'type'        => substr(IPS_GetModule($GUID)['ModuleName'], 6),
-                    'videosource' => '',
+                    'VideoSource' => '',
                     'name'        => IPS_GetName($IPSInstance),
                     'Location'    => stristr(IPS_GetLocation($IPSInstance), IPS_GetName($IPSInstance), true)
                 ];
@@ -189,7 +189,7 @@ class ONVIFConfigurator extends ONVIFModuleBase
                 $InstanceValues = [
                     'instanceID'  => 0,
                     'type'        => substr(IPS_GetModule($GUID)['ModuleName'], 6),
-                    'videosource' => '',
+                    'VideoSource' => '',
                     'name'        => substr(IPS_GetModule($GUID)['ModuleName'], 6),
                     'Location'    => ''
                 ];

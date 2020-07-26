@@ -12,7 +12,7 @@
             "Call 'Renew' with no Subscription reference":"Starte 'Renew' ohne Abonnementreferenz",
             "List of possible and used events:": "Liste möglicher und verwendeter Ereignisse:",
             "This device not support events.":"Dieses Gerät unterstützt keine Ereignisse.",
-            "This device does not support ONVIF events.":"Dieses Gerät untertützt keine ONVIF Ereignisse.",
+            "This device does not support ONVIF events.":"Dieses Gerät unterstützt keine ONVIF Ereignisse.",
             "Used": "Benutzt",
             "Name of source": "Name der Quelle",
             "Type of source": "Typ der Quelle",

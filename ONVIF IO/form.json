@@ -44,7 +44,7 @@
                     "caption": "Event hook:"
                 },
                 {
-                    "name": "Eventhook",
+                    "name": "EventHook",
                     "type": "Label",
                     "link": false,
                     "caption": ""
@@ -109,7 +109,7 @@
                     "visible": false,
                     "edit": {
                         "type": "List",
-                        "name": "Eventreciever",
+                        "name": "EventReceiver",
                         "add": false,
                         "delete": false,
                         "sort": {

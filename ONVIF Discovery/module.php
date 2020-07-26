@@ -15,8 +15,10 @@ require_once dirname(__DIR__) . '/libs/onvif-client-php/inc/ONVIF.inc.php';
  */
 class ONVIFDiscovery extends IPSModule
 {
-    use \ONVIFDiscovery\BufferHelper,
-        \ONVIFDiscovery\DebugHelper,
+    use \ONVIFDiscovery\BufferHelper;
+    use
+        \ONVIFDiscovery\DebugHelper;
+    use
         \ONVIFDiscovery\Semaphore;
     const WS_DISCOVERY_MESSAGE = '<?xml version="1.0" encoding="UTF-8"?><e:Envelope xmlns:e="http://www.w3.org/2003/05/soap-envelope" xmlns:w="http://schemas.xmlsoap.org/ws/2004/08/addressing" xmlns:d="http://schemas.xmlsoap.org/ws/2005/04/discovery" xmlns:dn="http://www.onvif.org/ver10/network/wsdl"><e:Header><w:MessageID>uuid:[UUID]</w:MessageID><w:To e:mustUnderstand="true">urn:schemas-xmlsoap-org:ws:2005:04:discovery</w:To><w:Action e:mustUnderstand="true">http://schemas.xmlsoap.org/ws/2005/04/discovery/Probe</w:Action></e:Header><e:Body><d:Probe><d:Types>dn:NetworkVideoTransmitter</d:Types></d:Probe></e:Body></e:Envelope>';
 
@@ -31,7 +33,7 @@ class ONVIFDiscovery extends IPSModule
     const WS_DISCOVERY_MULTICAST_ADDRESS = '239.255.255.250';
 
     /**
-     * The port that will be used in the socket for the discovdery request.
+     * The port that will be used in the socket for the discovery request.
      */
     const WS_DISCOVERY_MULTICAST_PORT = 3702;
 
@@ -78,224 +80,6 @@ class ONVIFDiscovery extends IPSModule
         $this->Discover();
     }
 
-    protected function Discover()
-    {
-        $this->LogMessage($this->Translate('Background discovery of ONVIF devices started'), KL_NOTIFY);
-        $this->Devices = [];
-        $this->DevicesError = [];
-        $this->DevicesTotal = 0;
-        $this->DevicesProcessed = -1;
-        $this->ReloadForm();
-        $discoveryList = $this->DiscoverDevices();
-        $this->DevicesTotal = count($discoveryList);
-        //$this->UpdateFormField('ScanProgress', 'visible', true);
-        $this->UpdateFormField('ScanProgress', 'maximum', count($discoveryList));
-        $this->UpdateFormField('ScanProgress', 'current', 0);
-        $this->UpdateFormField('ScanProgress', 'caption', '0 / ' . count($discoveryList));
-        $this->LogMessage(sprintf($this->Translate('Background discovery of ONVIF found %d devices'), count($discoveryList)), KL_NOTIFY);
-        $i = 0;
-        $this->DevicesProcessed = 0;
-        foreach ($discoveryList as $IP => $Device) {
-            $i++;
-            $ScriptText = 'IPS_RequestAction(' . $this->InstanceID . ', \'ScanDevice\',\'' . serialize(['IP' => $IP, 'xAddrs' => $Device]) . '\');';
-            IPS_RunScriptText($ScriptText);
-            if ($i % 3) {
-                IPS_Sleep(400);
-            }
-        }
-    }
-
-    protected function DiscoverDevices()
-    {
-        $discoveryTimeout = time() + self::WS_DISCOVERY_TIMEOUT;
-        $uuid = self::uuidV4();
-        $discoveryMessage = str_replace('[UUID]', $uuid, self::WS_DISCOVERY_MESSAGE);
-        $discoveryPort = self::WS_DISCOVERY_MULTICAST_PORT;
-        $discoveryList = [];
-        $sock = socket_create(AF_INET, SOCK_DGRAM, SOL_UDP);
-        socket_set_option($sock, SOL_SOCKET, SO_REUSEADDR, 1);
-        socket_set_option($sock, SOL_SOCKET, SO_RCVTIMEO, ['sec' => 0, 'usec' => 100000]);
-        /* if (defined('IPPROTO_IP') && defined('MCAST_JOIN_GROUP')) {
-          socket_set_option($sock, IPPROTO_IP, MCAST_JOIN_GROUP, array('group' => self::WS_DISCOVERY_MULTICAST_ADDRESS));
-          } else { */
-        socket_set_option($sock, SOL_SOCKET, SO_BROADCAST, 1);
-        //}
-
-        socket_bind($sock, '0.0.0.0', 0); //self::WS_DISCOVERY_MULTICAST_PORT);
-        $this->SendDebug('Start Discovery', '', 0);
-        socket_sendto($sock, $discoveryMessage, strlen($discoveryMessage), 0, self::WS_DISCOVERY_MULTICAST_ADDRESS, self::WS_DISCOVERY_MULTICAST_PORT);
-        $response = $from = null;
-        do {
-            if (0 == @socket_recvfrom($sock, $response, 9999, 0, $from, $discoveryPort)) {
-                continue;
-            }
-            $this->SendDebug('Receive', $response, 0);
-            $xml = new DOMDocument();
-            if (false === $xml->loadXML($response)) {
-                $this->SendDebug('Error on parse XML', $response, 0);
-                continue;
-            }
-            if (!self::relatesToMatch($uuid, $xml)) {
-                $this->SendDebug('Skip Data', 'UUID incorrect', 0);
-                continue;
-            }
-            $xAddrs = self::getProbeMatchXAddrs($xml, $from);
-            $this->SendDebug('Receive from', $from, 0);
-            $this->SendDebug('Receive address', $xAddrs, 0);
-            $discoveryList[$from] = $xAddrs;
-            usleep(10000);
-        } while (time() < $discoveryTimeout);
-        socket_close($sock);
-        return $discoveryList;
-    }
-
-    protected function ScanDevice(string $IP, array $IpValues)
-    {
-        $uselogin = false;
-        if (($this->ReadAttributeString('Username') != '') or ($this->ReadAttributeString('Password') != '')) {
-            $uselogin = true;
-        }
-        $wsdl = dirname(__DIR__) . DIRECTORY_SEPARATOR . 'libs' . DIRECTORY_SEPARATOR . 'onvif-client-php' . DIRECTORY_SEPARATOR . 'WSDL' . DIRECTORY_SEPARATOR . 'devicemgmt-mod.wsdl';
-        //$DevicesOk = [];
-        //$DevicesError = [];
-        $this->LogMessage(sprintf($this->Translate('Scan of ONVIF device (%s) started'), $IP), KL_NOTIFY);
-        $Device = null;
-        $DeviceOk = false;
-        $DeviceError = [];
-        foreach ($IpValues as $IpValue) {
-            $this->SendDebug('Request', $IpValue, 0);
-            if ($uselogin) {
-                $offset = $this->GetTimeOffset($IpValue);
-                $ONVIFclient = new ONVIF($wsdl, $IpValue, $this->ReadAttributeString('Username'), $this->ReadAttributeString('Password'), [], $offset);
-            } else {
-                $ONVIFclient = new ONVIF($wsdl, $IpValue);
-            }
-            try {
-                $result = $ONVIFclient->client->GetDeviceInformation();
-                $this->SendDebug('Soap Request ' . $IpValue, $ONVIFclient->client->__getLastRequest(), 0);
-                $this->SendDebug('Soap Response ' . $IpValue, $ONVIFclient->client->__getLastResponse(), 0);
-                $this->SendDebug('Read ' . $IpValue, json_encode($result), 0);
-                if ($Device === null) {
-                    $Device = json_decode(json_encode($result), true);
-                    $DeviceOk = true;
-                }
-                $Device['Address'][] = $IpValue;
-            } catch (SoapFault $e) {
-                $this->SendDebug('Soap Request Error ' . $IpValue, $ONVIFclient->client->__getLastRequest(), 0);
-                $this->SendDebug('Soap Response Error ' . $IpValue, $ONVIFclient->client->__getLastResponse(), 0);
-                $this->SendDebug('Soap Response Error Message ' . $IpValue, $e->getMessage(), 0);
-                $Url = parse_url($IpValue);
-                $Url['port'] = isset($Url['port']) ? ':' . $Url['port'] : '';
-                $DeviceError[$Url['scheme'] . '://' . $Url['host'] . $Url['port']] = $e->getMessage();
-            }
-        }
-        if ($DeviceOk) {
-            $this->lock('Devices');
-            $this->Devices = array_merge($this->Devices, [$IP => $Device]);
-            $this->unlock('Devices');
-        } else {
-            $this->lock('DevicesError');
-            $this->DevicesError = array_merge($this->DevicesError, $DeviceError);
-            $this->unlock('DevicesError');
-        }
-        $this->lock('ScanProgress');
-        $DevicesProcessed = $this->DevicesProcessed;
-        $DevicesProcessed++;
-        $this->DevicesProcessed = $DevicesProcessed;
-        $this->UpdateFormField('ScanProgress', 'current', $DevicesProcessed);
-        $this->UpdateFormField('ScanProgress', 'caption', $DevicesProcessed . ' / ' . $this->DevicesTotal);
-        $this->unlock('ScanProgress');
-        $this->LogMessage(sprintf($this->Translate('Scan progress of ONVIF devices: %d / %d '), $DevicesProcessed, $this->DevicesTotal), KL_NOTIFY);
-        $this->SendDebug('Scan finish', $IP, 0);
-        if ($DevicesProcessed == $this->DevicesTotal) {
-            $this->LogMessage($this->Translate('End of background discovery of ONVIF devices'), KL_NOTIFY);
-            $this->ReloadForm();
-        }
-    }
-
-    protected static function relatesToMatch($uuid, $xmlDOMDoc)
-    {
-        $relatesNodes = $xmlDOMDoc->getElementsByTagName('RelatesTo');
-        foreach ($relatesNodes as $node) {
-            if (preg_match('|' . $uuid . '$|', $node->nodeValue)) {
-                return true;
-            }
-        }
-        return false;
-    }
-
-    protected static function getProbeMatchXAddrs($xmlDOMDoc, $ip)
-    {
-        $matches = [];
-        $probeMatchNodes = $xmlDOMDoc->getElementsByTagName('ProbeMatch');
-        foreach ($probeMatchNodes as $node) {
-            $xAddrsNodes = $node->getElementsByTagName('XAddrs');
-            foreach ($xAddrsNodes as $addrsNode) {
-                $matches = array_merge($matches, explode(' ', $addrsNode->nodeValue));
-            }
-        }
-        $filtermatches = array_filter($matches, function ($item) use ($ip) {
-            return (strpos($item, $ip));
-        });
-        //todo reindex
-        return array_values($filtermatches);
-    }
-
-    /**
-     * Roger Stringer's UUID function, http://rogerstringer.com/2013/11/15/generate-uuids-php/
-     *
-     * @return string A random uuid.
-     */
-    protected static function uuidV4()
-    {
-        return sprintf(
-            '%04x%04x-%04x-%04x-%04x-%04x%04x%04x',
-            mt_rand(0, 0xffff),
-            mt_rand(0, 0xffff),
-            mt_rand(0, 0xffff),
-            mt_rand(0, 0x0fff) | 0x4000, // this sequence must start with 4
-                                                mt_rand(0, 0x3fff) | 0x8000, // this sequence can start with 8, 9, A, or B
-                                                        mt_rand(0, 0xffff),
-            mt_rand(0, 0xffff),
-            mt_rand(0, 0xffff)
-        );
-    }
-
-    protected function GetTimeOffset(string $IpValue)
-    {
-        $wsdl = dirname(__DIR__) . DIRECTORY_SEPARATOR . 'libs' . DIRECTORY_SEPARATOR . 'onvif-client-php' . DIRECTORY_SEPARATOR . 'WSDL' . DIRECTORY_SEPARATOR . 'devicemgmt-mod.wsdl';
-        $ONVIFclient = new ONVIF($wsdl, $IpValue);
-        try {
-            $camera_datetime = $ONVIFclient->client->GetSystemDateAndTime();
-        } catch (SoapFault $e) {
-            return 0;
-        }
-
-        if (property_exists($camera_datetime->SystemDateAndTime, 'UTCDateTime')) {
-            $camera_ts = gmmktime(
-                $camera_datetime->SystemDateAndTime->UTCDateTime->Time->Hour,
-                $camera_datetime->SystemDateAndTime->UTCDateTime->Time->Minute,
-                $camera_datetime->SystemDateAndTime->UTCDateTime->Time->Second,
-                $camera_datetime->SystemDateAndTime->UTCDateTime->Date->Month,
-                $camera_datetime->SystemDateAndTime->UTCDateTime->Date->Day,
-                $camera_datetime->SystemDateAndTime->UTCDateTime->Date->Year
-            );
-            return time() - $camera_ts;
-        }
-        if (property_exists($camera_datetime->SystemDateAndTime, 'LocalDateTime')) {
-            $camera_ts = mktime(
-                $camera_datetime->SystemDateAndTime->LocalDateTime->Time->Hour,
-                $camera_datetime->SystemDateAndTime->LocalDateTime->Time->Minute,
-                $camera_datetime->SystemDateAndTime->LocalDateTime->Time->Second,
-                $camera_datetime->SystemDateAndTime->LocalDateTime->Date->Month,
-                $camera_datetime->SystemDateAndTime->LocalDateTime->Date->Day,
-                $camera_datetime->SystemDateAndTime->LocalDateTime->Date->Year
-            );
-            return time() - $camera_ts;
-        }
-        return 0;
-    }
-
     /**
      * Interne Funktion des SDK.
      */
@@ -304,10 +88,10 @@ class ONVIFDiscovery extends IPSModule
         $Devices = $this->Devices;
         $DevicesError = $this->DevicesError;
         $Form = json_decode(file_get_contents(__DIR__ . '/form.json'), true);
-        $InstanceIDListConfigurators = IPS_GetInstanceListByModuleID('{C6A79C49-19D5-8D45-FFE5-5D77165FAEE6}');
+        $InstanceIDListConfigurator = IPS_GetInstanceListByModuleID('{C6A79C49-19D5-8D45-FFE5-5D77165FAEE6}');
         $DevicesAddress = [];
         $DeviceValues = [];
-        foreach ($InstanceIDListConfigurators as $InstanceIDConfigurator) {
+        foreach ($InstanceIDListConfigurator as $InstanceIDConfigurator) {
             $IO = IPS_GetInstance($InstanceIDConfigurator)['ConnectionID'];
             if ($IO > 0) {
                 $DevicesAddress[$InstanceIDConfigurator] = IPS_GetProperty($IO, 'Address');
@@ -389,5 +173,224 @@ class ONVIFDiscovery extends IPSModule
             $Data = unserialize($Value);
             $this->ScanDevice($Data['IP'], $Data['xAddrs']);
         }
+    }
+
+    protected function Discover()
+    {
+        $this->LogMessage($this->Translate('Background discovery of ONVIF devices started'), KL_NOTIFY);
+        $this->Devices = [];
+        $this->DevicesError = [];
+        $this->DevicesTotal = 0;
+        $this->DevicesProcessed = -1;
+        $this->ReloadForm();
+        $discoveryList = $this->DiscoverDevices();
+        $this->DevicesTotal = count($discoveryList);
+        //$this->UpdateFormField('ScanProgress', 'visible', true);
+        $this->UpdateFormField('ScanProgress', 'maximum', count($discoveryList));
+        $this->UpdateFormField('ScanProgress', 'current', 0);
+        $this->UpdateFormField('ScanProgress', 'caption', '0 / ' . count($discoveryList));
+        $this->LogMessage(sprintf($this->Translate('Background discovery of ONVIF found %d devices'), count($discoveryList)), KL_NOTIFY);
+        $i = 0;
+        $this->DevicesProcessed = 0;
+        foreach ($discoveryList as $IP => $Device) {
+            $i++;
+            $ScriptText = 'IPS_RequestAction(' . $this->InstanceID . ', \'ScanDevice\',\'' . serialize(['IP' => $IP, 'xAddrs' => $Device]) . '\');';
+            IPS_RunScriptText($ScriptText);
+            if ($i % 3) {
+                IPS_Sleep(400);
+            }
+        }
+    }
+
+    protected function DiscoverDevices()
+    {
+        $discoveryTimeout = time() + self::WS_DISCOVERY_TIMEOUT;
+        $uuid = self::uuidV4();
+        $discoveryMessage = str_replace('[UUID]', $uuid, self::WS_DISCOVERY_MESSAGE);
+        $discoveryPort = self::WS_DISCOVERY_MULTICAST_PORT;
+        $discoveryList = [];
+        $sock = socket_create(AF_INET, SOCK_DGRAM, SOL_UDP);
+        socket_set_option($sock, SOL_SOCKET, SO_REUSEADDR, 1);
+        socket_set_option($sock, SOL_SOCKET, SO_RCVTIMEO, ['sec' => 0, 'usec' => 100000]);
+        /* if (defined('IPPROTO_IP') && defined('MCAST_JOIN_GROUP')) {
+          socket_set_option($sock, IPPROTO_IP, MCAST_JOIN_GROUP, array('group' => self::WS_DISCOVERY_MULTICAST_ADDRESS));
+          } else { */
+        socket_set_option($sock, SOL_SOCKET, SO_BROADCAST, 1);
+        //}
+
+        socket_bind($sock, '0.0.0.0', 0); //self::WS_DISCOVERY_MULTICAST_PORT);
+        $this->SendDebug('Start Discovery', '', 0);
+        socket_sendto($sock, $discoveryMessage, strlen($discoveryMessage), 0, self::WS_DISCOVERY_MULTICAST_ADDRESS, self::WS_DISCOVERY_MULTICAST_PORT);
+        $response = $from = null;
+        do {
+            if (0 == @socket_recvfrom($sock, $response, 9999, 0, $from, $discoveryPort)) {
+                continue;
+            }
+            $this->SendDebug('Receive', $response, 0);
+            $xml = new DOMDocument();
+            if (false === $xml->loadXML($response)) {
+                $this->SendDebug('Error on parse XML', $response, 0);
+                continue;
+            }
+            if (!self::relatesToMatch($uuid, $xml)) {
+                $this->SendDebug('Skip Data', 'UUID incorrect', 0);
+                continue;
+            }
+            $xAddrs = self::getProbeMatchXAddrs($xml, $from);
+            $this->SendDebug('Receive from', $from, 0);
+            $this->SendDebug('Receive address', $xAddrs, 0);
+            $discoveryList[$from] = $xAddrs;
+            usleep(10000);
+        } while (time() < $discoveryTimeout);
+        socket_close($sock);
+        return $discoveryList;
+    }
+
+    protected function ScanDevice(string $IP, array $IpValues)
+    {
+        $UseLogin = false;
+        if (($this->ReadAttributeString('Username') != '') || ($this->ReadAttributeString('Password') != '')) {
+            $UseLogin = true;
+        }
+        $wsdl = dirname(__DIR__) . DIRECTORY_SEPARATOR . 'libs' . DIRECTORY_SEPARATOR . 'onvif-client-php' . DIRECTORY_SEPARATOR . 'WSDL' . DIRECTORY_SEPARATOR . 'devicemgmt-mod.wsdl';
+        //$DevicesOk = [];
+        //$DevicesError = [];
+        $this->LogMessage(sprintf($this->Translate('Scan of ONVIF device (%s) started'), $IP), KL_NOTIFY);
+        $Device = null;
+        $DeviceOk = false;
+        $DeviceError = [];
+        foreach ($IpValues as $IpValue) {
+            $this->SendDebug('Request', $IpValue, 0);
+            if ($UseLogin) {
+                $offset = $this->GetTimeOffset($IpValue);
+                $ONVIFClient = new ONVIF($wsdl, $IpValue, $this->ReadAttributeString('Username'), $this->ReadAttributeString('Password'), [], $offset);
+            } else {
+                $ONVIFClient = new ONVIF($wsdl, $IpValue);
+            }
+            try {
+                $result = $ONVIFClient->client->GetDeviceInformation();
+                $this->SendDebug('Soap Request ' . $IpValue, $ONVIFClient->client->__getLastRequest(), 0);
+                $this->SendDebug('Soap Response ' . $IpValue, $ONVIFClient->client->__getLastResponse(), 0);
+                $this->SendDebug('Read ' . $IpValue, json_encode($result), 0);
+                if ($Device === null) {
+                    $Device = json_decode(json_encode($result), true);
+                    $DeviceOk = true;
+                }
+                $Device['Address'][] = $IpValue;
+            } catch (SoapFault $e) {
+                $this->SendDebug('Soap Request Error ' . $IpValue, $ONVIFClient->client->__getLastRequest(), 0);
+                $this->SendDebug('Soap Response Error ' . $IpValue, $ONVIFClient->client->__getLastResponse(), 0);
+                $this->SendDebug('Soap Response Error Message ' . $IpValue, $e->getMessage(), 0);
+                $Url = parse_url($IpValue);
+                $Url['port'] = isset($Url['port']) ? ':' . $Url['port'] : '';
+                $DeviceError[$Url['scheme'] . '://' . $Url['host'] . $Url['port']] = $e->getMessage();
+            }
+        }
+        if ($DeviceOk) {
+            $this->lock('Devices');
+            $this->Devices = array_merge($this->Devices, [$IP => $Device]);
+            $this->unlock('Devices');
+        } else {
+            $this->lock('DevicesError');
+            $this->DevicesError = array_merge($this->DevicesError, $DeviceError);
+            $this->unlock('DevicesError');
+        }
+        $this->lock('ScanProgress');
+        $DevicesProcessed = $this->DevicesProcessed;
+        $DevicesProcessed++;
+        $this->DevicesProcessed = $DevicesProcessed;
+        $this->UpdateFormField('ScanProgress', 'current', $DevicesProcessed);
+        $this->UpdateFormField('ScanProgress', 'caption', $DevicesProcessed . ' / ' . $this->DevicesTotal);
+        $this->unlock('ScanProgress');
+        $this->LogMessage(sprintf($this->Translate('Scan progress of ONVIF devices: %d / %d '), $DevicesProcessed, $this->DevicesTotal), KL_NOTIFY);
+        $this->SendDebug('Scan finish', $IP, 0);
+        if ($DevicesProcessed == $this->DevicesTotal) {
+            $this->LogMessage($this->Translate('End of background discovery of ONVIF devices'), KL_NOTIFY);
+            $this->ReloadForm();
+        }
+    }
+
+    protected static function relatesToMatch($uuid, $xmlDOMDoc)
+    {
+        $relatesNodes = $xmlDOMDoc->getElementsByTagName('RelatesTo');
+        foreach ($relatesNodes as $node) {
+            if (preg_match('|' . $uuid . '$|', $node->nodeValue)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    protected static function getProbeMatchXAddrs($xmlDOMDoc, $ip)
+    {
+        $matches = [];
+        $probeMatchNodes = $xmlDOMDoc->getElementsByTagName('ProbeMatch');
+        foreach ($probeMatchNodes as $node) {
+            $xAddrsNodes = $node->getElementsByTagName('XAddrs');
+            foreach ($xAddrsNodes as $addrsNode) {
+                $matches = array_merge($matches, explode(' ', $addrsNode->nodeValue));
+            }
+        }
+        $filtermatches = array_filter($matches, function ($item) use ($ip)
+        {
+            return strpos($item, $ip);
+        });
+        //todo reindex
+        return array_values($filtermatches);
+    }
+
+    /**
+     * Roger Stringer's UUID function, http://rogerstringer.com/2013/11/15/generate-uuids-php/
+     *
+     * @return string A random uuid.
+     */
+    protected static function uuidV4()
+    {
+        return sprintf(
+            '%04x%04x-%04x-%04x-%04x-%04x%04x%04x',
+            mt_rand(0, 0xffff),
+            mt_rand(0, 0xffff),
+            mt_rand(0, 0xffff),
+            mt_rand(0, 0x0fff) | 0x4000, // this sequence must start with 4
+                                                mt_rand(0, 0x3fff) | 0x8000, // this sequence can start with 8, 9, A, or B
+                                                        mt_rand(0, 0xffff),
+            mt_rand(0, 0xffff),
+            mt_rand(0, 0xffff)
+        );
+    }
+
+    protected function GetTimeOffset(string $IpValue)
+    {
+        $wsdl = dirname(__DIR__) . DIRECTORY_SEPARATOR . 'libs' . DIRECTORY_SEPARATOR . 'onvif-client-php' . DIRECTORY_SEPARATOR . 'WSDL' . DIRECTORY_SEPARATOR . 'devicemgmt-mod.wsdl';
+        $ONVIFClient = new ONVIF($wsdl, $IpValue);
+        try {
+            $camera_datetime = $ONVIFClient->client->GetSystemDateAndTime();
+        } catch (SoapFault $e) {
+            return 0;
+        }
+
+        if (property_exists($camera_datetime->SystemDateAndTime, 'UTCDateTime')) {
+            $camera_ts = gmmktime(
+                $camera_datetime->SystemDateAndTime->UTCDateTime->Time->Hour,
+                $camera_datetime->SystemDateAndTime->UTCDateTime->Time->Minute,
+                $camera_datetime->SystemDateAndTime->UTCDateTime->Time->Second,
+                $camera_datetime->SystemDateAndTime->UTCDateTime->Date->Month,
+                $camera_datetime->SystemDateAndTime->UTCDateTime->Date->Day,
+                $camera_datetime->SystemDateAndTime->UTCDateTime->Date->Year
+            );
+            return time() - $camera_ts;
+        }
+        if (property_exists($camera_datetime->SystemDateAndTime, 'LocalDateTime')) {
+            $camera_ts = mktime(
+                $camera_datetime->SystemDateAndTime->LocalDateTime->Time->Hour,
+                $camera_datetime->SystemDateAndTime->LocalDateTime->Time->Minute,
+                $camera_datetime->SystemDateAndTime->LocalDateTime->Time->Second,
+                $camera_datetime->SystemDateAndTime->LocalDateTime->Date->Month,
+                $camera_datetime->SystemDateAndTime->LocalDateTime->Date->Day,
+                $camera_datetime->SystemDateAndTime->LocalDateTime->Date->Year
+            );
+            return time() - $camera_ts;
+        }
+        return 0;
     }
 }

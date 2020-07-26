@@ -26,7 +26,7 @@ function initPTZ(mediaId, instanceId)
     left += '</g>';
     left += '<g id="' + instanceId + '_right">';
     left += '<line fill="none" stroke-width="2" x1="1280" y1="360" x2="1180" y2="310" id="svg_rightline1" stroke="#00ff00" opacity="0.5"/>';
-    left += '<line fill="none" stroke-width="2" x1="1280" y1="360" x2="1180" y2="410" id="svg_rightine2" stroke="#00ff00" opacity="0.5"/>';
+    left += '<line fill="none" stroke-width="2" x1="1280" y1="360" x2="1180" y2="410" id="svg_rightline2" stroke="#00ff00" opacity="0.5"/>';
     left += '<rect x="1180" y="310" fill="#fff" opacity="0.2" width="100" height="100"/>';
     left += '</g>';
     left += '<g id="' + instanceId + '_top">';
@@ -45,7 +45,7 @@ function initPTZ(mediaId, instanceId)
             if (x[i].childNodes[1].childNodes[0].childNodes[1].getAttribute("src").includes(mediaId))
             {
                 f = x[i].childNodes[1].childNodes[0].childNodes[1];
-                i = x.lenght;
+                i = x.length;
             }
         }
     }
@@ -57,7 +57,7 @@ function initPTZ(mediaId, instanceId)
                 if (x[i].childNodes[1].childNodes[0].childNodes[1].getAttribute("src").includes(mediaId))
                 {
                     f = x[i].childNodes[1].childNodes[0].childNodes[1];
-                    i = x.lenght;
+                    i = x.length;
                 }
             }
         }

@@ -10,7 +10,7 @@ Bildet Digitale Ausgänge (Relays) in Symcon ab.
 - [5. Statusvariablen und Profile](#5-statusvariablen-und-profile)
   - [Statusvariablen](#statusvariablen)
 - [6. WebFront](#6-webfront)
-- [7. PHP-Befehlsreferenze](#7-php-befehlsreferenze)
+- [7. PHP-Befehlsreferenz](#7-php-befehlsreferenz)
 
 ## 1. Funktionsumfang
 
@@ -54,7 +54,7 @@ Die Statusvariablen werden automatisch angelegt. Das Löschen einzelner kann zu 
 
 Die Statusvariablen haben eine hinterlegte Standardaktion und somit können die Ausgänge direkt aus dem WebFront bedient werden. 
 
-## 7. PHP-Befehlsreferenze
+## 7. PHP-Befehlsreferenz
 
 ```php
 boolean ONVIF_SetRelayOutputState(integer $InstanzID, string $Ident, bool $Value);

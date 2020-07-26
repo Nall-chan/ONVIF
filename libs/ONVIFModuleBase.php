@@ -10,11 +10,10 @@ eval('declare(strict_types=1);namespace ONVIFModuleBase {?>' . file_get_contents
 eval('declare(strict_types=1);namespace ONVIFModuleBase {?>' . file_get_contents(__DIR__ . '/../libs/helper/AttributeArrayHelper.php') . '}');
 
 /**
- * @property int $ParentID 
+ * @property int $ParentID
  */
 class ONVIFModuleBase extends IPSModule
 {
-
     use \ONVIFModuleBase\BufferHelper,
         \ONVIFModuleBase\VariableProfileHelper,
         \ONVIFModuleBase\VariableHelper,
@@ -69,16 +68,6 @@ class ONVIFModuleBase extends IPSModule
         //$this->ReloadForm();
     }
 
-    protected function KernelReady()
-    {
-        $this->RegisterParent();
-    }
-
-    protected function RegisterParent()
-    {
-        $this->IORegisterParent();
-    }
-
     public function RequestAction($Ident, $Value)
     {
         if ($this->IORequestAction($Ident, $Value)) {
@@ -96,6 +85,16 @@ class ONVIFModuleBase extends IPSModule
                 $this->KernelReady();
                 break;
         }
+    }
+
+    protected function KernelReady()
+    {
+        $this->RegisterParent();
+    }
+
+    protected function RegisterParent()
+    {
+        $this->IORegisterParent();
     }
 
     /**
@@ -116,11 +115,11 @@ class ONVIFModuleBase extends IPSModule
                 $InstanceID = $this->InstanceID;
             }
             $Data = json_encode(['DataID' => '{9B9C8DA6-BC89-21BC-3E8C-BA6E534ABC37}', 'Function' => 'GetEvents', 'Pattern' => $Pattern, 'Instance' => $InstanceID, 'SkippedTopics' => $SkippedTopics]);
-            $anwser = $this->SendDataToParent($Data);
-            if ($anwser === false) {
+            $answer = $this->SendDataToParent($Data);
+            if ($answer === false) {
                 return [];
             }
-            return unserialize($anwser);
+            return unserialize($answer);
         }
         return [];
     }
@@ -129,9 +128,9 @@ class ONVIFModuleBase extends IPSModule
     {
         if ($this->HasActiveParent()) {
             $Data = json_encode(['DataID' => '{9B9C8DA6-BC89-21BC-3E8C-BA6E534ABC37}', 'Function' => 'GetCapabilities']);
-            $anwser = $this->SendDataToParent($Data);
-            if ($anwser !== false) {
-                return unserialize($anwser);
+            $answer = $this->SendDataToParent($Data);
+            if ($answer !== false) {
+                return unserialize($answer);
             }
         }
         return [
@@ -153,12 +152,12 @@ class ONVIFModuleBase extends IPSModule
     {
         if ($this->HasActiveParent()) {
             $Data = json_encode(['DataID' => '{9B9C8DA6-BC89-21BC-3E8C-BA6E534ABC37}', 'Function' => 'GetCredentials']);
-            $anwser = $this->SendDataToParent($Data);
-            if ($anwser === false) {
+            $answer = $this->SendDataToParent($Data);
+            if ($answer === false) {
                 $this->SendDebug('GetCredentials', 'No valid answer', 0);
                 throw new Exception($this->Translate('No valid answer.'), E_USER_NOTICE);
             }
-            return unserialize($anwser);
+            return unserialize($answer);
         }
         return ['Username' => '', 'Password' => ''];
     }
@@ -278,5 +277,4 @@ class ONVIFModuleBase extends IPSModule
         }
         return true;
     }
-
 }

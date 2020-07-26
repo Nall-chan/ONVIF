@@ -41,29 +41,6 @@ class ONVIFDigitalOutput extends ONVIFModuleBase
         $this->SetStatus(IS_ACTIVE);
     }
 
-    protected function GetRelayOutputs()
-    {
-        $ret = $this->SendData('', 'GetRelayOutputs', true);
-        if ($ret == false) {
-            return false;
-        }
-        $RelayOutputs = [];
-        if (is_array($ret->RelayOutputs)) {
-            foreach ($ret->RelayOutputs as $RelayOutput) {
-                $RelayOutputs[$RelayOutput->token] = json_decode(json_encode($RelayOutput), true);
-            }
-        } else {
-            $RelayOutputs[$ret->RelayOutputs->token] = json_decode(json_encode($ret->RelayOutputs), true);
-        }
-        $this->SendDebug('RelayOutputs', $RelayOutputs, 0);
-        $this->WriteAttributeArray('RelayOutputs', $RelayOutputs);
-        foreach ($RelayOutputs as $Ident => $RelayOutput) {
-            $this->RegisterVariableBoolean($Ident, $Ident, '~Switch', 0);
-            $this->EnableAction($Ident);
-        }
-        return true;
-    }
-
     public function SetRelayOutputState(string $Ident, bool $Value)
     {
         if (!array_key_exists($Ident, $this->ReadAttributeArray('RelayOutputs'))) {
@@ -205,5 +182,28 @@ class ONVIFDigitalOutput extends ONVIFModuleBase
         $this->SendDebug('FORM', json_last_error_msg(), 0);
 
         return json_encode($Form);
+    }
+
+    protected function GetRelayOutputs()
+    {
+        $ret = $this->SendData('', 'GetRelayOutputs', true);
+        if ($ret == false) {
+            return false;
+        }
+        $RelayOutputs = [];
+        if (is_array($ret->RelayOutputs)) {
+            foreach ($ret->RelayOutputs as $RelayOutput) {
+                $RelayOutputs[$RelayOutput->token] = json_decode(json_encode($RelayOutput), true);
+            }
+        } else {
+            $RelayOutputs[$ret->RelayOutputs->token] = json_decode(json_encode($ret->RelayOutputs), true);
+        }
+        $this->SendDebug('RelayOutputs', $RelayOutputs, 0);
+        $this->WriteAttributeArray('RelayOutputs', $RelayOutputs);
+        foreach ($RelayOutputs as $Ident => $RelayOutput) {
+            $this->RegisterVariableBoolean($Ident, $Ident, '~Switch', 0);
+            $this->EnableAction($Ident);
+        }
+        return true;
     }
 }

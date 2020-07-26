@@ -25,4 +25,4 @@ Erkennt ONVIF kompatible Geräte innerhalb des lokalen LAN.
 ## 4. Einrichten der Instanzen in IP-Symcon
 
  Unter 'Instanz hinzufügen' ist das 'ONVIF Discovery'-Modul unter dem Hersteller 'ONVIF' aufgeführt.
- Nach der Installtion über den Store, sollte eine Instanz von diesem Modul automatisch angelegt worden sein.  
+ Nach der Installation über den Store, sollte eine Instanz von diesem Modul automatisch angelegt worden sein.  

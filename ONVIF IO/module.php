@@ -122,15 +122,15 @@ class ONVIFIO extends IPSModule
             return;
         }
         $Host = $Url['scheme'] . '://' . $Url['host'] . $Url['port'];
-        $ReloadCapas = ($this->Host != $Host);
-        $ReloadCapas = $ReloadCapas || ($this->GetStatus() == 202);
-        $ReloadCapas = $ReloadCapas || ($this->ReadAttributeString('ConsumerAddress') == '');
-        $this->SendDebug('ReloadCapas', $ReloadCapas, 0);
+        $ReloadCapabilities = ($this->Host != $Host);
+        $ReloadCapabilities = $ReloadCapabilities || ($this->GetStatus() == 202);
+        $ReloadCapabilities = $ReloadCapabilities || ($this->ReadAttributeString('ConsumerAddress') == '');
+        $this->SendDebug('ReloadCapabilities', $ReloadCapabilities, 0);
         $this->SetSummary($Host);
         $this->Host = $Host;
         $this->GetSystemDateAndTime(); // können nicht alle, also nicht weiter beachten. Wird aber für login benötigt, damit Zeitdifferenzen berücksichtigt werden.
         if (!$this->GetDeviceInformation()) { // not reachable
-            $this->UpdateFormField('Eventhook', 'caption', $this->ReadAttributeString('ConsumerAddress'));
+            $this->UpdateFormField('EventHook', 'caption', $this->ReadAttributeString('ConsumerAddress'));
             $this->WriteAttributeString('SubscriptionReference', '');
             $this->WriteAttributeString('SubscriptionId', '');
             $this->UpdateFormField('SubscriptionReferenceRow', 'visible', true);
@@ -144,7 +144,7 @@ class ONVIFIO extends IPSModule
             return;
         }
 
-        if ($ReloadCapas) {
+        if ($ReloadCapabilities) {
             if (!$this->GetProfiles()) {
                 $this->SetStatus(IS_EBASE + 2);
                 return;
@@ -190,11 +190,11 @@ class ONVIFIO extends IPSModule
         $Data = json_decode($JSONString, true);
         unset($Data['DataID']);
         if ($Data['Function'] == 'GetCapabilities') {
-            $Capas['VideoSources'] = $this->ReadAttributeArray('VideoSources');
-            $Capas['HasOutput'] = $this->ReadAttributeBoolean('HasOutput');
-            $Capas['HasInput'] = $this->ReadAttributeBoolean('HasInput');
-            $Capas['XAddr'] = $this->ReadAttributeArray('XAddr');
-            return serialize($Capas);
+            $Capabilities['VideoSources'] = $this->ReadAttributeArray('VideoSources');
+            $Capabilities['HasOutput'] = $this->ReadAttributeBoolean('HasOutput');
+            $Capabilities['HasInput'] = $this->ReadAttributeBoolean('HasInput');
+            $Capabilities['XAddr'] = $this->ReadAttributeArray('XAddr');
+            return serialize($Capabilities);
         }
         if ($Data['Function'] == 'GetCredentials') {
             $Credentials['Username'] = $this->ReadPropertyString('Username');
@@ -317,7 +317,7 @@ class ONVIFIO extends IPSModule
     protected function EventsNotSupported()
     {
         $this->LogMessage('Events not supported: ' . $this->lastSOAPError, KL_MESSAGE);
-        $this->UpdateFormField('Eventhook', 'caption', $this->Translate('This device not support events.'));
+        $this->UpdateFormField('EventHook', 'caption', $this->Translate('This device not support events.'));
         $this->UpdateFormField('SubscriptionReferenceRow', 'visible', false);
         $this->UpdateFormField('Events', 'values', json_encode([]));
         $this->UpdateFormField('Events', 'visible', false);
@@ -355,14 +355,14 @@ class ONVIFIO extends IPSModule
             @socket_close($sock);
             if ($ip == '0.0.0.0') {
                 $this->SendDebug('ConsumerAddress', 'Invalid', 0);
-                $this->UpdateFormField('Eventhook', 'caption', $this->Translate('Invalid'));
+                $this->UpdateFormField('EventHook', 'caption', $this->Translate('Invalid'));
                 $this->WriteAttributeString('ConsumerAddress', 'Invalid');
                 return false;
             }
             $Url = 'http://' . $ip . ':3777/hook/ONVIFEvents/IO/' . $this->InstanceID;
             $this->SendDebug('ConsumerAddress', $Url, 0);
         }
-        $this->UpdateFormField('Eventhook', 'caption', $Url);
+        $this->UpdateFormField('EventHook', 'caption', $Url);
         $this->WriteAttributeString('ConsumerAddress', $Url);
         return true;
     }
@@ -501,12 +501,12 @@ class ONVIFIO extends IPSModule
         $xpath->registerNamespace($tt_ns, 'http://www.onvif.org/ver10/schema');
         $xpath->registerNamespace($wstop_ns, 'http://docs.oasis-open.org/wsn/t-1');
         $query = '//' . $wstop_ns . ':TopicSet';
-        $prefixPathlen = strlen($xpath->query($query, null, true)[0]->getNodePath());
+        $prefixPathLen = strlen($xpath->query($query, null, true)[0]->getNodePath());
         $query = '//*[@' . $wstop_ns . ":topic='true']/" . $tt_ns . ":MessageDescription[@IsProperty='true']/" . $tt_ns . ':Data/' . $tt_ns . ':SimpleItemDescription'; //[@Type='" . $xs_ns . ":boolean' or @Type='" . $xs_ns . ":string' or @Type='" . $xs_ns . ":int' or @Type='" . $tt_ns . ":RelayLogicalState']";
         $wsTopics = $xpath->query($query);
         $Path = [];
         foreach ($wsTopics as $wsData) {
-            $Topic = substr($wsData->parentNode->parentNode->parentNode->getNodePath(), $prefixPathlen + 1);
+            $Topic = substr($wsData->parentNode->parentNode->parentNode->getNodePath(), $prefixPathLen + 1);
             $Path[$Topic]['DataName'] = $wsData->attributes->getNamedItem('Name')->nodeValue;
             $Path[$Topic]['DataType'] = $wsData->attributes->getNamedItem('Type')->nodeValue;
             $wsSource = $xpath->query('../../' . $tt_ns . ':Source/' . $tt_ns . ':SimpleItemDescription', $wsData, true);
@@ -692,25 +692,25 @@ class ONVIFIO extends IPSModule
         $this->SendDebug('Send Params', $Params, 0);
         $wsdl = dirname(__DIR__) . DIRECTORY_SEPARATOR . 'libs' . DIRECTORY_SEPARATOR . 'onvif-client-php' . DIRECTORY_SEPARATOR . 'WSDL' . DIRECTORY_SEPARATOR . $wsdl;
         if ($UseLogin) {
-            $ONVIFclient = new ONVIF($wsdl, $URI, $this->ReadPropertyString('Username'), $this->ReadPropertyString('Password'), $Header, $this->ReadAttributeInteger('Timestamp_Offset'));
+            $ONVIFClient = new ONVIF($wsdl, $URI, $this->ReadPropertyString('Username'), $this->ReadPropertyString('Password'), $Header, $this->ReadAttributeInteger('Timestamp_Offset'));
         } else {
-            $ONVIFclient = new ONVIF($wsdl, $URI, null, null, $Header);
+            $ONVIFClient = new ONVIF($wsdl, $URI, null, null, $Header);
         }
         try {
             if (count($Params) == 0) {
-                $Result = $ONVIFclient->client->{$Function}();
+                $Result = $ONVIFClient->client->{$Function}();
             } else {
-                $Result = $ONVIFclient->client->{$Function}($Params);
+                $Result = $ONVIFClient->client->{$Function}($Params);
             }
-            $Response = $ONVIFclient->client->__getLastResponse();
-            $this->SendDebug('Soap Request', $ONVIFclient->client->__getLastRequest(), 0);
+            $Response = $ONVIFClient->client->__getLastResponse();
+            $this->SendDebug('Soap Request', $ONVIFClient->client->__getLastRequest(), 0);
             $this->SendDebug('Soap Response', $Response, 0);
             $this->lastSOAPError = '';
         } catch (SoapFault $e) {
-            $this->SendDebug('Soap Request Error', $ONVIFclient->client->__getLastRequest(), 0);
-            $this->SendDebug('Soap Response Error', $ONVIFclient->client->__getLastResponse(), 0);
+            $this->SendDebug('Soap Request Error', $ONVIFClient->client->__getLastRequest(), 0);
+            $this->SendDebug('Soap Response Error', $ONVIFClient->client->__getLastResponse(), 0);
             $this->SendDebug('Soap Response Error Message', $e->getMessage(), 0);
-            $Response = $ONVIFclient->client->__getLastResponse();
+            $Response = $ONVIFClient->client->__getLastResponse();
             $this->lastSOAPError = $e->getMessage();
             return $e;
         }
@@ -779,9 +779,9 @@ class ONVIFIO extends IPSModule
         $Notifications = $xml->xpath('//wsnt:NotificationMessage');
         $EventData = [];
         foreach ($Notifications as $Notification) {
-            $NotificationDataChilds = $Notification->children('wsnt', true);
-            $NotificatioTopic = (string) $NotificationDataChilds->Topic;
-            $NotificationMessage = $NotificationDataChilds->Message->children('tt', true)->Message;
+            $NotificationDataChildren = $Notification->children('wsnt', true);
+            $NotificationTopic = (string) $NotificationDataChildren->Topic;
+            $NotificationMessage = $NotificationDataChildren->Message->children('tt', true)->Message;
             if (count($NotificationMessage->Source->children('tt', true)) == 0) {
                 $NotificationSourceAttributes['Name'] = '';
                 $NotificationSourceAttributes['Value'] = '';
@@ -789,7 +789,7 @@ class ONVIFIO extends IPSModule
                 $NotificationSourceAttributes = ((array) $NotificationMessage->Source->children('tt', true)[0]->attributes())['@attributes'];
             }
             $NotificationDataAttributes = ((array) $NotificationMessage->Data->children('tt', true)[0]->attributes())['@attributes'];
-            $EventData[] = ['Topic'       => $NotificatioTopic,
+            $EventData[] = ['Topic'       => $NotificationTopic,
                 'SourceName'              => $NotificationSourceAttributes['Name'],
                 'SourceValue'             => $NotificationSourceAttributes['Value'],
                 'DataName'                => $NotificationDataAttributes['Name'],
@@ -797,14 +797,14 @@ class ONVIFIO extends IPSModule
             ];
         }
         $this->SendDebug('Event', $EventData, 0);
-        $this->SendEventDataToChilds($EventData);
+        $this->SendEventDataToChildren($EventData);
     }
 
-    protected function SendEventDataToChilds(array $EventDataArray)
+    protected function SendEventDataToChildren(array $EventDataArray)
     {
         foreach ($EventDataArray as $EventData) {
             $EventData['DataID'] = '{E23DD2CD-F098-268A-CE49-1CC04FE8060B}';
-            $this->SendDebug('tochild', json_encode($EventData), 0);
+            $this->SendDebug('ToChild', json_encode($EventData), 0);
             $this->SendDataToChildren(json_encode($EventData));
         }
     }

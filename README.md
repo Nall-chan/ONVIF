@@ -15,7 +15,7 @@ Folgende Module beinhaltet das ONVIF Library Repository:
 	Unterstützt beim Einrichten der verschiedenen Instanzen für ein ONVIF-Gerät.
 
 - __ONVIF IO__ ([Dokumentation](ONVIF%20IO))
-	Stellt die Verbidnung zu einem ONVIF-Gerät her.  
+	Stellt die Verbindung zu einem ONVIF-Gerät her.  
 
 - __ONVIF Media Stream__ ([Dokumentation](ONVIF%20Media%20Stream))
 	Konfiguriert ein IPS Medien-Objekt anhand der Geräte-Fähigkeiten.  
@@ -39,7 +39,7 @@ Folgende Module beinhaltet das ONVIF Library Repository:
 
 ## Spenden  
   
-  Die Library ist für die nicht kommzerielle Nutzung kostenlos, Schenkungen als Unterstützung für den Autor werden hier akzeptiert:  
+  Die Library ist für die nicht kommerzielle Nutzung kostenlos, Schenkungen als Unterstützung für den Autor werden hier akzeptiert:  
 
 <a href="https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=G2SLW2MEMQZH2" target="_blank"><img src="https://www.paypalobjects.com/de_DE/DE/i/btn/btn_donate_LG.gif" border="0" /></a>
 
