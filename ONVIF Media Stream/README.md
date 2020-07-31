@@ -34,7 +34,7 @@ __Konfigurationsseite__:
 
 | Name        | Text                       | Beschreibung                                                                      |
 | ----------- | -------------------------- | --------------------------------------------------------------------------------- |
-| VideoSource | Videoquelle                | Auswahl der Videiquelle                                                           |
+| VideoSource | Videoquelle                | Auswahl der Videoquelle                                                           |
 | Profile     | Stream-Profil              | Auswahl des Profils                                                               |
 | EventTopic  | Ereignisse der Videoquelle | Auswahl des Ereignis-Pfad ab welchen Ereignisse empfangen und verarbeitet werden. |
 
@@ -46,5 +46,5 @@ Die Statusvariablen werden automatisch angelegt. Das Löschen einzelner kann zu 
 
 | Name    | Typ      | Beschreibung                                                                                |
 | ------- | -------- | ------------------------------------------------------------------------------------------- |
-| Stream  | Media    | IPS-Medionobjekt Typ Stream mit der RTSP-URL.                                               |
+| Stream  | Media    | IPS-Medienobjekt Typ Stream mit der RTSP-URL.                                               |
 | diverse | variable | Für jedes eintreffende Ereignis wird automatisch eine passende Variable in Symcon erstellt. |

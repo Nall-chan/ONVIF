@@ -1,5 +1,5 @@
 # ONVIF IO
-Stellt die Verbidnung zu einem ONVIF-Gerät her.  
+Stellt die Verbindung zu einem ONVIF-Gerät her.  
 
 ## Inhaltsverzeichnis <!-- omit in toc -->
 
@@ -33,7 +33,7 @@ Stellt die Verbidnung zu einem ONVIF-Gerät her.
 | Name       | Text         | Beschreibung                                                                                                            |
 | ---------- | ------------ | ----------------------------------------------------------------------------------------------------------------------- |
 | Open       | Aktiv        | Öffnet/Aktiviert die Verbindung zum Gerät.                                                                              |
-| Address    | Adresse      | URL zum ONIVIF Device-Service (z.B. http://192.168.1.111/onvif/device_service)                                          |
+| Address    | Adresse      | URL zum ONVIF Device-Service (z.B. http://192.168.1.111/onvif/device_service)                                           |
 | Username   | Benutzername | Benutzername für die Anmeldung                                                                                          |
 | Password   | Passwort     | Passwort zum Benutzernamen                                                                                              |
 | NATAddress | NAT Adresse  | Nur bei Betrieb von Symcon hinter einem NAT, ist hier die Public-IP ggfls mit :Port einzutragen (z.B. 192.168.0.5:3777) |
