@@ -110,28 +110,35 @@ class ONVIFModuleBase extends IPSModule
 
     protected function GetEvents(string $Pattern = '', int $InstanceID = -1, array $SkippedTopics = [])
     {
+        $answer = [];
         if ($this->HasActiveParent()) {
             if ($InstanceID == -1) {
                 $InstanceID = $this->InstanceID;
             }
+            $this->SendDebug('GetEvents Pattern', $Pattern, 0);
+            $this->SendDebug('GetEvents SkippedTopics', $SkippedTopics, 0);
             $Data = json_encode(['DataID' => '{9B9C8DA6-BC89-21BC-3E8C-BA6E534ABC37}', 'Function' => 'GetEvents', 'Pattern' => $Pattern, 'Instance' => $InstanceID, 'SkippedTopics' => $SkippedTopics]);
             $answer = $this->SendDataToParent($Data);
-            if ($answer === false) {
-                return [];
+            if ($answer !== false) {
+                $answer = unserialize($answer);
             }
-            return unserialize($answer);
+            $this->SendDebug('Events Result', $answer, 0);
         }
-        return [];
+        return $answer;
     }
 
     protected function GetCapabilities()
     {
         if ($this->HasActiveParent()) {
+            $this->SendDebug('GetCapabilities', '', 0);
             $Data = json_encode(['DataID' => '{9B9C8DA6-BC89-21BC-3E8C-BA6E534ABC37}', 'Function' => 'GetCapabilities']);
             $answer = $this->SendDataToParent($Data);
             if ($answer !== false) {
-                return unserialize($answer);
+                $Result = unserialize($answer);
+                $this->SendDebug('Capabilities Result', $Result, 0);
+                return $Result;
             }
+            $this->SendDebug('Capabilities Result', [], 0);
         }
         return [
             'VideoSources' => [],
@@ -174,10 +181,12 @@ class ONVIFModuleBase extends IPSModule
         $this->SendDebug('Forward useLogin', $UseLogin, 0);
         $Ret = $this->SendDataToParent(json_encode(['DataID' => '{9B9C8DA6-BC89-21BC-3E8C-BA6E534ABC37}', 'URI' => $URI, 'Function' => $Function, 'Params' => $Params, 'useLogin' => $UseLogin, 'wsdl' => $wsdl]));
         if ($Ret === false) {
+            $this->SendDebug('Result', false, 0);
             return false;
         }
         $Result = unserialize($Ret);
         if (is_a($Result, 'SoapFault')) {
+            $this->SendDebug('Result Error', $Result, 0);
             trigger_error($Result->getMessage(), E_USER_WARNING);
             return false;
         }
@@ -208,8 +217,6 @@ class ONVIFModuleBase extends IPSModule
     protected function GetConfigurationFormEventTopic(array $Form, bool $AddNothingIndex = false, array $SkippedTopics = [])
     {
         $Events = $this->GetEvents(static::TopicFilter, 0, $SkippedTopics);
-        $this->SendDebug('GetEvents', $SkippedTopics, 0);
-        $this->SendDebug('GetEvents', $Events, 0);
         if (count($Events) == 0) {
             unset($Form['options']);
             $Form['type'] = 'ValidationTextBox';

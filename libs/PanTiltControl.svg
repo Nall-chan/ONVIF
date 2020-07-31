@@ -1,0 +1,19 @@
+<svg viewBox="0 0 200 200" width=%%width%% height=%%height
+    xmlns="http://www.w3.org/2000/svg">
+    <g id="%%InstanceId%%_left">
+        <path opacity="%%opacity%%" stroke="none" id="left" d="m30,30l70,70l-70,70q-60,-70 0,-140" stroke-width="2" fill="#33666C"/>
+        <path opacity="%%opacity%%" transform="rotate(180 34.6644172668457,99.67082214355469) " id="arrow_left" d="m36.8548,99.67083l-21.69038,-37.50001l38.99999,37.50001l-38.99999,37.5l21.69038,-37.5z" stroke-width="1.5" stroke="#000000" fill="#ffffff"/>
+    </g>
+    <g id="%%InstanceId%%_up">
+        <path opacity="%%opacity%%" stroke="none" id="up" d="m30,30l70,70l70,-70q-70,-60 -140,0" stroke-width="2" fill="#33666C"/>
+        <path opacity="%%opacity%%" transform="rotate(-90 99.66441345214844,36.67082214355468) " id="arrow_up" d="m101.8548,36.67083l-21.69038,-37.50001l38.99999,37.50001l-38.99999,37.5l21.69038,-37.5z" stroke-width="1.5" stroke="#000000" fill="#ffffff"/>
+    </g>
+    <g id="%%InstanceId%%_right">
+        <path opacity="%%opacity%%" stroke="none" id="right" d="m170,30l-70,70l70,70q60,-70 0,-140" stroke-width="2" fill="#33666C"/>
+        <path opacity="%%opacity%%" id="arrow_right" d="m166.8548,99.67083l-21.69038,-37.50001l38.99999,37.50001l-38.99999,37.49999l21.69038,-37.49999z" stroke-width="1.5" stroke="#000000" fill="#ffffff"/>
+    </g>
+    <g id="%%InstanceId%%_down">
+        <path opacity="%%opacity%%" stroke="none" id="down" d="m170,170l-70,-70l-70,70q70,60 140,0" stroke-width="2" fill="#33666C"/>
+        <path opacity="%%opacity%%" transform="rotate(90 99.66441345214842,162.67082214355472) " id="arrow_down" d="m101.8548,162.67083l-21.69038,-37.50001l38.99999,37.50001l-38.99999,37.5l21.69038,-37.5z" stroke-width="1.5" stroke="#000000" fill="#ffffff"/>
+    </g>
+</svg>

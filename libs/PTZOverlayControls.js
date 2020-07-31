@@ -15,8 +15,6 @@ function sendPTZstop(event) {
 }
 function initPTZ(mediaId, instanceId)
 {
-    var x = document.querySelectorAll("div.ipsContainer.container.nestedEven.ipsMedia");
-    var f = null;
     var left = '';
     left += '<svg viewBox="0 0 1280 720" xmlns="http://www.w3.org/2000/svg">';
     left += '<g id="' + instanceId + '_left">';
@@ -40,8 +38,10 @@ function initPTZ(mediaId, instanceId)
     left += '<rect x="590" y="620" fill="#fff" opacity="0.2" width="100" height="100"/>';
     left += '</g>';
     left += '</svg>';
+    var f = null;
+    var x = document.querySelectorAll("div.ipsContainer.container.nestedEven.ipsMedia");
     for (i = 0; i < x.length; i++) {
-        if (x[i].childNodes[1].childNodes[0].childNodes[1].tagName === "VIDEO") {
+        if (x[i].childNodes[1].childNodes[0].childNodes[1].tagName === "IMG") {
             if (x[i].childNodes[1].childNodes[0].childNodes[1].getAttribute("src").includes(mediaId))
             {
                 f = x[i].childNodes[1].childNodes[0].childNodes[1];
@@ -53,7 +53,7 @@ function initPTZ(mediaId, instanceId)
     if (f === -1) {
         x = document.querySelectorAll("div.ipsContainer.container.nestedUneven.ipsMedia");
         for (i = 0; i < x.length; i++) {
-            if (x[i].childNodes[1].childNodes[0].childNodes[1].tagName === "VIDEO") {
+            if (x[i].childNodes[1].childNodes[0].childNodes[1].tagName === "IMG") {
                 if (x[i].childNodes[1].childNodes[0].childNodes[1].getAttribute("src").includes(mediaId))
                 {
                     f = x[i].childNodes[1].childNodes[0].childNodes[1];
@@ -63,13 +63,16 @@ function initPTZ(mediaId, instanceId)
         }
     }
     if (f !== null) {
-        var mydiv = document.createElement("div");
         var style = document.createAttribute("style");
         style.value = "position: absolute; left: 0px; top: 0px; bottom: 0px; right: 0px; outline: solid 2px; padding:10px; z-index: 5;";
+        var IpsClass = document.createAttribute("class");
+        IpsClass.value = "stream";
+        var mydiv = document.createElement("div");
         mydiv.attributes.setNamedItem(style);
+        mydiv.attributes.setNamedItem(IpsClass);
         mydiv.innerHTML = left;
         var p = f.parentElement;
-        p.insertBefore(mydiv, f);
+        p.appendChild(mydiv);
         document.getElementById(instanceId + "_left").addEventListener("mousedown", sendPTZstart);
         document.getElementById(instanceId + "_right").addEventListener("mousedown", sendPTZstart);
         document.getElementById(instanceId + "_top").addEventListener("mousedown", sendPTZstart);

@@ -4,24 +4,204 @@
             "type": "Select",
             "name": "VideoSource",
             "caption": "Videosource",
-            "options": [
-            ],
+            "width": "300px",
+            "options": [],
             "onChange": "IPS_RequestAction($id,'RefreshProfileForm',$VideoSource);"
         },
         {
             "type": "Select",
             "name": "Profile",
             "caption": "Stream-Profile",
-            "options": [
-            ]
+            "width": "300px",
+            "options": []
         },
         {
             "type": "Select",
             "name": "EventTopic",
             "caption": "Events of videosource",
-            "options": [
-            ],
-            "enable": false
+            "width": "300px",
+            "options": [],
+            "enabled": false
+        },
+        {
+            "type": "PopupButton",
+            "caption": "Configure PTZ",
+            "width": "300px",
+            "enabled": false,
+            "popup": {
+                "caption": "Pan/Tilt/Zoom",
+                "items": [
+                    {
+                        "type": "ExpansionPanel",
+                        "caption": "Stream and Control HTML-Box",
+                        "expanded": true,
+                        "items": [
+                            {
+                                "type": "RowLayout",
+                                "items": [
+                                    {
+                                        "type": "CheckBox",
+                                        "name": "EnablePanTiltHTML",
+                                        "caption": "Enable Pan/Tilt",
+                                        "width": "250px"
+                                    },
+                                    {
+                                        "type": "CheckBox",
+                                        "name": "EnableZoomHTML",
+                                        "caption": "Enable Zoom",
+                                        "width": "250px"
+                                    }
+                                ]
+                            },
+                            {
+                                "type": "RowLayout",
+                                "items": [
+                                    {
+                                        "type": "NumberSpinner",
+                                        "name": "PanTiltControlWidth",
+                                        "caption": "Pan/Tilt-Control width",
+                                        "digits": 0,
+                                        "width": "250px",
+                                        "minimum": 0
+                                    },
+                                    {
+                                        "type": "NumberSpinner",
+                                        "name": "ZoomControlWidth",
+                                        "caption": "Zoom-Control width",
+                                        "digits": 0,
+                                        "width": "250px",
+                                        "minimum": 0
+                                    }
+                                ]
+                            },
+                            {
+                                "type": "RowLayout",
+                                "items": [
+                                    {
+                                        "type": "NumberSpinner",
+                                        "name": "PanTiltControlHeight",
+                                        "caption": "Pan/Tilt-Control height",
+                                        "digits": 0,
+                                        "width": "250px",
+                                        "minimum": 0
+                                    },
+                                    {
+                                        "type": "NumberSpinner",
+                                        "name": "ZoomControlHeight",
+                                        "caption": "Zoom-Control height",
+                                        "digits": 0,
+                                        "width": "250px",
+                                        "minimum": 0
+                                    }
+                                ]
+                            },
+                            {
+                                "type": "RowLayout",
+                                "items": [
+                                    {
+                                        "type": "NumberSpinner",
+                                        "name": "PanTiltControlOpacity",
+                                        "caption": "Pan/Tilt-Control opacity",
+                                        "digits": 0,
+                                        "suffix": "%",
+                                        "width": "250px",
+                                        "minimum": 0,
+                                        "maximum": 100
+                                    },
+                                    {
+                                        "type": "NumberSpinner",
+                                        "name": "ZoomControlOpacity",
+                                        "caption": "Zoom-Control opacity",
+                                        "digits": 0,
+                                        "suffix": "%",
+                                        "width": "250px",
+                                        "minimum": 0,
+                                        "maximum": 100
+                                    }
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        "type": "ExpansionPanel",
+                        "caption": "Control Variables",
+                        "expanded": true,
+                        "items": [
+                            {
+                                "type": "RowLayout",
+                                "items": [
+                                    {
+                                        "type": "CheckBox",
+                                        "name": "EnablePanTiltVariable",
+                                        "caption": "Enable Pan/Tilt",
+                                        "width": "250px"
+                                    },
+                                    {
+                                        "type": "CheckBox",
+                                        "name": "EnableZoomVariable",
+                                        "caption": "Enable Zoom",
+                                        "width": "250px"
+                                    }
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        "type": "ExpansionPanel",
+                        "caption": "Default Speeds",
+                        "expanded": false,
+                        "items": [
+                            {
+                                "type": "RowLayout",
+                                "items": [
+                                    {
+                                        "type": "NumberSpinner",
+                                        "name": "PanDefaultSpeed",
+                                        "caption": "Pan speed",
+                                        "digits": 2,
+                                        "width": "250px",
+                                        "minimum": 0.01,
+                                        "maximum": 1
+                                    },
+                                    {
+                                        "type": "NumberSpinner",
+                                        "name": "ZoomDefaultSpeed",
+                                        "caption": "Zoom speed",
+                                        "digits": 2,
+                                        "width": "250px",
+                                        "minimum": 0.01,
+                                        "maximum": 1
+                                    }
+                                ]
+                            },
+                            {
+                                "type": "RowLayout",
+                                "items": [
+                                    {
+                                        "type": "NumberSpinner",
+                                        "name": "TiltDefaultSpeed",
+                                        "caption": "Tilt speed",
+                                        "digits": 2,
+                                        "width": "250px",
+                                        "minimum": 0.01,
+                                        "maximum": 1
+                                    }
+                                ]
+                            }
+                        ]
+                    }
+                ]
+            }
+        },
+        {
+            "type": "PopupButton",
+            "caption": "Configure Presets",
+            "width": "300px",
+            "enabled": false,
+            "popup": {
+                "caption": "Presets",
+                "items": []
+            }
         }
     ],
     "status": [

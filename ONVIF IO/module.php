@@ -179,6 +179,7 @@ class ONVIFIO extends IPSModule
                 }
             }
         } else {
+            $this->SendDebug('VideoSourcesAttribute', $this->ReadAttributeArray('VideoSources'), 0);
             $this->Subscribe();
         }
         $this->LogMessage($this->Translate('Interface connected'), KL_MESSAGE);
@@ -537,6 +538,7 @@ class ONVIFIO extends IPSModule
             return false;
         }
         $res = json_decode(json_encode($ret), true)['Profiles'];
+        $this->SendDebug('Profiles', $res, 0);
         $Profiles = array_filter($res, function ($Profile)
         {
             if (isset($Profile['VideoEncoderConfiguration']['Encoding'])) {
@@ -554,9 +556,12 @@ class ONVIFIO extends IPSModule
             $VideoSourcesItems[$Profile['VideoSourceConfiguration']['SourceToken']]['VideoSourceToken'] = $Profile['VideoSourceConfiguration']['SourceToken'];
             $VideoSourcesItems[$Profile['VideoSourceConfiguration']['SourceToken']]['VideoSourceName'] = $Profile['VideoSourceConfiguration']['Name'];
             $VideoSourcesItems[$Profile['VideoSourceConfiguration']['SourceToken']]['Profile'][] = [
-                'Name'     => $Profile['VideoEncoderConfiguration']['Name'],
-                'token'    => $Profile['token'],
-                'ptztoken' => isset($Profile['PTZConfiguration']['token']) ? $Profile['PTZConfiguration']['token'] : ''
+                'Name'       => $Profile['VideoEncoderConfiguration']['Name'],
+                'token'      => $Profile['token'],
+                'ptztoken'   => isset($Profile['PTZConfiguration']['token']) ? $Profile['PTZConfiguration']['token'] : '',
+                'Encoding'   => $Profile['VideoEncoderConfiguration']['Encoding'],
+                'Resolution' => $Profile['VideoEncoderConfiguration']['Resolution'],
+                'RateControl'=> $Profile['VideoEncoderConfiguration']['RateControl']
             ];
         }
         $VideoSources = array_values($VideoSourcesItems);
