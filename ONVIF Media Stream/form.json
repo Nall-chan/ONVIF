@@ -33,7 +33,7 @@
                 "items": [
                     {
                         "type": "ExpansionPanel",
-                        "caption": "Stream and Control HTML-Box",
+                        "caption": "HTML-Box (Stream & Control)",
                         "expanded": true,
                         "items": [
                             {
@@ -59,7 +59,7 @@
                                     {
                                         "type": "NumberSpinner",
                                         "name": "PanTiltControlWidth",
-                                        "caption": "Pan/Tilt-Control width",
+                                        "caption": "Width Pan/Tilt-Control",
                                         "digits": 0,
                                         "width": "250px",
                                         "minimum": 0
@@ -67,7 +67,7 @@
                                     {
                                         "type": "NumberSpinner",
                                         "name": "ZoomControlWidth",
-                                        "caption": "Zoom-Control width",
+                                        "caption": "Width Zoom-Control",
                                         "digits": 0,
                                         "width": "250px",
                                         "minimum": 0
@@ -80,7 +80,7 @@
                                     {
                                         "type": "NumberSpinner",
                                         "name": "PanTiltControlHeight",
-                                        "caption": "Pan/Tilt-Control height",
+                                        "caption": "Height Pan/Tilt-Control",
                                         "digits": 0,
                                         "width": "250px",
                                         "minimum": 0
@@ -88,7 +88,7 @@
                                     {
                                         "type": "NumberSpinner",
                                         "name": "ZoomControlHeight",
-                                        "caption": "Zoom-Control height",
+                                        "caption": "Height Zoom-Control",
                                         "digits": 0,
                                         "width": "250px",
                                         "minimum": 0
@@ -101,7 +101,7 @@
                                     {
                                         "type": "NumberSpinner",
                                         "name": "PanTiltControlOpacity",
-                                        "caption": "Pan/Tilt-Control opacity",
+                                        "caption": "Opacity Pan/Tilt-Control",
                                         "digits": 0,
                                         "suffix": "%",
                                         "width": "250px",
@@ -111,7 +111,7 @@
                                     {
                                         "type": "NumberSpinner",
                                         "name": "ZoomControlOpacity",
-                                        "caption": "Zoom-Control opacity",
+                                        "caption": "Opacity Zoom-Control",
                                         "digits": 0,
                                         "suffix": "%",
                                         "width": "250px",
@@ -126,6 +126,7 @@
                         "type": "ExpansionPanel",
                         "caption": "Control Variables",
                         "expanded": true,
+                        "visible": false,
                         "items": [
                             {
                                 "type": "RowLayout",
@@ -200,7 +201,12 @@
             "enabled": false,
             "popup": {
                 "caption": "Presets",
-                "items": []
+                "items": [
+                    {
+                        "type": "Label", 
+                        "caption":"nothing to see.... yet"
+                    }
+                ]
             }
         }
     ],

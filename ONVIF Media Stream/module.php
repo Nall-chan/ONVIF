@@ -276,7 +276,7 @@ class ONVIFMediaStream extends ONVIFModuleBase
             }
             $Actions[] = [
                 'type'   => 'ExpansionPanel',
-                'caption'=> $this->Translate('Stream-Propertys'),
+                'caption'=> $this->Translate('Stream properties'),
                 'items'  => $ExpansionPanelVideoItems
             ];
 
@@ -319,7 +319,7 @@ class ONVIFMediaStream extends ONVIFModuleBase
                     $PTZPresetItems['items'][] =
                      [
                          'type'     => 'PopupButton',
-                         'caption'  => $this->Translate('No Presets'),
+                         'caption'  => $this->Translate('No presets'),
                          'width'    => '200px',
                          'popup'    => [],
                          'enabled'  => false
@@ -338,7 +338,7 @@ class ONVIFMediaStream extends ONVIFModuleBase
                     }
                     $PTZPresetItems['items'][] = [
                         'type'    => 'PopupButton',
-                        'caption' => $this->Translate('Show Presets'),
+                        'caption' => $this->Translate('Show presets'),
                         'width'   => '200px',
                         'popup'   => [
                             'caption'=> $this->Translate('Presets'),
@@ -383,7 +383,7 @@ class ONVIFMediaStream extends ONVIFModuleBase
                         [
                             'type'    => 'Label',
                             'width'   => '200px',
-                            'caption' => $this->Translate('PTZ-Max Presets:')
+                            'caption' => $this->Translate('max. presets:')
                         ],
                         [
                             'type'    => 'Label',
@@ -399,7 +399,7 @@ class ONVIFMediaStream extends ONVIFModuleBase
                         [
                             'type'    => 'Label',
                             'width'   => '200px',
-                            'caption' => $this->Translate('PTZ has Homeposition:')
+                            'caption' => $this->Translate('Has Home Position:')
                         ],
                         [
                             'type'    => 'Label',
@@ -410,7 +410,7 @@ class ONVIFMediaStream extends ONVIFModuleBase
                 ];
                 $Actions[] = [
                     'type'   => 'ExpansionPanel',
-                    'caption'=> $this->Translate('PTZ-Propertys'),
+                    'caption'=> $this->Translate('PTZ properties'),
                     'items'  => $ExpansionPanelPTZItems
                 ];
             }
