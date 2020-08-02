@@ -53,23 +53,21 @@ class ONVIFMediaStream extends ONVIFModuleBase
         $this->PTZ_HasHome = false;
         $this->PTZ_MaxPresets = 0;
         $this->PTZ_Spaces = [];
-        // TODO
-        // Statusvariablen PT & Zoom in applychanges anlegen/entfernen + Aktion testen
-        // Statusvariablen SPEED & TIME in applychanges anlegen/entfernen + Aktion erstellen + testen
+        // Profile
         $this->RegisterProfileIntegerEx('ONVIF.PanTilt', 'Move', '', '',
             [
-                [0, '', 'HollowLargeArrowLeft', -1],
-                [1, '', 'HollowLargeArrowUp', -1],
-                [2, '', 'Cross', -1],
-                [3, '', 'HollowLargeArrowDown', -1],
-                [4, '', 'HollowLargeArrowRight', -1]
+                [0, '◄◄', 'HollowLargeArrowLeft', -1],
+                [1, '▲▲', 'HollowLargeArrowUp', -1],
+                [2, 'Stop', 'Move', -1],
+                [3, '▼▼', 'HollowLargeArrowDown', -1],
+                [4, '►►', 'HollowLargeArrowRight', -1]
             ]
         );
         $this->RegisterProfileIntegerEx('ONVIF.Zoom', 'Move', '', '',
             [
-                [0, '', 'HollowDoubleArrowUp', -1],
-                [1, '', 'Cross', -1],
-                [2, '', 'HollowDoubleArrowDown', -1]
+                [0, '↑↑', 'HollowDoubleArrowUp', -1],
+                [1, 'Stop', 'Move', -1],
+                [2, '↓↓', 'HollowDoubleArrowDown', -1]
             ]
         );
         $this->RegisterProfileFloatEx('ONVIF.Speed', 'Speedo', '', '',
@@ -99,23 +97,6 @@ class ONVIFMediaStream extends ONVIFModuleBase
 
     public function ApplyChanges()
     {
-        $this->RegisterProfileIntegerEx('ONVIF.PanTilt', 'Move', '', '',
-        [
-            [0, '◄◄', 'HollowLargeArrowLeft', -1],
-            [1, '▲▲', 'HollowLargeArrowUp', -1],
-            [2, 'Stop', 'Move', -1],
-            [3, '▼▼', 'HollowLargeArrowDown', -1],
-            [4, '►►', 'HollowLargeArrowRight', -1]
-        ]
-    );
-        $this->RegisterProfileIntegerEx('ONVIF.Zoom', 'Move', '', '',
-        [
-            [0, '↑↑', 'HollowDoubleArrowUp', -1],
-            [1, 'Stop', 'Move', -1],
-            [2, '↓↓', 'HollowDoubleArrowDown', -1]
-        ]
-    );
-
         //Never delete this line!
         parent::ApplyChanges();
         $this->PTZ_token = '';
@@ -754,7 +735,7 @@ class ONVIFMediaStream extends ONVIFModuleBase
         switch ($Ident) {
             case 'TIME':
             case 'SPEED':
-                $this->SetValueFloat($Ident,$Value);
+                $this->SetValueFloat($Ident, $Value);
             return;
             case 'PT':
                 $ret = false;

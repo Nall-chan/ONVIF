@@ -42,8 +42,4 @@ class LibraryValidationTest extends TestCaseSymconValidation
     {
         $this->validateModule(__DIR__ . '/../ONVIF Media Stream');
     }
-    public function testValidatePTZ(): void
-    {
-        $this->validateModule(__DIR__ . '/../ONVIF PTZ');
-    }
 }
