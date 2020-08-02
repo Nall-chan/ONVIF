@@ -73,9 +73,9 @@ class ONVIFMediaStream extends ONVIFModuleBase
         $this->RegisterProfileFloatEx('ONVIF.Speed', 'Speedo', '', '',
         [
             [0, $this->Translate('default'), '', -1],
-            [0.1, '%.1f', '', -1]
+            [0.1, '%.1f ' . $this->Translate('sec.'), '', -1]
         ],
-        1, 0.1, 1);
+        5, 0.5, 1);
         $this->RegisterProfileFloatEx('ONVIF.Time', 'Clock', '', '',
         [
             [0, $this->Translate('default'), '', -1],
@@ -756,7 +756,9 @@ class ONVIFMediaStream extends ONVIFModuleBase
                         $ret = $this->MoveRightSpeedTime($Speed, $Time);
                     break;
                     default:
+                        set_error_handler([$this, 'ModulErrorHandler']);
                         trigger_error($this->Translate('Invalid Value.'), E_USER_NOTICE);
+                        restore_error_handler();
                         return false;
 
                 }
@@ -777,7 +779,9 @@ class ONVIFMediaStream extends ONVIFModuleBase
                         $ret = $this->ZoomNearSpeedTime($Speed, $Time);
                     break;
                         default:
+                        set_error_handler([$this, 'ModulErrorHandler']);
                         trigger_error($this->Translate('Invalid Value.'), E_USER_NOTICE);
+                        restore_error_handler();
                         return false;
 
                 }
@@ -786,7 +790,9 @@ class ONVIFMediaStream extends ONVIFModuleBase
                 }
                 return $ret;
         }
+        set_error_handler([$this, 'ModulErrorHandler']);
         trigger_error($this->Translate('Invalid Ident.'), E_USER_NOTICE);
+        restore_error_handler();
         return false;
     }
 
@@ -807,7 +813,17 @@ class ONVIFMediaStream extends ONVIFModuleBase
         $PreName = str_replace($this->ReadPropertyString('EventTopic'), '', $Data['Topic']);
         return $this->SetEventStatusVariable($PreName, $EventProperties[$Data['Topic']], $Data);
     }
+    protected function IOChangeState($State)
+    {
+        parent::IOChangeState($State);
 
+        if ($State == IS_INACTIVE) {
+            $this->SetMedia('');
+            if ($this->GetIDForIdent('PTZControlHtml')) {
+                $this->SetValueString('PTZControlHtml', '');
+            }
+        }
+    }
     protected function RefreshProfileForm($NewVideoSource)
     {
         $Capas = @$this->GetCapabilities();
@@ -934,6 +950,7 @@ class ONVIFMediaStream extends ONVIFModuleBase
     {
         $mId = @$this->GetIDForIdent('STREAM');
         if ($mId == false) {
+            $this->SetValueString('PTZControlHtml', '');
             return;
         }
         $this->RegisterVariableString('PTZControlHtml', 'PTZ Control for Webfront', '~HTMLBox', 5);

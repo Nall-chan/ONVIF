@@ -3,7 +3,9 @@
         "de": {
             "Event(s)": "Ereignis-Pfad",
             "Configuration is valid": "Konfiguration ist gültig",
-            "Event missing": "Ereignis fehlt"
+            "Event missing": "Ereignis fehlt",
+            "Instance has no active parent.": "Instanz hat kein aktives übergeordnetes Element.",
+            "Unknown error.": "Unbekannter Fehler."
         }
     }
 }

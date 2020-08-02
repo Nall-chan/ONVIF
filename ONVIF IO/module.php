@@ -50,7 +50,7 @@ class ONVIFIO extends IPSModule
         $this->RegisterTimer('RenewSubscription', 0, 'IPS_RequestAction(' . $this->InstanceID . ',"Renew",true);');
         $this->Host = '';
         $this->isSubscribed = false;
-        $this->RegisterMessage(0, IPS_KERNELMESSAGE);
+        $this->RegisterMessage(0, IPS_KERNELSTARTED);
         if (IPS_GetKernelRunlevel() == KR_READY) {
             $this->RegisterMessage($this->InstanceID, FM_CHILDREMOVED);
         }
@@ -70,10 +70,8 @@ class ONVIFIO extends IPSModule
     public function MessageSink($TimeStamp, $SenderID, $Message, $Data)
     {
         switch ($Message) {
-            case IPS_KERNELMESSAGE:
-                if ($Data[0] == KR_READY) {
+            case IPS_KERNELSTARTED:
                     IPS_RequestAction($this->InstanceID, 'KernelReady', true);
-                }
                 break;
             case FM_CHILDREMOVED:
                 $this->lock('EventProperties');
@@ -816,7 +814,7 @@ class ONVIFIO extends IPSModule
 
     private function KernelReady()
     {
-        $this->UnregisterMessage(0, IPS_KERNELMESSAGE);
+        $this->UnregisterMessage(0, IPS_KERNELSTARTED);
         $this->RegisterMessage($this->InstanceID, FM_CHILDREMOVED);
         $Url = parse_url($this->ReadPropertyString('Address'));
         $Url['port'] = (isset($Url['port']) ? ':' . $Url['port'] : '');

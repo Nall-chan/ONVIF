@@ -9,6 +9,7 @@
             "Stream could not be determined": "Stream konnte nicht bestimmt werden",
             "Error on read capabilities.": "Fehler beim Lesen der Fähigkeiten.",
             "Instance has no active parent.": "Instanz hat kein aktives übergeordnetes Element.",
+            "Unknown error.": "Unbekannter Fehler.",
             "none": "keine",
             "nothing": "keins",
             "Videoencoder-Profilename:": "Videoencoder-Profilname:",
@@ -50,7 +51,8 @@
             "Time": "Zeit",
             "Move": "Bewegen",
             "Zoom": "Zoom",
-            "default":"Standard"
+            "default": "Standard",
+            "sec.": "sek."
         }
     }
 }

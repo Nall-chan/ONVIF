@@ -2,8 +2,11 @@
     "translations": {
         "de": {
             "Event of input(s)": "Ereignis der Eingänge",
-            "Configuration is valid":"Konfiguration ist gültig",
-            "Event missing":"Ereignis fehlt",
-            "Event not valid":"Ereignis ist nicht gültig"    }
+            "Configuration is valid": "Konfiguration ist gültig",
+            "Event missing": "Ereignis fehlt",
+            "Event not valid": "Ereignis ist nicht gültig",
+            "Instance has no active parent.": "Instanz hat kein aktives übergeordnetes Element.",
+            "Unknown error.": "Unbekannter Fehler."
+        }
     }
 }

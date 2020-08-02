@@ -90,6 +90,9 @@ class ONVIFModuleBase extends IPSModule
     protected function KernelReady()
     {
         $this->RegisterParent();
+        if ($this->HasActiveParent()) {
+            $this->ApplyChanges();
+        }
     }
 
     protected function RegisterParent()
@@ -187,11 +190,25 @@ class ONVIFModuleBase extends IPSModule
         $Result = unserialize($Ret);
         if (is_a($Result, 'SoapFault')) {
             $this->SendDebug('Result Error', $Result, 0);
+            set_error_handler([$this, 'ModulErrorHandler']);
             trigger_error($Result->getMessage(), E_USER_WARNING);
+            restore_error_handler();
             return false;
         }
         $this->SendDebug('Result', $Result, 0);
-        if ((count(get_object_vars($Result)) == 0)){
+        if ($Result === false){
+            if (!$this->HasActiveParent()){
+                set_error_handler([$this, 'ModulErrorHandler']);
+                trigger_error($this->Translate('Instance has no active parent.'), E_USER_WARNING);
+                restore_error_handler();
+            } else {
+                set_error_handler([$this, 'ModulErrorHandler']);
+                trigger_error($this->Translate('Unknown error.'), E_USER_WARNING);
+                restore_error_handler();
+            }
+            return false;
+        }
+        if ((count(get_object_vars($Result)) == 0)) {
             return true;
         }
         return $Result;
@@ -214,7 +231,7 @@ class ONVIFModuleBase extends IPSModule
     protected function ModulErrorHandler($errno, $errstr)
     {
         $this->SendDebug('ERROR', utf8_decode($errstr), 0);
-        echo $errstr;
+        echo $errstr."\r\n";
     }
 
     protected function GetConfigurationFormEventTopic(array $Form, bool $AddNothingIndex = false, array $SkippedTopics = [])

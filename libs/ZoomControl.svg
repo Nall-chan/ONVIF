@@ -1,10 +1,10 @@
 <svg viewBox="0 0 50 200" width=%%width%% height=%%height xmlns="http://www.w3.org/2000/svg">
     <g id="%%InstanceId%%_near">
-        <path opacity="%%opacity%%" id="near" fill="#33666C" stroke-width="1.5" d="m0,20l0,80l50,0l0,-80q-25,-40 -50,0" stroke="#ffffff" />
+        <path opacity="%%opacity%%" id="near" fill="#33666C" stroke-width="2" d="m0,20l0,80l50,0l0,-80q-25,-40 -50,0" stroke="none" />
         <path opacity="%%opacity%%" id="symbol_near" stroke="#000000" d="m7.99844,49.23512l11.23666,0l0,-11.23667l11.52668,0l0,11.23667l11.23666,0l0,11.52669l-11.23666,0l0,11.23667l-11.52668,0l0,-11.23667l-11.23666,0l0,-11.52669z" fill-opacity="null" stroke-opacity="null" stroke-width="1.5" fill="#ffffff"/>
     </g>
     <g id="%%InstanceId%%_far">
-        <path opacity="%%opacity%%" id="far" fill="#33666C" stroke-width="1.5" d="m0,180l0,-80l50,0l0,80q-25,40 -50,0" stroke="#ffffff" />
+        <path opacity="%%opacity%%" id="far" fill="#33666C" stroke-width="2" d="m0,180l0,-80l50,0l0,80q-25,40 -50,0" stroke="none" />
         <path opacity="%%opacity%%" id="symbol_far" stroke="#000000" d="m8.23249,139.91784l33,0l0,10.56144l-33,0l0,-10.56144z" fill-opacity="null" stroke-opacity="null" stroke-width="1.5" fill="#ffffff"/>
     </g>
 </svg>

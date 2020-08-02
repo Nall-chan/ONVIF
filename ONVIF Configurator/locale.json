@@ -6,8 +6,8 @@
             "Location": "Lokation",
             "Error on read of capabilities.": "Fehler beim Lesen der Funktionen.",
             "Instance has no active parent.": "Instanz hat kein aktives übergeordnetes Element.",
+            "Unknown error.": "Unbekannter Fehler.",
             "ONVIF Devices": "ONVIF-Geräte"
-
         }
     }
 }

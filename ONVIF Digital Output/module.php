@@ -61,7 +61,9 @@ class ONVIFDigitalOutput extends ONVIFModuleBase
                 $SendValue = $Value;
                 break;
             default:
+            set_error_handler([$this, 'ModulErrorHandler']);
                 trigger_error($this->Translate('Unsupported Datatype'), E_USER_NOTICE);
+                restore_error_handler();
                 return false;
         }
 
