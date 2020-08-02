@@ -33,6 +33,8 @@
             "HTML-Box (Stream & Control)": "HTML-Box (Stream & Steuerung)",
             "Enable Pan/Tilt": "Aktiviere Schwenk/Neige",
             "Enable Zoom": "Aktiviere Zoom",
+            "Enable Speed": "Aktiviere Geschwindigkeit",
+            "Enable Time": "Aktiviere Zeit",
             "Width Pan/Tilt-Control": "Breite Schwenk/Neige-Element",
             "Width Zoom-Control": "Breite Zoom-Element",
             "Height Pan/Tilt-Control": "Höhe Schwenk/Neige-Element",
@@ -43,7 +45,12 @@
             "Default Speeds": "Standard Geschwindigkeiten",
             "Pan speed": "Schwenkgeschwindigkeit",
             "TiltDefaultSpeed": "Neigegeschwindigkeit",
-            "Zoom speed": "Zoomgeschwindigkeit"
+            "Zoom speed": "Zoomgeschwindigkeit",
+            "Speed": "Geschwindigkeit",
+            "Time": "Zeit",
+            "Move": "Bewegen",
+            "Zoom": "Zoom",
+            "default":"Standard"
         }
     }
 }

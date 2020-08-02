@@ -126,7 +126,6 @@
                         "type": "ExpansionPanel",
                         "caption": "Control Variables",
                         "expanded": true,
-                        "visible": false,
                         "items": [
                             {
                                 "type": "RowLayout",
@@ -141,6 +140,23 @@
                                         "type": "CheckBox",
                                         "name": "EnableZoomVariable",
                                         "caption": "Enable Zoom",
+                                        "width": "250px"
+                                    }
+                                ]
+                            },
+                            {
+                                "type": "RowLayout",
+                                "items": [
+                                    {
+                                        "type": "CheckBox",
+                                        "name": "EnableSpeedVariable",
+                                        "caption": "Enable Speed",
+                                        "width": "250px"
+                                    },
+                                    {
+                                        "type": "CheckBox",
+                                        "name": "EnableTimeVariable",
+                                        "caption": "Enable Time",
                                         "width": "250px"
                                     }
                                 ]

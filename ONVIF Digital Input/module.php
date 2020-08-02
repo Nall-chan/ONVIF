@@ -37,7 +37,7 @@ class ONVIFDigitalInput extends ONVIFModuleBase
         $Ident = $Data['SourceValue'];
         $Value = ($Data['DataValue'] == 'true');
         $this->RegisterVariableBoolean($Ident, $Ident, '', 0);
-        $this->SetValue($Ident, $Value);
+        $this->SetValueBoolean($Ident, $Value);
     }
 
     public function GetConfigurationForm()

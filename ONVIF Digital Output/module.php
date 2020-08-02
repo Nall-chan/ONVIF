@@ -74,7 +74,7 @@ class ONVIFDigitalOutput extends ONVIFModuleBase
             return false;
         }
         if ($this->ReadPropertyBoolean('EmulateStatus')) {
-            $this->SetValue($Ident, $Value);
+            $this->SetValueBoolean($Ident, $Value);
         }
         return true;
     }
@@ -109,7 +109,7 @@ class ONVIFDigitalOutput extends ONVIFModuleBase
         }
         $Ident = $Data['SourceValue'];
         $this->RegisterVariableBoolean($Ident, $Ident, '~Switch', 0);
-        $this->SetValue($Ident, $Value);
+        $this->SetValueBoolean($Ident, $Value);
     }
 
     public function GetConfigurationForm()

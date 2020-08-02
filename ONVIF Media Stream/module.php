@@ -30,6 +30,8 @@ class ONVIFMediaStream extends ONVIFModuleBase
         //IPS Variables
         $this->RegisterPropertyBoolean('EnablePanTiltVariable', false);
         $this->RegisterPropertyBoolean('EnableZoomVariable', false);
+        $this->RegisterPropertyBoolean('EnableSpeedVariable', false);
+        $this->RegisterPropertyBoolean('EnableTimeVariable', false);
         //HTML-Box
         $this->RegisterPropertyBoolean('EnablePanTiltHTML', false);
         $this->RegisterPropertyBoolean('EnableZoomHTML', false);
@@ -40,7 +42,7 @@ class ONVIFMediaStream extends ONVIFModuleBase
         $this->RegisterPropertyInteger('ZoomControlWidth', 50);
         $this->RegisterPropertyInteger('ZoomControlHeight', 100);
         $this->RegisterPropertyInteger('ZoomControlOpacity', 60);
-        //Default Speed für ???
+        //Default Speed
         $this->RegisterPropertyFloat('PanDefaultSpeed', 1);
         $this->RegisterPropertyFloat('TiltDefaultSpeed', 1);
         $this->RegisterPropertyFloat('ZoomDefaultSpeed', 1);
@@ -51,6 +53,37 @@ class ONVIFMediaStream extends ONVIFModuleBase
         $this->PTZ_HasHome = false;
         $this->PTZ_MaxPresets = 0;
         $this->PTZ_Spaces = [];
+        // TODO
+        // Statusvariablen PT & Zoom in applychanges anlegen/entfernen + Aktion testen
+        // Statusvariablen SPEED & TIME in applychanges anlegen/entfernen + Aktion erstellen + testen
+        $this->RegisterProfileIntegerEx('ONVIF.PanTilt', 'Move', '', '',
+            [
+                [0, '', 'HollowLargeArrowLeft', -1],
+                [1, '', 'HollowLargeArrowUp', -1],
+                [2, '', 'Cross', -1],
+                [3, '', 'HollowLargeArrowDown', -1],
+                [4, '', 'HollowLargeArrowRight', -1]
+            ]
+        );
+        $this->RegisterProfileIntegerEx('ONVIF.Zoom', 'Move', '', '',
+            [
+                [0, '', 'HollowDoubleArrowUp', -1],
+                [1, '', 'Cross', -1],
+                [2, '', 'HollowDoubleArrowDown', -1]
+            ]
+        );
+        $this->RegisterProfileFloatEx('ONVIF.Speed', 'Speedo', '', '',
+        [
+            [0, $this->Translate('default'), '', -1],
+            [0.1, '%.1f', '', -1]
+        ],
+        1, 0.1, 1);
+        $this->RegisterProfileFloatEx('ONVIF.Time', 'Clock', '', '',
+        [
+            [0, $this->Translate('default'), '', -1],
+            [0.1, '%.1f', '', -1]
+        ],
+        1, 0.1, 1);
     }
 
     /**
@@ -66,6 +99,23 @@ class ONVIFMediaStream extends ONVIFModuleBase
 
     public function ApplyChanges()
     {
+        $this->RegisterProfileIntegerEx('ONVIF.PanTilt', 'Move', '', '',
+        [
+            [0, '◄◄', 'HollowLargeArrowLeft', -1],
+            [1, '▲▲', 'HollowLargeArrowUp', -1],
+            [2, 'Stop', 'Move', -1],
+            [3, '▼▼', 'HollowLargeArrowDown', -1],
+            [4, '►►', 'HollowLargeArrowRight', -1]
+        ]
+    );
+        $this->RegisterProfileIntegerEx('ONVIF.Zoom', 'Move', '', '',
+        [
+            [0, '↑↑', 'HollowDoubleArrowUp', -1],
+            [1, 'Stop', 'Move', -1],
+            [2, '↓↓', 'HollowDoubleArrowDown', -1]
+        ]
+    );
+
         //Never delete this line!
         parent::ApplyChanges();
         $this->PTZ_token = '';
@@ -100,12 +150,41 @@ class ONVIFMediaStream extends ONVIFModuleBase
             $this->SetMedia('');
             $this->SetStatus(IS_EBASE + 1);
         }
+
         if ($this->ReadPropertyBoolean('EnablePanTiltHTML') || $this->ReadPropertyBoolean('EnableZoomHTML')) {
             $this->RegisterHook('/hook/ONVIF/PTZ/' . $this->InstanceID);
             $this->WritePTZInHTMLBox();
         } else {
             $this->UnregisterHook('/hook/ONVIF/PTZ/' . $this->InstanceID);
             $this->UnregisterVariable('PTZControlHtml');
+        }
+        if ($this->ReadPropertyBoolean('EnablePanTiltVariable')) {
+            $this->RegisterVariableInteger('PT', $this->Translate('Move'), 'ONVIF.PanTilt', 3);
+            $this->SetValueInteger('PT', 2);
+            $this->EnableAction('PT');
+        } else {
+            $this->UnregisterVariable('PT');
+        }
+        if ($this->ReadPropertyBoolean('EnableZoomVariable')) {
+            $this->RegisterVariableInteger('ZOOM', $this->Translate('Zoom'), 'ONVIF.Zoom', 4);
+            $this->SetValueInteger('ZOOM', 1);
+            $this->EnableAction('ZOOM');
+        } else {
+            $this->UnregisterVariable('ZOOM');
+        }
+        if ($this->ReadPropertyBoolean('EnableSpeedVariable')) {
+            $this->RegisterVariableFloat('SPEED', $this->Translate('Speed'), 'ONVIF.Speed', 1);
+            $this->SetValueFloat('SPEED', 0);
+            $this->EnableAction('SPEED');
+        } else {
+            $this->UnregisterVariable('SPEED');
+        }
+        if ($this->ReadPropertyBoolean('EnableTimeVariable')) {
+            $this->RegisterVariableFloat('TIME', $this->Translate('Time'), 'ONVIF.Time', 2);
+            $this->SetValueFloat('TIME', 0);
+            $this->EnableAction('TIME');
+        } else {
+            $this->UnregisterVariable('TIME');
         }
     }
 
@@ -423,102 +502,210 @@ class ONVIFMediaStream extends ONVIFModuleBase
         return json_encode($Form);
     }
 
-    public function StartLeft()
+    public function MoveLeft()
+    {
+        return $this->MoveLeftSpeedTime(0, 0);
+    }
+    public function MoveLeftTime(float $Time)
+    {
+        return $this->MoveLeftSpeedTime(0, $Time);
+    }
+    public function MoveLeftSpeed(float $Speed)
+    {
+        return $this->MoveLeftSpeedTime($Speed, 0);
+    }
+    public function MoveLeftSpeedTime(float $Speed, float $Time)
     {
         if ($this->PTZ_token == '') {
             return false;
+        }
+        if ($Speed == 0) {
+            $Speed = $this->ReadPropertyFloat('PanDefaultSpeed');
         }
         $Params = [
             'ProfileToken' => $this->ReadPropertyString('Profile'),
             'Velocity'     => [
                 'PanTilt' => [
-                    'x' => 1,
+                    'x' => $Speed,
                     'y' => 0
                 ]
             ]
         ];
-        $ret = $this->SendData($this->PTZ_xAddr, 'ContinuousMove', true, $Params, self::PTZwsdl);
+        if ($Time != 0) {
+            $Params['Timeout'] = sprintf('PT%.2FS', $Time);
+        }
+        return $this->SendData($this->PTZ_xAddr, 'ContinuousMove', true, $Params, self::PTZwsdl);
     }
-
-    public function StartRight()
+    public function MoveRight()
+    {
+        return $this->MoveRightSpeedTime(0, 0);
+    }
+    public function MoveRightSpeed(float $Speed)
+    {
+        return $this->MoveRightSpeedTime($Speed, 0);
+    }
+    public function MoveRightTime(float $Time)
+    {
+        return $this->MoveRightSpeedTime(0, $Time);
+    }
+    public function MoveRightSpeedTime(float $Speed, float $Time)
     {
         if ($this->PTZ_token == '') {
             return false;
+        }
+        if ($Speed == 0) {
+            $Speed = $this->ReadPropertyFloat('PanDefaultSpeed');
         }
         $Params = [
             'ProfileToken' => $this->ReadPropertyString('Profile'),
             'Velocity'     => [
                 'PanTilt' => [
-                    'x' => -1,
+                    'x' => -$Speed,
                     'y' => 0
                 ]
             ]
         ];
-        $ret = $this->SendData($this->PTZ_xAddr, 'ContinuousMove', true, $Params, self::PTZwsdl);
+        if ($Time != 0) {
+            $Params['Timeout'] = sprintf('PT%.2FS', $Time);
+        }
+        return $this->SendData($this->PTZ_xAddr, 'ContinuousMove', true, $Params, self::PTZwsdl);
     }
 
-    public function StartUp()
+    public function MoveUp()
+    {
+        return $this->MoveUpSpeedTime(0, 0);
+    }
+    public function MoveUpSpeed(float $Speed)
+    {
+        return $this->MoveUpSpeedTime($Speed, 0);
+    }
+    public function MoveUpTime(float $Time)
+    {
+        return $this->MoveUpSpeedTime(0, $Time);
+    }
+    public function MoveUpSpeedTime(float $Speed, float $Time)
     {
         if ($this->PTZ_token == '') {
             return false;
+        }
+        if ($Speed == 0) {
+            $Speed = $this->ReadPropertyFloat('TiltDefaultSpeed');
         }
         $Params = [
             'ProfileToken' => $this->ReadPropertyString('Profile'),
             'Velocity'     => [
                 'PanTilt' => [
                     'x' => 0,
-                    'y' => 1
+                    'y' => $Speed
                 ]
             ]
         ];
-        $ret = $this->SendData($this->PTZ_xAddr, 'ContinuousMove', true, $Params, self::PTZwsdl);
+        if ($Time != 0) {
+            $Params['Timeout'] = sprintf('PT%.2FS', $Time);
+        }
+        return $this->SendData($this->PTZ_xAddr, 'ContinuousMove', true, $Params, self::PTZwsdl);
     }
 
-    public function StartDown()
+    public function MoveDown()
+    {
+        return $this->MoveDownSpeedTime(0, 0);
+    }
+    public function MoveDownSpeed(float $Speed)
+    {
+        return $this->MoveDownSpeedTime($Speed, 0);
+    }
+    public function MoveDownTime(float $Time)
+    {
+        return $this->MoveDownSpeedTime(0, $Time);
+    }
+
+    public function MoveDownSpeedTime(float $Speed, float $Time)
     {
         if ($this->PTZ_token == '') {
             return false;
+        }
+        if ($Speed == 0) {
+            $Speed = $this->ReadPropertyFloat('TiltDefaultSpeed');
         }
         $Params = [
             'ProfileToken' => $this->ReadPropertyString('Profile'),
             'Velocity'     => [
                 'PanTilt' => [
                     'x' => 0,
-                    'y' => -1
+                    'y' => -$Speed
                 ]
             ]
         ];
-        $ret = $this->SendData($this->PTZ_xAddr, 'ContinuousMove', true, $Params, self::PTZwsdl);
+        if ($Time != 0) {
+            $Params['Timeout'] = sprintf('PT%.2FS', $Time);
+        }
+        return $this->SendData($this->PTZ_xAddr, 'ContinuousMove', true, $Params, self::PTZwsdl);
     }
-    public function StartNear()
+    public function ZoomNear()
+    {
+        return $this->ZoomNearSpeedTime(0, 0);
+    }
+    public function ZoomNearSpeed(float $Speed)
+    {
+        return $this->ZoomNearSpeedTime($Speed, 0);
+    }
+    public function ZoomNearTime(float $Time)
+    {
+        return $this->ZoomNearSpeedTime(0, $Time);
+    }
+    public function ZoomNearSpeedTime(float $Speed, float $Time)
     {
         if ($this->PTZ_token == '') {
             return false;
+        }
+        if ($Speed == 0) {
+            $Speed = $this->ReadPropertyFloat('ZoomDefaultSpeed');
         }
         $Params = [
             'ProfileToken' => $this->ReadPropertyString('Profile'),
             'Velocity'     => [
                 'Zoom' => [
-                    'x' => 1
+                    'x' => $Speed
                 ]
             ]
         ];
-        $ret = $this->SendData($this->PTZ_xAddr, 'ContinuousMove', true, $Params, self::PTZwsdl);
+        if ($Time != 0) {
+            $Params['Timeout'] = sprintf('PT%.2FS', $Time);
+        }
+        return $this->SendData($this->PTZ_xAddr, 'ContinuousMove', true, $Params, self::PTZwsdl);
     }
-    public function StartFar()
+    public function ZoomFar()
+    {
+        return $this->ZoomFarSpeedTime(0, 0);
+    }
+    public function ZoomFarSpeed(float $Speed)
+    {
+        return $this->ZoomFarSpeedTime($Speed, 0);
+    }
+    public function ZoomFarTime(float $Time)
+    {
+        return $this->ZoomFarSpeedTime(0, $Time);
+    }
+    public function ZoomFarSpeedTime(float $Speed, float $Time)
     {
         if ($this->PTZ_token == '') {
             return false;
+        }
+        if ($Speed == 0) {
+            $Speed = $this->ReadPropertyFloat('ZoomDefaultSpeed');
         }
         $Params = [
             'ProfileToken' => $this->ReadPropertyString('Profile'),
             'Velocity'     => [
                 'Zoom' => [
-                    'x' => -1
+                    'x' => -$Speed
                 ]
             ]
         ];
-        $ret = $this->SendData($this->PTZ_xAddr, 'ContinuousMove', true, $Params, self::PTZwsdl);
+        if ($Time != 0) {
+            $Params['Timeout'] = sprintf('PT%.2FS', $Time);
+        }
+        return $this->SendData($this->PTZ_xAddr, 'ContinuousMove', true, $Params, self::PTZwsdl);
     }
     public function StopPTZ()
     {
@@ -526,25 +713,25 @@ class ONVIFMediaStream extends ONVIFModuleBase
             return false;
         }
         $Params = ['ProfileToken' => $this->ReadPropertyString('Profile')];
-        $ret = $this->SendData($this->PTZ_xAddr, 'Stop', true, $Params, self::PTZwsdl);
+        return $this->SendData($this->PTZ_xAddr, 'Stop', true, $Params, self::PTZwsdl);
     }
 
-    public function StopPanTilt()
+    public function MoveStop()
     {
         if ($this->PTZ_token == '') {
             return false;
         }
         $Params = ['ProfileToken' => $this->ReadPropertyString('Profile'), 'PanTilt' => true];
-        $ret = $this->SendData($this->PTZ_xAddr, 'Stop', true, $Params, self::PTZwsdl);
+        return $this->SendData($this->PTZ_xAddr, 'Stop', true, $Params, self::PTZwsdl);
     }
 
-    public function StopZoom()
+    public function ZoomStop()
     {
         if ($this->PTZ_token == '') {
             return false;
         }
         $Params = ['ProfileToken' => $this->ReadPropertyString('Profile'), 'Zoom' => true];
-        $ret = $this->SendData($this->PTZ_xAddr, 'Stop', true, $Params, self::PTZwsdl);
+        return $this->SendData($this->PTZ_xAddr, 'Stop', true, $Params, self::PTZwsdl);
     }
 
     public function RequestAction($Ident, $Value)
@@ -554,8 +741,72 @@ class ONVIFMediaStream extends ONVIFModuleBase
         }
         if ($Ident == 'RefreshProfileForm') {
             $this->RefreshProfileForm($Value);
+            return true;
         }
-        return true;
+        $Speed = 0;
+        if (@$this->GetIDForIdent('SPEED')) {
+            $Speed = $this->GetValue('SPEED');
+        }
+        $Time = 0;
+        if (@$this->GetIDForIdent('TIME')) {
+            $Time = $this->GetValue('TIME');
+        }
+        switch ($Ident) {
+            case 'TIME':
+            case 'SPEED':
+                $this->SetValueFloat($Ident,$Value);
+            return;
+            case 'PT':
+                $ret = false;
+                switch ($Value) {
+                    case 0:
+                        $ret = $this->MoveLeftSpeedTime($Speed, $Time);
+                    break;
+                    case 1:
+                        $ret = $this->MoveUpSpeedTime($Speed, $Time);
+                    break;
+                    case 2:
+                        $ret = $this->MoveStop();
+                    break;
+                    case 3:
+                        $ret = $this->MoveDownSpeedTime($Speed, $Time);
+                    break;
+                    case 4:
+                        $ret = $this->MoveRightSpeedTime($Speed, $Time);
+                    break;
+                    default:
+                        trigger_error($this->Translate('Invalid Value.'), E_USER_NOTICE);
+                        return false;
+
+                }
+                if ($ret) {
+                    $this->SetValueInteger('PT', $Value);
+                }
+                return $ret;
+            case 'ZOOM':
+                $ret = false;
+                switch ($Value) {
+                    case 0:
+                        $ret = $this->ZoomFarSpeedTime($Speed, $Time);
+                    break;
+                    case 1:
+                        $ret = $this->ZoomStop();
+                    break;
+                    case 2:
+                        $ret = $this->ZoomNearSpeedTime($Speed, $Time);
+                    break;
+                        default:
+                        trigger_error($this->Translate('Invalid Value.'), E_USER_NOTICE);
+                        return false;
+
+                }
+                if ($ret) {
+                    $this->SetValueInteger('ZOOM', $Value);
+                }
+                return $ret;
+        }
+        trigger_error($this->Translate('Invalid Ident.'), E_USER_NOTICE);
+        return false;
     }
 
     public function ReceiveData($JSONString)
@@ -704,7 +955,7 @@ class ONVIFMediaStream extends ONVIFModuleBase
         if ($mId == false) {
             return;
         }
-        $this->RegisterVariableString('PTZControlHtml', 'PTZ Control for Webfront', '~HTMLBox', 1);
+        $this->RegisterVariableString('PTZControlHtml', 'PTZ Control for Webfront', '~HTMLBox', 5);
         $Key = IPS_CreateTemporaryMediaStreamToken($mId, 900);
         $ImgSrc = '<img class="stream" src="proxy/' . $mId . '?authorization=' . $Key . '">';
         $PanTiltSVG = '';
@@ -752,7 +1003,7 @@ class ONVIFMediaStream extends ONVIFModuleBase
         $JSCode .
         '</div></div>';
 
-        $this->SetValue('PTZControlHtml', $HTMLData);
+        $this->SetValueString('PTZControlHtml', $HTMLData);
     }
     protected function ProcessHookData()
     {
@@ -779,29 +1030,35 @@ class ONVIFMediaStream extends ONVIFModuleBase
             case 'StartPTZ':
                 switch ($_GET['value']) {
                     case 'left':
-                        $this->StartLeft();
-                        echo 'OK';
+                        if ($this->MoveLeft()) {
+                            echo 'OK';
+                        }
                         return;
                     case 'right':
-                        $this->StartRight();
-                        echo 'OK';
+                        if ($this->MoveRight()) {
+                            echo 'OK';
+                        }
                         return;
                     case 'up':
-                        $this->StartUp();
-                        echo 'OK';
+                        if ($this->MoveUp()) {
+                            echo 'OK';
+                        }
                         return;
                     case 'down':
-                        $this->StartDown();
-                        echo 'OK';
-                        return;
-                        case 'near':
-                            $this->StartNear();
+                        if ($this->MoveDown()) {
                             echo 'OK';
-                            return;
-                            case 'far':
-                                $this->StartFar();
-                                echo 'OK';
-                                return;
+                        }
+                        return;
+                    case 'near':
+                        if ($this->ZoomNear()) {
+                            echo 'OK';
+                        }
+                        return;
+                    case 'far':
+                        if ($this->ZoomFar()) {
+                            echo 'OK';
+                        }
+                        return;
                     default:
                         echo $this->Translate('Invalid parameters.');
                         return;

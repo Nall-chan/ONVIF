@@ -178,7 +178,7 @@ class ONVIFModuleBase extends IPSModule
         $this->SendDebug('Send WSDL', $wsdl, 0);
         $this->SendDebug('Send Function', $Function, 0);
         $this->SendDebug('Send Params', $Params, 0);
-        $this->SendDebug('Forward useLogin', $UseLogin, 0);
+        $this->SendDebug('Send useLogin', $UseLogin, 0);
         $Ret = $this->SendDataToParent(json_encode(['DataID' => '{9B9C8DA6-BC89-21BC-3E8C-BA6E534ABC37}', 'URI' => $URI, 'Function' => $Function, 'Params' => $Params, 'useLogin' => $UseLogin, 'wsdl' => $wsdl]));
         if ($Ret === false) {
             $this->SendDebug('Result', false, 0);
@@ -191,6 +191,9 @@ class ONVIFModuleBase extends IPSModule
             return false;
         }
         $this->SendDebug('Result', $Result, 0);
+        if ((count(get_object_vars($Result)) == 0)){
+            return true;
+        }
         return $Result;
     }
 
@@ -265,21 +268,21 @@ class ONVIFModuleBase extends IPSModule
                 if (intval($Data['DataValue']) === 1) {
                     $DataValue = true;
                 }
-                $this->SetValue($Ident, $DataValue);
+                $this->SetValueBoolean($Ident, $DataValue);
                 break;
             case ':float':
             case ':double':
                 $this->RegisterVariableFloat($Ident, $Name, '', 0);
-                $this->SetValue($Ident, (float) $Data['DataValue']);
+                $this->SetValueFloat($Ident, (float) $Data['DataValue']);
                 break;
             case ':integer':
             case ':int':
                 $this->RegisterVariableInteger($Ident, $Name, '', 0);
-                $this->SetValue($Ident, (int) $Data['DataValue']);
+                $this->SetValueInteger($Ident, (int) $Data['DataValue']);
                 break;
             case ':string':
                 $this->RegisterVariableString($Ident, $Name, '', 0);
-                $this->SetValue($Ident, $Data['DataValue']);
+                $this->SetValueString($Ident, $Data['DataValue']);
                 break;
         }
         return true;
