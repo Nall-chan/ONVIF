@@ -10,7 +10,8 @@
             "type": "ValidationTextBox",
             "caption": "Address",
             "width": "500px"
-        }, { 
+        },
+        {
             "type": "RowLayout",
             "items": [
                 {
@@ -29,7 +30,7 @@
             "name": "NATAddress",
             "type": "ValidationTextBox",
             "caption": "NAT Address",
-            "validate":"",
+            "validate": "",
             "visible": false
         }
     ],
@@ -78,27 +79,33 @@
                 "column": "Topic",
                 "direction": "ascending"
             },
-            "columns": [{
+            "columns": [
+                {
                     "caption": "Used",
                     "name": "Used",
                     "width": "70px"
-                }, {
+                },
+                {
                     "caption": "Topic",
                     "name": "Topic",
                     "width": "auto"
-                }, {
+                },
+                {
                     "caption": "Name of source",
                     "name": "SourceName",
                     "width": "200px"
-                }, {
+                },
+                {
                     "caption": "Type of source",
                     "name": "SourceType",
                     "width": "200px"
-                }, {
+                },
+                {
                     "caption": "Name of data",
                     "name": "DataName",
                     "width": "200px"
-                }, {
+                },
+                {
                     "caption": "Type of data",
                     "name": "DataType",
                     "width": "200px"
@@ -121,11 +128,13 @@
                                 "caption": "Instance",
                                 "name": "instanceID",
                                 "width": "90px"
-                            }, {
+                            },
+                            {
                                 "caption": "Type",
                                 "name": "Type",
                                 "width": "150px"
-                            }, {
+                            },
+                            {
                                 "caption": "Name",
                                 "name": "Name",
                                 "width": "auto"

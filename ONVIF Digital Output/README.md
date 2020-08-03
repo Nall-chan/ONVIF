@@ -35,10 +35,10 @@ Bildet Digitale Ausgänge (Relays) in Symcon ab.
  
 __Konfigurationsseite__:
 
-| Name       | Text                    | Beschreibung                                                                      |
-| ---------- | ----------------------- | --------------------------------------------------------------------------------- |
-| EventTopic | Ereignisse der Ausgänge | Auswahl des Ereignis-Pfad ab welchen Ereignisse empfangen und verarbeitet werden. |
-| EmulateStatus | Status simulieren | Wenn aktiviert, wird die Statusvariable in Symcon auf den neuen Wert gesetzt, sobald ein Schaltbefehl erfolgreich übertragen wurde. Sonst wird nur über ankommende Ereignisse gesetzt. 
+| Name          | Text                    | Beschreibung                                                                                                                                                                           |
+| ------------- | ----------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| EventTopic    | Ereignisse der Ausgänge | Auswahl des Ereignis-Pfad ab welchen Ereignisse empfangen und verarbeitet werden.                                                                                                      |
+| EmulateStatus | Status simulieren       | Wenn aktiviert, wird die Statusvariable in Symcon auf den neuen Wert gesetzt, sobald ein Schaltbefehl erfolgreich übertragen wurde. Sonst wird nur über ankommende Ereignisse gesetzt. |
 
 ## 5. Statusvariablen und Profile
 
@@ -46,8 +46,8 @@ Die Statusvariablen werden automatisch angelegt. Das Löschen einzelner kann zu 
 
 ### Statusvariablen
 
-| Name                           | Typ  | Beschreibung                                                                                |
-| ------------------------------ | ---- | ------------------------------------------------------------------------------------------- |
+| Name                                                | Typ  | Beschreibung                                                               |
+| --------------------------------------------------- | ---- | -------------------------------------------------------------------------- |
 | je nach Name des Relay-Token aus dem Onvif-Ereignis | bool | Für jeden bekannten Output wird eine passende Variable in Symcon erstellt. |
 
 ## 6. WebFront

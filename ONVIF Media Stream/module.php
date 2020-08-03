@@ -11,7 +11,7 @@ eval('declare(strict_types=1);namespace ONVIFMediaStream {?>' . file_get_content
  * @property array $PTZ_Presets
  * @property bool $PTZ_HasHome
  * @property int $PTZ_MaxPresets
- * @property array $PTZ_Spaces
+ *
  */
 class ONVIFMediaStream extends ONVIFModuleBase
 {
@@ -52,7 +52,7 @@ class ONVIFMediaStream extends ONVIFModuleBase
         $this->PTZ_Presets = [];
         $this->PTZ_HasHome = false;
         $this->PTZ_MaxPresets = 0;
-        $this->PTZ_Spaces = [];
+        //$this->PTZ_Spaces = [];
         // Profile
         $this->RegisterProfileIntegerEx('ONVIF.PanTilt', 'Move', '', '',
             [
@@ -104,7 +104,7 @@ class ONVIFMediaStream extends ONVIFModuleBase
         $this->PTZ_Presets = [];
         $this->PTZ_HasHome = false;
         $this->PTZ_MaxPresets = 0;
-        $this->PTZ_Spaces = [];
+        //$this->PTZ_Spaces = [];
 
         if ($this->ReadPropertyString('VideoSource') == '') {
             $this->SetStatus(IS_INACTIVE);
@@ -124,7 +124,7 @@ class ONVIFMediaStream extends ONVIFModuleBase
         if ($StreamURL) {
             $this->SetMedia($StreamURL);
             if ($this->PTZ_token != '') {
-                $UsePTZ = $this->GetPTZCapas();
+                $UsePTZ = $this->GetPTZCapabilities();
             }
             $this->SetStatus(IS_ACTIVE);
         } else {
@@ -171,9 +171,9 @@ class ONVIFMediaStream extends ONVIFModuleBase
 
     public function GetConfigurationForm()
     {
-        $Capas = @$this->GetCapabilities();
+        $Capabilities = @$this->GetCapabilities();
         $Form = json_decode(file_get_contents(__DIR__ . '/form.json'), true);
-        if ($Capas == false) {
+        if ($Capabilities == false) {
             $Form['actions'][] = [
                 'type'  => 'PopupAlert',
                 'popup' => [
@@ -206,7 +206,7 @@ class ONVIFMediaStream extends ONVIFModuleBase
         ];
         $ActualSources = null;
         $ActualProfile = null;
-        foreach ($Capas['VideoSources'] as $VideoSource) {
+        foreach ($Capabilities['VideoSources'] as $VideoSource) {
             $VideoSourcesOptions[] = [
                 'caption' => $VideoSource['VideoSourceName'],
                 'value'   => $VideoSource['VideoSourceToken']
@@ -826,8 +826,8 @@ class ONVIFMediaStream extends ONVIFModuleBase
     }
     protected function RefreshProfileForm($NewVideoSource)
     {
-        $Capas = @$this->GetCapabilities();
-        if ($Capas == false) {
+        $Capabilities = @$this->GetCapabilities();
+        if ($Capabilities == false) {
             return false;
         }
         $ProfileOptions = [];
@@ -835,7 +835,7 @@ class ONVIFMediaStream extends ONVIFModuleBase
             'caption' => 'none',
             'value'   => ''
         ];
-        foreach ($Capas['VideoSources'] as $VideoSource) {
+        foreach ($Capabilities['VideoSources'] as $VideoSource) {
             if ($NewVideoSource == $VideoSource['VideoSourceToken']) {
                 foreach ($VideoSource['Profile'] as $Profile) {
                     $ProfileOptions[] = [
@@ -850,11 +850,11 @@ class ONVIFMediaStream extends ONVIFModuleBase
     }
 
     /**
-     * @todo Rückgabewert korrekt auswerten und ggfls. Funktion deaktivieren und Form aktualisieren.
+     * @todo Rückgabewert korrekt auswerten und u.U. Funktion deaktivieren und Form aktualisieren.
      *
      * @return void
      */
-    protected function GetPTZCapas()
+    protected function GetPTZCapabilities()
     {
         if ($this->PTZ_token == '') {
             return false;
@@ -870,11 +870,11 @@ class ONVIFMediaStream extends ONVIFModuleBase
         if ($PTZNode === false) {
             $this->PTZ_HasHome = false;
             $this->PTZ_MaxPresets = 0;
-            $this->PTZ_Spaces = [];
+        //$this->PTZ_Spaces = [];
         } else {
             $this->PTZ_HasHome = $PTZNode->PTZNode->HomeSupported;
             $this->PTZ_MaxPresets = $PTZNode->PTZNode->MaximumNumberOfPresets;
-            $this->PTZ_Spaces = json_decode(json_encode($PTZNode->PTZNode->SupportedPTZSpaces), true);
+            //$this->PTZ_Spaces = json_decode(json_encode($PTZNode->PTZNode->SupportedPTZSpaces), true);
         }
 
         // Presets
@@ -890,12 +890,12 @@ class ONVIFMediaStream extends ONVIFModuleBase
 
     protected function GetStreamUri()
     {
-        $Capas = @$this->GetCapabilities();
-        if ($Capas == false) {
+        $Capabilities = @$this->GetCapabilities();
+        if ($Capabilities == false) {
             return false;
         }
-        $this->PTZ_xAddr = $Capas['XAddr']['PTZ'];
-        foreach ($Capas['VideoSources'] as $VideoSource) {
+        $this->PTZ_xAddr = $Capabilities['XAddr']['PTZ'];
+        foreach ($Capabilities['VideoSources'] as $VideoSource) {
             if ($this->ReadPropertyString('VideoSource') == $VideoSource['VideoSourceToken']) {
                 foreach ($VideoSource['Profile'] as $Profile) {
                     if ($Profile['token'] == $this->ReadPropertyString('Profile')) {
@@ -915,7 +915,7 @@ class ONVIFMediaStream extends ONVIFModuleBase
             ],
             'ProfileToken' => $this->ReadPropertyString('Profile')
         ];
-        $ret = $this->SendData($Capas['XAddr']['Media'], 'GetStreamUri', true, $Params);
+        $ret = $this->SendData($Capabilities['XAddr']['Media'], 'GetStreamUri', true, $Params);
         if ($ret == false) {
             return false;
         }

@@ -14,20 +14,24 @@
                     "caption": "Type",
                     "name": "type",
                     "width": "160px"
-                }, {
+                },
+                {
                     "caption": "VideoSource",
                     "name": "VideoSource",
                     "width": "120px"
-                }, {
+                },
+                {
                     "caption": "Name",
                     "name": "name",
                     "width": "300px"
-                }, {
+                },
+                {
                     "caption": "Location",
                     "name": "Location",
                     "width": "auto"
                 }
             ],
             "values": []
-        }]
+        }
+    ]
 }

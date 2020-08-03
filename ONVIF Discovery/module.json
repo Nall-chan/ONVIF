@@ -4,13 +4,9 @@
     "type": 5,
     "vendor": "ONVIF",
     "aliases": [],
-    "parentRequirements": [
-
-    ],
+    "parentRequirements": [],
     "childRequirements": [],
-    "implemented": [
-
-    ],
+    "implemented": [],
     "prefix": "ONVIF",
-    "url": "https://github.com/Nall-chan/ONVIF/ONVIF%20Discovery"
+    "url": "https://github.com/Nall-chan/ONVIF/blob/master/ONVIF%20Discovery"
 }

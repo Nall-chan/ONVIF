@@ -4,8 +4,7 @@
             "type": "Select",
             "name": "EventTopic",
             "caption": "Event of relay(s)",
-            "options": [
-            ],
+            "options": [],
             "enable": false
         },
         {

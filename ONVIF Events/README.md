@@ -40,6 +40,6 @@ Die Statusvariablen werden automatisch angelegt. Das Löschen einzelner kann zu 
 
 ### Statusvariablen
 
-| Name                                           | Typ      | Beschreibung                                                                                         |
-| ---------------------------------------------- | -------- | ---------------------------------------------------------------------------------------------------- |
+| Name                                           | Typ      | Beschreibung                                                                                        |
+| ---------------------------------------------- | -------- | --------------------------------------------------------------------------------------------------- |
 | je nach Name des Events aus dem Onvif-Ereignis | variabel | Für jedes Ereignis welches einen Wert liefern kann, wird eine passende Variable in Symcon erstellt. |

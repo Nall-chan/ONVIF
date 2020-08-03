@@ -219,8 +219,8 @@
                 "caption": "Presets",
                 "items": [
                     {
-                        "type": "Label", 
-                        "caption":"nothing to see.... yet"
+                        "type": "Label",
+                        "caption": "nothing to see.... yet"
                     }
                 ]
             }
