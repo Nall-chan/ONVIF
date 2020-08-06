@@ -248,6 +248,8 @@ class ONVIFMediaStream extends ONVIFModuleBase
                 ];
             }
             if ($ActualProfile != null) {
+                $mId = $this->GetIDForIdent('STREAM');
+                $Key = IPS_CreateTemporaryMediaStreamToken($mId, 900);
                 $ExpansionPanelVideoItems[] = [
                     'type'  => 'RowLayout',
                     'items' => [
@@ -258,7 +260,15 @@ class ONVIFMediaStream extends ONVIFModuleBase
                         ],
                         [
                             'type'    => 'Label',
+                            'width'   => '200px',
                             'caption' => $ActualProfile['Name']
+                        ],
+                        [
+                            'onClick' => 'echo "../proxy/' . $mId . '?authorization=' . $Key . '";',
+                            'label'   => 'Show Stream',
+                            'type'    => 'Button',
+                            'link'    => true,
+                            'width'   => '300px'
                         ]
                     ]
                 ];
@@ -380,7 +390,7 @@ class ONVIFMediaStream extends ONVIFModuleBase
                      [
                          'type'     => 'PopupButton',
                          'caption'  => $this->Translate('No presets'),
-                         'width'    => '200px',
+                         'width'    => '300px',
                          'popup'    => [],
                          'enabled'  => false
                      ];
@@ -399,7 +409,7 @@ class ONVIFMediaStream extends ONVIFModuleBase
                     $PTZPresetItems['items'][] = [
                         'type'    => 'PopupButton',
                         'caption' => $this->Translate('Show presets'),
-                        'width'   => '200px',
+                        'width'   => '300px',
                         'popup'   => [
                             'caption'=> $this->Translate('Presets'),
                             'items'  => [
