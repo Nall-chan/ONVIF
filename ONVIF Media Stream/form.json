@@ -212,15 +212,78 @@
         },
         {
             "type": "PopupButton",
-            "caption": "Configure Presets",
+            "caption": "Configure pre-positions",
             "width": "300px",
             "enabled": false,
             "popup": {
-                "caption": "Presets",
+                "caption": "Pre-positions",
                 "items": [
                     {
-                        "type": "Label",
-                        "caption": "nothing to see.... yet"
+                        "type": "RowLayout",
+                        "items": [
+                            {
+                                "type": "CheckBox",
+                                "name": "EnablePresetVariable",
+                                "caption": "Enable Preset Variable",
+                                "width": "250px",
+                                "onChange": "IPS_RequestAction($id,'RefreshEnablePresetProfileForm',$EnablePresetVariable);"
+                            },
+                            {
+                                "type": "CheckBox",
+                                "name": "EnablePresetProfile",
+                                "caption": "Variableprofile uses pre-position name",
+                                "width": "250px"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "List",
+                        "caption": "Select pre-positions",
+                        "name": "PresetProfile",
+                        "add": false,
+                        "delete": true,
+                        "sort": {
+                            "column": "VariableValue",
+                            "direction": "ascending"
+                        },
+                        "columns": [
+                            {
+                                "caption": "Value",
+                                "name": "VariableValue",
+                                "width": "70px",
+                                "add": 0,
+                                "edit": {
+                                    "type": "NumberSpinner",
+                                    "minimum": 0,
+                                    "maximum": 255
+                                }
+                            },
+                            {
+                                "caption": "Active",
+                                "name": "PresetActive",
+                                "width": "70px",
+                                "add": true,
+                                "edit": {
+                                    "type": "CheckBox"
+                                }
+                            },
+                            {
+                                "caption": "Pre-position name",
+                                "name": "PresetName",
+                                "width": "auto",
+                                "add:": "",
+                                "edit": {
+                                    "type": "ValidationTextBox"
+                                }
+                            },
+                            {
+                                "caption": "Pre-position token",
+                                "name": "PresetToken",
+                                "width": "125px",
+                                "save": true
+                            }
+                        ],
+                        "values": []
                     }
                 ]
             }

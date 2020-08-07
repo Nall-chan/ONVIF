@@ -11,7 +11,7 @@ eval('declare(strict_types=1);namespace ONVIFMediaStream {?>' . file_get_content
  * @property array $PTZ_Presets
  * @property bool $PTZ_HasHome
  * @property int $PTZ_MaxPresets
- *
+ * @property array $PresetTokenList
  */
 class ONVIFMediaStream extends ONVIFModuleBase
 {
@@ -46,12 +46,17 @@ class ONVIFMediaStream extends ONVIFModuleBase
         $this->RegisterPropertyFloat('PanDefaultSpeed', 1);
         $this->RegisterPropertyFloat('TiltDefaultSpeed', 1);
         $this->RegisterPropertyFloat('ZoomDefaultSpeed', 1);
+        // Presets
+        $this->RegisterPropertyBoolean('EnablePresetVariable', true);
+        $this->RegisterPropertyBoolean('EnablePresetProfile', true);
+        $this->RegisterPropertyString('PresetProfile', json_encode([]));
         // Buffer
         $this->PTZ_token = '';
         $this->PTZ_xAddr = '';
         $this->PTZ_Presets = [];
         $this->PTZ_HasHome = false;
         $this->PTZ_MaxPresets = 0;
+        $this->PresetTokenList = [];
         //$this->PTZ_Spaces = [];
         // Profile
         $this->RegisterProfileIntegerEx('ONVIF.PanTilt', 'Move', '', '',
@@ -71,17 +76,19 @@ class ONVIFMediaStream extends ONVIFModuleBase
             ]
         );
         $this->RegisterProfileFloatEx('ONVIF.Speed', 'Speedo', '', '',
-        [
-            [0, $this->Translate('default'), '', -1],
-            [0.1, '%.1f ' . $this->Translate('sec.'), '', -1]
-        ],
-        5, 0.5, 1);
+            [
+                [0, $this->Translate('default'), '', -1],
+                [0.1, '%.1f ' . $this->Translate('sec.'), '', -1]
+            ],
+            5, 0.5, 1
+        );
         $this->RegisterProfileFloatEx('ONVIF.Time', 'Clock', '', '',
-        [
-            [0, $this->Translate('default'), '', -1],
-            [0.1, '%.1f', '', -1]
-        ],
-        1, 0.1, 1);
+            [
+                [0, $this->Translate('default'), '', -1],
+                [0.1, '%.1f', '', -1]
+            ],
+            1, 0.1, 1
+        );
     }
 
     /**
@@ -104,6 +111,7 @@ class ONVIFMediaStream extends ONVIFModuleBase
         $this->PTZ_Presets = [];
         $this->PTZ_HasHome = false;
         $this->PTZ_MaxPresets = 0;
+        $this->PresetTokenList = [];
         //$this->PTZ_Spaces = [];
 
         if ($this->ReadPropertyString('VideoSource') == '') {
@@ -167,6 +175,31 @@ class ONVIFMediaStream extends ONVIFModuleBase
         } else {
             $this->UnregisterVariable('TIME');
         }
+        $PresetProfileName = 'ONVIF.Preset.' . $this->InstanceID;
+        if ($this->ReadPropertyBoolean('EnablePresetVariable')) {
+            $UsePresetName = $this->ReadPropertyBoolean('EnablePresetProfile');
+            $Presets = json_decode($this->ReadPropertyString('PresetProfile'));
+            $PresetTokenList = [];
+            $PresetAssociations = [];
+            foreach ($Presets as $Preset) {
+                $PresetTokenList[$Preset->VariableValue] = $Preset->PresetToken;
+                if ($Preset->PresetActive) {
+                    $PresetAssociations[] = [
+                        $Preset->VariableValue,
+                        $UsePresetName ? $Preset->PresetName : $Preset->VariableValue,
+                        '',
+                        -1
+                    ];
+                }
+            }
+            $this->PresetTokenList = $PresetTokenList;
+            $this->RegisterProfileIntegerEx($PresetProfileName, 'Move', '', '', $PresetAssociations);
+            $this->RegisterVariableInteger('PRESET', $this->Translate('Pre-position'), $PresetProfileName, 5);
+            $this->EnableAction('PRESET');
+        } else {
+            $this->UnregisterVariable('PRESET');
+            $this->UnregisterProfile($PresetProfileName);
+        }
     }
 
     public function GetConfigurationForm()
@@ -227,7 +260,7 @@ class ONVIFMediaStream extends ONVIFModuleBase
         $Form['elements'][0]['options'] = $VideoSourcesOptions;
         $Form['elements'][1]['options'] = $ProfileOptions;
         $Form['elements'][2] = $this->GetConfigurationFormEventTopic($Form['elements'][2], true);
-
+        $PTZValues = [];
         $this->SendDebug('ActualProfile', $ActualProfile, 0);
         if ($ActualProfile != null) {
             $ExpansionPanelVideoItems = [];
@@ -264,11 +297,11 @@ class ONVIFMediaStream extends ONVIFModuleBase
                             'caption' => $ActualProfile['Name']
                         ],
                         [
-                            'onClick' => 'echo "../proxy/' . $mId . '?authorization=' . $Key . '";',
-                            'label'   => 'Show Stream',
                             'type'    => 'Button',
-                            'link'    => true,
-                            'width'   => '300px'
+                            'width'   => '300px',
+                            'label'   => 'Show Stream',
+                            'onClick' => 'echo "../proxy/' . $mId . '?authorization=' . $Key . '";',
+                            'link'    => true
                         ]
                     ]
                 ];
@@ -354,21 +387,21 @@ class ONVIFMediaStream extends ONVIFModuleBase
                 $Form['elements'][3]['enabled'] = true;
                 $ExpansionPanelPTZItems = [];
                 $ExpansionPanelPTZItems[] =
-                    [
-                        'type'  => 'RowLayout',
-                        'items' => [
-                            [
-                                'type'    => 'Label',
-                                'width'   => '200px',
-                                'caption' => $this->Translate('PTZ-Token:')
-                            ],
-                            [
-                                'type'    => 'Label',
-                                'width'   => '200px',
-                                'caption' => $ActualProfile['ptztoken']
-                            ]
+                [
+                    'type'  => 'RowLayout',
+                    'items' => [
+                        [
+                            'type'    => 'Label',
+                            'width'   => '200px',
+                            'caption' => $this->Translate('PTZ-Token:')
+                        ],
+                        [
+                            'type'    => 'Label',
+                            'width'   => '200px',
+                            'caption' => $ActualProfile['ptztoken']
                         ]
-                    ];
+                    ]
+                ];
                 $Presets = $this->PTZ_Presets;
                 $PTZPresetItems = [
                     'type'  => 'RowLayout',
@@ -387,23 +420,25 @@ class ONVIFMediaStream extends ONVIFModuleBase
                 ];
                 if (count($Presets) == 0) {
                     $PTZPresetItems['items'][] =
-                     [
-                         'type'     => 'PopupButton',
-                         'caption'  => $this->Translate('No presets'),
-                         'width'    => '300px',
-                         'popup'    => [],
-                         'enabled'  => false
-                     ];
+                    [
+                        'type'     => 'PopupButton',
+                        'caption'  => $this->Translate('No presets'),
+                        'width'    => '300px',
+                        'popup'    => [],
+                        'enabled'  => false
+                    ];
                 } else {
                     $Form['elements'][4]['enabled'] = true;
 
-                    $PTZValues = [];
-                    foreach ($Presets as $Index => $Preset) {
+                    foreach ($Presets as $PresetIndex => $Preset) {
                         $PTZValues[] =
                         [
-                            'Index' => $Index,
-                            'Name'  => $Preset->Name,
-                            'token' => $Preset->token
+                            'PresetIndex'  => $PresetIndex,
+                            'PresetName'   => $Preset->Name,
+                            'PresetToken'  => $Preset->token,
+                            'PresetActive' => true,
+                            'VariableValue'=> $PresetIndex,
+                            'rowColor'     => '#C0FFC0' // grün token neu
                         ];
                     }
                     $PTZPresetItems['items'][] = [
@@ -419,22 +454,22 @@ class ONVIFMediaStream extends ONVIFModuleBase
                                     'add'    => false,
                                     'delete' => false,
                                     'sort'   => [
-                                        'column'   => 'token',
+                                        'column'   => 'PresetToken',
                                         'direction'=> 'ascending'
                                     ],
                                     'columns'=> [
                                         [
-                                            'caption' => 'Index',
-                                            'name'    => 'Index',
+                                            'caption' => 'Pre-position index',
+                                            'name'    => 'PresetIndex',
                                             'width'   => '70px'
                                         ], [
-                                            'caption'    => 'Token',
-                                            'name'       => 'token',
+                                            'caption'    => 'Pre-position token',
+                                            'name'       => 'PresetToken',
                                             'width'      => '100px'
                                         ],
                                         [
-                                            'caption'    => 'Name',
-                                            'name'       => 'Name',
+                                            'caption'    => 'Pre-position name',
+                                            'name'       => 'PresetName',
                                             'width'      => 'auto'
                                         ]
 
@@ -447,46 +482,78 @@ class ONVIFMediaStream extends ONVIFModuleBase
                 }
                 $ExpansionPanelPTZItems[] = $PTZPresetItems;
                 $ExpansionPanelPTZItems[] =
-                [
-                    'type'  => 'RowLayout',
-                    'items' => [
-                        [
-                            'type'    => 'Label',
-                            'width'   => '200px',
-                            'caption' => $this->Translate('max. presets:')
-                        ],
-                        [
-                            'type'    => 'Label',
-                            'width'   => '200px',
-                            'caption' => $this->PTZ_MaxPresets
-                        ]
+            [
+                'type'  => 'RowLayout',
+                'items' => [
+                    [
+                        'type'    => 'Label',
+                        'width'   => '200px',
+                        'caption' => $this->Translate('max. presets:')
+                    ],
+                    [
+                        'type'    => 'Label',
+                        'width'   => '200px',
+                        'caption' => $this->PTZ_MaxPresets
                     ]
-                ];
+                ]
+            ];
                 $ExpansionPanelPTZItems[] =
-                [
-                    'type'  => 'RowLayout',
-                    'items' => [
-                        [
-                            'type'    => 'Label',
-                            'width'   => '200px',
-                            'caption' => $this->Translate('Has Home Position:')
-                        ],
-                        [
-                            'type'    => 'Label',
-                            'width'   => '200px',
-                            'caption' => $this->PTZ_HasHome ? $this->Translate('Yes') : $this->Translate('No')
-                        ]
+            [
+                'type'  => 'RowLayout',
+                'items' => [
+                    [
+                        'type'    => 'Label',
+                        'width'   => '200px',
+                        'caption' => $this->Translate('Has Home Position:')
+                    ],
+                    [
+                        'type'    => 'Label',
+                        'width'   => '200px',
+                        'caption' => $this->PTZ_HasHome ? $this->Translate('Yes') : $this->Translate('No')
                     ]
-                ];
+                ]
+            ];
                 $Actions[] = [
                     'type'   => 'ExpansionPanel',
                     'caption'=> $this->Translate('PTZ properties'),
                     'items'  => $ExpansionPanelPTZItems
                 ];
             }
-
+            $Actions[] = [
+                'type'   => 'ExpansionPanel',
+                'caption'=> $this->Translate('Testcenter'),
+                'items'  => [[
+                    'type'=> 'TestCenter'
+                ]]
+            ];
             $Form['actions'] = $Actions;
         }
+        $Form['elements'][4]['popup']['items'][1]['visible'] = $this->ReadPropertyBoolean('EnablePresetVariable');
+        $PresetProfile = json_decode($this->ReadPropertyString('PresetProfile'), true);
+        $ValidTokens = array_column($PTZValues, 'PresetToken');
+        foreach ($PresetProfile as &$Profile) {
+            $KnownToken = array_search($Profile['PresetToken'], $ValidTokens);
+            if ($KnownToken === false) {
+                $Profile['rowColor'] = '#FFC0C0'; // rot Token ungültig
+            } else {
+                $Profile['rowColor'] = '#FFFFFF'; // weiß token gültig
+                unset($ValidTokens[$KnownToken]);
+            }
+        }
+        $UsedValues = array_column($PresetProfile, 'VariableValue');
+        foreach ($PTZValues as $NewPTZToken) {
+            if (in_array($NewPTZToken['PresetToken'], $ValidTokens)) {
+                for ($i = $NewPTZToken['VariableValue']; $i < 256; $i++) {
+                    if (!in_array($i, $UsedValues)) {
+                        $NewPTZToken['VariableValue'] = $i;
+                        $UsedValues[] = $i;
+                        break;
+                    }
+                }
+                $PresetProfile[] = $NewPTZToken;
+            }
+        }
+        $Form['elements'][4]['popup']['items'][1]['values'] = $PresetProfile;
         $this->SendDebug('FORM', json_encode($Form), 0);
         $this->SendDebug('FORM', json_last_error_msg(), 0);
 
@@ -725,6 +792,37 @@ class ONVIFMediaStream extends ONVIFModuleBase
         return $this->SendData($this->PTZ_xAddr, 'Stop', true, $Params, self::PTZwsdl);
     }
 
+    public function GotoPreset(int $Preset)
+    {
+        $PresetTokenList = $this->PresetTokenList;
+        if (!array_key_exists($Preset, $PresetTokenList)) {
+            set_error_handler([$this, 'ModulErrorHandler']);
+            trigger_error($this->Translate('Invalid Preset.'), E_USER_NOTICE);
+            restore_error_handler();
+            return false;
+        }
+        $Token = $PresetTokenList[$Preset];
+        return $this->GotoPresetToken($Token);
+    }
+
+    public function GotoPresetToken(string $PresetToken)
+    {
+        if ($this->PTZ_token == '') {
+            return false;
+        }
+        $Params = ['ProfileToken' => $this->ReadPropertyString('Profile'), 'PresetToken' => $PresetToken];
+        return $this->SendData($this->PTZ_xAddr, 'GotoPreset', true, $Params, self::PTZwsdl);
+    }
+
+    public function GotoPresetHomePosition()
+    {
+        if ($this->PTZ_token == '') {
+            return false;
+        }
+        $Params = ['ProfileToken' => $this->ReadPropertyString('Profile')];
+        return $this->SendData($this->PTZ_xAddr, 'GotoHomePosition', true, $Params, self::PTZwsdl);
+    }
+
     public function RequestAction($Ident, $Value)
     {
         if (parent::RequestAction($Ident, $Value)) {
@@ -732,6 +830,10 @@ class ONVIFMediaStream extends ONVIFModuleBase
         }
         if ($Ident == 'RefreshProfileForm') {
             $this->RefreshProfileForm($Value);
+            return true;
+        }
+        if ($Ident == 'RefreshEnablePresetProfileForm') {
+            $this->RefreshPresetProfileForm($Value);
             return true;
         }
         $Speed = 0;
@@ -743,63 +845,69 @@ class ONVIFMediaStream extends ONVIFModuleBase
             $Time = $this->GetValue('TIME');
         }
         switch ($Ident) {
-            case 'TIME':
-            case 'SPEED':
-                $this->SetValueFloat($Ident, $Value);
-            return;
-            case 'PT':
-                $ret = false;
-                switch ($Value) {
-                    case 0:
-                        $ret = $this->MoveLeftSpeedTime($Speed, $Time);
-                    break;
-                    case 1:
-                        $ret = $this->MoveUpSpeedTime($Speed, $Time);
-                    break;
-                    case 2:
-                        $ret = $this->MoveStop();
-                    break;
-                    case 3:
-                        $ret = $this->MoveDownSpeedTime($Speed, $Time);
-                    break;
-                    case 4:
-                        $ret = $this->MoveRightSpeedTime($Speed, $Time);
-                    break;
+        case 'PRESET':
+            if ($this->GotoPreset($Value)) {
+                $this->SetValue('PRESET', $Value);
+                return true;
+            }
+            return false;
+        case 'TIME':
+        case 'SPEED':
+            $this->SetValueFloat($Ident, $Value);
+        return true;
+        case 'PT':
+            $ret = false;
+            switch ($Value) {
+                case 0:
+                    $ret = $this->MoveLeftSpeedTime($Speed, $Time);
+                break;
+                case 1:
+                    $ret = $this->MoveUpSpeedTime($Speed, $Time);
+                break;
+                case 2:
+                    $ret = $this->MoveStop();
+                break;
+                case 3:
+                    $ret = $this->MoveDownSpeedTime($Speed, $Time);
+                break;
+                case 4:
+                    $ret = $this->MoveRightSpeedTime($Speed, $Time);
+                break;
+                default:
+                    set_error_handler([$this, 'ModulErrorHandler']);
+                    trigger_error($this->Translate('Invalid Value.'), E_USER_NOTICE);
+                    restore_error_handler();
+                    return false;
+
+            }
+            if ($ret) {
+                $this->SetValueInteger('PT', $Value);
+            }
+            return $ret;
+        case 'ZOOM':
+            $ret = false;
+            switch ($Value) {
+                case 0:
+                    $ret = $this->ZoomFarSpeedTime($Speed, $Time);
+                break;
+                case 1:
+                    $ret = $this->ZoomStop();
+                break;
+                case 2:
+                    $ret = $this->ZoomNearSpeedTime($Speed, $Time);
+                break;
                     default:
-                        set_error_handler([$this, 'ModulErrorHandler']);
-                        trigger_error($this->Translate('Invalid Value.'), E_USER_NOTICE);
-                        restore_error_handler();
-                        return false;
+                    set_error_handler([$this, 'ModulErrorHandler']);
+                    trigger_error($this->Translate('Invalid Value.'), E_USER_NOTICE);
+                    restore_error_handler();
+                    return false;
 
-                }
-                if ($ret) {
-                    $this->SetValueInteger('PT', $Value);
-                }
-                return $ret;
-            case 'ZOOM':
-                $ret = false;
-                switch ($Value) {
-                    case 0:
-                        $ret = $this->ZoomFarSpeedTime($Speed, $Time);
-                    break;
-                    case 1:
-                        $ret = $this->ZoomStop();
-                    break;
-                    case 2:
-                        $ret = $this->ZoomNearSpeedTime($Speed, $Time);
-                    break;
-                        default:
-                        set_error_handler([$this, 'ModulErrorHandler']);
-                        trigger_error($this->Translate('Invalid Value.'), E_USER_NOTICE);
-                        restore_error_handler();
-                        return false;
-
-                }
-                if ($ret) {
-                    $this->SetValueInteger('ZOOM', $Value);
-                }
-                return $ret;
-        }
+            }
+            if ($ret) {
+                $this->SetValueInteger('ZOOM', $Value);
+            }
+            return $ret;
+    }
         set_error_handler([$this, 'ModulErrorHandler']);
         trigger_error($this->Translate('Invalid Ident.'), E_USER_NOTICE);
         restore_error_handler();
@@ -833,6 +941,10 @@ class ONVIFMediaStream extends ONVIFModuleBase
                 $this->SetValueString('PTZControlHtml', '');
             }
         }
+    }
+    protected function RefreshPresetProfileForm($EnablePresetProfileForm)
+    {
+        $this->UpdateFormField('PresetProfile', 'visible', $EnablePresetProfileForm);
     }
     protected function RefreshProfileForm($NewVideoSource)
     {
@@ -969,47 +1081,47 @@ class ONVIFMediaStream extends ONVIFModuleBase
         $PanTiltSVG = '';
         if ($this->ReadPropertyBoolean('EnablePanTiltHTML')) {
             $PanTiltSVG = str_replace(
-                [
-                    '%%InstanceId%%',
-                    '%%width%%',
-                    '%%height',
-                    '%%opacity%%'
-                ],
-                [
-                    $this->InstanceID,
-                    $this->ReadPropertyInteger('PanTiltControlWidth'),
-                    $this->ReadPropertyInteger('PanTiltControlHeight'),
-                    sprintf('%F', $this->ReadPropertyInteger('PanTiltControlOpacity') / 100)
-                ],
-                file_get_contents(__DIR__ . '/../libs/PanTiltControl.svg'));
+            [
+                '%%InstanceId%%',
+                '%%width%%',
+                '%%height',
+                '%%opacity%%'
+            ],
+            [
+                $this->InstanceID,
+                $this->ReadPropertyInteger('PanTiltControlWidth'),
+                $this->ReadPropertyInteger('PanTiltControlHeight'),
+                sprintf('%F', $this->ReadPropertyInteger('PanTiltControlOpacity') / 100)
+            ],
+            file_get_contents(__DIR__ . '/../libs/PanTiltControl.svg'));
         }
         $ZoomSVG = '';
         if ($this->ReadPropertyBoolean('EnableZoomHTML')) {
             $ZoomSVG = str_replace(
-                [
-                    '%%InstanceId%%',
-                    '%%width%%',
-                    '%%height',
-                    '%%opacity%%'
-                ],
-                [
-                    $this->InstanceID,
-                    $this->ReadPropertyInteger('ZoomControlWidth'),
-                    $this->ReadPropertyInteger('ZoomControlHeight'),
-                    sprintf('%F', $this->ReadPropertyInteger('ZoomControlOpacity') / 100)
-                ],
-                file_get_contents(__DIR__ . '/../libs/ZoomControl.svg'));
+            [
+                '%%InstanceId%%',
+                '%%width%%',
+                '%%height',
+                '%%opacity%%'
+            ],
+            [
+                $this->InstanceID,
+                $this->ReadPropertyInteger('ZoomControlWidth'),
+                $this->ReadPropertyInteger('ZoomControlHeight'),
+                sprintf('%F', $this->ReadPropertyInteger('ZoomControlOpacity') / 100)
+            ],
+            file_get_contents(__DIR__ . '/../libs/ZoomControl.svg'));
         }
         $JS = file_get_contents(__DIR__ . '/../libs/PTZControl.js');
         $JSCode = '<script>' . $JS . 'initPTZ(' . $this->InstanceID . ');</script>';
         $HTMLData = '<div class="extended"><div class="ipsContainer media">' .
-        $ImgSrc .
-        '<div style="position:absolute; right:0px; bottom:0px; margin:10px">' .
-        $ZoomSVG .
-        $PanTiltSVG .
-        '</div>' .
-        $JSCode .
-        '</div></div>';
+    $ImgSrc .
+    '<div style="position:absolute; right:0px; bottom:0px; margin:10px">' .
+    $ZoomSVG .
+    $PanTiltSVG .
+    '</div>' .
+    $JSCode .
+    '</div></div>';
 
         $this->SetValueString('PTZControlHtml', $HTMLData);
     }
@@ -1031,48 +1143,48 @@ class ONVIFMediaStream extends ONVIFModuleBase
             return;
         }
         switch ($_GET['action']) {
-            case 'StopPTZ':
-                $this->StopPTZ();
-                echo 'OK';
-                return;
-            case 'StartPTZ':
-                switch ($_GET['value']) {
-                    case 'left':
-                        if ($this->MoveLeft()) {
-                            echo 'OK';
-                        }
-                        return;
-                    case 'right':
-                        if ($this->MoveRight()) {
-                            echo 'OK';
-                        }
-                        return;
-                    case 'up':
-                        if ($this->MoveUp()) {
-                            echo 'OK';
-                        }
-                        return;
-                    case 'down':
-                        if ($this->MoveDown()) {
-                            echo 'OK';
-                        }
-                        return;
-                    case 'near':
-                        if ($this->ZoomNear()) {
-                            echo 'OK';
-                        }
-                        return;
-                    case 'far':
-                        if ($this->ZoomFar()) {
-                            echo 'OK';
-                        }
-                        return;
-                    default:
-                        echo $this->Translate('Invalid parameters.');
-                        return;
-                }
-                break;
-        }
+        case 'StopPTZ':
+            $this->StopPTZ();
+            echo 'OK';
+            return;
+        case 'StartPTZ':
+            switch ($_GET['value']) {
+                case 'left':
+                    if ($this->MoveLeft()) {
+                        echo 'OK';
+                    }
+                    return;
+                case 'right':
+                    if ($this->MoveRight()) {
+                        echo 'OK';
+                    }
+                    return;
+                case 'up':
+                    if ($this->MoveUp()) {
+                        echo 'OK';
+                    }
+                    return;
+                case 'down':
+                    if ($this->MoveDown()) {
+                        echo 'OK';
+                    }
+                    return;
+                case 'near':
+                    if ($this->ZoomNear()) {
+                        echo 'OK';
+                    }
+                    return;
+                case 'far':
+                    if ($this->ZoomFar()) {
+                        echo 'OK';
+                    }
+                    return;
+                default:
+                    echo $this->Translate('Invalid parameters.');
+                    return;
+            }
+            break;
+    }
         echo $this->Translate('Invalid parameters.');
         return;
     }
