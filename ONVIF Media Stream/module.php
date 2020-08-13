@@ -994,8 +994,12 @@ class ONVIFMediaStream extends ONVIFModuleBase
             $this->PTZ_MaxPresets = 0;
         //$this->PTZ_Spaces = [];
         } else {
-            $this->PTZ_HasHome = $PTZNode->PTZNode->HomeSupported;
-            $this->PTZ_MaxPresets = $PTZNode->PTZNode->MaximumNumberOfPresets;
+            if (property_exists($PTZNode->PTZNode, 'HomeSupported')) {
+                $this->PTZ_HasHome = $PTZNode->PTZNode->HomeSupported;
+            }
+            if (property_exists($PTZNode->PTZNode, 'MaximumNumberOfPresets')) {
+                $this->PTZ_MaxPresets = $PTZNode->PTZNode->MaximumNumberOfPresets;
+            }
             //$this->PTZ_Spaces = json_decode(json_encode($PTZNode->PTZNode->SupportedPTZSpaces), true);
         }
 
