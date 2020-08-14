@@ -99,7 +99,7 @@ class ONVIFDiscovery extends IPSModule
             $AddDevice = [
                 'instanceID'      => 0,
                 'IPAddress'       => $IP,
-                'name'            => $Device['Model'],
+                'name'            => $Device['Name'],
                 'Manufacturer'    => $Device['Manufacturer'],
                 'Model'           => $Device['Model'],
                 'FirmwareVersion' => $Device['FirmwareVersion'],
@@ -119,7 +119,7 @@ class ONVIFDiscovery extends IPSModule
                     $ConfigIo['Username'] = $this->ReadAttributeString('Username');
                     $ConfigIo['Password'] = $this->ReadAttributeString('Password');
                 }
-                $AddDevice['create'][$Device['Model'] . ' (' . $Address . ')'] = [
+                $AddDevice['create'][$Device['Name'] . ' (' . $Address . ')'] = [
                     [
                         'moduleID'      => '{C6A79C49-19D5-8D45-FFE5-5D77165FAEE6}',
                         'configuration' => new stdClass()
@@ -272,9 +272,18 @@ class ONVIFDiscovery extends IPSModule
                 $this->SendDebug('Read ' . $IpValue, json_encode($result), 0);
                 if ($Device === null) {
                     $Device = json_decode(json_encode($result), true);
+                    $Device['Name'] = $Device['Model'];
                     $DeviceOk = true;
                 }
                 $Device['Address'][] = $IpValue;
+                $HostnameResult = $ONVIFClient->client->GetHostname();
+                $this->SendDebug('Soap Request ' . $IpValue, $ONVIFClient->client->__getLastRequest(), 0);
+                $this->SendDebug('Soap Response ' . $IpValue, $ONVIFClient->client->__getLastResponse(), 0);
+                $this->SendDebug('Read ' . $IpValue, json_encode($HostnameResult), 0);
+                $Name = $HostnameResult->HostnameInformation->Name;
+                if ($Name != '') {
+                    $Device['Name'] = $Name;
+                }
             } catch (SoapFault $e) {
                 $this->SendDebug('Soap Request Error ' . $IpValue, $ONVIFClient->client->__getLastRequest(), 0);
                 $this->SendDebug('Soap Response Error ' . $IpValue, $ONVIFClient->client->__getLastResponse(), 0);
