@@ -986,7 +986,7 @@ class ONVIFMediaStream extends ONVIFModuleBase
             return false;
         }
         $NodeToken = ['NodeToken'=>$PTZConfiguration->PTZConfiguration->NodeToken];
-        $PTZNode = $this->SendData($this->PTZ_xAddr, 'GetNode', true, $NodeToken, self::PTZwsdl);
+        $PTZNode = @$this->SendData($this->PTZ_xAddr, 'GetNode', true, $NodeToken, self::PTZwsdl);
         if ($PTZNode === false) {
             $this->PTZ_HasHome = false;
             $this->PTZ_MaxPresets = 0;
