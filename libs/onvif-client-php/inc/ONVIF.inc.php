@@ -35,12 +35,15 @@ class ONVIF
     {
         $this->wsdl = $wsdl;
         $Options = [
-            'trace'              => 1,
+            'trace'              => true,
             'exceptions'         => true,
             'cache_wsdl'         => WSDL_CACHE_NONE,
             'ssl_method '        => SOAP_SSL_METHOD_TLS,
             'connection_timeout' => 5,
+            'user_agent'         => 'Symcon ONVIF-Lib by Nall-chan',
+            'keep_alive'         => false,
             'soap_version'       => SOAP_1_2,
+            'compression'        => SOAP_COMPRESSION_ACCEPT | SOAP_COMPRESSION_GZIP | SOAP_COMPRESSION_DEFLATE,
             'stream_context'     => stream_context_create(
                 [
                     'ssl'  => [
@@ -111,7 +114,7 @@ class ONVIF
 
         // Generating and encoding a random number
         $simple_nonce = mt_rand();
-        $encoded_nonce = base64_encode((string)$simple_nonce);
+        $encoded_nonce = base64_encode((string) $simple_nonce);
 
         // Compiling WSS string
         $passdigest = base64_encode(sha1($simple_nonce . $tm_created . $password, true));
