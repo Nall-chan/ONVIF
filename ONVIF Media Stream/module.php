@@ -131,9 +131,7 @@ class ONVIFMediaStream extends ONVIFModuleBase
         $StreamURL = $this->GetStreamUri();
         if ($StreamURL) {
             $this->SetMedia($StreamURL);
-            if ($this->PTZ_token != '') {
-                $UsePTZ = $this->GetPTZCapabilities();
-            }
+            $this->GetPTZCapabilities();
             $this->SetStatus(IS_ACTIVE);
         } else {
             $this->SetMedia('');
@@ -482,37 +480,37 @@ class ONVIFMediaStream extends ONVIFModuleBase
                 }
                 $ExpansionPanelPTZItems[] = $PTZPresetItems;
                 $ExpansionPanelPTZItems[] =
-            [
-                'type'  => 'RowLayout',
-                'items' => [
-                    [
-                        'type'    => 'Label',
-                        'width'   => '200px',
-                        'caption' => $this->Translate('max. presets:')
-                    ],
-                    [
-                        'type'    => 'Label',
-                        'width'   => '200px',
-                        'caption' => $this->PTZ_MaxPresets
+                [
+                    'type'  => 'RowLayout',
+                    'items' => [
+                        [
+                            'type'    => 'Label',
+                            'width'   => '200px',
+                            'caption' => $this->Translate('max. presets:')
+                        ],
+                        [
+                            'type'    => 'Label',
+                            'width'   => '200px',
+                            'caption' => $this->PTZ_MaxPresets
+                        ]
                     ]
-                ]
-            ];
+                ];
                 $ExpansionPanelPTZItems[] =
-            [
-                'type'  => 'RowLayout',
-                'items' => [
-                    [
-                        'type'    => 'Label',
-                        'width'   => '200px',
-                        'caption' => $this->Translate('Has Home Position:')
-                    ],
-                    [
-                        'type'    => 'Label',
-                        'width'   => '200px',
-                        'caption' => $this->PTZ_HasHome ? $this->Translate('Yes') : $this->Translate('No')
+                [
+                    'type'  => 'RowLayout',
+                    'items' => [
+                        [
+                            'type'    => 'Label',
+                            'width'   => '200px',
+                            'caption' => $this->Translate('Has Home Position:')
+                        ],
+                        [
+                            'type'    => 'Label',
+                            'width'   => '200px',
+                            'caption' => $this->PTZ_HasHome ? $this->Translate('Yes') : $this->Translate('No')
+                        ]
                     ]
-                ]
-            ];
+                ];
                 $Actions[] = [
                     'type'   => 'ExpansionPanel',
                     'caption'=> $this->Translate('PTZ properties'),
@@ -988,11 +986,10 @@ class ONVIFMediaStream extends ONVIFModuleBase
             return false;
         }
         $NodeToken = ['NodeToken'=>$PTZConfiguration->PTZConfiguration->NodeToken];
-        $PTZNode = @$this->SendData($this->PTZ_xAddr, 'GetNode', true, $NodeToken, self::PTZwsdl);
+        $PTZNode = $this->SendData($this->PTZ_xAddr, 'GetNode', true, $NodeToken, self::PTZwsdl);
         if ($PTZNode === false) {
             $this->PTZ_HasHome = false;
             $this->PTZ_MaxPresets = 0;
-        //$this->PTZ_Spaces = [];
         } else {
             if (property_exists($PTZNode->PTZNode, 'HomeSupported')) {
                 $this->PTZ_HasHome = $PTZNode->PTZNode->HomeSupported;
@@ -1000,9 +997,7 @@ class ONVIFMediaStream extends ONVIFModuleBase
             if (property_exists($PTZNode->PTZNode, 'MaximumNumberOfPresets')) {
                 $this->PTZ_MaxPresets = $PTZNode->PTZNode->MaximumNumberOfPresets;
             }
-            //$this->PTZ_Spaces = json_decode(json_encode($PTZNode->PTZNode->SupportedPTZSpaces), true);
         }
-
         // Presets
         $ProfileToken = ['ProfileToken' => $this->ReadPropertyString('Profile')];
         $Presets = @$this->SendData($this->PTZ_xAddr, 'GetPresets', true, $ProfileToken, self::PTZwsdl);

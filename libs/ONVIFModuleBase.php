@@ -191,7 +191,7 @@ class ONVIFModuleBase extends IPSModule
         if (is_a($Result, 'SoapFault')) {
             $this->SendDebug('Result Error', $Result, 0);
             set_error_handler([$this, 'ModulErrorHandler']);
-            trigger_error($Result->getMessage(), E_USER_WARNING);
+            trigger_error($Result->getMessage(), E_USER_NOTICE);
             restore_error_handler();
             return false;
         }
@@ -199,11 +199,11 @@ class ONVIFModuleBase extends IPSModule
         if ($Result === false){
             if (!$this->HasActiveParent()){
                 set_error_handler([$this, 'ModulErrorHandler']);
-                trigger_error($this->Translate('Instance has no active parent.'), E_USER_WARNING);
+                trigger_error($this->Translate('Instance has no active parent.'), E_USER_NOTICE);
                 restore_error_handler();
             } else {
                 set_error_handler([$this, 'ModulErrorHandler']);
-                trigger_error($this->Translate('Unknown error.'), E_USER_WARNING);
+                trigger_error($this->Translate('Unknown error.'), E_USER_NOTICE);
                 restore_error_handler();
             }
             return false;
@@ -232,6 +232,7 @@ class ONVIFModuleBase extends IPSModule
     {
         $this->SendDebug('ERROR', utf8_decode($errstr), 0);
         echo $errstr."\r\n";
+        //return true;
     }
 
     protected function GetConfigurationFormEventTopic(array $Form, bool $AddNothingIndex = false, array $SkippedTopics = [])
