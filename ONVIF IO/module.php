@@ -435,7 +435,7 @@ class ONVIFIO extends IPSModule
         $empty = '';
         $ret = $this->SendData($SubscriptionReference, 'event-mod.wsdl', 'Renew', true, $Params, $empty, $Header);
         if (is_a($ret, 'SoapFault')) {
-            trigger_error($ret->getMessage(), E_USER_WARNING);
+            trigger_error($ret->getMessage(), E_USER_NOTICE);
             $this->SetStatus(IS_EBASE + 3);
             $this->LogMessage($this->Translate('Connection lost'), KL_ERROR);
             $this->isSubscribed = false;
