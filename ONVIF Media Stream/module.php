@@ -1004,7 +1004,11 @@ class ONVIFMediaStream extends ONVIFModuleBase
         if (is_bool($Presets)) {
             $this->PTZ_Presets = [];
         } else {
-            $this->PTZ_Presets = json_decode(json_encode($Presets->Preset), true);
+            $Presets = json_decode(json_encode($Presets->Preset), true);
+            if (!is_array($Presets)) {
+                $Presets[] = $Presets;
+            }
+            $this->PTZ_Presets = $Presets;
         }
         return true;
     }
