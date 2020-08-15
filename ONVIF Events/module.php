@@ -9,7 +9,6 @@ class ONVIFEvents extends ONVIFModuleBase
     const wsdl = '';
     public function Create()
     {
-        $this->ConnectParent('{F40CA9A7-3B4D-4B26-7214-3A94B6074DFB}');
         parent::Create();
     }
     public function ApplyChanges()

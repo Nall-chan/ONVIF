@@ -33,6 +33,7 @@ class ONVIFModuleBase extends IPSModule
         parent::Create();
         $this->RegisterPropertyString('EventTopic', '');
         $this->RegisterAttributeArray('EventProperties', []);
+        $this->ConnectParent('{F40CA9A7-3B4D-4B26-7214-3A94B6074DFB}');
     }
 
     public function Destroy()

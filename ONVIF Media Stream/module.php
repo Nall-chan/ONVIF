@@ -106,6 +106,7 @@ class ONVIFMediaStream extends ONVIFModuleBase
     {
         //Never delete this line!
         parent::ApplyChanges();
+
         $this->PTZ_token = '';
         $this->PTZ_xAddr = '';
         $this->PTZ_Presets = [];
@@ -131,7 +132,7 @@ class ONVIFMediaStream extends ONVIFModuleBase
         $StreamURL = $this->GetStreamUri();
         if ($StreamURL) {
             $this->SetMedia($StreamURL);
-            $this->GetPTZCapabilities();
+            //$this->GetPTZCapabilities();
             $this->SetStatus(IS_ACTIVE);
         } else {
             $this->SetMedia('');
@@ -203,6 +204,7 @@ class ONVIFMediaStream extends ONVIFModuleBase
     public function GetConfigurationForm()
     {
         $Capabilities = @$this->GetCapabilities();
+        @$this->GetPTZCapabilities();
         $Form = json_decode(file_get_contents(__DIR__ . '/form.json'), true);
         if ($Capabilities == false) {
             $Form['actions'][] = [
@@ -279,8 +281,12 @@ class ONVIFMediaStream extends ONVIFModuleBase
                 ];
             }
             if ($ActualProfile != null) {
-                $mId = $this->GetIDForIdent('STREAM');
-                $Key = IPS_CreateTemporaryMediaStreamToken($mId, 900);
+                $mId = @$this->GetIDForIdent('STREAM');
+                $ButtonPreview = '';
+                if ($mId > 0) {
+                    $Key = IPS_CreateTemporaryMediaStreamToken($mId, 900);
+                    $ButtonPreview = 'echo "../proxy/' . $mId . '?authorization=' . urlencode($Key) . '";';
+                }
                 $ExpansionPanelVideoItems[] = [
                     'type'  => 'RowLayout',
                     'items' => [
@@ -298,7 +304,8 @@ class ONVIFMediaStream extends ONVIFModuleBase
                             'type'    => 'Button',
                             'width'   => '300px',
                             'label'   => 'Show Stream',
-                            'onClick' => 'echo "../proxy/' . $mId . '?authorization=' . urlencode($Key) . '";',
+                            'visible' => ($mId > 0),
+                            'onClick' => $ButtonPreview,
                             'link'    => true
                         ]
                     ]
@@ -427,7 +434,6 @@ class ONVIFMediaStream extends ONVIFModuleBase
                     ];
                 } else {
                     $Form['elements'][4]['enabled'] = true;
-
                     foreach ($Presets as $PresetIndex => $Preset) {
                         $PTZValues[] =
                         [
@@ -935,7 +941,7 @@ class ONVIFMediaStream extends ONVIFModuleBase
 
         if ($State == IS_INACTIVE) {
             $this->SetMedia('');
-            if ($this->GetIDForIdent('PTZControlHtml')) {
+            if (@$this->GetIDForIdent('PTZControlHtml')) {
                 $this->SetValueString('PTZControlHtml', '');
             }
         }
@@ -1000,13 +1006,15 @@ class ONVIFMediaStream extends ONVIFModuleBase
         }
         // Presets
         $ProfileToken = ['ProfileToken' => $this->ReadPropertyString('Profile')];
-        $Presets = @$this->SendData($this->PTZ_xAddr, 'GetPresets', true, $ProfileToken, self::PTZwsdl);
-        if (is_bool($Presets)) {
+        $PresetResult = @$this->SendData($this->PTZ_xAddr, 'GetPresets', true, $ProfileToken, self::PTZwsdl);
+        if (is_bool($PresetResult)) {
             $this->PTZ_Presets = [];
         } else {
-            $Presets = json_decode(json_encode($Presets->Preset), true);
-            if (!is_array($Presets)) {
-                $Presets[] = $Presets;
+            $Presets = [];
+            if (is_object($PresetResult->Preset)) {
+                $Presets[] = json_decode(json_encode($PresetResult->Preset), true);
+            } else {
+                $Presets = json_decode(json_encode($PresetResult->Preset), true);
             }
             $this->PTZ_Presets = $Presets;
         }
