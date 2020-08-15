@@ -432,8 +432,8 @@ class ONVIFMediaStream extends ONVIFModuleBase
                         $PTZValues[] =
                         [
                             'PresetIndex'  => $PresetIndex,
-                            'PresetName'   => $Preset->Name,
-                            'PresetToken'  => $Preset->token,
+                            'PresetName'   => $Preset['Name'],
+                            'PresetToken'  => $Preset['token'],
                             'PresetActive' => true,
                             'VariableValue'=> $PresetIndex,
                             'rowColor'     => '#C0FFC0' // grün token neu
@@ -1004,7 +1004,7 @@ class ONVIFMediaStream extends ONVIFModuleBase
         if (is_bool($Presets)) {
             $this->PTZ_Presets = [];
         } else {
-            $this->PTZ_Presets = $Presets->Preset;
+            $this->PTZ_Presets = json_decode(json_encode($Presets->Preset), true);
         }
         return true;
     }
