@@ -47,8 +47,8 @@ class ONVIFMediaStream extends ONVIFModuleBase
         $this->RegisterPropertyFloat('TiltDefaultSpeed', 1);
         $this->RegisterPropertyFloat('ZoomDefaultSpeed', 1);
         // Presets
-        $this->RegisterPropertyBoolean('EnablePresetVariable', true);
-        $this->RegisterPropertyBoolean('EnablePresetProfile', true);
+        $this->RegisterPropertyBoolean('EnablePresetVariable', false);
+        $this->RegisterPropertyBoolean('EnablePresetProfile', false);
         $this->RegisterPropertyString('PresetProfile', json_encode([]));
         // Buffer
         $this->PTZ_token = '';
@@ -1001,7 +1001,7 @@ class ONVIFMediaStream extends ONVIFModuleBase
         // Presets
         $ProfileToken = ['ProfileToken' => $this->ReadPropertyString('Profile')];
         $Presets = @$this->SendData($this->PTZ_xAddr, 'GetPresets', true, $ProfileToken, self::PTZwsdl);
-        if ($Presets === false) {
+        if (is_bool($Presets)) {
             $this->PTZ_Presets = [];
         } else {
             $this->PTZ_Presets = $Presets->Preset;
