@@ -298,7 +298,7 @@ class ONVIFMediaStream extends ONVIFModuleBase
                             'type'    => 'Button',
                             'width'   => '300px',
                             'label'   => 'Show Stream',
-                            'onClick' => 'echo "../proxy/' . $mId . '?authorization=' . $Key . '";',
+                            'onClick' => 'echo "../proxy/' . $mId . '?authorization=' . urlencode($Key) . '";',
                             'link'    => true
                         ]
                     ]
