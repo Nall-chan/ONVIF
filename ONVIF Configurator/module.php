@@ -11,26 +11,11 @@ class ONVIFConfigurator extends ONVIFModuleBase
     const GUID_ONVIF_DIGITAL_OUTPUT = '{A44B3114-1F72-1FD1-96FB-D7E970BD8614}';
     const GUID_ONVIF_MEDIA_STREAM = '{FA889450-38B6-7E20-D4DC-F2C6D0B074FB}';
     const GUID_ONVIF_IMAGE_GRABBER = '{18EA97C1-3CEC-80B7-4CAA-D91F8A2A0599}';
-   
+
     public function GetConfigurationForm()
     {
-        $Capabilities = $this->GetCapabilities();
         $Form = json_decode(file_get_contents(__DIR__ . '/form.json'), true);
-        if ($Capabilities == false) {
-            $Form['actions'][] = [
-                'type'  => 'PopupAlert',
-                'popup' => [
-                    'items' => [[
-                        'type'    => 'Label',
-                        'caption' => 'Error on read of Capabilities.'
-                    ]]
-                ]
-            ];
-            $this->SendDebug('FORM', json_encode($Form), 0);
-            $this->SendDebug('FORM', json_last_error_msg(), 0);
-            return json_encode($Form);
-        }
-        if (!$this->HasActiveParent()) {
+        if (!$this->HasActiveParent() || ($this->ParentID == 0)) {
             $Form['actions'][] = [
                 'type'  => 'PopupAlert',
                 'popup' => [
@@ -40,9 +25,26 @@ class ONVIFConfigurator extends ONVIFModuleBase
                     ]]
                 ]
             ];
+        } else {
+            $Capabilities = @$this->GetCapabilities();
+            if ($Capabilities == false) {
+                $Form['actions'][] = [
+                    'type'  => 'PopupAlert',
+                    'popup' => [
+                        'items' => [[
+                            'type'    => 'Label',
+                            'caption' => 'Error on read of Capabilities.'
+                        ]]
+                    ]
+                ];
+                $this->SendDebug('FORM', json_encode($Form), 0);
+                $this->SendDebug('FORM', json_last_error_msg(), 0);
+                return json_encode($Form);
+            }
         }
 
         $this->SendDebug('VideoSources', $Capabilities['VideoSources'], 0);
+        $this->SendDebug('VideoSourcesJPEG', $Capabilities['VideoSourcesJPEG'], 0);
         $this->SendDebug('HasInput', $Capabilities['HasInput'], 0);
         $this->SendDebug('HasOutput', $Capabilities['HasOutput'], 0);
 
@@ -87,7 +89,7 @@ class ONVIFConfigurator extends ONVIFModuleBase
         }
 
         $OutputValues = $this->GetConfigurationArray(self::GUID_ONVIF_DIGITAL_OUTPUT, $Capabilities['HasOutput'], $OutputTopics);
-
+        // Stream H264
         $StreamCreateParams = [
             'moduleID'      => self::GUID_ONVIF_MEDIA_STREAM,
             'configuration' => [],
@@ -95,7 +97,6 @@ class ONVIFConfigurator extends ONVIFModuleBase
         ];
         $StreamValues = [];
         $IPSStreamInstances = $this->GetInstanceList(self::GUID_ONVIF_MEDIA_STREAM, 'VideoSource');
-
         foreach ($Capabilities['VideoSources'] as $VideoSource) {
             $Device = [
                 'instanceID'  => 0,
@@ -136,7 +137,56 @@ class ONVIFConfigurator extends ONVIFModuleBase
             ];
             $StreamValues[] = $Device;
         }
-        $Values = array_merge($InputValues, $OutputValues, $StreamValues);
+        // Stream JPEG
+        $StreamJPEGCreateParams = [
+            'moduleID'      => self::GUID_ONVIF_IMAGE_GRABBER,
+            'configuration' => [],
+            'location'      => [$this->Translate('ONVIF Devices'), IPS_GetName($this->InstanceID)]
+        ];
+        $StreamJPEGValues = [];
+        $IPSStreamJPEGInstances = $this->GetInstanceList(self::GUID_ONVIF_IMAGE_GRABBER, 'VideoSource');
+        foreach ($Capabilities['VideoSourcesJPEG'] as $VideoSourceJPEG) {
+            $Device = [
+                'instanceID'  => 0,
+                'type'        => 'Image Grabber',
+                'VideoSource' => $VideoSourceJPEG['VideoSourceToken'],
+                'name'        => $VideoSourceJPEG['VideoSourceName'],
+                'Location'    => ''
+            ];
+            $InstanceID = array_search($VideoSourceJPEG['VideoSourceToken'], $IPSStreamJPEGInstances);
+
+            if ($InstanceID !== false) {
+                unset($IPSStreamJPEGInstances[$InstanceID]);
+                $Device['instanceID'] = $InstanceID;
+                $Device['name'] = IPS_GetName($InstanceID);
+                $Device['Location'] = stristr(IPS_GetLocation($InstanceID), IPS_GetName($InstanceID), true);
+            }
+            $Create = [];
+            foreach ($VideoSourceJPEG['Profile'] as $Profile) {
+                $Create[$VideoSourceJPEG['VideoSourceName'] . ' (' . $Profile['Name'] . ')'] = $StreamJPEGCreateParams;
+                $Create[$VideoSourceJPEG['VideoSourceName'] . ' (' . $Profile['Name'] . ')']['configuration'] = [
+                    'VideoSource' => $VideoSourceJPEG['VideoSourceToken'],
+                    'Profile'     => $Profile['token']
+                ];
+            }
+            if (count($Create) == 1) {
+                $Create = array_shift($Create);
+            }
+            $Device['create'] = $Create;
+            $StreamJPEGValues[] = $Device;
+        }
+        foreach ($IPSStreamJPEGInstances as $InstanceID => $VideoSourceJPEG) {
+            $Device = [
+                'instanceID'  => $InstanceID,
+                'type'        => 'Media Stream',
+                'VideoSource' => $VideoSourceJPEG,
+                'name'        => IPS_GetName($InstanceID),
+                'Location'    => stristr(IPS_GetLocation($InstanceID), IPS_GetName($InstanceID), true)
+            ];
+            $StreamJPEGValues[] = $Device;
+        }
+
+        $Values = array_merge($InputValues, $OutputValues, $StreamValues, $StreamJPEGValues);
         $Form['actions'][0]['values'] = $Values;
         $this->SendDebug('FORM', json_encode($Form), 0);
         $this->SendDebug('FORM', json_last_error_msg(), 0);
