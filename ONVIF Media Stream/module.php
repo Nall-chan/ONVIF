@@ -287,9 +287,9 @@ class ONVIFMediaStream extends ONVIFModuleBase
                 $mId = @$this->GetIDForIdent('STREAM');
                 $ButtonPreview = '';
                 if ($mId > 0) {
-                    $Key = IPS_CreateTemporaryMediaStreamToken($mId, 900);
-                    $ButtonPreview = 'echo "../proxy/' . $mId . '?authorization=' . urlencode($Key) . '";';
-                    $this->SendDebug('PREVIEW', '../proxy/' . $mId . '?authorization=' . urlencode($Key), 0);
+                    $Key = urlencode(base64_encode(IPS_CreateTemporaryMediaStreamToken($mId, 900)));
+                    $ButtonPreview = 'echo "../proxy/' . $mId . '?authorization=' . $Key . '";';
+                    $this->SendDebug('PREVIEW', '../proxy/' . $mId . '?authorization=' . $Key , 0);
                 }
                 $ExpansionPanelVideoItems[] = [
                     'type'  => 'RowLayout',
@@ -990,7 +990,7 @@ class ONVIFMediaStream extends ONVIFModuleBase
         if ($this->PTZ_token == '') {
             return false;
         }
-
+        ob_start();
         $PTZConfigurationToken = ['PTZConfigurationToken' => $this->PTZ_token];
         $PTZConfiguration = @$this->SendData($this->PTZ_xAddr, 'GetConfiguration', true, $PTZConfigurationToken, self::PTZwsdl);
         if ($PTZConfiguration == false) {
@@ -1012,6 +1012,7 @@ class ONVIFMediaStream extends ONVIFModuleBase
         // Presets
         $ProfileToken = ['ProfileToken' => $this->ReadPropertyString('Profile')];
         $PresetResult = @$this->SendData($this->PTZ_xAddr, 'GetPresets', true, $ProfileToken, self::PTZwsdl);
+        ob_clean();
         if (is_bool($PresetResult)) {
             $this->PTZ_Presets = [];
         } else {
@@ -1092,7 +1093,7 @@ class ONVIFMediaStream extends ONVIFModuleBase
             return;
         }
         $this->RegisterVariableString('PTZControlHtml', 'PTZ Control for Webfront', '~HTMLBox', 5);
-        $Key = IPS_CreateTemporaryMediaStreamToken($mId, 900);
+        $Key = urlencode(base64_encode(IPS_CreateTemporaryMediaStreamToken($mId, 900)));
         $ImgSrc = '<img class="stream" src="proxy/' . $mId . '?authorization=' . $Key . '">';
         $PanTiltSVG = '';
         if ($this->ReadPropertyBoolean('EnablePanTiltHTML')) {

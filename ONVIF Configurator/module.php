@@ -25,24 +25,25 @@ class ONVIFConfigurator extends ONVIFModuleBase
                     ]]
                 ]
             ];
-        } else {
-            $Capabilities = @$this->GetCapabilities();
-            if ($Capabilities == false) {
-                $Form['actions'][] = [
-                    'type'  => 'PopupAlert',
-                    'popup' => [
-                        'items' => [[
-                            'type'    => 'Label',
-                            'caption' => 'Error on read of Capabilities.'
-                        ]]
-                    ]
-                ];
-                $this->SendDebug('FORM', json_encode($Form), 0);
-                $this->SendDebug('FORM', json_last_error_msg(), 0);
-                return json_encode($Form);
-            }
+            $this->SendDebug('FORM', json_encode($Form), 0);
+            $this->SendDebug('FORM', json_last_error_msg(), 0);
+            return json_encode($Form);
         }
-
+        $Capabilities = @$this->GetCapabilities();
+        if ($Capabilities == false) {
+            $Form['actions'][] = [
+                'type'  => 'PopupAlert',
+                'popup' => [
+                    'items' => [[
+                        'type'    => 'Label',
+                        'caption' => 'Error on read of Capabilities.'
+                    ]]
+                ]
+            ];
+            $this->SendDebug('FORM', json_encode($Form), 0);
+            $this->SendDebug('FORM', json_last_error_msg(), 0);
+            return json_encode($Form);
+        }
         $this->SendDebug('VideoSources', $Capabilities['VideoSources'], 0);
         $this->SendDebug('VideoSourcesJPEG', $Capabilities['VideoSourcesJPEG'], 0);
         $this->SendDebug('HasInput', $Capabilities['HasInput'], 0);
