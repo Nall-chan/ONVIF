@@ -178,7 +178,7 @@ class ONVIFConfigurator extends ONVIFModuleBase
         foreach ($IPSStreamJPEGInstances as $InstanceID => $VideoSourceJPEG) {
             $Device = [
                 'instanceID'  => $InstanceID,
-                'type'        => 'Media Stream',
+                'type'        => 'Image Grabber',
                 'VideoSource' => $VideoSourceJPEG,
                 'name'        => IPS_GetName($InstanceID),
                 'Location'    => stristr(IPS_GetLocation($InstanceID), IPS_GetName($InstanceID), true)

@@ -204,7 +204,7 @@ class ONVIFMediaStream extends ONVIFModuleBase
     public function GetConfigurationForm()
     {
         $Form = json_decode(file_get_contents(__DIR__ . '/form.json'), true);
-        if (!$this->HasActiveParent() or ($this->ParentID == 0)) {
+        if (!$this->HasActiveParent() || ($this->ParentID == 0)) {
             $Form['actions'][] = [
                 'type'  => 'PopupAlert',
                 'popup' => [
@@ -289,6 +289,7 @@ class ONVIFMediaStream extends ONVIFModuleBase
                 if ($mId > 0) {
                     $Key = IPS_CreateTemporaryMediaStreamToken($mId, 900);
                     $ButtonPreview = 'echo "../proxy/' . $mId . '?authorization=' . urlencode($Key) . '";';
+                    $this->SendDebug('PREVIEW', '../proxy/' . $mId . '?authorization=' . urlencode($Key), 0);
                 }
                 $ExpansionPanelVideoItems[] = [
                     'type'  => 'RowLayout',
@@ -304,12 +305,12 @@ class ONVIFMediaStream extends ONVIFModuleBase
                             'caption' => $ActualProfile['Name']
                         ],
                         [
-                            'type'    => 'Button',
-                            'width'   => '300px',
+                            'type'      => 'Button',
+                            'width'     => '300px',
                             'caption'   => 'Show Stream',
-                            'visible' => ($mId > 0),
-                            'onClick' => $ButtonPreview,
-                            'link'    => true
+                            'visible'   => ($mId > 0),
+                            'onClick'   => $ButtonPreview,
+                            'link'      => true
                         ]
                     ]
                 ];
