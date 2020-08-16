@@ -1,0 +1,30 @@
+{
+    "translations": {
+        "de": {
+            "Videosource": "Videoquelle",
+            "Stream-Profile": "Stream-Profil",
+            "Events of videosource": "Ereignisse der Videoquelle",
+            "Configuration is valid": "Konfiguration ist gültig",
+            "Configuration is invalid": "Konfiguration ist ungültig",
+            "Snapshot URL could not be determined": "Snapshot URL konnte nicht bestimmt werden",
+            "Error on read capabilities.": "Fehler beim Lesen der Fähigkeiten.",
+            "Instance has no active parent.": "Instanz hat kein aktives übergeordnetes Element.",
+            "Unknown error.": "Unbekannter Fehler.",
+            "none": "keine",
+            "nothing": "keins",
+            "Videoencoder-Profilename:": "Videoencoder-Profilname:",
+            "Videosource-Name:": "Videoquellen-Name:",
+            "Resolution:": "Auflösung:",
+            "Framerate:": "Bildrate:",
+            "Encoding-Interval:": "Kodierungsintervall:",
+            "Bitratelimit:": "Bitraten-Limit",
+            "Invalid parameters.": "Ungültige Parameter.",
+            "Stream properties": "Stream Eigenschaften",
+            "Show Image": "Zeige Bild",
+            "This options should not be disabled for SymBox or SD/SSD media": "Diese Option sollte nicht für die SymBox oder SD/SSD Speichermedien deaktiviert werden",
+            "Use in-memory cache": "Benutze In-Memory Cache",
+            "Update Now": "Jetzt aktualisieren",
+            "seconds": "Sekunden"
+        }
+    }
+}

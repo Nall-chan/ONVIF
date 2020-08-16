@@ -32,6 +32,7 @@ class ONVIFIO extends IPSModule
         $this->RegisterPropertyString('Password', '');
         $this->RegisterPropertyString('NATAddress', '');
         $this->RegisterAttributeArray('VideoSources', []);
+        $this->RegisterAttributeArray('VideoSourcesJPEG', []);
         $this->RegisterAttributeInteger('Timestamp_Offset', 0);
         /*        $this->RegisterAttributeString('XAddrMedia', '');
           $this->RegisterAttributeString('XAddrImageing', '');
@@ -141,14 +142,12 @@ class ONVIFIO extends IPSModule
             $this->SetStatus(IS_EBASE + 2);
             return;
         }
-
         if ($ReloadCapabilities) {
             if (!$this->GetProfiles()) {
                 $this->SetStatus(IS_EBASE + 2);
                 return;
             } else {
                 if ($this->GetCapabilities()) {
-                    // Prüfen ob XAddrEvents gesetzt ist
                     if ($this->GetEventProperties()) { // events are valid
                         $this->RegisterHook('/hook/ONVIFEvents/IO/' . $this->InstanceID);
                         if ($this->GetConsumerAddress()) { // yeah, we can receive events
@@ -177,7 +176,8 @@ class ONVIFIO extends IPSModule
                 }
             }
         } else {
-            $this->SendDebug('VideoSourcesAttribute', $this->ReadAttributeArray('VideoSources'), 0);
+            $this->SendDebug('VideoSources H.26x', $this->ReadAttributeArray('VideoSources'), 0);
+            $this->SendDebug('VideoSources JPEG', $this->ReadAttributeArray('VideoSourcesJPEG'), 0);
             $this->Subscribe();
         }
         $this->LogMessage($this->Translate('Interface connected'), KL_MESSAGE);
@@ -190,6 +190,7 @@ class ONVIFIO extends IPSModule
         unset($Data['DataID']);
         if ($Data['Function'] == 'GetCapabilities') {
             $Capabilities['VideoSources'] = $this->ReadAttributeArray('VideoSources');
+            $Capabilities['VideoSourcesJPEG'] = $this->ReadAttributeArray('VideoSourcesJPEG');
             $Capabilities['HasOutput'] = $this->ReadAttributeBoolean('HasOutput');
             $Capabilities['HasInput'] = $this->ReadAttributeBoolean('HasInput');
             $Capabilities['XAddr'] = $this->ReadAttributeArray('XAddr');
@@ -539,7 +540,7 @@ class ONVIFIO extends IPSModule
         }
         $res = json_decode(json_encode($ret), true)['Profiles'];
         $this->SendDebug('Profiles', $res, 0);
-        $Profiles = array_filter($res, function ($Profile)
+        $H264Profiles = array_filter($res, function ($Profile)
         {
             if (isset($Profile['VideoEncoderConfiguration']['Encoding'])) {
                 if (strtoupper($Profile['VideoEncoderConfiguration']['Encoding']) == 'JPEG') {
@@ -548,14 +549,14 @@ class ONVIFIO extends IPSModule
             }
             return true;
         });
-        $VideoSourcesItems = [];
-        foreach ($Profiles as $Profile) {
+        $H264VideoSourcesItems = [];
+        foreach ($H264Profiles as $Profile) {
             if (!array_key_exists('VideoEncoderConfiguration', $Profile)) {
                 continue;
             }
-            $VideoSourcesItems[$Profile['VideoSourceConfiguration']['SourceToken']]['VideoSourceToken'] = $Profile['VideoSourceConfiguration']['SourceToken'];
-            $VideoSourcesItems[$Profile['VideoSourceConfiguration']['SourceToken']]['VideoSourceName'] = $Profile['VideoSourceConfiguration']['Name'];
-            $VideoSourcesItems[$Profile['VideoSourceConfiguration']['SourceToken']]['Profile'][] = [
+            $H264VideoSourcesItems[$Profile['VideoSourceConfiguration']['SourceToken']]['VideoSourceToken'] = $Profile['VideoSourceConfiguration']['SourceToken'];
+            $H264VideoSourcesItems[$Profile['VideoSourceConfiguration']['SourceToken']]['VideoSourceName'] = $Profile['VideoSourceConfiguration']['Name'];
+            $H264VideoSourcesItems[$Profile['VideoSourceConfiguration']['SourceToken']]['Profile'][] = [
                 'Name'       => $Profile['VideoEncoderConfiguration']['Name'],
                 'token'      => $Profile['token'],
                 'ptztoken'   => isset($Profile['PTZConfiguration']['token']) ? $Profile['PTZConfiguration']['token'] : '',
@@ -564,9 +565,37 @@ class ONVIFIO extends IPSModule
                 'RateControl'=> $Profile['VideoEncoderConfiguration']['RateControl']
             ];
         }
-        $VideoSources = array_values($VideoSourcesItems);
-        $this->SendDebug('VideoSourcesAttribute', $VideoSources, 0);
-        $this->WriteAttributeArray('VideoSources', $VideoSources);
+        $H264VideoSources = array_values($H264VideoSourcesItems);
+        $this->SendDebug('VideoSources H.26x', $H264VideoSources, 0);
+        $this->WriteAttributeArray('VideoSources', $H264VideoSources);
+
+        $JPEGProfiles = array_filter($res, function ($Profile)
+        {
+            if (isset($Profile['VideoEncoderConfiguration']['Encoding'])) {
+                if (strtoupper($Profile['VideoEncoderConfiguration']['Encoding']) == 'JPEG') {
+                    return true;
+                }
+            }
+            return false;
+        });
+        $JPEGVideoSourcesItems = [];
+        foreach ($JPEGProfiles as $Profile) {
+            if (!array_key_exists('VideoEncoderConfiguration', $Profile)) {
+                continue;
+            }
+            $JPEGVideoSourcesItems[$Profile['VideoSourceConfiguration']['SourceToken']]['VideoSourceToken'] = $Profile['VideoSourceConfiguration']['SourceToken'];
+            $JPEGVideoSourcesItems[$Profile['VideoSourceConfiguration']['SourceToken']]['VideoSourceName'] = $Profile['VideoSourceConfiguration']['Name'];
+            $JPEGVideoSourcesItems[$Profile['VideoSourceConfiguration']['SourceToken']]['Profile'][] = [
+                'Name'       => $Profile['VideoEncoderConfiguration']['Name'],
+                'token'      => $Profile['token'],
+                'Encoding'   => $Profile['VideoEncoderConfiguration']['Encoding'],
+                'Resolution' => $Profile['VideoEncoderConfiguration']['Resolution'],
+                'RateControl'=> $Profile['VideoEncoderConfiguration']['RateControl']
+            ];
+        }
+        $JPEGVideoSources = array_values($JPEGVideoSourcesItems);
+        $this->SendDebug('VideoSources JPEG', $JPEGVideoSources, 0);
+        $this->WriteAttributeArray('VideoSourcesJPEG', $JPEGVideoSources);
         return true;
     }
 

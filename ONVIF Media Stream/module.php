@@ -203,9 +203,22 @@ class ONVIFMediaStream extends ONVIFModuleBase
 
     public function GetConfigurationForm()
     {
-        $Capabilities = @$this->GetCapabilities();
-        @$this->GetPTZCapabilities();
         $Form = json_decode(file_get_contents(__DIR__ . '/form.json'), true);
+        if (!$this->HasActiveParent() or ($this->ParentID == 0)) {
+            $Form['actions'][] = [
+                'type'  => 'PopupAlert',
+                'popup' => [
+                    'items' => [[
+                        'type'    => 'Label',
+                        'caption' => 'Instance has no active parent.'
+                    ]]
+                ]
+            ];
+            $this->SendDebug('FORM', json_encode($Form), 0);
+            $this->SendDebug('FORM', json_last_error_msg(), 0);
+            return json_encode($Form);
+        }
+        $Capabilities = @$this->GetCapabilities();
         if ($Capabilities == false) {
             $Form['actions'][] = [
                 'type'  => 'PopupAlert',
@@ -220,17 +233,7 @@ class ONVIFMediaStream extends ONVIFModuleBase
             $this->SendDebug('FORM', json_last_error_msg(), 0);
             return json_encode($Form);
         }
-        if (!$this->HasActiveParent()) {
-            $Form['actions'][] = [
-                'type'  => 'PopupAlert',
-                'popup' => [
-                    'items' => [[
-                        'type'    => 'Label',
-                        'caption' => 'Instance has no active parent.'
-                    ]]
-                ]
-            ];
-        }
+        @$this->GetPTZCapabilities();
         $VideoSourcesOptions = [];
         $ProfileOptions = [];
         $ProfileOptions[] = [
@@ -303,7 +306,7 @@ class ONVIFMediaStream extends ONVIFModuleBase
                         [
                             'type'    => 'Button',
                             'width'   => '300px',
-                            'label'   => 'Show Stream',
+                            'caption'   => 'Show Stream',
                             'visible' => ($mId > 0),
                             'onClick' => $ButtonPreview,
                             'link'    => true
@@ -442,7 +445,7 @@ class ONVIFMediaStream extends ONVIFModuleBase
                             'PresetToken'  => $Preset['token'],
                             'PresetActive' => true,
                             'VariableValue'=> $PresetIndex,
-                            'rowColor'     => '#C0FFC0' // grün token neu
+                            'rowColor'     => '#C0FFC0'
                         ];
                     }
                     $PTZPresetItems['items'][] = [
@@ -935,6 +938,7 @@ class ONVIFMediaStream extends ONVIFModuleBase
         $PreName = str_replace($this->ReadPropertyString('EventTopic'), '', $Data['Topic']);
         return $this->SetEventStatusVariable($PreName, $EventProperties[$Data['Topic']], $Data);
     }
+
     protected function IOChangeState($State)
     {
         parent::IOChangeState($State);
@@ -971,7 +975,7 @@ class ONVIFMediaStream extends ONVIFModuleBase
                 }
             }
         }
-        //PTZ-Liste leeren
+        // todo PTZ-Liste leeren
         $this->UpdateFormField('Profile', 'options', json_encode($ProfileOptions));
     }
 

@@ -115,34 +115,41 @@ class ONVIFModuleBase extends IPSModule
     protected function GetEvents(string $Pattern = '', int $InstanceID = -1, array $SkippedTopics = [])
     {
         $answer = [];
-        if ($this->HasActiveParent()) {
-            if ($InstanceID == -1) {
-                $InstanceID = $this->InstanceID;
-            }
-            $this->SendDebug('GetEvents Pattern', $Pattern, 0);
-            $this->SendDebug('GetEvents SkippedTopics', $SkippedTopics, 0);
-            $Data = json_encode(['DataID' => '{9B9C8DA6-BC89-21BC-3E8C-BA6E534ABC37}', 'Function' => 'GetEvents', 'Pattern' => $Pattern, 'Instance' => $InstanceID, 'SkippedTopics' => $SkippedTopics]);
-            $answer = $this->SendDataToParent($Data);
-            if ($answer !== false) {
-                $answer = unserialize($answer);
-            }
-            $this->SendDebug('Events Result', $answer, 0);
+        if ($this->ParentID == 0) {
+            return $answer;
         }
+        if (!$this->HasActiveParent()) {
+            return $answer;
+        }
+        if ($InstanceID == -1) {
+            $InstanceID = $this->InstanceID;
+        }
+        $this->SendDebug('GetEvents Pattern', $Pattern, 0);
+        $this->SendDebug('GetEvents SkippedTopics', $SkippedTopics, 0);
+        $Data = json_encode(['DataID' => '{9B9C8DA6-BC89-21BC-3E8C-BA6E534ABC37}', 'Function' => 'GetEvents', 'Pattern' => $Pattern, 'Instance' => $InstanceID, 'SkippedTopics' => $SkippedTopics]);
+        $answer = $this->SendDataToParent($Data);
+        if ($answer !== false) {
+            $answer = unserialize($answer);
+        }
+        $this->SendDebug('Events Result', $answer, 0);
+
         return $answer;
     }
 
     protected function GetCapabilities()
     {
-        if ($this->HasActiveParent()) {
-            $this->SendDebug('GetCapabilities', '', 0);
-            $Data = json_encode(['DataID' => '{9B9C8DA6-BC89-21BC-3E8C-BA6E534ABC37}', 'Function' => 'GetCapabilities']);
-            $answer = $this->SendDataToParent($Data);
-            if ($answer !== false) {
-                $Result = unserialize($answer);
-                $this->SendDebug('Capabilities Result', $Result, 0);
-                return $Result;
+        if ($this->ParentID > 0) {
+            if ($this->HasActiveParent()) {
+                $this->SendDebug('GetCapabilities', '', 0);
+                $Data = json_encode(['DataID' => '{9B9C8DA6-BC89-21BC-3E8C-BA6E534ABC37}', 'Function' => 'GetCapabilities']);
+                $answer = $this->SendDataToParent($Data);
+                if ($answer !== false) {
+                    $Result = unserialize($answer);
+                    $this->SendDebug('Capabilities Result', $Result, 0);
+                    return $Result;
+                }
+                $this->SendDebug('Capabilities Result', [], 0);
             }
-            $this->SendDebug('Capabilities Result', [], 0);
         }
         return [
             'VideoSources' => [],
@@ -161,14 +168,16 @@ class ONVIFModuleBase extends IPSModule
 
     protected function GetCredentials()
     {
-        if ($this->HasActiveParent()) {
-            $Data = json_encode(['DataID' => '{9B9C8DA6-BC89-21BC-3E8C-BA6E534ABC37}', 'Function' => 'GetCredentials']);
-            $answer = $this->SendDataToParent($Data);
-            if ($answer === false) {
-                $this->SendDebug('GetCredentials', 'No valid answer', 0);
-                throw new Exception($this->Translate('No valid answer.'), E_USER_NOTICE);
+        if ($this->ParentID > 0) {
+            if ($this->HasActiveParent()) {
+                $Data = json_encode(['DataID' => '{9B9C8DA6-BC89-21BC-3E8C-BA6E534ABC37}', 'Function' => 'GetCredentials']);
+                $answer = $this->SendDataToParent($Data);
+                if ($answer === false) {
+                    $this->SendDebug('GetCredentials', 'No valid answer', 0);
+                    throw new Exception($this->Translate('No valid answer.'), E_USER_NOTICE);
+                }
+                return unserialize($answer);
             }
-            return unserialize($answer);
         }
         return ['Username' => '', 'Password' => ''];
     }
@@ -178,6 +187,12 @@ class ONVIFModuleBase extends IPSModule
         $this->SendDebug('Send URI', $URI, 0);
         if ($wsdl == '') {
             $wsdl = static::wsdl;
+        }
+        if ($this->ParentID == 0) {
+            return false;
+        }
+        if (!$this->HasActiveParent()) {
+            return false;
         }
         $this->SendDebug('Send WSDL', $wsdl, 0);
         $this->SendDebug('Send Function', $Function, 0);
@@ -197,8 +212,8 @@ class ONVIFModuleBase extends IPSModule
             return false;
         }
         $this->SendDebug('Result', $Result, 0);
-        if ($Result === false){
-            if (!$this->HasActiveParent()){
+        if ($Result === false) {
+            if (!$this->HasActiveParent()) {
                 set_error_handler([$this, 'ModulErrorHandler']);
                 trigger_error($this->Translate('Instance has no active parent.'), E_USER_NOTICE);
                 restore_error_handler();
@@ -232,7 +247,7 @@ class ONVIFModuleBase extends IPSModule
     protected function ModulErrorHandler($errno, $errstr)
     {
         $this->SendDebug('ERROR', utf8_decode($errstr), 0);
-        echo $errstr."\r\n";
+        echo $errstr . "\r\n";
         //return true;
     }
 

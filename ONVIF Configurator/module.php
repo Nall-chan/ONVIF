@@ -10,7 +10,8 @@ class ONVIFConfigurator extends ONVIFModuleBase
     const GUID_ONVIF_DIGITAL_INPUT = '{73097230-1ECC-FEEB-5969-C85148DFA76E}';
     const GUID_ONVIF_DIGITAL_OUTPUT = '{A44B3114-1F72-1FD1-96FB-D7E970BD8614}';
     const GUID_ONVIF_MEDIA_STREAM = '{FA889450-38B6-7E20-D4DC-F2C6D0B074FB}';
-
+    const GUID_ONVIF_IMAGE_GRABBER = '{18EA97C1-3CEC-80B7-4CAA-D91F8A2A0599}';
+   
     public function GetConfigurationForm()
     {
         $Capabilities = $this->GetCapabilities();

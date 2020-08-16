@@ -1,0 +1,67 @@
+{
+    "elements": [
+        {
+            "type": "Select",
+            "name": "VideoSource",
+            "caption": "Videosource",
+            "width": "300px",
+            "options": [],
+            "onChange": "IPS_RequestAction($id,'RefreshProfileForm',$VideoSource);"
+        },
+        {
+            "type": "Select",
+            "name": "Profile",
+            "caption": "Stream-Profile",
+            "width": "300px",
+            "options": []
+        },
+        {
+            "name": "Interval",
+            "caption": "Interval",
+            "type": "NumberSpinner",
+            "suffix": "seconds",
+            "minimum": 0
+        },
+        {
+            "type": "Label",
+            "caption": "This options should not be disabled for SymBox or SD/SSD media"
+        },
+        {
+            "name": "UseCaching",
+            "type": "CheckBox",
+            "caption": "Use in-memory cache"
+        },
+        {
+            "type": "Select",
+            "name": "EventTopic",
+            "caption": "Events of videosource",
+            "width": "300px",
+            "options": [],
+            "enabled": false
+        }
+    ],
+    "actions": [
+        {
+            "type": "Button",
+            "caption": "Update Image",
+            "onClick": "ONVIF_UpdateImage($id);"
+        }
+    ],
+    "status": [
+        {
+            "code": 102,
+            "icon": "active",
+            "caption": "Configuration is valid"
+        },
+        {
+            "code": 104,
+            "icon": "inactive",
+            "caption": "Configuration invalid"
+        },
+        {
+            "code": 201,
+            "icon": "error",
+            "caption": "Snapshot URL could not be determined"
+        }
+    ]
+}
