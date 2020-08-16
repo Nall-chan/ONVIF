@@ -287,7 +287,7 @@ class ONVIFMediaStream extends ONVIFModuleBase
                 $mId = @$this->GetIDForIdent('STREAM');
                 $ButtonPreview = '';
                 if ($mId > 0) {
-                    $Key = urlencode(base64_encode(IPS_CreateTemporaryMediaStreamToken($mId, 900)));
+                    $Key = urlencode(base64_encode('token:'.IPS_CreateTemporaryMediaStreamToken($mId, 900)));
                     $ButtonPreview = 'echo "../proxy/' . $mId . '?authorization=' . $Key . '";';
                     $this->SendDebug('PREVIEW', '../proxy/' . $mId . '?authorization=' . $Key , 0);
                 }
@@ -1093,7 +1093,7 @@ class ONVIFMediaStream extends ONVIFModuleBase
             return;
         }
         $this->RegisterVariableString('PTZControlHtml', 'PTZ Control for Webfront', '~HTMLBox', 5);
-        $Key = urlencode(base64_encode(IPS_CreateTemporaryMediaStreamToken($mId, 900)));
+        $Key = urlencode(base64_encode('token:'.IPS_CreateTemporaryMediaStreamToken($mId, 900)));
         $ImgSrc = '<img class="stream" src="proxy/' . $mId . '?authorization=' . $Key . '">';
         $PanTiltSVG = '';
         if ($this->ReadPropertyBoolean('EnablePanTiltHTML')) {
