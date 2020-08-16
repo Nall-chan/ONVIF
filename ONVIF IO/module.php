@@ -421,7 +421,7 @@ class ONVIFIO extends IPSModule
         }
         $Action = '<ns2:Action env:mustUnderstand="1">http://docs.oasis-open.org/wsn/bw-2/SubscriptionManager/RenewRequest</ns2:Action>';
         $Header[] = new SoapHeader('http://www.w3.org/2005/08/addressing', 'Action', new SoapVar($Action, XSD_ANYXML), true);
-        $To = '<ns2:To env:mustUnderstand="1">'.$SubscriptionReference.'</ns2:To>';
+        $To = '<ns2:To env:mustUnderstand="1">' . $SubscriptionReference . '</ns2:To>';
         $Header[] = new SoapHeader('http://www.w3.org/2005/08/addressing', 'To', new SoapVar($To, XSD_ANYXML), true);
         $SubscriptionId = $this->ReadAttributeString('SubscriptionId');
         if ($SubscriptionId != '') {
@@ -578,6 +578,9 @@ class ONVIFIO extends IPSModule
             }
             return false;
         });
+        if (count($JPEGProfiles) == 0) { //fallback, no JPEG found
+            $JPEGProfiles = $res;
+        }
         $JPEGVideoSourcesItems = [];
         foreach ($JPEGProfiles as $Profile) {
             if (!array_key_exists('VideoEncoderConfiguration', $Profile)) {
