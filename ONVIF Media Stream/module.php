@@ -12,6 +12,7 @@ eval('declare(strict_types=1);namespace ONVIFMediaStream {?>' . file_get_content
  * @property bool $PTZ_HasHome
  * @property int $PTZ_MaxPresets
  * @property array $PresetTokenList
+ * @property string $AuthorizationKey
  */
 class ONVIFMediaStream extends ONVIFModuleBase
 {
@@ -57,7 +58,7 @@ class ONVIFMediaStream extends ONVIFModuleBase
         $this->PTZ_HasHome = false;
         $this->PTZ_MaxPresets = 0;
         $this->PresetTokenList = [];
-        //$this->PTZ_Spaces = [];
+        $this->AuthorizationKey='';
         // Profile
         $this->RegisterProfileIntegerEx('ONVIF.PanTilt', 'Move', '', '',
             [
@@ -113,7 +114,7 @@ class ONVIFMediaStream extends ONVIFModuleBase
         $this->PTZ_HasHome = false;
         $this->PTZ_MaxPresets = 0;
         $this->PresetTokenList = [];
-        //$this->PTZ_Spaces = [];
+        $this->AuthorizationKey='';
 
         if ($this->ReadPropertyString('VideoSource') == '') {
             $this->SetStatus(IS_INACTIVE);
@@ -132,7 +133,6 @@ class ONVIFMediaStream extends ONVIFModuleBase
         $StreamURL = $this->GetStreamUri();
         if ($StreamURL) {
             $this->SetMedia($StreamURL);
-            //$this->GetPTZCapabilities();
             $this->SetStatus(IS_ACTIVE);
         } else {
             $this->SetMedia('');
@@ -287,9 +287,9 @@ class ONVIFMediaStream extends ONVIFModuleBase
                 $mId = @$this->GetIDForIdent('STREAM');
                 $ButtonPreview = '';
                 if ($mId > 0) {
-                    $Key = urlencode(base64_encode('token:'.IPS_CreateTemporaryMediaStreamToken($mId, 900)));
+                    $Key = urlencode(base64_encode('token:' . IPS_CreateTemporaryMediaStreamToken($mId, 900)));
                     $ButtonPreview = 'echo "../proxy/' . $mId . '?authorization=' . $Key . '";';
-                    $this->SendDebug('PREVIEW', '../proxy/' . $mId . '?authorization=' . $Key , 0);
+                    $this->SendDebug('PREVIEW', '../proxy/' . $mId . '?authorization=' . $Key, 0);
                 }
                 $ExpansionPanelVideoItems[] = [
                     'type'  => 'RowLayout',
@@ -976,15 +976,11 @@ class ONVIFMediaStream extends ONVIFModuleBase
                 }
             }
         }
-        // todo PTZ-Liste leeren
         $this->UpdateFormField('Profile', 'options', json_encode($ProfileOptions));
+        $this->UpdateFormField('ConfigurePTZ', 'enabled', false);
+        $this->UpdateFormField('ConfigurePrePositions', 'enabled', false);
     }
 
-    /**
-     * @todo Rückgabewert korrekt auswerten und u.U. Funktion deaktivieren und Form aktualisieren.
-     *
-     * @return void
-     */
     protected function GetPTZCapabilities()
     {
         if ($this->PTZ_token == '') {
@@ -1093,7 +1089,8 @@ class ONVIFMediaStream extends ONVIFModuleBase
             return;
         }
         $this->RegisterVariableString('PTZControlHtml', 'PTZ Control for Webfront', '~HTMLBox', 5);
-        $Key = urlencode(base64_encode('token:'.IPS_CreateTemporaryMediaStreamToken($mId, 900)));
+        $this->AuthorizationKey = $Key = base64_encode('token:' . IPS_CreateTemporaryMediaStreamToken($mId, 900));
+        $Key = urlencode($Key);
         $ImgSrc = '<img class="stream" src="proxy/' . $mId . '?authorization=' . $Key . '">';
         $PanTiltSVG = '';
         if ($this->ReadPropertyBoolean('EnablePanTiltHTML')) {
@@ -1129,34 +1126,59 @@ class ONVIFMediaStream extends ONVIFModuleBase
             ],
             file_get_contents(__DIR__ . '/../libs/ZoomControl.svg'));
         }
-        $JS = file_get_contents(__DIR__ . '/../libs/PTZControl.js');
-        $JSCode = '<script>' . $JS . 'initPTZ(' . $this->InstanceID . ');</script>';
+        $JS = str_replace(
+            [
+                '%%InstanceId%%',
+                '%%Authorization%%'
+            ],
+            [
+                $this->InstanceID,
+                $Key
+            ],
+            file_get_contents(__DIR__ . '/../libs/PTZControl.js'));
+
+        $JSCode = '<script>' . $JS . /*'initPTZ(' . $this->InstanceID . ');*/'</script>';
         $HTMLData = '<div class="extended"><div class="ipsContainer media">' .
-    $ImgSrc .
-    '<div style="position:absolute; right:0px; bottom:0px; margin:10px">' .
-    $ZoomSVG .
-    $PanTiltSVG .
-    '</div>' .
-    $JSCode .
-    '</div></div>';
+        $ImgSrc .
+        '<div style="position:absolute; right:0px; bottom:0px; margin:10px">' .
+        $ZoomSVG .
+        $PanTiltSVG .
+        '</div>' .
+        $JSCode .
+        '</div></div>';
 
         $this->SetValueString('PTZControlHtml', $HTMLData);
     }
     protected function ProcessHookData()
     {
+        if (!isset($_GET['authorization']) || ($_GET['authorization'] != $this->AuthorizationKey)) {
+            http_response_code(401);
+            header('HTTP/1.1 403 Forbidden');
+            header('Connection: close');
+            header('Server: Symcon ' . IPS_GetKernelVersion());
+            header('X-Powered-By: ONVIF Module');
+            header('Expires: 0');
+            header('Cache-Control: no-cache');
+            header('Content-Type: text/plain');
+            echo $this->Translate('Access denied');
+            return;
+        }
         http_response_code(200);
+        header('HTTP/1.1 200 OK');
         header('Connection: close');
         header('Server: Symcon ' . IPS_GetKernelVersion());
         header('X-Powered-By: ONVIF Module');
         header('Expires: 0');
         header('Cache-Control: no-cache');
         header('Content-Type: text/plain');
-        if ($this->GetStatus() != IS_ACTIVE) {
-            echo 'Instance is inactive.';
-            return;
-        }
         if ((!isset($_GET['action'])) || (!isset($_GET['value']))) {
             echo $this->Translate('Invalid parameters.');
+            return;
+        }
+
+
+        if ($this->GetStatus() != IS_ACTIVE) {
+            echo 'Instance is inactive.';
             return;
         }
         switch ($_GET['action']) {

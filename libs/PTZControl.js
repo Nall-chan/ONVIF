@@ -5,14 +5,16 @@ function sendPTZstart(event) {
     this.childNodes[1].setAttribute("fill", "#5B9BA2");
     this.childNodes[3].setAttribute("fill", "#000000");
     var action = this.id.split('_');
-    myPTZRequestActionGet({ url: "hook/ONVIF/PTZ/" + action[0] + "?action=StartPTZ&value=" + action[1] });
+    var Key = window["Key"+ action[0]];
+    myPTZRequestActionGet({ url: "hook/ONVIF/PTZ/" + action[0] + "?action=StartPTZ&value=" + action[1] + "&authorization=" + Key});
 }
 function sendPTZstop(event) {
     this.childNodes[1].setAttribute("stroke", "none");
     this.childNodes[1].setAttribute("fill", "#33666C");
     this.childNodes[3].setAttribute("fill", "#ffffff");
     var action = this.id.split('_');
-    myPTZRequestActionGet({ url: "hook/ONVIF/PTZ/" + action[0] + "?action=StopPTZ&value=" + action[1] });
+    var Key = window["Key"+ action[0]];
+    myPTZRequestActionGet({ url: "hook/ONVIF/PTZ/" + action[0] + "?action=StopPTZ&value=" + action[1] + "&authorization=" + Key});
 }
 function initPTZ(instanceId) {
     document.getElementById(instanceId + "_left").addEventListener("mousedown", sendPTZstart);
@@ -65,3 +67,5 @@ function sendError(data) {
         thisDiv.style.height = newheight;
     });
 }
+var Key%%InstanceId%% = "%%Authorization%%";
+initPTZ(%%InstanceId%%);

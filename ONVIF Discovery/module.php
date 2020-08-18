@@ -342,7 +342,6 @@ class ONVIFDiscovery extends IPSModule
         {
             return strpos($item, $ip);
         });
-        //todo reindex
         return array_values($filtermatches);
     }
 

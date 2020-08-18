@@ -25,6 +25,7 @@
         },
         {
             "type": "PopupButton",
+            "name": "ConfigurePTZ",
             "caption": "Configure PTZ",
             "width": "300px",
             "enabled": false,
@@ -212,6 +213,7 @@
         },
         {
             "type": "PopupButton",
+            "name": "ConfigurePrePositions",
             "caption": "Configure pre-positions",
             "width": "300px",
             "enabled": false,
