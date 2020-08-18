@@ -83,6 +83,7 @@
                     },
                     {
                         "caption": "List of hosts:",
+                        "name": "ErrorList",
                         "type": "List",
                         "add": false,
                         "delete": false,
@@ -124,7 +125,8 @@
                         "minimum": 0,
                         "maximum": 1,
                         "current": 0,
-                        "caption": "(Wait for end of discovery)"
+                        "caption": "(Wait for end of discovery)",
+                        "visible": false
                     }
                 ]
             }
