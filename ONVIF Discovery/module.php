@@ -90,15 +90,9 @@ class ONVIFDiscovery extends IPSModule
         $Form['actions'][0]['items'][0]['items'][0]['value'] = $this->ReadAttributeString('Username');
         $Form['actions'][0]['items'][0]['items'][1]['value'] = $this->ReadAttributeString('Password');
         if (!$this->DiscoveryIsRunning) {
-            //$DeviceValues = [];
-        //} else {
-            //$DeviceValues = $this->GetConfigurationValues();
-            //$Form['actions'][3]['visible'] = false;
             $ScriptText = 'IPS_RequestAction(' . $this->InstanceID . ', \'StartDiscover\',true);';
             IPS_RunScriptText($ScriptText);
         }
-        //$Form['actions'][1]['values'] = $DeviceValues;
-
         $this->SendDebug('FORM', json_encode($Form), 0);
         $this->SendDebug('FORM', json_last_error_msg(), 0);
         return json_encode($Form);
@@ -110,11 +104,14 @@ class ONVIFDiscovery extends IPSModule
             $Data = explode(':', $Value);
             $this->WriteAttributeString('Username', urldecode($Data[0]));
             $this->WriteAttributeString('Password', urldecode($Data[1]));
+            $this->UpdateFormField('ScanProgress', 'caption', '(Wait for end of discovery)');
+            $this->UpdateFormField('ProgressPopup', 'visible', true);
             $this->Discover();
             return;
         }
 
         if ($Ident == 'StartDiscover') {
+            $this->UpdateFormField('ProgressPopup', 'visible', true);
             $this->Discover();
         }
 
@@ -191,10 +188,8 @@ class ONVIFDiscovery extends IPSModule
         $this->DevicesError = [];
         $this->DevicesTotal = 0;
         $this->DevicesProcessed = -1;
-        //$this->ReloadForm();
         $this->UpdateFormField('ScanProgress', 'visible', true);
         $this->UpdateFormField('ScanProgress', 'caption', '(Wait for end of discovery)');
-        $this->UpdateFormField('ProgressPopup', 'visible', true);
         $discoveryList = $this->DiscoverDevices();
         $this->DevicesTotal = count($discoveryList);
         $this->UpdateFormField('ScanProgress', 'maximum', count($discoveryList));
@@ -315,14 +310,12 @@ class ONVIFDiscovery extends IPSModule
         $this->UpdateFormField('ScanProgress', 'current', $DevicesProcessed);
         $this->UpdateFormField('ScanProgress', 'caption', $DevicesProcessed . ' / ' . $this->DevicesTotal);
         $this->UpdateFormField('ScanProgress', 'visible', true);
-        $this->UpdateFormField('ProgressPopup', 'visible', true);
         $this->unlock('ScanProgress');
         $this->LogMessage(sprintf($this->Translate('Scan progress of ONVIF devices: %d / %d '), $DevicesProcessed, $this->DevicesTotal), KL_NOTIFY);
         $this->SendDebug('Scan finish', $IP, 0);
         if ($DevicesProcessed == $this->DevicesTotal) {
             $this->DiscoveryIsRunning = false;
             $this->LogMessage($this->Translate('End of background discovery of ONVIF devices'), KL_NOTIFY);
-            //$this->ReloadForm();
             $this->UpdateFormField('ProgressPopup', 'visible', false);
             $this->UpdateFormField('ScanProgress', 'visible', false);
             $this->UpdateFormField('Discovery', 'values', json_encode($this->GetConfigurationValues()));
