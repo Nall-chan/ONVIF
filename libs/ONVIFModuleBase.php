@@ -33,7 +33,6 @@ class ONVIFModuleBase extends IPSModule
         parent::Create();
         $this->RegisterPropertyString('EventTopic', '');
         $this->RegisterAttributeArray('EventProperties', []);
-        $this->ConnectParent('{F40CA9A7-3B4D-4B26-7214-3A94B6074DFB}');
     }
 
     public function Destroy()
@@ -56,7 +55,6 @@ class ONVIFModuleBase extends IPSModule
         $TopicFilter = '.*"Topic":"' . preg_quote(substr(json_encode($EventTopic), 1, -1)) . '.*';
         $this->SetReceiveDataFilter($TopicFilter);
         $this->SendDebug('SetReceiveDataFilter', $TopicFilter, 0);
-        //$this->LogMessage('SetReceiveDataFilter: ' . $TopicFilter, KL_DEBUG);
 
         if (IPS_GetKernelRunlevel() != KR_READY) {
             return;
@@ -66,7 +64,6 @@ class ONVIFModuleBase extends IPSModule
         $this->WriteAttributeArray('EventProperties', $Events);
         $this->SendDebug('RegisterEvents', $Events, 0);
 
-        //$this->ReloadForm();
     }
 
     public function RequestAction($Ident, $Value)

@@ -58,7 +58,7 @@ class ONVIFMediaStream extends ONVIFModuleBase
         $this->PTZ_HasHome = false;
         $this->PTZ_MaxPresets = 0;
         $this->PresetTokenList = [];
-        $this->AuthorizationKey='';
+        $this->AuthorizationKey = '';
         // Profile
         $this->RegisterProfileIntegerEx('ONVIF.PanTilt', 'Move', '', '',
             [
@@ -114,7 +114,7 @@ class ONVIFMediaStream extends ONVIFModuleBase
         $this->PTZ_HasHome = false;
         $this->PTZ_MaxPresets = 0;
         $this->PresetTokenList = [];
-        $this->AuthorizationKey='';
+        $this->AuthorizationKey = '';
 
         if ($this->ReadPropertyString('VideoSource') == '') {
             $this->SetStatus(IS_INACTIVE);
@@ -284,13 +284,13 @@ class ONVIFMediaStream extends ONVIFModuleBase
                 ];
             }
             if ($ActualProfile != null) {
-                $mId = @$this->GetIDForIdent('STREAM');
-                $ButtonPreview = '';
+                $mId = $this->GetMediaId();
+                /*$ButtonPreview = '';
                 if ($mId > 0) {
                     $Key = urlencode(base64_encode('token:' . IPS_CreateTemporaryMediaStreamToken($mId, 900)));
                     $ButtonPreview = 'echo "../proxy/' . $mId . '?authorization=' . $Key . '";';
                     $this->SendDebug('PREVIEW', '../proxy/' . $mId . '?authorization=' . $Key, 0);
-                }
+                }*/
                 $ExpansionPanelVideoItems[] = [
                     'type'  => 'RowLayout',
                     'items' => [
@@ -305,12 +305,17 @@ class ONVIFMediaStream extends ONVIFModuleBase
                             'caption' => $ActualProfile['Name']
                         ],
                         [
-                            'type'      => 'Button',
+                            'type'      => 'PopupButton',
                             'width'     => '300px',
                             'caption'   => 'Show Stream',
-                            'visible'   => ($mId > 0),
-                            'onClick'   => $ButtonPreview,
-                            'link'      => true
+                            'popup'     => [
+                                'caption'   => 'Image',
+                                'items'     => [[
+                                    'type'   => 'Image',
+                                    'center' => true,
+                                    'mediaID'=> $mId
+                                ]]
+                            ]
                         ]
                     ]
                 ];
@@ -1071,16 +1076,19 @@ class ONVIFMediaStream extends ONVIFModuleBase
 
     protected function SetMedia($StreamURL)
     {
-        $mId = @$this->GetIDForIdent('STREAM');
-        if ($mId == false) {
-            $mId = IPS_CreateMedia(MEDIATYPE_STREAM);
-            IPS_SetParent($mId, $this->InstanceID);
-            IPS_SetName($mId, 'Stream');
-            IPS_SetIdent($mId, 'STREAM');
-        }
-        IPS_SetMediaFile($mId, $StreamURL, false);
+        IPS_SetMediaFile($this->GetMediaId(), $StreamURL, false);
     }
-
+    protected function GetMediaId()
+    {
+        $MediaId = @$this->GetIDForIdent('STREAM');
+        if ($MediaId == false) {
+            $MediaId = IPS_CreateMedia(MEDIATYPE_STREAM);
+            IPS_SetParent($MediaId, $this->InstanceID);
+            IPS_SetName($MediaId, $this->Translate('Stream'));
+            IPS_SetIdent($MediaId, 'STREAM');
+        }
+        return $MediaId;
+    }
     protected function WritePTZInHTMLBox()
     {
         $mId = @$this->GetIDForIdent('STREAM');
@@ -1175,7 +1183,6 @@ class ONVIFMediaStream extends ONVIFModuleBase
             echo $this->Translate('Invalid parameters.');
             return;
         }
-
 
         if ($this->GetStatus() != IS_ACTIVE) {
             echo 'Instance is inactive.';

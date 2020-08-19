@@ -15,7 +15,6 @@ class ONVIFImageGrabber extends ONVIFModuleBase
     {
         //Never delete this line!
         parent::Create();
-        //Stream
         $this->RegisterPropertyString('VideoSource', '');
         $this->RegisterPropertyString('Profile', '');
         $this->RegisterPropertyInteger('Interval', 0);
@@ -72,16 +71,7 @@ class ONVIFImageGrabber extends ONVIFModuleBase
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
         curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, $timeout);
         curl_setopt($ch, CURLOPT_TIMEOUT_MS, 2000);
-        /* $Credentials = parse_url($URL);
-         if (!isset($Url['scheme']) && !isset($Url['host'])) {
-
-         if (($Credentials['Username'] != '') || ($Credentials['Password'] != '')) {
-             $User = urlencode($Credentials['user']);
-             $Pass = urlencode($Credentials['pass']);*/
         curl_setopt($ch, CURLOPT_HTTPAUTH, CURLAUTH_BASIC | CURLAUTH_DIGEST);
-        //      curl_setopt($ch, CURLOPT_USERPWD, $User . ':' . $Pass);
-        // }
-
         $this->SendDebug('Request Image', $URL, 0);
         $Result = curl_exec($ch);
         $http_code = curl_getinfo($ch, CURLINFO_RESPONSE_CODE);
@@ -386,7 +376,7 @@ class ONVIFImageGrabber extends ONVIFModuleBase
         $this->SendDebug('MediaURL', $MediaURL, 0);
         return $MediaURL;
     }
-    private function GetMediaId()
+    protected function GetMediaId()
     {
         $MediaId = @$this->GetIDForIdent('IMAGE');
         if ($MediaId == false) {

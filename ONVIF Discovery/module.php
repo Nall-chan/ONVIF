@@ -47,7 +47,6 @@ class ONVIFDiscovery extends IPSModule
         $this->DevicesTotal = 0;
         $this->DevicesProcessed = 0;
         $this->DiscoveryIsRunning = false;
-        $this->RegisterMessage(0, IPS_KERNELSTARTED);
     }
 
     public function Destroy()
@@ -56,29 +55,11 @@ class ONVIFDiscovery extends IPSModule
         parent::Destroy();
     }
 
-    /**
-     * Interne Funktion des SDK.
-     */
-    public function MessageSink($TimeStamp, $SenderID, $Message, $Data)
-    {
-        switch ($Message) {
-            case IPS_KERNELSTARTED:
-                $this->ApplyChanges();
-                break;
-        }
-    }
-
     public function ApplyChanges()
     {
         //Never delete this line!
         parent::ApplyChanges();
         $this->DiscoveryIsRunning=false;
-        // Wenn Kernel nicht bereit, dann warten... KR_READY kommt ja gleich
-        if (IPS_GetKernelRunlevel() != KR_READY) {
-            return;
-        }
-        //Hier den Scan starten. Passiert ja nur beim starten von IPS oder wenn die Instanz erstellt wurde.
-        $this->Discover();
     }
 
     /**
@@ -104,14 +85,12 @@ class ONVIFDiscovery extends IPSModule
             $Data = explode(':', $Value);
             $this->WriteAttributeString('Username', urldecode($Data[0]));
             $this->WriteAttributeString('Password', urldecode($Data[1]));
-            $this->UpdateFormField('ScanProgress', 'caption', '(Wait for end of discovery)');
             $this->UpdateFormField('ProgressPopup', 'visible', true);
-            $this->Discover();
+            $this->ReloadForm();
             return;
         }
 
         if ($Ident == 'StartDiscover') {
-            $this->UpdateFormField('ProgressPopup', 'visible', true);
             $this->Discover();
         }
 
@@ -172,9 +151,6 @@ class ONVIFDiscovery extends IPSModule
             }
             $DeviceValues[] = $AddDevice;
         }
-        // Todo
-        // Konfiguratoren in Symcon ohne Device fehlen:
-        // DevicesAddress
         return $DeviceValues;
     }
     protected function Discover()
@@ -285,7 +261,7 @@ class ONVIFDiscovery extends IPSModule
                 if ($Name != '') {
                     $Device['Name'] = $Name;
                 }
-            } catch (SoapFault $e) {
+            } catch (Exception $e) {
                 $this->SendDebug('Soap Request Error ' . $IpValue, $ONVIFClient->client->__getLastRequest(), 0);
                 $this->SendDebug('Soap Response Error ' . $IpValue, $ONVIFClient->client->__getLastResponse(), 0);
                 $this->SendDebug('Soap Response Error Message ' . $IpValue, $e->getMessage(), 0);
@@ -318,6 +294,7 @@ class ONVIFDiscovery extends IPSModule
             $this->LogMessage($this->Translate('End of background discovery of ONVIF devices'), KL_NOTIFY);
             $this->UpdateFormField('ProgressPopup', 'visible', false);
             $this->UpdateFormField('ScanProgress', 'visible', false);
+            $this->UpdateFormField('ScanProgress', 'caption', '(Wait for end of discovery)');
             $this->UpdateFormField('Discovery', 'values', json_encode($this->GetConfigurationValues()));
             $DevicesError = $this->DevicesError;
             if (count($DevicesError) > 0) {

@@ -195,7 +195,7 @@ class ONVIFConfigurator extends ONVIFModuleBase
         return json_encode($Form);
     }
 
-    private function GetInstanceList(string $GUID, string $ConfigParam = null)
+    protected function GetInstanceList(string $GUID, string $ConfigParam = null)
     {
         $InstanceIDList = array_filter(IPS_GetInstanceListByModuleID($GUID), [$this, 'FilterInstances']);
         if ($ConfigParam != null) {
@@ -205,17 +205,17 @@ class ONVIFConfigurator extends ONVIFModuleBase
         return $InstanceIDList;
     }
 
-    private function FilterInstances(int $InstanceID)
+    protected function FilterInstances(int $InstanceID)
     {
         return IPS_GetInstance($InstanceID)['ConnectionID'] == $this->ParentID;
     }
 
-    private function GetConfigParam(&$item1, $InstanceID, $ConfigParam)
+    protected function GetConfigParam(&$item1, $InstanceID, $ConfigParam)
     {
         $item1 = IPS_GetProperty($InstanceID, $ConfigParam);
     }
 
-    private function GetConfigurationArray(string $GUID, bool $isValid, array $CreateParams = [])
+    protected function GetConfigurationArray(string $GUID, bool $isValid, array $CreateParams = [])
     {
         $IPSInstances = $this->GetInstanceList($GUID);
 

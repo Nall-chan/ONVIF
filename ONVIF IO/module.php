@@ -211,7 +211,6 @@ class ONVIFIO extends IPSModule
             $FoundEvents = [];
             if ($Data['Pattern'] == '') {
                 if ($Data['Instance'] == 0) {
-                    //$FoundEvents = $Events;
                     foreach ($SkippedTopics as $SkippedTopic) {
                         foreach (array_keys($Events) as $Topic) {
                             if (strpos($Topic, $SkippedTopic) !== false) {
@@ -452,6 +451,36 @@ class ONVIFIO extends IPSModule
      */
     protected function Unsubscribe()
     {
+        $SubscriptionReference = $this->ReadAttributeString('SubscriptionReference');
+        if ($SubscriptionReference == '') {
+            $this->SendDebug('ERROR Unsubscribe', 'No SubscriptionReference', 0);
+            $this->LogMessage($this->Translate('Call Renew with no SubscriptionReference'), KL_ERROR);
+            return false;
+        }
+        $Action = '<ns2:Action env:mustUnderstand="1">http://docs.oasis-open.org/wsn/bw-2/SubscriptionManager/RenewRequest</ns2:Action>';
+        $Header[] = new SoapHeader('http://www.w3.org/2005/08/addressing', 'Action', new SoapVar($Action, XSD_ANYXML), true);
+        $To = '<ns2:To env:mustUnderstand="1">' . $SubscriptionReference . '</ns2:To>';
+        $Header[] = new SoapHeader('http://www.w3.org/2005/08/addressing', 'To', new SoapVar($To, XSD_ANYXML), true);
+        $SubscriptionId = $this->ReadAttributeString('SubscriptionId');
+        if ($SubscriptionId != '') {
+            $xml = new DOMDocument();
+            $xml->loadXML($SubscriptionId);
+            $ns = $xml->firstChild->namespaceURI;
+            $name = $xml->firstChild->nodeName;
+            $Header[] = new SoapHeader($ns, $name, new SoapVar($SubscriptionId, XSD_ANYXML), true);
+        }
+
+        $empty = '';
+        $ret = $this->SendData($SubscriptionReference, 'event-mod.wsdl', 'Unsubscribe', true, [], $empty, $Header);
+        if (is_a($ret, 'SoapFault')) {
+            trigger_error($ret->getMessage(), E_USER_NOTICE);
+        }
+        $this->isSubscribed = false;
+        $this->WriteAttributeString('SubscriptionReference','');
+        $this->WriteAttributeString('SubscriptionId','');
+        $this->SetTimerInterval('RenewSubscription', 0);
+        return true;
+
     }
 
     protected function GetEventProperties()
@@ -619,27 +648,21 @@ class ONVIFIO extends IPSModule
         ];
         if (isset($ret['Capabilities']['Events']['XAddr'])) {
             $XAddr['Events'] = $ret['Capabilities']['Events']['XAddr'];
-            // $this->WriteAttributeString('XAddrEvents', $ret['Capabilities']['Events']['XAddr']);
         }
         if (isset($ret['Capabilities']['Media']['XAddr'])) {
             $XAddr['Media'] = $ret['Capabilities']['Media']['XAddr'];
-            // $this->WriteAttributeString('XAddrMedia', $ret['Capabilities']['Media']['XAddr']);
         }
         if (isset($ret['Capabilities']['PTZ']['XAddr'])) {
             $XAddr['PTZ'] = $ret['Capabilities']['PTZ']['XAddr'];
-            // $this->WriteAttributeString('XAddrPTZ', $ret['Capabilities']['PTZ']['XAddr']);
         }
         if (isset($ret['Capabilities']['Imaging']['XAddr'])) {
             $XAddr['Imaging'] = $ret['Capabilities']['Imaging']['XAddr'];
-            // $this->WriteAttributeString('XAddrImageing', $ret['Capabilities']['Imaging']['XAddr']);
         }
         if (isset($ret['Capabilities']['Extension']['Recording']['XAddr'])) {
             $XAddr['Recording'] = $ret['Capabilities']['Extension']['Recording']['XAddr'];
-            // $this->WriteAttributeString('XAddrRecording', $ret['Capabilities']['Extension']['Recording']['XAddr']);
         }
         if (isset($ret['Capabilities']['Extension']['Replay']['XAddr'])) {
             $XAddr['Replay'] = $ret['Capabilities']['Extension']['Replay']['XAddr'];
-            //$this->WriteAttributeString('XAddrReplay', $ret['Capabilities']['Extension']['Replay']['XAddr']);
         }
         $this->WriteAttributeArray('XAddr', $XAddr);
 
@@ -846,7 +869,7 @@ class ONVIFIO extends IPSModule
         }
     }
 
-    private function KernelReady()
+    protected function KernelReady()
     {
         $this->UnregisterMessage(0, IPS_KERNELSTARTED);
         $this->RegisterMessage($this->InstanceID, FM_CHILDREMOVED);
