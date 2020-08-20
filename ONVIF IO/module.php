@@ -285,6 +285,18 @@ class ONVIFIO extends IPSModule
         if ($Ident == 'Renew') {
             return $this->Renew();
         }
+        if ($Ident == 'Reload') {
+            $this->UpdateFormField('ErrorTitle', 'caption', 'Please wait!');
+            $this->UpdateFormField('ErrorText', 'caption', 'Determine abilities of this device');
+            $this->UpdateFormField('ErrorPopup', 'visible', true);
+            if ($this->isSubscribed) {
+                $this->Unsubscribe();
+            }
+            $this->WriteAttributeString('ConsumerAddress', '');
+            $this->ApplyChanges();
+            $this->ReloadForm();
+            return;
+        }
         if ($Ident == 'KernelReady') {
             return $this->KernelReady();
         }
@@ -300,14 +312,14 @@ class ONVIFIO extends IPSModule
         $ConsumerAddress = $this->ReadAttributeString('ConsumerAddress');
         if ($ConsumerAddress == '') {
             $ConsumerAddress = $this->Translate('This device not support events.');
-            $Form['actions'][1]['visible'] = false;
             $Form['actions'][2]['visible'] = false;
+            $Form['actions'][3]['visible'] = false;
         }
-        $Form['actions'][0]['items'][1]['caption'] = $ConsumerAddress;
+        $Form['actions'][1]['items'][1]['caption'] = $ConsumerAddress;
         $SubscriptionReference = $this->ReadAttributeString('SubscriptionReference');
-        $Form['actions'][1]['items'][1]['caption'] = $SubscriptionReference;
+        $Form['actions'][2]['items'][1]['caption'] = $SubscriptionReference;
         $EventList = $this->GetEventReceiverFormValues();
-        $Form['actions'][2]['values'] = $EventList;
+        $Form['actions'][3]['values'] = $EventList;
         $this->SendDebug('FORM', json_encode($Form), 0);
         $this->SendDebug('FORM', json_last_error_msg(), 0);
         return json_encode($Form);
@@ -476,11 +488,10 @@ class ONVIFIO extends IPSModule
             trigger_error($ret->getMessage(), E_USER_NOTICE);
         }
         $this->isSubscribed = false;
-        $this->WriteAttributeString('SubscriptionReference','');
-        $this->WriteAttributeString('SubscriptionId','');
+        $this->WriteAttributeString('SubscriptionReference', '');
+        $this->WriteAttributeString('SubscriptionId', '');
         $this->SetTimerInterval('RenewSubscription', 0);
         return true;
-
     }
 
     protected function GetEventProperties()
@@ -836,6 +847,11 @@ class ONVIFIO extends IPSModule
         $Data = file_get_contents('php://input');
         $this->SendDebug('Event', $Data, 0);
         $xml = simplexml_load_string($Data);
+        if ($xml === false) {
+            $this->LogMessage($this->Translate('Malformed XML event received'), KL_ERROR);
+            $this->SendDebug('Event', $this->Translate('Malformed XML event received'), 0);
+            return;
+        }
         $Notifications = $xml->xpath('//wsnt:NotificationMessage');
         $EventData = [];
         foreach ($Notifications as $Notification) {
@@ -860,7 +876,7 @@ class ONVIFIO extends IPSModule
         $this->SendEventDataToChildren($EventData);
     }
 
-    protected function SendEventDataToChildren(array $EventDataArray)
+    protected function SendEventDataToChildren(array $EventDataArray): void
     {
         foreach ($EventDataArray as $EventData) {
             $EventData['DataID'] = '{E23DD2CD-F098-268A-CE49-1CC04FE8060B}';

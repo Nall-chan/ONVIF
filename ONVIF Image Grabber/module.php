@@ -82,10 +82,11 @@ class ONVIFImageGrabber extends ONVIFModuleBase
             set_error_handler([$this, 'ModulErrorHandler']);
             trigger_error($Error, E_USER_NOTICE);
             restore_error_handler();
-            $Result = false;
+            return false;
         }
         $MediaId = $this->GetMediaId();
         IPS_SetMediaContent($MediaId, base64_encode($Result));
+        return true;
     }
     public function ReceiveData($JSONString)
     {

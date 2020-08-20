@@ -36,6 +36,12 @@
     ],
     "actions": [
         {
+            "type": "Button",
+            "width": "300px",
+            "caption": "capability reload",
+            "onClick": "IPS_RequestAction($id,'Reload',true);"
+        },
+        {
             "name": "EventRow",
             "type": "RowLayout",
             "items": [
