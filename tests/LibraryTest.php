@@ -42,4 +42,9 @@ class LibraryValidationTest extends TestCaseSymconValidation
     {
         $this->validateModule(__DIR__ . '/../ONVIF Media Stream');
     }
+    
+    public function testValidateImage(): void
+    {
+        $this->validateModule(__DIR__ . '/../ONVIF Image Grabber');
+    }
 }

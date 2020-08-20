@@ -27,7 +27,7 @@
             "Device not reachable": "Gerät nicht erreichbar",
             "Connection lost": "Verbindung verloren",
             "Malformed XML event received": "Fehlerhaftes XML-Ereignis empfangen",
-            "capability reload": "Fähigkeit neu laden",
+            "Reload abilities": "Fähigkeiten neu laden",
             "Please wait!":"Bitte warten!",
             "Determine abilities of this device": "Ermittle die Fähigkeiten des Gerätes"
         }
