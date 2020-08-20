@@ -816,7 +816,7 @@ class ONVIFIO extends IPSModule
                 'DataName'   => $ListEvent['DataName'],
                 'DataType'   => $ListEvent['DataType'],
                 'rowColor'   => (count($Receivers) > 0 ? '#FFFFFF' : ''),
-                'Used'       => (count($Receivers) > 0) ? 'Yes' : 'No',
+                'Used'       => $this->Translate((count($Receivers) > 0) ? 'Yes' : 'No'),
                 'Receivers'  => $Receivers
             ];
         }

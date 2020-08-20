@@ -21,6 +21,8 @@
             "Events are used by this instances:": "Ereignisse werden von diesen Instanzen verwendet:",
             "Instance": "Instanze",
             "Type": "Typ",
+            "Yes": "Ja",
+            "No": "Nein",
             "Interface connected": "Verbindung hergestellt",
             "Interface closed": "Verbindung geschlossen",
             "Address is invalid": "Adresse ungültig",
@@ -28,7 +30,7 @@
             "Connection lost": "Verbindung verloren",
             "Malformed XML event received": "Fehlerhaftes XML-Ereignis empfangen",
             "Reload abilities": "Fähigkeiten neu laden",
-            "Please wait!":"Bitte warten!",
+            "Please wait!": "Bitte warten!",
             "Determine abilities of this device": "Ermittle die Fähigkeiten des Gerätes"
         }
     }
