@@ -1,12 +1,28 @@
 [![Version](https://img.shields.io/badge/Symcon-PHPModul-red.svg)](https://www.symcon.de/service/dokumentation/entwicklerbereich/sdk-tools/sdk-php/)
-[![Version](https://img.shields.io/badge/Modul%20Version-0.96-blue.svg)]()
-[![Version](https://img.shields.io/badge/Symcon%20Version-5.3%20%3E-green.svg)](https://www.symcon.de/forum/threads/30857-IP-Symcon-5-3-%28Stable%29-Changelog)  
+[![Version](https://img.shields.io/badge/Modul%20Version-1.00-blue.svg)]()
+[![Version](https://img.shields.io/badge/Symcon%20Version-5.5%20%3E-green.svg)](https://www.symcon.de/forum/threads/30857-IP-Symcon-5-3-%28Stable%29-Changelog)  
 [![License](https://img.shields.io/badge/License-CC%20BY--NC--SA%204.0-green.svg)](https://creativecommons.org/licenses/by-nc-sa/4.0/)
 [![Check Style](https://github.com/Nall-chan/ONVIF/workflows/Check%20Style/badge.svg)](https://github.com/Nall-chan/ONVIF/actions) [![Run Tests](https://github.com/Nall-chan/ONVIF/workflows/Run%20Tests/badge.svg)](https://github.com/Nall-chan/ONVIF/actions)  
 
-# ONVIF Library
+# ONVIF Profil S Library
 
-Folgende Module beinhaltet das ONVIF Library Repository:
+
+## Vorbemerkungen zur Library
+
+Diese Library wurde nicht dazu entwickelt komplett den Profil S Spezifikationen zu entsprechen oder deren gesamten Funktionsumfang abzubilden.  
+Vielmehr liegt der Schwerpunkt auf eine einfache und unkomplizierte Integration bestimmter Bestandteile und Funktionen in Symcon.  
+Dadurch ist es auch möglich Geräte in Symcon einzubinden welche ihrerseits die Spezifikationen nicht vollständig oder nicht korrekt umsetzen.  
+
+## Vorbemerkungen zur Integration von Geräten  
+
+Es werden Instanzen zum auffinden (Discovery) und einrichten (Konfigurator) von Geräten in Symcon bereitgestellt.  
+Diese Instanzen werden nur korrekt funktionieren, wenn die betreffenden Geräte entsprechend Konfiguriert wurden.  
+So gibt es Geräte bei welchen am Werk z.B. das ONVIF Protokoll deaktiviert ist.  
+Oder eine entsprechende Zugangsberechtigung erstellt oder erweitert werden muss.  
+Eine Konfiguration der Geräte über Symcon ist in dieser Library nicht vorgesehen.  
+
+
+## Folgende Module beinhaltet die ONVIF Library:
 
 - __ONVIF Discovery__ ([Dokumentation](ONVIF%20Discovery))
 	Erkennt ONVIF kompatible Geräte innerhalb des lokalen LAN.
@@ -19,6 +35,9 @@ Folgende Module beinhaltet das ONVIF Library Repository:
 
 - __ONVIF Media Stream__ ([Dokumentation](ONVIF%20Media%20Stream))
 	Konfiguriert ein IPS Medien-Objekt anhand der Geräte-Fähigkeiten.  
+
+- __ONVIF Image Grabber__ ([Dokumentation](ONVIF%20Image%20Grabber))
+	Lädt Snapshots (Standbilder) von dem Gerät und legt es in einem Media-Objekt ab.  
 
 - __ONVIF Digital Input__ ([Dokumentation](ONVIF%20Digital%20Input))
 	Bildet die Digitalen Eingänge in Symcon ab.  
@@ -34,8 +53,8 @@ Folgende Module beinhaltet das ONVIF Library Repository:
 
 ## Changelog
 
- Version 0.96:  
-  - Start offene Beta.  
+ Version 1.00:  
+  - Release für Symcon 5.5  
 
 ## Spenden  
   
