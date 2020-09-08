@@ -276,8 +276,8 @@ class ONVIFIO extends IPSModule
         $this->SendDebug('Forward Function', $Data['Function'], 0);
         $this->SendDebug('Forward Params', $Data['Params'], 0);
         $this->SendDebug('Forward useLogin', $Data['useLogin'], 0);
-        $Ret = $this->SendData($Data['URI'], $Data['wsdl'], $Data['Function'], $Data['useLogin'], $Data['Params']);
-        return serialize($Ret);
+        $Result = $this->SendData($Data['URI'], $Data['wsdl'], $Data['Function'], $Data['useLogin'], $Data['Params']);
+        return serialize($Result);
     }
 
     public function RequestAction($Ident, $Value)
@@ -391,20 +391,20 @@ class ONVIFIO extends IPSModule
             'InitialTerminationTime' => 'PT1M'
         ];
         $Response = '';
-        $ret = $this->SendData($XAddr['Events'], 'event-mod.wsdl', 'Subscribe', true, $Params, $Response);
-        if (is_a($ret, 'SoapFault')) {
+        $ProfileResult = $this->SendData($XAddr['Events'], 'event-mod.wsdl', 'Subscribe', true, $Params, $Response);
+        if (is_a($ProfileResult, 'SoapFault')) {
             $this->SetStatus(IS_EBASE + 3);
             $this->LogMessage($this->Translate('Connection lost'), KL_ERROR);
-            $this->ShowLastError($ret->getMessage());
+            $this->ShowLastError($ProfileResult->getMessage());
             return false;
         }
-        $SubscriptionReference = $ret->SubscriptionReference->Address->{'_'};
+        $SubscriptionReference = $ProfileResult->SubscriptionReference->Address->{'_'};
         $this->SendDebug('SubscriptionReference', $SubscriptionReference, 0);
         $this->WriteAttributeString('SubscriptionReference', $SubscriptionReference);
         $this->UpdateFormField('SubscriptionReference', 'caption', $SubscriptionReference);
         $this->UpdateFormField('SubscriptionReferenceRow', 'visible', true);
-        if (property_exists($ret->SubscriptionReference, 'ReferenceParameters')) {
-            $SubscriptionId = property_exists($ret->SubscriptionReference->ReferenceParameters, 'any') ? $ret->SubscriptionReference->ReferenceParameters->any : '';
+        if (property_exists($ProfileResult->SubscriptionReference, 'ReferenceParameters')) {
+            $SubscriptionId = property_exists($ProfileResult->SubscriptionReference->ReferenceParameters, 'any') ? $ProfileResult->SubscriptionReference->ReferenceParameters->any : '';
             $this->SendDebug('SubscriptionId', $SubscriptionId, 0);
             $this->WriteAttributeString('SubscriptionId', $SubscriptionId);
         } else {
@@ -447,9 +447,9 @@ class ONVIFIO extends IPSModule
             'TerminationTime' => 'PT1M'
         ];
         $empty = '';
-        $ret = $this->SendData($SubscriptionReference, 'event-mod.wsdl', 'Renew', true, $Params, $empty, $Header);
-        if (is_a($ret, 'SoapFault')) {
-            trigger_error($ret->getMessage(), E_USER_NOTICE);
+        $ProfileResult = $this->SendData($SubscriptionReference, 'event-mod.wsdl', 'Renew', true, $Params, $empty, $Header);
+        if (is_a($ProfileResult, 'SoapFault')) {
+            trigger_error($ProfileResult->getMessage(), E_USER_NOTICE);
             $this->SetStatus(IS_EBASE + 3);
             $this->LogMessage($this->Translate('Connection lost'), KL_ERROR);
             $this->isSubscribed = false;
@@ -483,9 +483,9 @@ class ONVIFIO extends IPSModule
         }
 
         $empty = '';
-        $ret = $this->SendData($SubscriptionReference, 'event-mod.wsdl', 'Unsubscribe', true, [], $empty, $Header);
-        if (is_a($ret, 'SoapFault')) {
-            trigger_error($ret->getMessage(), E_USER_NOTICE);
+        $ProfileResult = $this->SendData($SubscriptionReference, 'event-mod.wsdl', 'Unsubscribe', true, [], $empty, $Header);
+        if (is_a($ProfileResult, 'SoapFault')) {
+            trigger_error($ProfileResult->getMessage(), E_USER_NOTICE);
         }
         $this->isSubscribed = false;
         $this->WriteAttributeString('SubscriptionReference', '');
@@ -501,8 +501,8 @@ class ONVIFIO extends IPSModule
             return false;
         }
         $Response = '';
-        $ret = $this->SendData($XAddr['Events'], 'event-mod.wsdl', 'GetEventProperties', true, [], $Response);
-        if (is_a($ret, 'SoapFault')) {
+        $ProfileResult = $this->SendData($XAddr['Events'], 'event-mod.wsdl', 'GetEventProperties', true, [], $Response);
+        if (is_a($ProfileResult, 'SoapFault')) {
             return false;
         }
 
@@ -572,15 +572,21 @@ class ONVIFIO extends IPSModule
 
     protected function GetProfiles()
     {
-        $ret = $this->SendData('', 'media-mod.wsdl', 'GetProfiles', true);
-        if (is_a($ret, 'SoapFault')) {
+        $ProfileResult = $this->SendData('', 'media-mod.wsdl', 'GetProfiles', true);
+        if (is_a($ProfileResult, 'SoapFault')) {
             $this->LogMessage($this->lastSOAPError, KL_ERROR);
             $this->ShowLastError($this->lastSOAPError);
             return false;
         }
-        $res = json_decode(json_encode($ret), true)['Profiles'];
-        $this->SendDebug('Profiles', $res, 0);
-        $H264Profiles = array_filter($res, function ($Profile)
+        if (is_object($ProfileResult->Profiles)) {
+            $Profiles = [];
+            $Profiles[] = json_decode(json_encode($ProfileResult), true)['Profiles'];
+        } else {
+            $Profiles = json_decode(json_encode($ProfileResult), true)['Profiles'];
+        }
+
+        $this->SendDebug('Profiles', $Profiles, 0);
+        $H264Profiles = array_filter($Profiles, function ($Profile)
         {
             if (isset($Profile['VideoEncoderConfiguration']['Encoding'])) {
                 if (strtoupper($Profile['VideoEncoderConfiguration']['Encoding']) == 'JPEG') {
@@ -609,7 +615,7 @@ class ONVIFIO extends IPSModule
         $this->SendDebug('VideoSources H.26x', $H264VideoSources, 0);
         $this->WriteAttributeArray('VideoSources', $H264VideoSources);
 
-        $JPEGProfiles = array_filter($res, function ($Profile)
+        $JPEGProfiles = array_filter($Profiles, function ($Profile)
         {
             if (isset($Profile['VideoEncoderConfiguration']['Encoding'])) {
                 if (strtoupper($Profile['VideoEncoderConfiguration']['Encoding']) == 'JPEG') {
@@ -619,7 +625,7 @@ class ONVIFIO extends IPSModule
             return false;
         });
         if (count($JPEGProfiles) == 0) { //fallback, no JPEG found
-            $JPEGProfiles = $res;
+            $JPEGProfiles = $Profiles;
         }
         $JPEGVideoSourcesItems = [];
         foreach ($JPEGProfiles as $Profile) {
@@ -648,7 +654,7 @@ class ONVIFIO extends IPSModule
         if (is_a($Result, 'SoapFault')) {
             return false;
         }
-        $ret = json_decode(json_encode($Result), true);
+        $ProfileResult = json_decode(json_encode($Result), true);
         $XAddr = [
             'Events'    => '',
             'Media'     => '',
@@ -657,36 +663,36 @@ class ONVIFIO extends IPSModule
             'Recording' => '',
             'Replay'    => ''
         ];
-        if (isset($ret['Capabilities']['Events']['XAddr'])) {
-            $XAddr['Events'] = $ret['Capabilities']['Events']['XAddr'];
+        if (isset($ProfileResult['Capabilities']['Events']['XAddr'])) {
+            $XAddr['Events'] = $ProfileResult['Capabilities']['Events']['XAddr'];
         }
-        if (isset($ret['Capabilities']['Media']['XAddr'])) {
-            $XAddr['Media'] = $ret['Capabilities']['Media']['XAddr'];
+        if (isset($ProfileResult['Capabilities']['Media']['XAddr'])) {
+            $XAddr['Media'] = $ProfileResult['Capabilities']['Media']['XAddr'];
         }
-        if (isset($ret['Capabilities']['PTZ']['XAddr'])) {
-            $XAddr['PTZ'] = $ret['Capabilities']['PTZ']['XAddr'];
+        if (isset($ProfileResult['Capabilities']['PTZ']['XAddr'])) {
+            $XAddr['PTZ'] = $ProfileResult['Capabilities']['PTZ']['XAddr'];
         }
-        if (isset($ret['Capabilities']['Imaging']['XAddr'])) {
-            $XAddr['Imaging'] = $ret['Capabilities']['Imaging']['XAddr'];
+        if (isset($ProfileResult['Capabilities']['Imaging']['XAddr'])) {
+            $XAddr['Imaging'] = $ProfileResult['Capabilities']['Imaging']['XAddr'];
         }
-        if (isset($ret['Capabilities']['Extension']['Recording']['XAddr'])) {
-            $XAddr['Recording'] = $ret['Capabilities']['Extension']['Recording']['XAddr'];
+        if (isset($ProfileResult['Capabilities']['Extension']['Recording']['XAddr'])) {
+            $XAddr['Recording'] = $ProfileResult['Capabilities']['Extension']['Recording']['XAddr'];
         }
-        if (isset($ret['Capabilities']['Extension']['Replay']['XAddr'])) {
-            $XAddr['Replay'] = $ret['Capabilities']['Extension']['Replay']['XAddr'];
+        if (isset($ProfileResult['Capabilities']['Extension']['Replay']['XAddr'])) {
+            $XAddr['Replay'] = $ProfileResult['Capabilities']['Extension']['Replay']['XAddr'];
         }
         $this->WriteAttributeArray('XAddr', $XAddr);
 
         $HasInput = false;
         $HasOutput = false;
-        if (isset($ret['Capabilities']['Device']['IO']['InputConnectors'])) {
-            $HasInput = ($ret['Capabilities']['Device']['IO']['InputConnectors'] > 0);
+        if (isset($ProfileResult['Capabilities']['Device']['IO']['InputConnectors'])) {
+            $HasInput = ($ProfileResult['Capabilities']['Device']['IO']['InputConnectors'] > 0);
         }
-        if (isset($ret['Capabilities']['Device']['IO']['RelayOutputs'])) {
-            $HasOutput = ($ret['Capabilities']['Device']['IO']['RelayOutputs'] > 0);
+        if (isset($ProfileResult['Capabilities']['Device']['IO']['RelayOutputs'])) {
+            $HasOutput = ($ProfileResult['Capabilities']['Device']['IO']['RelayOutputs'] > 0);
         } else {
-            if (isset($ret['Capabilities']['Extension']['DeviceIO']['RelayOutputs'])) {
-                $HasOutput = ($ret['Capabilities']['Extension']['DeviceIO']['RelayOutputs'] > 0);
+            if (isset($ProfileResult['Capabilities']['Extension']['DeviceIO']['RelayOutputs'])) {
+                $HasOutput = ($ProfileResult['Capabilities']['Extension']['DeviceIO']['RelayOutputs'] > 0);
             }
         }
         $this->WriteAttributeBoolean('HasInput', $HasInput);
@@ -696,11 +702,12 @@ class ONVIFIO extends IPSModule
 
     protected function GetDeviceInformation()
     {
-        $ret = $this->SendData('', 'devicemgmt-mod.wsdl', 'GetDeviceInformation', true);
-        if (is_a($ret, 'SoapFault')) {
+        $ProfileResult = $this->SendData('', 'devicemgmt-mod.wsdl', 'GetDeviceInformation', true);
+        if (is_a($ProfileResult, 'SoapFault')) {
             return false;
         }
-        $res = json_decode(json_encode($ret), true);
+        $Result = json_decode(json_encode($ProfileResult), true);
+        // Todo
         return true;
     }
 

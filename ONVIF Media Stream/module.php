@@ -869,22 +869,22 @@ class ONVIFMediaStream extends ONVIFModuleBase
             $this->SetValueFloat($Ident, $Value);
         return true;
         case 'PT':
-            $ret = false;
+            $Result = false;
             switch ($Value) {
                 case 0:
-                    $ret = $this->MoveLeftSpeedTime($Speed, $Time);
+                    $Result = $this->MoveLeftSpeedTime($Speed, $Time);
                 break;
                 case 1:
-                    $ret = $this->MoveUpSpeedTime($Speed, $Time);
+                    $Result = $this->MoveUpSpeedTime($Speed, $Time);
                 break;
                 case 2:
-                    $ret = $this->MoveStop();
+                    $Result = $this->MoveStop();
                 break;
                 case 3:
-                    $ret = $this->MoveDownSpeedTime($Speed, $Time);
+                    $Result = $this->MoveDownSpeedTime($Speed, $Time);
                 break;
                 case 4:
-                    $ret = $this->MoveRightSpeedTime($Speed, $Time);
+                    $Result = $this->MoveRightSpeedTime($Speed, $Time);
                 break;
                 default:
                     set_error_handler([$this, 'ModulErrorHandler']);
@@ -893,21 +893,21 @@ class ONVIFMediaStream extends ONVIFModuleBase
                     return false;
 
             }
-            if ($ret) {
+            if ($Result) {
                 $this->SetValueInteger('PT', $Value);
             }
-            return $ret;
+            return $Result;
         case 'ZOOM':
-            $ret = false;
+            $Result = false;
             switch ($Value) {
                 case 0:
-                    $ret = $this->ZoomFarSpeedTime($Speed, $Time);
+                    $Result = $this->ZoomFarSpeedTime($Speed, $Time);
                 break;
                 case 1:
-                    $ret = $this->ZoomStop();
+                    $Result = $this->ZoomStop();
                 break;
                 case 2:
-                    $ret = $this->ZoomNearSpeedTime($Speed, $Time);
+                    $Result = $this->ZoomNearSpeedTime($Speed, $Time);
                 break;
                     default:
                     set_error_handler([$this, 'ModulErrorHandler']);
@@ -916,10 +916,10 @@ class ONVIFMediaStream extends ONVIFModuleBase
                     return false;
 
             }
-            if ($ret) {
+            if ($Result) {
                 $this->SetValueInteger('ZOOM', $Value);
             }
-            return $ret;
+            return $Result;
     }
         set_error_handler([$this, 'ModulErrorHandler']);
         trigger_error($this->Translate('Invalid Ident.'), E_USER_NOTICE);
@@ -1055,15 +1055,15 @@ class ONVIFMediaStream extends ONVIFModuleBase
             ],
             'ProfileToken' => $this->ReadPropertyString('Profile')
         ];
-        $ret = $this->SendData($Capabilities['XAddr']['Media'], 'GetStreamUri', true, $Params);
-        if ($ret == false) {
+        $Result = $this->SendData($Capabilities['XAddr']['Media'], 'GetStreamUri', true, $Params);
+        if ($Result == false) {
             return false;
         }
-        $res = json_decode(json_encode($ret), true);
-        if (!isset($res['MediaUri']['Uri'])) {
+        $GetStreamUriResult = json_decode(json_encode($Result), true);
+        if (!isset($GetStreamUriResult['MediaUri']['Uri'])) {
             return false;
         }
-        $Uri = parse_url($res['MediaUri']['Uri']);
+        $Uri = parse_url($GetStreamUriResult['MediaUri']['Uri']);
         $Credentials = $this->GetCredentials();
         if (($Credentials['Username'] != '') || ($Credentials['Password'] != '')) {
             $Uri['user'] = $Credentials['Username'];

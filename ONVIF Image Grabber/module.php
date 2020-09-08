@@ -359,15 +359,15 @@ class ONVIFImageGrabber extends ONVIFModuleBase
         $Params = [
             'ProfileToken' => $this->ReadPropertyString('Profile')
         ];
-        $ret = $this->SendData($Capabilities['XAddr']['Media'], 'GetSnapshotUri', true, $Params);
-        if ($ret == false) {
+        $Result = $this->SendData($Capabilities['XAddr']['Media'], 'GetSnapshotUri', true, $Params);
+        if ($Result == false) {
             return false;
         }
-        $res = json_decode(json_encode($ret), true);
-        if (!isset($res['MediaUri']['Uri'])) {
+        $SnapshotUriResult = json_decode(json_encode($Result), true);
+        if (!isset($SnapshotUriResult['MediaUri']['Uri'])) {
             return false;
         }
-        $Uri = parse_url($res['MediaUri']['Uri']);
+        $Uri = parse_url($SnapshotUriResult['MediaUri']['Uri']);
         $Credentials = $this->GetCredentials();
         if (($Credentials['Username'] != '') || ($Credentials['Password'] != '')) {
             $Uri['user'] = $Credentials['Username'];

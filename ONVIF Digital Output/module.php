@@ -71,8 +71,8 @@ class ONVIFDigitalOutput extends ONVIFModuleBase
             'RelayOutputToken' => $Ident,
             'LogicalState'     => $SendValue
         ];
-        $ret = $this->SendData('', 'SetRelayOutputState', true, $Params);
-        if ($ret == false) {
+        $Result = $this->SendData('', 'SetRelayOutputState', true, $Params);
+        if ($Result == false) {
             return false;
         }
         if ($this->ReadPropertyBoolean('EmulateStatus')) {
@@ -188,17 +188,17 @@ class ONVIFDigitalOutput extends ONVIFModuleBase
 
     protected function GetRelayOutputs()
     {
-        $ret = $this->SendData('', 'GetRelayOutputs', true);
-        if ($ret == false) {
+        $Result = $this->SendData('', 'GetRelayOutputs', true);
+        if ($Result == false) {
             return false;
         }
         $RelayOutputs = [];
-        if (is_array($ret->RelayOutputs)) {
-            foreach ($ret->RelayOutputs as $RelayOutput) {
+        if (is_array($Result->RelayOutputs)) {
+            foreach ($Result->RelayOutputs as $RelayOutput) {
                 $RelayOutputs[$RelayOutput->token] = json_decode(json_encode($RelayOutput), true);
             }
         } else {
-            $RelayOutputs[$ret->RelayOutputs->token] = json_decode(json_encode($ret->RelayOutputs), true);
+            $RelayOutputs[$Result->RelayOutputs->token] = json_decode(json_encode($Result->RelayOutputs), true);
         }
         $this->SendDebug('RelayOutputs', $RelayOutputs, 0);
         $this->WriteAttributeArray('RelayOutputs', $RelayOutputs);
