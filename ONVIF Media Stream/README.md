@@ -16,7 +16,7 @@ Konfiguriert ein IPS Medien-Objekt anhand der Geräte-Fähigkeiten.
 
 ## 2. Vorraussetzungen
 
-* IP-Symcon ab Version 5.3
+* IP-Symcon ab Version 5.5
 * Kameras oder Video-Encoder mit ONVIF Profil S Unterstützung.
 * Geräte müssen H264 Streams bereitstellen. MJPEG/JPEG/H265 wird von Symcon nicht über RTSP unterstützt!  
 

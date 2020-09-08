@@ -15,7 +15,7 @@ Erkennt ONVIF kompatible Geräte innerhalb des lokalen LAN.
 
 ## 2. Vorraussetzungen
 
-* IP-Symcon ab Version 5.3  
+* IP-Symcon ab Version 5.5  
 * Kameras oder Video-Encoder mit ONVIF Profil S Unterstützung.  
 
 ## 3. Software-Installation
