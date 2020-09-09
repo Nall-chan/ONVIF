@@ -601,7 +601,11 @@ class ONVIFIO extends IPSModule
                 continue;
             }
             $H264VideoSourcesItems[$Profile['VideoSourceConfiguration']['SourceToken']]['VideoSourceToken'] = $Profile['VideoSourceConfiguration']['SourceToken'];
-            $H264VideoSourcesItems[$Profile['VideoSourceConfiguration']['SourceToken']]['VideoSourceName'] = $Profile['VideoSourceConfiguration']['Name'];
+            if ($Profile['VideoSourceConfiguration']['Name'] == '') {
+                $H264VideoSourcesItems[$Profile['VideoSourceConfiguration']['SourceToken']]['VideoSourceName'] = $Profile['VideoSourceConfiguration']['SourceToken'];
+            } else {
+                $H264VideoSourcesItems[$Profile['VideoSourceConfiguration']['SourceToken']]['VideoSourceName'] = $Profile['VideoSourceConfiguration']['Name'];
+            }
             $H264VideoSourcesItems[$Profile['VideoSourceConfiguration']['SourceToken']]['Profile'][] = [
                 'Name'       => $Profile['VideoEncoderConfiguration']['Name'],
                 'token'      => $Profile['token'],
