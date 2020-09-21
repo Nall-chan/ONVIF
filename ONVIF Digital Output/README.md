@@ -25,24 +25,30 @@ Bildet Digitale Ausgänge (Relays) in Symcon ab.
 
 ## 3. Software-Installation
 
-* Über den Module Store das 'ONVIF'-Modul installieren.
+* Über den Module Store das  ['ONVIF'-Modul](../README.md) installieren.
 
 ## 4. Einrichten der Instanzen in IP-Symcon
 
- Unter 'Instanz hinzufügen' ist das 'ONVIF Digital Output'-Modul unter dem Hersteller 'ONVIF' aufgeführt.
+ Unter 'Instanz hinzufügen' ist das 'ONVIF Digital Output'-Modul unter dem Hersteller 'ONVIF' aufgeführt.  
+![Module](../imgs/Module.png)  
 
- Es wird empfohlen diese Instanz über die dazugehörige Instanz des Configurator-Moduls von diesem Geräte anzulegen.  
+ Es wird empfohlen diese Instanz über die dazugehörige Instanz des [Configurator-Moduls](../ONVIF%20Configurator/README.md) von diesem Geräte anzulegen.  
  
 __Konfigurationsseite__:
+
+![Config](imgs/Config.png)  
 
 | Name          | Text                    | Beschreibung                                                                                                                                                                           |
 | ------------- | ----------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | EventTopic    | Ereignisse der Ausgänge | Auswahl des Ereignis-Pfad ab welchen Ereignisse empfangen und verarbeitet werden.                                                                                                      |
 | EmulateStatus | Status simulieren       | Wenn aktiviert, wird die Statusvariable in Symcon auf den neuen Wert gesetzt, sobald ein Schaltbefehl erfolgreich übertragen wurde. Sonst wird nur über ankommende Ereignisse gesetzt. |
 
+Der Ereignis-Pfad wird bei Digital-Outputs versucht automatisch zu erkennen, funktioniert dies nicht, ist das Eingabefeld aktiv und das Ereignis muss manuell ausgewählt werden.  
+
 ## 5. Statusvariablen und Profile
 
-Die Statusvariablen werden automatisch angelegt. Das Löschen einzelner kann zu Fehlfunktionen führen.
+Die Statusvariablen werden automatisch angelegt und erhalten das `~Switch` Profil. Das Löschen einzelner Statusvariablen kann zu Fehlfunktionen führen.  
+
 
 ### Statusvariablen
 
@@ -54,6 +60,8 @@ Die Statusvariablen werden automatisch angelegt. Das Löschen einzelner kann zu 
 
 Die Statusvariablen haben eine hinterlegte Standardaktion und somit können die Ausgänge direkt aus dem WebFront bedient werden. 
 
+Die direkte Darstellung der Statusvariablen ist möglich; es wird aber empfohlen mit Links zu arbeiten.  
+
 ## 7. PHP-Befehlsreferenz
 
 ```php
@@ -61,7 +69,7 @@ boolean ONVIF_SetRelayOutputState(integer $InstanzID, string $Ident, bool $Value
 ```
 De/Aktiviert den in `$Ident` übergeben Ausgang, je nach übergebenen Wert in `$Value`.  
 Konnte der Befehl erfolgreich ausgeführt werden, wird `TRUE` zurückgegeben.  
-Im Fehlerfall wird eine Warnung erzeugt.  
+Im Fehlerfall wird eine Warnung erzeugt und `FALSE` zurückgegeben.  
 
 Beispiel:
 `ONVIF_SetRelayOutputState(12345, '1', true);`  

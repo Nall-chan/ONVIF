@@ -9,6 +9,8 @@ Bildet die Digitalen Eingänge in Symcon ab.
 - [4. Einrichten der Instanzen in IP-Symcon](#4-einrichten-der-instanzen-in-ip-symcon)
 - [5. Statusvariablen und Profile](#5-statusvariablen-und-profile)
   - [Statusvariablen](#statusvariablen)
+- [6. WebFront](#6-webfront)
+- [7. PHP-Funktionsreferenz](#7-php-funktionsreferenz)
 
 ## 1. Funktionsumfang
 
@@ -22,20 +24,23 @@ Bildet die Digitalen Eingänge in Symcon ab.
 
 ## 3. Software-Installation
 
-* Über den Module Store das 'ONVIF'-Modul installieren.
+* Über den Module Store das ['ONVIF'-Modul](../README.md) installieren.
 
 ## 4. Einrichten der Instanzen in IP-Symcon
 
  Unter 'Instanz hinzufügen' ist das 'ONVIF Digital Input'-Modul unter dem Hersteller 'ONVIF' aufgeführt.
+![Module](../imgs/Module.png)  
 
- Es wird empfohlen diese Instanz über die dazugehörige Instanz des Configurator-Moduls von diesem Geräte anzulegen.  
+ Es wird empfohlen diese Instanz über die dazugehörige Instanz des [Configurator-Moduls](../ONVIF%20Configurator/README.md) von diesem Geräte anzulegen.  
  
 __Konfigurationsseite__:
 
+![Config](imgs/Config.png)  
 | Name       | Text                    | Beschreibung                                                                      |
 | ---------- | ----------------------- | --------------------------------------------------------------------------------- |
 | EventTopic | Ereignisse der Eingänge | Auswahl des Ereignis-Pfad ab welchen Ereignisse empfangen und verarbeitet werden. |
 
+Der Ereignis-Pfad wird bei Digital-Input versucht automatisch zu erkennen, alternativ steht das universelle [ONVIF Events](../ONVIF%20Events/README.md) Modul zur Verfügung
 ## 5. Statusvariablen und Profile
 
 Die Statusvariablen werden automatisch angelegt. Das Löschen einzelner kann zu Fehlfunktionen führen.
@@ -44,4 +49,13 @@ Die Statusvariablen werden automatisch angelegt. Das Löschen einzelner kann zu 
 
 | Name                           | Typ  | Beschreibung                                                                                |
 | ------------------------------ | ---- | ------------------------------------------------------------------------------------------- |
-| je nach Name im Onvif-Ereignis | bool | Für jedes eintreffende Ereignis wird automatisch eine passende Variable in Symcon erstellt. |
+| je nach Name des Onvif-Ereignis | bool | Für jeden Digital-Eingang wird eine passende Variable in Symcon erstellt. |
+
+
+## 6. WebFront
+
+Die direkte Darstellung der Statusvariablen ist möglich; es wird aber empfohlen mit Links zu arbeiten.  
+
+## 7. PHP-Funktionsreferenz
+
+Keine Funktionen verfügbar.  

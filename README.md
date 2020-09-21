@@ -20,7 +20,14 @@ Diese Instanzen werden nur korrekt funktionieren, wenn die betreffenden Geräte 
 So gibt es Geräte bei welchen am Werk z.B. das ONVIF Protokoll deaktiviert ist.  
 Oder eine entsprechende Zugangsberechtigung erstellt oder erweitert werden muss.  
 Eine Konfiguration der Geräte über Symcon ist in dieser Library nicht vorgesehen.  
+Unerlässlich ist eine korrekte Uhrzeit auf den Geräten, es wird dringend empfohlen vor der Integration in IPS folgende Parameter in den Geräten fertig zu konfigurieren und ggfls. zu testen:
 
+- Netzwerk-Schnittstelle (IP-Adresse)  
+- Auffindbarkeit / Discovery über ONVIF aktivieren  
+- Zugangsdaten (u.U. eigene für ONVIF)  
+- Zeitsynchronisation  
+- PTZ-Vorpositionen / Szenen  (sofern vorhanden)  
+- h26x-Profile bzw. Media-Profile für ONVIF
 
 ## Folgende Module beinhaltet die ONVIF Library:
 
