@@ -9,12 +9,13 @@ Konfiguriert ein IPS Medien-Objekt anhand der Geräte-Fähigkeiten.
 
 ## Inhaltsverzeichnis <!-- omit in toc -->
 
-- [1. Funktionsumfang](#1-funktionsumfang)
-- [2. Vorraussetzungen](#2-vorraussetzungen)
-- [3. Software-Installation](#3-software-installation)
-- [4. Einrichten der Instanzen in IP-Symcon](#4-einrichten-der-instanzen-in-ip-symcon)
-- [5. Statusvariablen und Profile](#5-statusvariablen-und-profile)
-  - [Statusvariablen](#statusvariablen)
+- [ONVIF Media Stream](#onvif-media-stream)
+  - [1. Funktionsumfang](#1-funktionsumfang)
+  - [2. Vorraussetzungen](#2-vorraussetzungen)
+  - [3. Software-Installation](#3-software-installation)
+  - [4. Einrichten der Instanzen in IP-Symcon](#4-einrichten-der-instanzen-in-ip-symcon)
+  - [5. Statusvariablen und Profile](#5-statusvariablen-und-profile)
+    - [Statusvariablen](#statusvariablen)
 
 ## 1. Funktionsumfang
 
@@ -24,7 +25,7 @@ Konfiguriert ein IPS Medien-Objekt anhand der Geräte-Fähigkeiten.
 
 * IP-Symcon ab Version 5.5
 * Kameras oder Video-Encoder mit ONVIF Profil S Unterstützung.
-* Geräte müssen H264 Streams bereitstellen. MJPEG/JPEG/H265 wird von Symcon nicht über RTSP unterstützt!  
+* Geräte müssen h264 Streams bereitstellen. MJPEG/JPEG/h265 wird von Symcon nicht über RTSP unterstützt!  
 
 ## 3. Software-Installation
 

@@ -14,6 +14,9 @@ Beschreibung des Moduls.
   - [2. Vorraussetzungen](#2-vorraussetzungen)
   - [3. Software-Installation](#3-software-installation)
   - [4. Einrichten der Instanzen in IP-Symcon](#4-einrichten-der-instanzen-in-ip-symcon)
+    - [Beipiel 1: Keine Digital IOs](#beipiel-1-keine-digital-ios)
+    - [Beipiel 2: Mit Digital IOs](#beipiel-2-mit-digital-ios)
+    - [Beipiel 3: Multikanal-Geräte](#beipiel-3-multikanal-geräte)
   - [5. Statusvariablen und Profile](#5-statusvariablen-und-profile)
   - [6. WebFront](#6-webfront)
   - [7. PHP-Funktionsreferenz](#7-php-funktionsreferenz)
@@ -25,16 +28,40 @@ Beschreibung des Moduls.
 ## 2. Vorraussetzungen
 
 * IP-Symcon ab Version 5.5
-
+* Kameras oder Video-Encoder mit ONVIF Profil S Unterstützung.  
+* 
 ## 3. Software-Installation
 
-* Über den Module Store das 'ONVIF'-Modul installieren.
+* Über den Module Store das ['ONVIF'-Modul](../README.md) installieren.  
 
 ## 4. Einrichten der Instanzen in IP-Symcon
 
- Unter 'Instanz hinzufügen' ist das 'ONVIF Configurator'-Modul unter dem Hersteller 'ONVIF' aufgeführt.
- Es wird empfohlen, die Instanzen über das 'ONVIF Discovery'-Modul einzurichten.  
- 
+ Unter 'Instanz hinzufügen' ist das 'ONVIF Configurator'-Modul unter dem Hersteller 'ONVIF' aufgeführt.  
+ ![Module](../imgs/Module.png)  
+ Es wird empfohlen, die Instanzen über das [ONVIF Discovery'-Modul](../ONVIF%20Discovery/README.md) einzurichten.  
+
+ Der Konfigurator ermöglicht es folgende Instanzen einfach zu erstellen und fertig zu konfigurieren:
+
+- ONVIF Media Stream ([Dokumentation](../ONVIF%20Media%20Stream/README.md))
+- ONVIF Image Grabber ([Dokumentation](../ONVIF%20Image%20Grabber/README.md))
+- ONVIF Digital Input ([Dokumentation](../ONVIF%20Digital%20Input/README.md))
+- ONVIF Digital Output ([Dokumentation](../ONVIF%20Digital%20Output/README.md))
+
+Eventuell benötigte ONVIF Events Instanzen ([Dokumentation](../ONVIF%20Events/README.md)) sind manuell einzurichten.  
+
+### Beipiel 1: Keine Digital IOs   
+![Config](imgs/Config1.png)  
+Hier wird als Beispiel ein Konfigurator eines Gerätes dargestellt, welche nur einen Videoeingang (Videosignal / Videoquelle) hat und über keine Digital I/O's verfügt.  
+
+### Beipiel 2: Mit Digital IOs
+![Config](imgs/Config2.png)  
+Dieses Gerät hat ebenfalls nur einen Videoeingang (Videosignal / Videoquelle), verfügt aber über Digitale Ein- und Ausgänge.  
+
+### Beipiel 3: Multikanal-Geräte
+![Config](imgs/Config3.png)
+Dieses Gerät stellt 5 Videosignale (Videoquellen) bereit.  
+In diesem Fall sind es 4 Videoeingänge und ein Quad-Bild aller 4 Videoeingänge.
+
 ## 5. Statusvariablen und Profile
 
 Dieses Modul erzeugt keine Statusvariablen.  

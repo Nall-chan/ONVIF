@@ -30,7 +30,7 @@ Erkennt ONVIF kompatible Geräte innerhalb des lokalen LAN.
 
 ## 3. Software-Installation
 
-* Über den Module Store das 'ONVIF'-Modul installieren.
+* Über den Module Store das ['ONVIF'-Modul](../README.md) installieren.  
 
 ## 4. Einrichten der Instanzen in IP-Symcon
 

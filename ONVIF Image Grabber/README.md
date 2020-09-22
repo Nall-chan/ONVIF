@@ -9,16 +9,17 @@ Speichert einzelne Snapshots als ein IPS Medien-Objekt.
 
 ## Inhaltsverzeichnis <!-- omit in toc -->
 
-- [1. Funktionsumfang](#1-funktionsumfang)
-- [2. Vorraussetzungen](#2-vorraussetzungen)
-- [3. Software-Installation](#3-software-installation)
-- [4. Einrichten der Instanzen in IP-Symcon](#4-einrichten-der-instanzen-in-ip-symcon)
-- [5. Statusvariablen und Profile](#5-statusvariablen-und-profile)
-  - [Statusvariablen](#statusvariablen)
-- [6. WebFront](#6-webfront)
-- [7. PHP-Funktionsreferenz](#7-php-funktionsreferenz)
-- [8. Tips & Tricks](#8-tips--tricks)
-  - [Bild bei Bewegung aktualisieren](#bild-bei-bewegung-aktualisieren)
+- [ONVIF Image Grabber](#onvif-image-grabber)
+  - [1. Funktionsumfang](#1-funktionsumfang)
+  - [2. Vorraussetzungen](#2-vorraussetzungen)
+  - [3. Software-Installation](#3-software-installation)
+  - [4. Einrichten der Instanzen in IP-Symcon](#4-einrichten-der-instanzen-in-ip-symcon)
+  - [5. Statusvariablen und Profile](#5-statusvariablen-und-profile)
+    - [Statusvariablen](#statusvariablen)
+  - [6. WebFront](#6-webfront)
+  - [7. PHP-Funktionsreferenz](#7-php-funktionsreferenz)
+  - [8. Tips & Tricks](#8-tips--tricks)
+    - [Bild bei Bewegung aktualisieren](#bild-bei-bewegung-aktualisieren)
 
 ## 1. Funktionsumfang
 
@@ -31,7 +32,7 @@ Speichert einzelne Snapshots als ein IPS Medien-Objekt.
 
 ## 3. Software-Installation
 
-* Über den Module Store das ['ONVIF'-Modul](../README.md) installieren.
+* Über den Module Store das ['ONVIF'-Modul](../README.md) installieren.  
 
 ## 4. Einrichten der Instanzen in IP-Symcon
 
