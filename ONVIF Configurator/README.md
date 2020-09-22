@@ -9,10 +9,14 @@ Beschreibung des Moduls.
 
 ## Inhaltsverzeichnis <!-- omit in toc -->
 
-- [1. Funktionsumfang](#1-funktionsumfang)
-- [2. Vorraussetzungen](#2-vorraussetzungen)
-- [3. Software-Installation](#3-software-installation)
-- [4. Einrichten der Instanzen in IP-Symcon](#4-einrichten-der-instanzen-in-ip-symcon)
+- [ONVIF Configurator](#onvif-configurator)
+  - [1. Funktionsumfang](#1-funktionsumfang)
+  - [2. Vorraussetzungen](#2-vorraussetzungen)
+  - [3. Software-Installation](#3-software-installation)
+  - [4. Einrichten der Instanzen in IP-Symcon](#4-einrichten-der-instanzen-in-ip-symcon)
+  - [5. Statusvariablen und Profile](#5-statusvariablen-und-profile)
+  - [6. WebFront](#6-webfront)
+  - [7. PHP-Funktionsreferenz](#7-php-funktionsreferenz)
 
 ## 1. Funktionsumfang
 
@@ -30,3 +34,15 @@ Beschreibung des Moduls.
 
  Unter 'Instanz hinzufügen' ist das 'ONVIF Configurator'-Modul unter dem Hersteller 'ONVIF' aufgeführt.
  Es wird empfohlen, die Instanzen über das 'ONVIF Discovery'-Modul einzurichten.  
+ 
+## 5. Statusvariablen und Profile
+
+Dieses Modul erzeugt keine Statusvariablen.  
+
+## 6. WebFront
+
+Dieses Modul ist nicht für die Darstellung im Webfront geeignet.  
+
+## 7. PHP-Funktionsreferenz
+
+Keine Funktionen verfügbar. 

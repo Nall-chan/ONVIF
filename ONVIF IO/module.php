@@ -30,16 +30,9 @@ class ONVIFIO extends IPSModule
         $this->RegisterPropertyString('Address', '');
         $this->RegisterPropertyString('Username', '');
         $this->RegisterPropertyString('Password', '');
-        $this->RegisterPropertyString('NATAddress', '');
         $this->RegisterAttributeArray('VideoSources', []);
         $this->RegisterAttributeArray('VideoSourcesJPEG', []);
         $this->RegisterAttributeInteger('Timestamp_Offset', 0);
-        /*        $this->RegisterAttributeString('XAddrMedia', '');
-          $this->RegisterAttributeString('XAddrImageing', '');
-          $this->RegisterAttributeString('XAddrEvents', '');
-          $this->RegisterAttributeString('XAddrPTZ', '');
-          $this->RegisterAttributeString('XAddrRecording', '');
-          $this->RegisterAttributeString('XAddrReplay', ''); */
         $this->RegisterAttributeArray('XAddr', []);
 
         $this->RegisterAttributeArray('EventProperties', []);
@@ -305,10 +298,6 @@ class ONVIFIO extends IPSModule
     public function GetConfigurationForm()
     {
         $Form = json_decode(file_get_contents(__DIR__ . '/form.json'), true);
-        if (IPS_GetOption('NATSupport')) {
-            $Form['elements'][3]['visible'] = true;
-            $Form['elements'][3]['validate'] = '^.+$';
-        }
         $ConsumerAddress = $this->ReadAttributeString('ConsumerAddress');
         if ($ConsumerAddress == '') {
             $ConsumerAddress = $this->Translate('This device not support events.');
@@ -349,11 +338,8 @@ class ONVIFIO extends IPSModule
     protected function GetConsumerAddress()
     {
         if (IPS_GetOption('NATSupport')) {
-            $parsed_url = parse_url($this->ReadPropertyString('NATAddress'));
-            $scheme = isset($parsed_url['scheme']) ? $parsed_url['scheme'] . '://' : 'http://';
-            $host = isset($parsed_url['host']) ? $parsed_url['host'] : '';
-            $port = isset($parsed_url['port']) ? ':' . $parsed_url['port'] : ':3777';
-            $Url = $scheme . $host . $port . '/hook/ONVIFEvents/IO/' . $this->InstanceID;
+            $ip = IPS_GetOption('NATPublicIP');
+            $Url = 'http://' . $ip . ':3777/hook/ONVIFEvents/IO/' . $this->InstanceID;
             $this->SendDebug('NAT enabled ConsumerAddress', $Url, 0);
         } else {
             $sock = socket_create(AF_INET, SOCK_STREAM, SOL_TCP);
