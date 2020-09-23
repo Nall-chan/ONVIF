@@ -14,6 +14,9 @@ Stellt die Verbindung zu einem ONVIF-Gerät her.
   - [2. Vorraussetzungen](#2-vorraussetzungen)
   - [3. Software-Installation](#3-software-installation)
   - [4. Einrichten der Instanzen in IP-Symcon](#4-einrichten-der-instanzen-in-ip-symcon)
+    - [Konfigurationsseite: Übersicht](#konfigurationsseite-übersicht)
+    - [Konfigurationsseite: Ereignisse möglich](#konfigurationsseite-ereignisse-möglich)
+    - [Konfigurationsseite: Ereignisse nicht möglich](#konfigurationsseite-ereignisse-nicht-möglich)
   - [5. Statusvariablen und Profile](#5-statusvariablen-und-profile)
   - [6. WebFront](#6-webfront)
   - [7. PHP-Funktionsreferenz](#7-php-funktionsreferenz)
@@ -39,7 +42,7 @@ Stellt die Verbindung zu einem ONVIF-Gerät her.
 
  Diese Instanz wird automatisch angelegt, wenn im Discovery-Modul ein Gerät in Symcon angelegt wird.  
  
- __Konfigurationsseite__:
+ ### Konfigurationsseite: Übersicht
 
 ![Config](imgs/Config2.png)  
 
@@ -48,7 +51,9 @@ Stellt die Verbindung zu einem ONVIF-Gerät her.
 | Open     | Aktiv        | Öffnet/Aktiviert die Verbindung zum Gerät.                                    |
 | Address  | Adresse      | URL zum ONVIF Device-Service (z.B. http://192.168.1.111/onvif/device_service) |
 | Username | Benutzername | Benutzername für die Anmeldung                                                |
-| Password | Passwort     | Passwort zum Benutzernamen                                                    |
+| Password | Passwort     | Passwort zum Benutzernamen                                                    |  
+
+### Konfigurationsseite: Ereignisse möglich  
 
 ![Config](imgs/Config1.png)  
 
@@ -59,6 +64,8 @@ In der Tabelle wird eine Liste aller vom Gerät gemeldeten Ereignissen angezeigt
 
 Die Fähigkeiten der Geräte werden beim Systemstart und anlegen von Instanzen ermittelt und innerhalb Symcon zwischengespeichert; da dieser Vorgang einige Zeit dauern kann.  
 Wird das Gerät selber umkonfiguriert, z.B. Änderung der Stream/ONVIF-Profile, oder erhält z.B. ein Firmware-Update, so kann über den Button `Fähigkeiten neu laden` die Instanz veranlasst werden die Fähigkeiten neu zu laden.  
+
+### Konfigurationsseite: Ereignisse nicht möglich  
 
 ![Config](imgs/Config3.png)  
 

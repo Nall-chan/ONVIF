@@ -24,7 +24,7 @@ class ONVIFDiscovery extends IPSModule
     /**
      * The maximum number of seconds that will be allowed for the discovery request.
      */
-    const WS_DISCOVERY_TIMEOUT = 5;
+    const WS_DISCOVERY_TIMEOUT = 10;
 
     /**
      * The multicast address to use in the socket for the discovery request.
@@ -142,6 +142,7 @@ class ONVIFDiscovery extends IPSModule
                     ],
                     [
                         'moduleID'      => '{F40CA9A7-3B4D-4B26-7214-3A94B6074DFB}',
+                        'name'          => $Device['Name'],
                         'configuration' => $ConfigIo
                     ]
                 ];
@@ -329,8 +330,7 @@ class ONVIFDiscovery extends IPSModule
                 $matches = array_merge($matches, explode(' ', $addrsNode->nodeValue));
             }
         }
-        $filtermatches = array_filter($matches, function ($item) use ($ip)
-        {
+        $filtermatches = array_filter($matches, function ($item) use ($ip) {
             return strpos($item, $ip);
         });
         return array_values($filtermatches);

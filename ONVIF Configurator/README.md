@@ -14,9 +14,9 @@ Beschreibung des Moduls.
   - [2. Vorraussetzungen](#2-vorraussetzungen)
   - [3. Software-Installation](#3-software-installation)
   - [4. Einrichten der Instanzen in IP-Symcon](#4-einrichten-der-instanzen-in-ip-symcon)
-    - [Beipiel 1: Keine Digital IOs](#beipiel-1-keine-digital-ios)
-    - [Beipiel 2: Mit Digital IOs](#beipiel-2-mit-digital-ios)
-    - [Beipiel 3: Multikanal-Geräte](#beipiel-3-multikanal-geräte)
+    - [Beispiel 1: Keine Digital IOs](#beispiel-1-keine-digital-ios)
+    - [Beispiel 2: Mit Digital IOs](#beispiel-2-mit-digital-ios)
+    - [Beispiel 3: Multikanal-Geräte](#beispiel-3-multikanal-geräte)
   - [5. Statusvariablen und Profile](#5-statusvariablen-und-profile)
   - [6. WebFront](#6-webfront)
   - [7. PHP-Funktionsreferenz](#7-php-funktionsreferenz)
@@ -49,15 +49,15 @@ Beschreibung des Moduls.
 
 Eventuell benötigte ONVIF Events Instanzen ([Dokumentation](../ONVIF%20Events/README.md)) sind manuell einzurichten.  
 
-### Beipiel 1: Keine Digital IOs   
+### Beispiel 1: Keine Digital IOs   
 ![Config](imgs/Config1.png)  
 Hier wird als Beispiel ein Konfigurator eines Gerätes dargestellt, welche nur einen Videoeingang (Videosignal / Videoquelle) hat und über keine Digital I/O's verfügt.  
 
-### Beipiel 2: Mit Digital IOs
+### Beispiel 2: Mit Digital IOs
 ![Config](imgs/Config2.png)  
 Dieses Gerät hat ebenfalls nur einen Videoeingang (Videosignal / Videoquelle), verfügt aber über Digitale Ein- und Ausgänge.  
 
-### Beipiel 3: Multikanal-Geräte
+### Beispiel 3: Multikanal-Geräte
 ![Config](imgs/Config3.png)
 Dieses Gerät stellt 5 Videosignale (Videoquellen) bereit.  
 In diesem Fall sind es 4 Videoeingänge und ein Quad-Bild aller 4 Videoeingänge.
