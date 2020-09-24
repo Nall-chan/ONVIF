@@ -75,6 +75,9 @@ Der initiale Name der erzeugten Statusvariablen integriert eventuelle Strukturen
 Die Statusvariablen werden automatisch angelegt, sobald ein entsprechendes Ereignis empfangen wurde.  
 Dies erfolgt immer, wenn sich die dazugehörige [IO-Instanz](../ONVIF%20IO/README.md) neu verbindet, sowie beim Systemstart von Symcon.  
 
+__Die Namen der Statusvariablen werden initial vorgegeben, damit Diese einfach zu identifizieren sind. Selbstverständlich können die Statusvariablen beliebig umbenannt werden.__
+
+
 ### Beispiel 1: Ein einzelnes Ereignis
 
 __Beispiel-Baum__  
