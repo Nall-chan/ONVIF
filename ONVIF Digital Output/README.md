@@ -9,14 +9,14 @@ Bildet Digitale Ausgänge (Relays) in Symcon ab.
 
 ## Inhaltsverzeichnis  <!-- omit in toc -->  
 
-- [1. Funktionsumfang](#1-funktionsumfang)
-- [2. Vorraussetzungen](#2-vorraussetzungen)
-- [3. Software-Installation](#3-software-installation)
-- [4. Einrichten der Instanzen in IP-Symcon](#4-einrichten-der-instanzen-in-ip-symcon)
-- [5. Statusvariablen und Profile](#5-statusvariablen-und-profile)
-  - [Statusvariablen](#statusvariablen)
-- [6. WebFront](#6-webfront)
-- [7. PHP-Befehlsreferenz](#7-php-befehlsreferenz)
+- [ONVIF Digital Output](#onvif-digital-output)
+  - [1. Funktionsumfang](#1-funktionsumfang)
+  - [2. Vorraussetzungen](#2-vorraussetzungen)
+  - [3. Software-Installation](#3-software-installation)
+  - [4. Einrichten der Instanzen in IP-Symcon](#4-einrichten-der-instanzen-in-ip-symcon)
+  - [5. Statusvariablen](#5-statusvariablen)
+  - [6. WebFront](#6-webfront)
+  - [7. PHP-Befehlsreferenz](#7-php-befehlsreferenz)
 
 ## 1. Funktionsumfang
 
@@ -51,12 +51,9 @@ __Konfigurationsseite__:
 
 Der Ereignis-Pfad wird bei Digital-Outputs versucht automatisch zu erkennen, funktioniert dies nicht, ist das Eingabefeld aktiv und das Ereignis muss manuell ausgewählt werden.  
 
-## 5. Statusvariablen und Profile
+## 5. Statusvariablen
 
 Die Statusvariablen werden automatisch angelegt und erhalten das `~Switch` Profil. Das Löschen einzelner Statusvariablen kann zu Fehlfunktionen führen.  
-
-
-### Statusvariablen
 
 | Name                                                | Typ  | Beschreibung                                                               |
 | --------------------------------------------------- | ---- | -------------------------------------------------------------------------- |

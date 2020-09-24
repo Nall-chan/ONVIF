@@ -17,7 +17,7 @@ Beschreibung des Moduls.
     - [Beispiel 1: Keine Digital IOs](#beispiel-1-keine-digital-ios)
     - [Beispiel 2: Mit Digital IOs](#beispiel-2-mit-digital-ios)
     - [Beispiel 3: Multikanal-Geräte](#beispiel-3-multikanal-geräte)
-  - [5. Statusvariablen und Profile](#5-statusvariablen-und-profile)
+  - [5. Statusvariablen](#5-statusvariablen)
   - [6. WebFront](#6-webfront)
   - [7. PHP-Funktionsreferenz](#7-php-funktionsreferenz)
 
@@ -62,7 +62,7 @@ Dieses Gerät hat ebenfalls nur einen Videoeingang (Videosignal / Videoquelle), 
 Dieses Gerät stellt 5 Videosignale (Videoquellen) bereit.  
 In diesem Fall sind es 4 Videoeingänge und ein Quad-Bild aller 4 Videoeingänge.
 
-## 5. Statusvariablen und Profile
+## 5. Statusvariablen
 
 Dieses Modul erzeugt keine Statusvariablen.  
 

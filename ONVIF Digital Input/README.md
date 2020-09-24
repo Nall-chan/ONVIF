@@ -9,14 +9,14 @@ Bildet die Digitalen Eingänge in Symcon ab.
 
 ## Inhaltsverzeichnis  <!-- omit in toc -->
 
-- [1. Funktionsumfang](#1-funktionsumfang)
-- [2. Vorraussetzungen](#2-vorraussetzungen)
-- [3. Software-Installation](#3-software-installation)
-- [4. Einrichten der Instanzen in IP-Symcon](#4-einrichten-der-instanzen-in-ip-symcon)
-- [5. Statusvariablen und Profile](#5-statusvariablen-und-profile)
-  - [Statusvariablen](#statusvariablen)
-- [6. WebFront](#6-webfront)
-- [7. PHP-Funktionsreferenz](#7-php-funktionsreferenz)
+- [ONVIF Digital Input](#onvif-digital-input)
+  - [1. Funktionsumfang](#1-funktionsumfang)
+  - [2. Vorraussetzungen](#2-vorraussetzungen)
+  - [3. Software-Installation](#3-software-installation)
+  - [4. Einrichten der Instanzen in IP-Symcon](#4-einrichten-der-instanzen-in-ip-symcon)
+  - [5. Statusvariablen](#5-statusvariablen)
+  - [6. WebFront](#6-webfront)
+  - [7. PHP-Funktionsreferenz](#7-php-funktionsreferenz)
 
 ## 1. Funktionsumfang
 
@@ -47,11 +47,9 @@ __Konfigurationsseite__:
 | EventTopic | Ereignisse der Eingänge | Auswahl des Ereignis-Pfad ab welchen Ereignisse empfangen und verarbeitet werden. |
 
 Der Ereignis-Pfad wird bei Digital-Input versucht automatisch zu erkennen, alternativ steht das universelle [ONVIF Events](../ONVIF%20Events/README.md) Modul zur Verfügung
-## 5. Statusvariablen und Profile
+## 5. Statusvariablen
 
 Die Statusvariablen werden automatisch angelegt. Das Löschen einzelner kann zu Fehlfunktionen führen.
-
-### Statusvariablen
 
 | Name                           | Typ  | Beschreibung                                                                                |
 | ------------------------------ | ---- | ------------------------------------------------------------------------------------------- |

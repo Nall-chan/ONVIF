@@ -14,8 +14,9 @@ Speichert einzelne Snapshots als ein IPS Medien-Objekt.
   - [2. Vorraussetzungen](#2-vorraussetzungen)
   - [3. Software-Installation](#3-software-installation)
   - [4. Einrichten der Instanzen in IP-Symcon](#4-einrichten-der-instanzen-in-ip-symcon)
-  - [5. Statusvariablen und Profile](#5-statusvariablen-und-profile)
-    - [Statusvariablen](#statusvariablen)
+  - [5. Statusvariablen](#5-statusvariablen)
+    - [Keine Events:](#keine-events)
+    - [Mit Events:](#mit-events)
   - [6. WebFront](#6-webfront)
   - [7. PHP-Funktionsreferenz](#7-php-funktionsreferenz)
   - [8. Tips & Tricks](#8-tips--tricks)
@@ -43,25 +44,36 @@ Speichert einzelne Snapshots als ein IPS Medien-Objekt.
  
 __Konfigurationsseite__:
 
-![Config](imgs/Config.png)
+![Config](imgs/Config.png)  
+
 | Name        | Text                       | Beschreibung                                                                                                  |
 | ----------- | -------------------------- | ------------------------------------------------------------------------------------------------------------- |
 | VideoSource | Videoquelle                | Auswahl der Videoquelle                                                                                       |
 | Profile     | Stream-Profil              | Auswahl des Profils                                                                                           |
 | Intervall   | Interval                   | Intervall in Sekunden wann das Bild neu geladen werden soll.                                                  |
 | UseCaching  | Benutze In-Memory Cache    | Speichert die Bilder im RAM des System und schreibt sie nur beim beenden des Dienstes auf das Speichermedium. |
-| EventTopic  | Ereignisse der Videoquelle | Auswahl des Ereignis-Pfad ab welchen Ereignisse empfangen und verarbeitet werden.                             |
+| EventTopic  | Ereignisse der Videoquelle | Auswahl des Ereignis-Pfad ab welchen Ereignisse empfangen und verarbeitet werden (*).                             |
 
-## 5. Statusvariablen und Profile
+(*)  _Durch eine Änderung des Ereignis-Pfad werden die alten Statusvariablen hinfällig und müssen manuell gelöscht werden._   
 
-Die Statusvariablen werden automatisch angelegt. Das Löschen einzelner kann zu Fehlfunktionen führen.
+## 5. Statusvariablen
 
-### Statusvariablen
+Es wird automatisch ein Media-Objekt vom Typ Bild angelegt.  
+Weitere Statusvariablen, basierend auf den Ereignissen, werden automatisch angelegt.  
+
+### Keine Events:  
+![Tree](imgs/Tree1.png)  
+
+### Mit Events:  
+![Tree](imgs/Tree2.png)  
 
 | Name    | Typ      | Beschreibung                                                                                |
 | ------- | -------- | ------------------------------------------------------------------------------------------- |
 | Image   | Media    | IPS-Medienobjekt Typ Bild mit dem Snapshot.                                                 |
 | diverse | variable | Für jedes eintreffende Ereignis wird automatisch eine passende Variable in Symcon erstellt. |
+
+Beispiele für Statusvariablen von Ereignisse (`EventTopics`) sind in der [Events-Instanz](../ONVIF%20Events/README.md#5-statusvariablen) zu finden.
+Es ist zu beachten das die Image-Grabber Instanz Event-Quellen auf Basis der konfigurierten Videoquelle (`VideoSource`) filtert. Somit werden z.B. Signalverlust (`VideoLost`) Events mit Bezug auf eine Videoquelle auch in der richtigen Instanz verarbeitet.  
 
 ## 6. WebFront
 

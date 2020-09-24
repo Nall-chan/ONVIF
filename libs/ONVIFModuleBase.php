@@ -287,7 +287,7 @@ class ONVIFModuleBase extends IPSModule
             $Name = $Data['DataName'];
         }
         if ($Data['SourceName'] != ''){
-            $Name .= ' - ' . $Data['SourceName'] . ':' . $Data['SourceValue'];
+            $Name .= ':' . $Data['SourceValue'];
         }
 
         $Ident = str_replace([' - ', '/', '-', ':'], ['_', '_', '_', ''], $Name);

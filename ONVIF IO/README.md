@@ -17,7 +17,7 @@ Stellt die Verbindung zu einem ONVIF-Gerät her.
     - [Konfigurationsseite: Übersicht](#konfigurationsseite-übersicht)
     - [Konfigurationsseite: Ereignisse möglich](#konfigurationsseite-ereignisse-möglich)
     - [Konfigurationsseite: Ereignisse nicht möglich](#konfigurationsseite-ereignisse-nicht-möglich)
-  - [5. Statusvariablen und Profile](#5-statusvariablen-und-profile)
+  - [5. Statusvariablen](#5-statusvariablen)
   - [6. WebFront](#6-webfront)
   - [7. PHP-Funktionsreferenz](#7-php-funktionsreferenz)
 
@@ -71,7 +71,7 @@ Wird das Gerät selber umkonfiguriert, z.B. Änderung der Stream/ONVIF-Profile, 
 
 Geräte welche beim ermitteln der Fähigkeiten von Ereignissen eine Fehlermeldung an Symcon melden, werden mit einem entsprechenden Hinweis dargestellt.  
 
-## 5. Statusvariablen und Profile
+## 5. Statusvariablen
 
 Dieses Modul erzeugt keine Statusvariablen.  
 
