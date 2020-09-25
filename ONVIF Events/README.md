@@ -57,7 +57,8 @@ Nach dem erzeugen der Instanz, muss zuerst über die Schaltfläche `Gateway änd
 
 ### Auswahl des Ereignis-Pfad :  
 
-Beispiel von Ereignissen:
+Beispiel von Ereignissen:  
+
 ![Beispiel](imgs/Config3.png)  
 
 | Name       | Text          | Beschreibung                                                                      |

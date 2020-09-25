@@ -16,6 +16,7 @@
             "Scan of ONVIF device (%s) started": "Überprüfung von ONVIF-Geräte (%s) gestartet",
             "Scan progress of ONVIF devices: %d / %d ": "Scan-Fortschritt von ONVIF-Geräten: %d / %d ",
             "End of background discovery of ONVIF devices": "Ende der Hintergrundsuche von ONVIF-Geräten",
+            "List of hosts:": "Liste der Hosts",
             "Error message": "Fehlermeldung"
         }
     }

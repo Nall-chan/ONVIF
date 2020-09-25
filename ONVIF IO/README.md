@@ -40,7 +40,7 @@ Stellt die Verbindung zu einem ONVIF-Gerät her.
  Unter 'Instanz hinzufügen' ist das 'ONVIF IO'-Modul unter dem Hersteller 'ONVIF' aufgeführt.  
 ![Module](../imgs/Module.png)  
 
- Diese Instanz wird automatisch angelegt, wenn im Discovery-Modul ein Gerät in Symcon angelegt wird.  
+ Diese Instanz wird automatisch angelegt, wenn im ['Discovery-Modul'](../ONVIF%20Discovery/README.md) ein Gerät in Symcon angelegt wird.  
  
  ### Konfigurationsseite: Übersicht
 
