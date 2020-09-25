@@ -36,39 +36,39 @@ Es wird dringend empfohlen vor der Integration in IPS folgende Parameter in den 
 
 Die Maximale Anzahl der gleichzeitig verwendbaren RTSP-Streams hängt von der Symcon Lizenz ab. Bitte hierzu die [Funktionsübersicht der Editionen](https://www.symcon.de/produkt/editionen/) beachten.  
 
-Um Ereignisse der Geräte in Symcon zu verarbeiten wird ein Webhook pro [IO-Modul](ONVIF%20IO) erzeugt.  
+Um Ereignisse der Geräte in Symcon zu verarbeiten wird ein Webhook pro [IO-Modul](ONVIF%20IO/README.md) erzeugt.  
 Hier wird aktuell nur der interne WebServer von Symcon auf Port 3777 unterstützt.  
 Die IP-Adresse auf welchem Symcon die Daten empfängt wird automatisch ermittelt.  
 
 Bei System mit aktiven NAT-Support funktioniert die automatische Erkennung der eigenen IP-Adresse nicht. Hier wird die PublicIP aus den Symcon-Spezialschaltern benutzt.  
 Auch bei Systemen mit aktiven NAT-Support wird extern nur der Port 3777 unterstützt, und muss somit korrekt weitergeleitet werden.  
-Damit Geräte über das [Discovery-Modul](ONVIF%20Discovery) gefunden werden können, müssen bei NAT Systemen Multicast-Pakete korrekt weitergeleitet werden.  
+Damit Geräte über das [Discovery-Modul](ONVIF%20Discovery/README.md) gefunden werden können, müssen bei NAT Systemen Multicast-Pakete korrekt weitergeleitet werden.  
 Für das Discovery werden Pakete über die Multicast-Adresse `239.255.255.250` auf Port `3702` gesendet und empfangen.
 
 ## Folgende Module beinhaltet die ONVIF Library:
 
-- __ONVIF Discovery__ ([Dokumentation](ONVIF%20Discovery))
+- __ONVIF Discovery__ ([Dokumentation](ONVIF%20Discovery/README.md))
 	Erkennt ONVIF kompatible Geräte innerhalb des lokalen LAN.
 
-- __ONVIF Configurator__ ([Dokumentation](ONVIF%20Configurator))
+- __ONVIF Configurator__ ([Dokumentation](ONVIF%20Configurator/README.md))
 	Unterstützt beim Einrichten der verschiedenen Instanzen für ein ONVIF-Gerät.
 
-- __ONVIF IO__ ([Dokumentation](ONVIF%20IO))
+- __ONVIF IO__ ([Dokumentation](ONVIF%20IO/README.md))
 	Stellt die Verbindung zu einem ONVIF-Gerät her.  
 
-- __ONVIF Media Stream__ ([Dokumentation](ONVIF%20Media%20Stream))
+- __ONVIF Media Stream__ ([Dokumentation](ONVIF%20Media%20Stream/README.md))
 	Konfiguriert ein IPS Medien-Objekt (RTSP-Stream) anhand der Geräte-Fähigkeiten.  
 
-- __ONVIF Image Grabber__ ([Dokumentation](ONVIF%20Image%20Grabber))
+- __ONVIF Image Grabber__ ([Dokumentation](ONVIF%20Image%20Grabber/README.md))
 	Lädt Snapshots (Standbilder) von dem Gerät und legt es in einem Media-Objekt ab.  
 
-- __ONVIF Digital Input__ ([Dokumentation](ONVIF%20Digital%20Input))
+- __ONVIF Digital Input__ ([Dokumentation](ONVIF%20Digital%20Input/README.md))
 	Bildet die Digitalen Eingänge in Symcon ab.  
 
-- __ONVIF Digital Output__ ([Dokumentation](ONVIF%20Digital%20Output))
+- __ONVIF Digital Output__ ([Dokumentation](ONVIF%20Digital%20Output/README.md))
 	Bildet Digitale Ausgänge (Relays) in Symcon ab.  
 
-- __ONVIF Events__ ([Dokumentation](ONVIF%20Events))
+- __ONVIF Events__ ([Dokumentation](ONVIF%20Events/README.md))
 	Bildet empfangbare ONVIF-Ereignisse in Symcon ab.  
 
 ---  
