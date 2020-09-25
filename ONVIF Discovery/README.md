@@ -4,22 +4,21 @@
 [![License](https://img.shields.io/badge/License-CC%20BY--NC--SA%204.0-green.svg)](https://creativecommons.org/licenses/by-nc-sa/4.0/)
 [![Check Style](https://github.com/Nall-chan/ONVIF/workflows/Check%20Style/badge.svg)](https://github.com/Nall-chan/ONVIF/actions) [![Run Tests](https://github.com/Nall-chan/ONVIF/workflows/Run%20Tests/badge.svg)](https://github.com/Nall-chan/ONVIF/actions)  
 
-# ONVIF Discovery
+# ONVIF Discovery <!-- omit in toc -->
 Erkennt ONVIF kompatible Geräte innerhalb des lokalen LAN.  
 
 ## Inhaltsverzeichnis <!-- omit in toc -->
 
-- [ONVIF Discovery](#onvif-discovery)
-  - [1. Funktionsumfang](#1-funktionsumfang)
-  - [2. Vorraussetzungen](#2-vorraussetzungen)
-  - [3. Software-Installation](#3-software-installation)
-  - [4. Einrichten der Instanz in IP-Symcon](#4-einrichten-der-instanz-in-ip-symcon)
-    - [Laden der Konfigurationsseite:](#laden-der-konfigurationsseite)
-    - [Konfigurationsseite nach der Gerätesuche:](#konfigurationsseite-nach-der-gerätesuche)
-    - [Anlegen von Geräten in Symcon:](#anlegen-von-geräten-in-symcon)
-  - [5. Statusvariablen](#5-statusvariablen)
-  - [6. WebFront](#6-webfront)
-  - [7. PHP-Funktionsreferenz](#7-php-funktionsreferenz)
+- [1. Funktionsumfang](#1-funktionsumfang)
+- [2. Vorraussetzungen](#2-vorraussetzungen)
+- [3. Software-Installation](#3-software-installation)
+- [4. Einrichten der Instanz in IP-Symcon](#4-einrichten-der-instanz-in-ip-symcon)
+  - [Laden der Konfigurationsseite:](#laden-der-konfigurationsseite)
+  - [Konfigurationsseite nach der Gerätesuche:](#konfigurationsseite-nach-der-gerätesuche)
+  - [Anlegen von Geräten in Symcon:](#anlegen-von-geräten-in-symcon)
+- [5. Statusvariablen](#5-statusvariablen)
+- [6. WebFront](#6-webfront)
+- [7. PHP-Funktionsreferenz](#7-php-funktionsreferenz)
 
 ## 1. Funktionsumfang
 
@@ -57,10 +56,10 @@ _(*) Siehe weiter unten._
 
 ### Konfigurationsseite nach der Gerätesuche:  
 
-| Name | Text | Beschreibung |
-| ---- | ---- | ------------ |
-|  -   |  -   |  -           |  
-__Die Discovery-Instanz hat keine Einstellungen, welche über IPS_SetProperty verändert werden können.__  
+| Name                                                                                                    | Text | Beschreibung |
+| ------------------------------------------------------------------------------------------------------- | ---- | ------------ |
+| __Die Discovery-Instanz hat keine Einstellungen, welche über IPS_SetProperty verändert werden können.__ |      |              |
+
 
 ![Config](imgs/Config.png)  
 

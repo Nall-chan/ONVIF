@@ -4,7 +4,7 @@
 [![License](https://img.shields.io/badge/License-CC%20BY--NC--SA%204.0-green.svg)](https://creativecommons.org/licenses/by-nc-sa/4.0/)
 [![Check Style](https://github.com/Nall-chan/ONVIF/workflows/Check%20Style/badge.svg)](https://github.com/Nall-chan/ONVIF/actions) [![Run Tests](https://github.com/Nall-chan/ONVIF/workflows/Run%20Tests/badge.svg)](https://github.com/Nall-chan/ONVIF/actions)  
 
-# ONVIF Media Stream
+# ONVIF Media Stream <!-- omit in toc -->
 Konfiguriert ein IPS Medien-Objekt anhand der Geräte-Fähigkeiten.  
 
 ## Inhaltsverzeichnis <!-- omit in toc -->

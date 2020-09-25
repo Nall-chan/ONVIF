@@ -4,27 +4,26 @@
 [![License](https://img.shields.io/badge/License-CC%20BY--NC--SA%204.0-green.svg)](https://creativecommons.org/licenses/by-nc-sa/4.0/)
 [![Check Style](https://github.com/Nall-chan/ONVIF/workflows/Check%20Style/badge.svg)](https://github.com/Nall-chan/ONVIF/actions) [![Run Tests](https://github.com/Nall-chan/ONVIF/workflows/Run%20Tests/badge.svg)](https://github.com/Nall-chan/ONVIF/actions)  
 
-# ONVIF Events
+# ONVIF Events <!-- omit in toc -->
 Bildet verschiedene Ereignisse (Events) als Statusvariablen in Symcon ab.
 
 ## Inhaltsverzeichnis <!-- omit in toc -->
 
-- [ONVIF Events](#onvif-events)
-  - [1. Funktionsumfang](#1-funktionsumfang)
-  - [2. Vorraussetzungen](#2-vorraussetzungen)
-  - [3. Software-Installation](#3-software-installation)
-  - [4. Einrichten der Instanzen in IP-Symcon](#4-einrichten-der-instanzen-in-ip-symcon)
-    - [Anlegen der Instanz:](#anlegen-der-instanz)
-    - [Zuordnen zur IO-Instanz:](#zuordnen-zur-io-instanz)
-    - [Auswahl des Ereignis-Pfad :](#auswahl-des-ereignis-pfad-)
-  - [5. Statusvariablen](#5-statusvariablen)
-    - [Beispiel 1: Ein einzelnes Ereignis](#beispiel-1-ein-einzelnes-ereignis)
-    - [Beispiel 2: Ein einzelnes Ereignis, mehrere Quellen](#beispiel-2-ein-einzelnes-ereignis-mehrere-quellen)
-    - [Beispiel 3: Ein Ordner](#beispiel-3-ein-ordner)
-    - [Beispiel 4: Ein Teilbaum](#beispiel-4-ein-teilbaum)
-  - [6. WebFront](#6-webfront)
-  - [7. PHP-Funktionsreferenz](#7-php-funktionsreferenz)
-  - [8. Tips & Tricks](#8-tips--tricks)
+- [1. Funktionsumfang](#1-funktionsumfang)
+- [2. Vorraussetzungen](#2-vorraussetzungen)
+- [3. Software-Installation](#3-software-installation)
+- [4. Einrichten der Instanzen in IP-Symcon](#4-einrichten-der-instanzen-in-ip-symcon)
+  - [Anlegen der Instanz:](#anlegen-der-instanz)
+  - [Zuordnen zur IO-Instanz:](#zuordnen-zur-io-instanz)
+  - [Auswahl des Ereignis-Pfad :](#auswahl-des-ereignis-pfad-)
+- [5. Statusvariablen](#5-statusvariablen)
+  - [Beispiel 1: Ein einzelnes Ereignis](#beispiel-1-ein-einzelnes-ereignis)
+  - [Beispiel 2: Ein einzelnes Ereignis, mehrere Quellen](#beispiel-2-ein-einzelnes-ereignis-mehrere-quellen)
+  - [Beispiel 3: Ein Ordner](#beispiel-3-ein-ordner)
+  - [Beispiel 4: Ein Teilbaum](#beispiel-4-ein-teilbaum)
+- [6. WebFront](#6-webfront)
+- [7. PHP-Funktionsreferenz](#7-php-funktionsreferenz)
+- [8. Tips & Tricks](#8-tips--tricks)
 
 ## 1. Funktionsumfang
 

@@ -4,22 +4,21 @@
 [![License](https://img.shields.io/badge/License-CC%20BY--NC--SA%204.0-green.svg)](https://creativecommons.org/licenses/by-nc-sa/4.0/)
 [![Check Style](https://github.com/Nall-chan/ONVIF/workflows/Check%20Style/badge.svg)](https://github.com/Nall-chan/ONVIF/actions) [![Run Tests](https://github.com/Nall-chan/ONVIF/workflows/Run%20Tests/badge.svg)](https://github.com/Nall-chan/ONVIF/actions)  
 
-# ONVIF Configurator
+# ONVIF Configurator  <!-- omit in toc -->
 Beschreibung des Moduls.
 
 ## Inhaltsverzeichnis <!-- omit in toc -->
 
-- [ONVIF Configurator](#onvif-configurator)
-  - [1. Funktionsumfang](#1-funktionsumfang)
-  - [2. Vorraussetzungen](#2-vorraussetzungen)
-  - [3. Software-Installation](#3-software-installation)
-  - [4. Einrichten der Instanzen in IP-Symcon](#4-einrichten-der-instanzen-in-ip-symcon)
-    - [Beispiel 1: Keine Digital IOs](#beispiel-1-keine-digital-ios)
-    - [Beispiel 2: Mit Digital IOs](#beispiel-2-mit-digital-ios)
-    - [Beispiel 3: Multikanal-Geräte](#beispiel-3-multikanal-geräte)
-  - [5. Statusvariablen](#5-statusvariablen)
-  - [6. WebFront](#6-webfront)
-  - [7. PHP-Funktionsreferenz](#7-php-funktionsreferenz)
+- [1. Funktionsumfang](#1-funktionsumfang)
+- [2. Vorraussetzungen](#2-vorraussetzungen)
+- [3. Software-Installation](#3-software-installation)
+- [4. Einrichten der Instanzen in IP-Symcon](#4-einrichten-der-instanzen-in-ip-symcon)
+  - [Beispiel 1: Keine Digital IOs](#beispiel-1-keine-digital-ios)
+  - [Beispiel 2: Mit Digital IOs](#beispiel-2-mit-digital-ios)
+  - [Beispiel 3: Multikanal-Geräte](#beispiel-3-multikanal-geräte)
+- [5. Statusvariablen](#5-statusvariablen)
+- [6. WebFront](#6-webfront)
+- [7. PHP-Funktionsreferenz](#7-php-funktionsreferenz)
 
 ## 1. Funktionsumfang
 

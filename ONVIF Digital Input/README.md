@@ -4,19 +4,18 @@
 [![License](https://img.shields.io/badge/License-CC%20BY--NC--SA%204.0-green.svg)](https://creativecommons.org/licenses/by-nc-sa/4.0/)
 [![Check Style](https://github.com/Nall-chan/ONVIF/workflows/Check%20Style/badge.svg)](https://github.com/Nall-chan/ONVIF/actions) [![Run Tests](https://github.com/Nall-chan/ONVIF/workflows/Run%20Tests/badge.svg)](https://github.com/Nall-chan/ONVIF/actions)  
 
-# ONVIF Digital Input
+# ONVIF Digital Input  <!-- omit in toc -->
 Bildet die Digitalen Eingänge in Symcon ab.  
 
 ## Inhaltsverzeichnis  <!-- omit in toc -->
 
-- [ONVIF Digital Input](#onvif-digital-input)
-  - [1. Funktionsumfang](#1-funktionsumfang)
-  - [2. Vorraussetzungen](#2-vorraussetzungen)
-  - [3. Software-Installation](#3-software-installation)
-  - [4. Einrichten der Instanzen in IP-Symcon](#4-einrichten-der-instanzen-in-ip-symcon)
-  - [5. Statusvariablen](#5-statusvariablen)
-  - [6. WebFront](#6-webfront)
-  - [7. PHP-Funktionsreferenz](#7-php-funktionsreferenz)
+- [1. Funktionsumfang](#1-funktionsumfang)
+- [2. Vorraussetzungen](#2-vorraussetzungen)
+- [3. Software-Installation](#3-software-installation)
+- [4. Einrichten der Instanzen in IP-Symcon](#4-einrichten-der-instanzen-in-ip-symcon)
+- [5. Statusvariablen](#5-statusvariablen)
+- [6. WebFront](#6-webfront)
+- [7. PHP-Funktionsreferenz](#7-php-funktionsreferenz)
 
 ## 1. Funktionsumfang
 

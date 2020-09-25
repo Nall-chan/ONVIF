@@ -4,23 +4,22 @@
 [![License](https://img.shields.io/badge/License-CC%20BY--NC--SA%204.0-green.svg)](https://creativecommons.org/licenses/by-nc-sa/4.0/)
 [![Check Style](https://github.com/Nall-chan/ONVIF/workflows/Check%20Style/badge.svg)](https://github.com/Nall-chan/ONVIF/actions) [![Run Tests](https://github.com/Nall-chan/ONVIF/workflows/Run%20Tests/badge.svg)](https://github.com/Nall-chan/ONVIF/actions)  
 
-# ONVIF Image Grabber
+# ONVIF Image Grabber <!-- omit in toc -->
 Speichert einzelne Snapshots als ein IPS Medien-Objekt.  
 
 ## Inhaltsverzeichnis <!-- omit in toc -->
 
-- [ONVIF Image Grabber](#onvif-image-grabber)
-  - [1. Funktionsumfang](#1-funktionsumfang)
-  - [2. Vorraussetzungen](#2-vorraussetzungen)
-  - [3. Software-Installation](#3-software-installation)
-  - [4. Einrichten der Instanzen in IP-Symcon](#4-einrichten-der-instanzen-in-ip-symcon)
-  - [5. Statusvariablen](#5-statusvariablen)
-    - [Keine Events:](#keine-events)
-    - [Mit Events:](#mit-events)
-  - [6. WebFront](#6-webfront)
-  - [7. PHP-Funktionsreferenz](#7-php-funktionsreferenz)
-  - [8. Tips & Tricks](#8-tips--tricks)
-    - [Bild bei Bewegung aktualisieren](#bild-bei-bewegung-aktualisieren)
+- [1. Funktionsumfang](#1-funktionsumfang)
+- [2. Vorraussetzungen](#2-vorraussetzungen)
+- [3. Software-Installation](#3-software-installation)
+- [4. Einrichten der Instanzen in IP-Symcon](#4-einrichten-der-instanzen-in-ip-symcon)
+- [5. Statusvariablen](#5-statusvariablen)
+  - [Keine Events:](#keine-events)
+  - [Mit Events:](#mit-events)
+- [6. WebFront](#6-webfront)
+- [7. PHP-Funktionsreferenz](#7-php-funktionsreferenz)
+- [8. Tips & Tricks](#8-tips--tricks)
+  - [Bild bei Bewegung aktualisieren](#bild-bei-bewegung-aktualisieren)
 
 ## 1. Funktionsumfang
 
