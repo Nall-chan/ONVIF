@@ -285,12 +285,6 @@ class ONVIFMediaStream extends ONVIFModuleBase
             }
             if ($ActualProfile != null) {
                 $mId = $this->GetMediaId();
-                /*$ButtonPreview = '';
-                if ($mId > 0) {
-                    $Key = urlencode(base64_encode('token:' . IPS_CreateTemporaryMediaStreamToken($mId, 900)));
-                    $ButtonPreview = 'echo "../proxy/' . $mId . '?authorization=' . $Key . '";';
-                    $this->SendDebug('PREVIEW', '../proxy/' . $mId . '?authorization=' . $Key, 0);
-                }*/
                 $ExpansionPanelVideoItems[] = [
                     'type'  => 'RowLayout',
                     'items' => [
@@ -407,7 +401,7 @@ class ONVIFMediaStream extends ONVIFModuleBase
                         [
                             'type'    => 'Label',
                             'width'   => '200px',
-                            'caption' => $this->Translate('PTZ-Token:')
+                            'caption' => $this->Translate('Token:')
                         ],
                         [
                             'type'    => 'Label',
@@ -423,7 +417,7 @@ class ONVIFMediaStream extends ONVIFModuleBase
                         [
                             'type'    => 'Label',
                             'width'   => '200px',
-                            'caption' => $this->Translate('PTZ-Presets:')
+                            'caption' => $this->Translate('Pre-positions:')
                         ],
                         [
                             'type'    => 'Label',
@@ -436,7 +430,7 @@ class ONVIFMediaStream extends ONVIFModuleBase
                     $PTZPresetItems['items'][] =
                     [
                         'type'     => 'PopupButton',
-                        'caption'  => $this->Translate('No presets'),
+                        'caption'  => $this->Translate('No pre-positions'),
                         'width'    => '300px',
                         'popup'    => [],
                         'enabled'  => false
@@ -456,7 +450,7 @@ class ONVIFMediaStream extends ONVIFModuleBase
                     }
                     $PTZPresetItems['items'][] = [
                         'type'    => 'PopupButton',
-                        'caption' => $this->Translate('Show presets'),
+                        'caption' => $this->Translate('Show pre-positions'),
                         'width'   => '300px',
                         'popup'   => [
                             'caption'=> $this->Translate('Presets'),
@@ -474,11 +468,11 @@ class ONVIFMediaStream extends ONVIFModuleBase
                                         [
                                             'caption' => 'Pre-position index',
                                             'name'    => 'PresetIndex',
-                                            'width'   => '70px'
+                                            'width'   => '120px'
                                         ], [
                                             'caption'    => 'Pre-position token',
                                             'name'       => 'PresetToken',
-                                            'width'      => '100px'
+                                            'width'      => '120px'
                                         ],
                                         [
                                             'caption'    => 'Pre-position name',
@@ -501,7 +495,7 @@ class ONVIFMediaStream extends ONVIFModuleBase
                         [
                             'type'    => 'Label',
                             'width'   => '200px',
-                            'caption' => $this->Translate('max. presets:')
+                            'caption' => $this->Translate('max. pre-positions:')
                         ],
                         [
                             'type'    => 'Label',
@@ -1092,12 +1086,12 @@ class ONVIFMediaStream extends ONVIFModuleBase
     }
     protected function WritePTZInHTMLBox()
     {
+        $this->RegisterVariableString('PTZControlHtml', 'PTZ Control for Webfront', '~HTMLBox', 5);
         $mId = @$this->GetIDForIdent('STREAM');
         if ($mId == false) {
             $this->SetValueString('PTZControlHtml', '');
             return;
         }
-        $this->RegisterVariableString('PTZControlHtml', 'PTZ Control for Webfront', '~HTMLBox', 5);
         $this->AuthorizationKey = $Key = base64_encode('token:' . IPS_CreateTemporaryMediaStreamToken($mId, 900));
         $Key = urlencode($Key);
         $ImgSrc = '<img class="stream" src="proxy/' . $mId . '?authorization=' . $Key . '">';

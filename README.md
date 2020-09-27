@@ -1,18 +1,30 @@
 [![Version](https://img.shields.io/badge/Symcon-PHPModul-red.svg)](https://www.symcon.de/service/dokumentation/entwicklerbereich/sdk-tools/sdk-php/)
-[![Version](https://img.shields.io/badge/Modul%20Version-1.00-blue.svg)]()
+[![Version](https://img.shields.io/badge/Modul%20Version-1.01-blue.svg)]()
 [![Version](https://img.shields.io/badge/Symcon%20Version-5.5%20%3E-green.svg)](https://www.symcon.de/forum/threads/41251-IP-Symcon-5-5-%28Testing%29)  
 [![License](https://img.shields.io/badge/License-CC%20BY--NC--SA%204.0-green.svg)](https://creativecommons.org/licenses/by-nc-sa/4.0/)
 [![Check Style](https://github.com/Nall-chan/ONVIF/workflows/Check%20Style/badge.svg)](https://github.com/Nall-chan/ONVIF/actions) [![Run Tests](https://github.com/Nall-chan/ONVIF/workflows/Run%20Tests/badge.svg)](https://github.com/Nall-chan/ONVIF/actions)  
+[![Spenden](https://www.paypalobjects.com/de_DE/DE/i/btn/btn_donate_SM.gif)](#spenden)  
 
-# ONVIF Profil S Library
+# ONVIF Profil S Library <!-- omit in toc -->
 
+## Inhaltsverzeichnis <!-- omit in toc -->
 
+- [Vorbemerkungen zur Library](#vorbemerkungen-zur-library)
+- [Vorbemerkungen zur Integration von Geräten](#vorbemerkungen-zur-integration-von-geräten)
+- [Hinweise zum Symcon-System / Host](#hinweise-zum-symcon-system--host)
+- [Folgende Module beinhaltet die ONVIF Library](#folgende-module-beinhaltet-die-onvif-library)
+- [Changelog](#changelog)
+- [Spenden](#spenden)
+- [Lizenz](#lizenz)
+
+----------
 ## Vorbemerkungen zur Library
 
 Diese Library wurde nicht dazu entwickelt komplett den Profil S Spezifikationen zu entsprechen oder deren gesamten Funktionsumfang abzubilden.  
 Vielmehr liegt der Schwerpunkt auf eine einfache und unkomplizierte Integration bestimmter Bestandteile (LiveStream, Steuerung) und Funktionen (Events, Digital Ein-/Ausgänge) in Symcon.  
 Dadurch ist es auch möglich Geräte in Symcon einzubinden welche ihrerseits die Spezifikationen nicht vollständig oder nicht korrekt umsetzen.  
 
+----------
 ## Vorbemerkungen zur Integration von Geräten  
 
 Es werden Instanzen zum auffinden (Discovery) und einrichten (Konfigurator) von Geräten in Symcon bereitgestellt.  
@@ -32,6 +44,7 @@ Es wird dringend empfohlen vor der Integration in IPS folgende Parameter in den 
 - PTZ-Vorpositionen / Szenen  (sofern vorhanden)  
 - h26x-Profile bzw. Media-Profile für ONVIF  
 
+----------
 ## Hinweise zum Symcon-System / Host  
 
 Die Maximale Anzahl der gleichzeitig verwendbaren RTSP-Streams hängt von der Symcon Lizenz ab. Bitte hierzu die [Funktionsübersicht der Editionen](https://www.symcon.de/produkt/editionen/) beachten.  
@@ -43,9 +56,10 @@ Die IP-Adresse auf welchem Symcon die Daten empfängt wird automatisch ermittelt
 Bei System mit aktiven NAT-Support funktioniert die automatische Erkennung der eigenen IP-Adresse nicht. Hier wird die PublicIP aus den Symcon-Spezialschaltern benutzt.  
 Auch bei Systemen mit aktiven NAT-Support wird extern nur der Port 3777 unterstützt, und muss somit korrekt weitergeleitet werden.  
 Damit Geräte über das [Discovery-Modul](ONVIF%20Discovery/README.md) gefunden werden können, müssen bei NAT Systemen Multicast-Pakete korrekt weitergeleitet werden.  
-Für das Discovery werden Pakete über die Multicast-Adresse `239.255.255.250` auf Port `3702` gesendet und empfangen.
+Für das Discovery werden Pakete über die Multicast-Adresse `239.255.255.250` auf Port `3702` gesendet und empfangen.  
 
-## Folgende Module beinhaltet die ONVIF Library:
+----------
+## Folgende Module beinhaltet die ONVIF Library
 
 - __ONVIF Discovery__ ([Dokumentation](ONVIF%20Discovery/README.md))
 	Erkennt ONVIF kompatible Geräte innerhalb des lokalen LAN.
@@ -71,14 +85,17 @@ Für das Discovery werden Pakete über die Multicast-Adresse `239.255.255.250` a
 - __ONVIF Events__ ([Dokumentation](ONVIF%20Events/README.md))
 	Bildet empfangbare ONVIF-Ereignisse in Symcon ab.  
 
----  
-
-
+----------
 ## Changelog
 
- Version 1.00:  
-  - Release für Symcon 5.5  
+Version 1.01:  
+- Release für Symcon 5.5  
+- Fehlende Übersetzungen ergänzt  
 
+Version 1.00:  
+- Beta Release für Symcon 5.5  
+
+----------
 ## Spenden  
   
   Die Library ist für die nicht kommerzielle Nutzung kostenlos, Schenkungen als Unterstützung für den Autor werden hier akzeptiert:  
