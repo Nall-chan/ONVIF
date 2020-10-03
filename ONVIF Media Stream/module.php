@@ -60,7 +60,11 @@ class ONVIFMediaStream extends ONVIFModuleBase
         $this->PresetTokenList = [];
         $this->AuthorizationKey = '';
         // Profile
-        $this->RegisterProfileIntegerEx('ONVIF.PanTilt', 'Move', '', '',
+        $this->RegisterProfileIntegerEx(
+            'ONVIF.PanTilt',
+            'Move',
+            '',
+            '',
             [
                 [0, '◄◄', 'HollowLargeArrowLeft', -1],
                 [1, '▲▲', 'HollowLargeArrowUp', -1],
@@ -69,26 +73,42 @@ class ONVIFMediaStream extends ONVIFModuleBase
                 [4, '►►', 'HollowLargeArrowRight', -1]
             ]
         );
-        $this->RegisterProfileIntegerEx('ONVIF.Zoom', 'Move', '', '',
+        $this->RegisterProfileIntegerEx(
+            'ONVIF.Zoom',
+            'Move',
+            '',
+            '',
             [
                 [0, '↑↑', 'HollowDoubleArrowUp', -1],
                 [1, 'Stop', 'Move', -1],
                 [2, '↓↓', 'HollowDoubleArrowDown', -1]
             ]
         );
-        $this->RegisterProfileFloatEx('ONVIF.Speed', 'Speedo', '', '',
-            [
-                [0, $this->Translate('default'), '', -1],
-                [0.1, '%.1f ' . $this->Translate('sec.'), '', -1]
-            ],
-            5, 0.5, 1
-        );
-        $this->RegisterProfileFloatEx('ONVIF.Time', 'Clock', '', '',
+        $this->RegisterProfileFloatEx(
+            'ONVIF.Speed',
+            'Speedo',
+            '',
+            '',
             [
                 [0, $this->Translate('default'), '', -1],
                 [0.1, '%.1f', '', -1]
             ],
-            1, 0.1, 1
+            5,
+            0.5,
+            1
+        );
+        $this->RegisterProfileFloatEx(
+            'ONVIF.Time',
+            'Clock',
+            '',
+            '',
+            [
+                [0, $this->Translate('default'), '', -1],
+                [0.1, '%.1f ' . $this->Translate('sec.'), '', -1]
+            ],
+            1,
+            0.1,
+            1
         );
     }
 
@@ -777,7 +797,7 @@ class ONVIFMediaStream extends ONVIFModuleBase
         if ($this->PTZ_token == '') {
             return false;
         }
-        $Params = ['ProfileToken' => $this->ReadPropertyString('Profile')];
+        $Params = ['ProfileToken' => $this->ReadPropertyString('Profile'), 'PanTilt' => true, 'Zoom' => true];
         return $this->SendData($this->PTZ_xAddr, 'Stop', true, $Params, self::PTZwsdl);
     }
 
@@ -1098,36 +1118,38 @@ class ONVIFMediaStream extends ONVIFModuleBase
         $PanTiltSVG = '';
         if ($this->ReadPropertyBoolean('EnablePanTiltHTML')) {
             $PanTiltSVG = str_replace(
-            [
+                [
                 '%%InstanceId%%',
                 '%%width%%',
                 '%%height',
                 '%%opacity%%'
             ],
-            [
+                [
                 $this->InstanceID,
                 $this->ReadPropertyInteger('PanTiltControlWidth'),
                 $this->ReadPropertyInteger('PanTiltControlHeight'),
                 sprintf('%F', $this->ReadPropertyInteger('PanTiltControlOpacity') / 100)
             ],
-            file_get_contents(__DIR__ . '/../libs/PanTiltControl.svg'));
+                file_get_contents(__DIR__ . '/../libs/PanTiltControl.svg')
+            );
         }
         $ZoomSVG = '';
         if ($this->ReadPropertyBoolean('EnableZoomHTML')) {
             $ZoomSVG = str_replace(
-            [
+                [
                 '%%InstanceId%%',
                 '%%width%%',
                 '%%height',
                 '%%opacity%%'
             ],
-            [
+                [
                 $this->InstanceID,
                 $this->ReadPropertyInteger('ZoomControlWidth'),
                 $this->ReadPropertyInteger('ZoomControlHeight'),
                 sprintf('%F', $this->ReadPropertyInteger('ZoomControlOpacity') / 100)
             ],
-            file_get_contents(__DIR__ . '/../libs/ZoomControl.svg'));
+                file_get_contents(__DIR__ . '/../libs/ZoomControl.svg')
+            );
         }
         $JS = str_replace(
             [
@@ -1138,7 +1160,8 @@ class ONVIFMediaStream extends ONVIFModuleBase
                 $this->InstanceID,
                 $Key
             ],
-            file_get_contents(__DIR__ . '/../libs/PTZControl.js'));
+            file_get_contents(__DIR__ . '/../libs/PTZControl.js')
+        );
 
         $JSCode = '<script>' . $JS . /*'initPTZ(' . $this->InstanceID . ');*/'</script>';
         $HTMLData = '<div class="extended"><div class="ipsContainer media">' .
