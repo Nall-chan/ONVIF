@@ -598,9 +598,9 @@ class ONVIFIO extends IPSModule
                 'Name'       => $Profile['VideoEncoderConfiguration']['Name'],
                 'token'      => $Profile['token'],
                 'ptztoken'   => isset($Profile['PTZConfiguration']['token']) ? $Profile['PTZConfiguration']['token'] : '',
-                'Encoding'   => $Profile['VideoEncoderConfiguration']['Encoding'],
-                'Resolution' => $Profile['VideoEncoderConfiguration']['Resolution'],
-                'RateControl'=> $Profile['VideoEncoderConfiguration']['RateControl']
+                'Encoding'   => isset($Profile['VideoEncoderConfiguration']['Encoding']) ?$Profile['VideoEncoderConfiguration']['Encoding'] : 'unknown',
+                'Resolution' => isset($Profile['VideoEncoderConfiguration']['Resolution']) ?$Profile['VideoEncoderConfiguration']['Resolution'] : 'unknown',
+                'RateControl'=> isset($Profile['VideoEncoderConfiguration']['RateControl']) ?$Profile['VideoEncoderConfiguration']['RateControl'] : 'unknown'
             ];
         }
         $H264VideoSources = array_values($H264VideoSourcesItems);
@@ -629,9 +629,9 @@ class ONVIFIO extends IPSModule
             $JPEGVideoSourcesItems[$Profile['VideoSourceConfiguration']['SourceToken']]['Profile'][] = [
                 'Name'       => $Profile['VideoEncoderConfiguration']['Name'],
                 'token'      => $Profile['token'],
-                'Encoding'   => $Profile['VideoEncoderConfiguration']['Encoding'],
-                'Resolution' => $Profile['VideoEncoderConfiguration']['Resolution'],
-                'RateControl'=> $Profile['VideoEncoderConfiguration']['RateControl']
+                'Encoding'   => isset($Profile['VideoEncoderConfiguration']['Encoding']) ?$Profile['VideoEncoderConfiguration']['Encoding'] : 'unknown',
+                'Resolution' => isset($Profile['VideoEncoderConfiguration']['Resolution']) ?$Profile['VideoEncoderConfiguration']['Resolution'] : 'unknown',
+                'RateControl'=> isset($Profile['VideoEncoderConfiguration']['RateControl']) ?$Profile['VideoEncoderConfiguration']['RateControl'] : 'unknown'
             ];
         }
         $JPEGVideoSources = array_values($JPEGVideoSourcesItems);

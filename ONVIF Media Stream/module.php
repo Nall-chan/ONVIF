@@ -1038,6 +1038,11 @@ class ONVIFMediaStream extends ONVIFModuleBase
             } else {
                 $Presets = json_decode(json_encode($PresetResult->Preset), true);
             }
+            foreach ($Presets as &$Preset) {
+                if ($Preset['Name'] = '') {
+                    $Preset['Name']=$Preset['token'];
+                }
+            }
             $this->PTZ_Presets = $Presets;
         }
         return true;
