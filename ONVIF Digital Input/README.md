@@ -1,10 +1,11 @@
 [![Version](https://img.shields.io/badge/Symcon-PHPModul-red.svg)](https://www.symcon.de/service/dokumentation/entwicklerbereich/sdk-tools/sdk-php/)
-[![Version](https://img.shields.io/badge/Modul%20Version-1.00-blue.svg)]()
-[![Version](https://img.shields.io/badge/Symcon%20Version-5.5%20%3E-green.svg)](https://www.symcon.de/forum/threads/41251-IP-Symcon-5-5-%28Testing%29)  
+[![Version](https://img.shields.io/badge/Modul%20Version-1.05-blue.svg)]()
+[![Version](https://img.shields.io/badge/Symcon%20Version-5.5%20%3E-green.svg)](https://www.symcon.de/forum/threads/41251-IP-Symcon-5-5-%28master%29)  
 [![License](https://img.shields.io/badge/License-CC%20BY--NC--SA%204.0-green.svg)](https://creativecommons.org/licenses/by-nc-sa/4.0/)
 [![Check Style](https://github.com/Nall-chan/ONVIF/workflows/Check%20Style/badge.svg)](https://github.com/Nall-chan/ONVIF/actions) [![Run Tests](https://github.com/Nall-chan/ONVIF/workflows/Run%20Tests/badge.svg)](https://github.com/Nall-chan/ONVIF/actions)  
+[![Spenden](https://www.paypalobjects.com/de_DE/DE/i/btn/btn_donate_SM.gif)](../README.md#spenden)  
 
-# ONVIF Digital Input
+# ONVIF Digital Input  <!-- omit in toc -->
 Bildet die Digitalen Eingänge in Symcon ab.  
 
 ## Inhaltsverzeichnis  <!-- omit in toc -->
@@ -13,8 +14,7 @@ Bildet die Digitalen Eingänge in Symcon ab.
 - [2. Vorraussetzungen](#2-vorraussetzungen)
 - [3. Software-Installation](#3-software-installation)
 - [4. Einrichten der Instanzen in IP-Symcon](#4-einrichten-der-instanzen-in-ip-symcon)
-- [5. Statusvariablen und Profile](#5-statusvariablen-und-profile)
-  - [Statusvariablen](#statusvariablen)
+- [5. Statusvariablen](#5-statusvariablen)
 - [6. WebFront](#6-webfront)
 - [7. PHP-Funktionsreferenz](#7-php-funktionsreferenz)
 
@@ -39,7 +39,7 @@ Bildet die Digitalen Eingänge in Symcon ab.
 
  Es wird empfohlen diese Instanz über die dazugehörige Instanz des [Configurator-Moduls](../ONVIF%20Configurator/README.md) von diesem Geräte anzulegen.  
  
-__Konfigurationsseite__:
+__Konfigurationsseite__:  
 
 ![Config](imgs/Config.png)  
 | Name       | Text                    | Beschreibung                                                                      |
@@ -47,11 +47,9 @@ __Konfigurationsseite__:
 | EventTopic | Ereignisse der Eingänge | Auswahl des Ereignis-Pfad ab welchen Ereignisse empfangen und verarbeitet werden. |
 
 Der Ereignis-Pfad wird bei Digital-Input versucht automatisch zu erkennen, alternativ steht das universelle [ONVIF Events](../ONVIF%20Events/README.md) Modul zur Verfügung
-## 5. Statusvariablen und Profile
+## 5. Statusvariablen
 
 Die Statusvariablen werden automatisch angelegt. Das Löschen einzelner kann zu Fehlfunktionen führen.
-
-### Statusvariablen
 
 | Name                           | Typ  | Beschreibung                                                                                |
 | ------------------------------ | ---- | ------------------------------------------------------------------------------------------- |

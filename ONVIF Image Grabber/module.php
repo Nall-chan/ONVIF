@@ -66,11 +66,10 @@ class ONVIFImageGrabber extends ONVIFModuleBase
             return false;
         }
         $ch = curl_init();
-        $timeout = 1;
         curl_setopt($ch, CURLOPT_URL, $URL);
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-        curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, $timeout);
-        curl_setopt($ch, CURLOPT_TIMEOUT_MS, 2000);
+        curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 2);
+        curl_setopt($ch, CURLOPT_TIMEOUT_MS, 5000);
         curl_setopt($ch, CURLOPT_HTTPAUTH, CURLAUTH_BASIC | CURLAUTH_DIGEST);
         $this->SendDebug('Request Image', $URL, 0);
         $Result = curl_exec($ch);
@@ -101,6 +100,7 @@ class ONVIFImageGrabber extends ONVIFModuleBase
             if ($Data['SourceValue'] != $this->ReadPropertyString('VideoSource')) {
                 return false;
             }
+            $Data['SourceName']='';
         }
         $PreName = str_replace($this->ReadPropertyString('EventTopic'), '', $Data['Topic']);
         return $this->SetEventStatusVariable($PreName, $EventProperties[$Data['Topic']], $Data);

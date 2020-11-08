@@ -33,6 +33,9 @@ class ONVIFModuleBase extends IPSModule
         parent::Create();
         $this->RegisterPropertyString('EventTopic', '');
         $this->RegisterAttributeArray('EventProperties', []);
+        if (IPS_GetKernelRunlevel() != KR_READY) {
+            $this->RegisterMessage(0, IPS_KERNELSTARTED);
+        }
     }
 
     public function Destroy()
@@ -45,7 +48,6 @@ class ONVIFModuleBase extends IPSModule
     {
         //Never delete this line!
         parent::ApplyChanges();
-        $this->RegisterMessage(0, IPS_KERNELSTARTED);
         $this->RegisterMessage($this->InstanceID, FM_CONNECT);
         $this->RegisterMessage($this->InstanceID, FM_DISCONNECT);
         $EventTopic = $this->ReadPropertyString('EventTopic');
@@ -80,6 +82,7 @@ class ONVIFModuleBase extends IPSModule
 
         switch ($Message) {
             case IPS_KERNELSTARTED:
+                $this->UnregisterMessage(0, IPS_KERNELSTARTED);
                 $this->KernelReady();
                 break;
         }
@@ -285,6 +288,9 @@ class ONVIFModuleBase extends IPSModule
             $Name = $PreName . ' - ' . $Data['DataName'];
         } else {
             $Name = $Data['DataName'];
+        }
+        if ($Data['SourceName'] != ''){
+            $Name .= ':' . $Data['SourceValue'];
         }
 
         $Ident = str_replace([' - ', '/', '-', ':'], ['_', '_', '_', ''], $Name);

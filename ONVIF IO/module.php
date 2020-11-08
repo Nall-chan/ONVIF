@@ -30,16 +30,9 @@ class ONVIFIO extends IPSModule
         $this->RegisterPropertyString('Address', '');
         $this->RegisterPropertyString('Username', '');
         $this->RegisterPropertyString('Password', '');
-        $this->RegisterPropertyString('NATAddress', '');
         $this->RegisterAttributeArray('VideoSources', []);
         $this->RegisterAttributeArray('VideoSourcesJPEG', []);
         $this->RegisterAttributeInteger('Timestamp_Offset', 0);
-        /*        $this->RegisterAttributeString('XAddrMedia', '');
-          $this->RegisterAttributeString('XAddrImageing', '');
-          $this->RegisterAttributeString('XAddrEvents', '');
-          $this->RegisterAttributeString('XAddrPTZ', '');
-          $this->RegisterAttributeString('XAddrRecording', '');
-          $this->RegisterAttributeString('XAddrReplay', ''); */
         $this->RegisterAttributeArray('XAddr', []);
 
         $this->RegisterAttributeArray('EventProperties', []);
@@ -51,9 +44,10 @@ class ONVIFIO extends IPSModule
         $this->RegisterTimer('RenewSubscription', 0, 'IPS_RequestAction(' . $this->InstanceID . ',"Renew",true);');
         $this->Host = '';
         $this->isSubscribed = false;
-        $this->RegisterMessage(0, IPS_KERNELSTARTED);
         if (IPS_GetKernelRunlevel() == KR_READY) {
             $this->RegisterMessage($this->InstanceID, FM_CHILDREMOVED);
+        } else {
+            $this->RegisterMessage(0, IPS_KERNELSTARTED);
         }
     }
 
@@ -72,6 +66,7 @@ class ONVIFIO extends IPSModule
     {
         switch ($Message) {
             case IPS_KERNELSTARTED:
+                    $this->UnregisterMessage(0, IPS_KERNELSTARTED);
                     IPS_RequestAction($this->InstanceID, 'KernelReady', true);
                 break;
             case FM_CHILDREMOVED:
@@ -305,10 +300,6 @@ class ONVIFIO extends IPSModule
     public function GetConfigurationForm()
     {
         $Form = json_decode(file_get_contents(__DIR__ . '/form.json'), true);
-        if (IPS_GetOption('NATSupport')) {
-            $Form['elements'][3]['visible'] = true;
-            $Form['elements'][3]['validate'] = '^.+$';
-        }
         $ConsumerAddress = $this->ReadAttributeString('ConsumerAddress');
         if ($ConsumerAddress == '') {
             $ConsumerAddress = $this->Translate('This device not support events.');
@@ -349,11 +340,8 @@ class ONVIFIO extends IPSModule
     protected function GetConsumerAddress()
     {
         if (IPS_GetOption('NATSupport')) {
-            $parsed_url = parse_url($this->ReadPropertyString('NATAddress'));
-            $scheme = isset($parsed_url['scheme']) ? $parsed_url['scheme'] . '://' : 'http://';
-            $host = isset($parsed_url['host']) ? $parsed_url['host'] : '';
-            $port = isset($parsed_url['port']) ? ':' . $parsed_url['port'] : ':3777';
-            $Url = $scheme . $host . $port . '/hook/ONVIFEvents/IO/' . $this->InstanceID;
+            $ip = IPS_GetOption('NATPublicIP');
+            $Url = 'http://' . $ip . ':3777/hook/ONVIFEvents/IO/' . $this->InstanceID;
             $this->SendDebug('NAT enabled ConsumerAddress', $Url, 0);
         } else {
             $sock = socket_create(AF_INET, SOCK_STREAM, SOL_TCP);
@@ -610,9 +598,9 @@ class ONVIFIO extends IPSModule
                 'Name'       => $Profile['VideoEncoderConfiguration']['Name'],
                 'token'      => $Profile['token'],
                 'ptztoken'   => isset($Profile['PTZConfiguration']['token']) ? $Profile['PTZConfiguration']['token'] : '',
-                'Encoding'   => $Profile['VideoEncoderConfiguration']['Encoding'],
-                'Resolution' => $Profile['VideoEncoderConfiguration']['Resolution'],
-                'RateControl'=> $Profile['VideoEncoderConfiguration']['RateControl']
+                'Encoding'   => isset($Profile['VideoEncoderConfiguration']['Encoding']) ?$Profile['VideoEncoderConfiguration']['Encoding'] : 'unknown',
+                'Resolution' => isset($Profile['VideoEncoderConfiguration']['Resolution']) ?$Profile['VideoEncoderConfiguration']['Resolution'] : 'unknown',
+                'RateControl'=> isset($Profile['VideoEncoderConfiguration']['RateControl']) ?$Profile['VideoEncoderConfiguration']['RateControl'] : 'unknown'
             ];
         }
         $H264VideoSources = array_values($H264VideoSourcesItems);
@@ -641,9 +629,9 @@ class ONVIFIO extends IPSModule
             $JPEGVideoSourcesItems[$Profile['VideoSourceConfiguration']['SourceToken']]['Profile'][] = [
                 'Name'       => $Profile['VideoEncoderConfiguration']['Name'],
                 'token'      => $Profile['token'],
-                'Encoding'   => $Profile['VideoEncoderConfiguration']['Encoding'],
-                'Resolution' => $Profile['VideoEncoderConfiguration']['Resolution'],
-                'RateControl'=> $Profile['VideoEncoderConfiguration']['RateControl']
+                'Encoding'   => isset($Profile['VideoEncoderConfiguration']['Encoding']) ?$Profile['VideoEncoderConfiguration']['Encoding'] : 'unknown',
+                'Resolution' => isset($Profile['VideoEncoderConfiguration']['Resolution']) ?$Profile['VideoEncoderConfiguration']['Resolution'] : 'unknown',
+                'RateControl'=> isset($Profile['VideoEncoderConfiguration']['RateControl']) ?$Profile['VideoEncoderConfiguration']['RateControl'] : 'unknown'
             ];
         }
         $JPEGVideoSources = array_values($JPEGVideoSourcesItems);
@@ -898,7 +886,6 @@ class ONVIFIO extends IPSModule
 
     protected function KernelReady()
     {
-        $this->UnregisterMessage(0, IPS_KERNELSTARTED);
         $this->RegisterMessage($this->InstanceID, FM_CHILDREMOVED);
         $Url = parse_url($this->ReadPropertyString('Address'));
         $Url['port'] = (isset($Url['port']) ? ':' . $Url['port'] : '');

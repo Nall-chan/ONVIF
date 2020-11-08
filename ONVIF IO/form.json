@@ -25,13 +25,6 @@
                     "caption": "Password"
                 }
             ]
-        },
-        {
-            "name": "NATAddress",
-            "type": "ValidationTextBox",
-            "caption": "NAT Address",
-            "validate": "",
-            "visible": false
         }
     ],
     "actions": [
