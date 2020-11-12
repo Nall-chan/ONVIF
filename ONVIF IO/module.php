@@ -536,7 +536,7 @@ class ONVIFIO extends IPSModule
         $wsTopics = $xpath->query($query);
         $Path = [];
         foreach ($wsTopics as $wsData) {
-            $Topic = substr($wsData->parentNode->parentNode->parentNode->getNodePath(), $prefixPathLen + 1);
+            $Topic = preg_replace('/\[\d*\]/','',substr($wsData->parentNode->parentNode->parentNode->getNodePath(), $prefixPathLen + 1));
             $Path[$Topic]['DataName'] = $wsData->attributes->getNamedItem('Name')->nodeValue;
             $Path[$Topic]['DataType'] = $wsData->attributes->getNamedItem('Type')->nodeValue;
             $wsSource = $xpath->query('../../' . $tt_ns . ':Source/' . $tt_ns . ':SimpleItemDescription', $wsData, true);
