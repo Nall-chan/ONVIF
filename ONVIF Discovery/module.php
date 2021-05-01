@@ -59,7 +59,7 @@ class ONVIFDiscovery extends IPSModule
     {
         //Never delete this line!
         parent::ApplyChanges();
-        $this->DiscoveryIsRunning=false;
+        $this->DiscoveryIsRunning = false;
     }
 
     /**
@@ -330,7 +330,8 @@ class ONVIFDiscovery extends IPSModule
                 $matches = array_merge($matches, explode(' ', $addrsNode->nodeValue));
             }
         }
-        $filtermatches = array_filter($matches, function ($item) use ($ip) {
+        $filtermatches = array_filter($matches, function ($item) use ($ip)
+        {
             return strpos($item, $ip);
         });
         return array_values($filtermatches);

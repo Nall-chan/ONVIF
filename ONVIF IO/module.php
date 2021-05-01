@@ -536,7 +536,7 @@ class ONVIFIO extends IPSModule
         $wsTopics = $xpath->query($query);
         $Path = [];
         foreach ($wsTopics as $wsData) {
-            $Topic = preg_replace('/\[\d*\]/','',substr($wsData->parentNode->parentNode->parentNode->getNodePath(), $prefixPathLen + 1));
+            $Topic = preg_replace('/\[\d*\]/', '', substr($wsData->parentNode->parentNode->parentNode->getNodePath(), $prefixPathLen + 1));
             $Path[$Topic]['DataName'] = $wsData->attributes->getNamedItem('Name')->nodeValue;
             $Path[$Topic]['DataType'] = $wsData->attributes->getNamedItem('Type')->nodeValue;
             $wsSource = $xpath->query('../../' . $tt_ns . ':Source/' . $tt_ns . ':SimpleItemDescription', $wsData, true);
@@ -598,9 +598,9 @@ class ONVIFIO extends IPSModule
                 'Name'       => $Profile['VideoEncoderConfiguration']['Name'],
                 'token'      => $Profile['token'],
                 'ptztoken'   => isset($Profile['PTZConfiguration']['token']) ? $Profile['PTZConfiguration']['token'] : '',
-                'Encoding'   => isset($Profile['VideoEncoderConfiguration']['Encoding']) ?$Profile['VideoEncoderConfiguration']['Encoding'] : 'unknown',
-                'Resolution' => isset($Profile['VideoEncoderConfiguration']['Resolution']) ?$Profile['VideoEncoderConfiguration']['Resolution'] : 'unknown',
-                'RateControl'=> isset($Profile['VideoEncoderConfiguration']['RateControl']) ?$Profile['VideoEncoderConfiguration']['RateControl'] : 'unknown'
+                'Encoding'   => isset($Profile['VideoEncoderConfiguration']['Encoding']) ? $Profile['VideoEncoderConfiguration']['Encoding'] : 'unknown',
+                'Resolution' => isset($Profile['VideoEncoderConfiguration']['Resolution']) ? $Profile['VideoEncoderConfiguration']['Resolution'] : 'unknown',
+                'RateControl'=> isset($Profile['VideoEncoderConfiguration']['RateControl']) ? $Profile['VideoEncoderConfiguration']['RateControl'] : 'unknown'
             ];
         }
         $H264VideoSources = array_values($H264VideoSourcesItems);
@@ -629,9 +629,9 @@ class ONVIFIO extends IPSModule
             $JPEGVideoSourcesItems[$Profile['VideoSourceConfiguration']['SourceToken']]['Profile'][] = [
                 'Name'       => $Profile['VideoEncoderConfiguration']['Name'],
                 'token'      => $Profile['token'],
-                'Encoding'   => isset($Profile['VideoEncoderConfiguration']['Encoding']) ?$Profile['VideoEncoderConfiguration']['Encoding'] : 'unknown',
-                'Resolution' => isset($Profile['VideoEncoderConfiguration']['Resolution']) ?$Profile['VideoEncoderConfiguration']['Resolution'] : 'unknown',
-                'RateControl'=> isset($Profile['VideoEncoderConfiguration']['RateControl']) ?$Profile['VideoEncoderConfiguration']['RateControl'] : 'unknown'
+                'Encoding'   => isset($Profile['VideoEncoderConfiguration']['Encoding']) ? $Profile['VideoEncoderConfiguration']['Encoding'] : 'unknown',
+                'Resolution' => isset($Profile['VideoEncoderConfiguration']['Resolution']) ? $Profile['VideoEncoderConfiguration']['Resolution'] : 'unknown',
+                'RateControl'=> isset($Profile['VideoEncoderConfiguration']['RateControl']) ? $Profile['VideoEncoderConfiguration']['RateControl'] : 'unknown'
             ];
         }
         $JPEGVideoSources = array_values($JPEGVideoSourcesItems);

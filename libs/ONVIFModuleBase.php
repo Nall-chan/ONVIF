@@ -65,7 +65,6 @@ class ONVIFModuleBase extends IPSModule
         $Events = $this->GetEvents($this->ReadPropertyString('EventTopic'));
         $this->WriteAttributeArray('EventProperties', $Events);
         $this->SendDebug('RegisterEvents', $Events, 0);
-
     }
 
     public function RequestAction($Ident, $Value)
@@ -289,11 +288,11 @@ class ONVIFModuleBase extends IPSModule
         } else {
             $Name = $Data['DataName'];
         }
-        if ($Data['SourceName'] != ''){
+        if ($Data['SourceName'] != '') {
             $Name .= ':' . $Data['SourceValue'];
         }
         $Ident = str_replace([' - ', ':'], ['_', ''], $Name);
-        $Ident = preg_replace('/[^a-zA-Z\d]/u','_',$Ident);
+        $Ident = preg_replace('/[^a-zA-Z\d]/u', '_', $Ident);
         switch (stristr($EventProperty['DataType'], ':')) {
             case ':boolean':
             case ':bool':

@@ -100,7 +100,7 @@ class ONVIFImageGrabber extends ONVIFModuleBase
             if ($Data['SourceValue'] != $this->ReadPropertyString('VideoSource')) {
                 return false;
             }
-            $Data['SourceName']='';
+            $Data['SourceName'] = '';
         }
         $PreName = str_replace($this->ReadPropertyString('EventTopic'), '', $Data['Topic']);
         return $this->SetEventStatusVariable($PreName, $EventProperties[$Data['Topic']], $Data);
