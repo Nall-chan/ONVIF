@@ -34,6 +34,46 @@
                 "items": [
                     {
                         "type": "ExpansionPanel",
+                        "caption": "Control behavior",
+                        "expanded": false,
+                        "items": [
+                            {
+                                "type": "RowLayout",
+                                "items": [
+                                    {
+                                        "type": "CheckBox",
+                                        "name": "InvertPanControl",
+                                        "caption": "Invert Pan",
+                                        "width": "250px"
+                                    },
+                                    {
+                                        "type": "CheckBox",
+                                        "name": "InvertZoomControl",
+                                        "caption": "Invert Zoom",
+                                        "width": "250px"
+                                    }
+                                ]
+                            },
+                            {
+                                "type": "RowLayout",
+                                "items": [
+                                    {
+                                        "type": "CheckBox",
+                                        "name": "InvertTiltControl",
+                                        "caption": "Invert Tilt",
+                                        "width": "250px"
+                                    },
+                                    {
+                                        "type": "Label",
+                                        "caption": "",
+                                        "width": "250px"
+                                    }
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        "type": "ExpansionPanel",
                         "caption": "HTML-Box (Stream & Control)",
                         "expanded": true,
                         "items": [

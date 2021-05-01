@@ -28,6 +28,10 @@ class ONVIFMediaStream extends ONVIFModuleBase
         //Stream
         $this->RegisterPropertyString('VideoSource', '');
         $this->RegisterPropertyString('Profile', '');
+        // Invert Controls
+        $this->RegisterPropertyBoolean('InvertPanControl', false);
+        $this->RegisterPropertyBoolean('InvertTiltControl', false);
+        $this->RegisterPropertyBoolean('InvertZoomControl', false);
         //IPS Variables
         $this->RegisterPropertyBoolean('EnablePanTiltVariable', false);
         $this->RegisterPropertyBoolean('EnableZoomVariable', false);
@@ -205,7 +209,7 @@ class ONVIFMediaStream extends ONVIFModuleBase
                 if ($Preset->PresetActive) {
                     $PresetAssociations[] = [
                         $Preset->VariableValue,
-                        $UsePresetName ? $Preset->PresetName : $Preset->VariableValue,
+                        $UsePresetName ? ($Preset->PresetName == '' ? $Preset->VariableValue : $Preset->PresetName) : $Preset->VariableValue,
                         '',
                         -1
                     ];
@@ -611,7 +615,7 @@ class ONVIFMediaStream extends ONVIFModuleBase
             'ProfileToken' => $this->ReadPropertyString('Profile'),
             'Velocity'     => [
                 'PanTilt' => [
-                    'x' => $Speed,
+                    'x' => ($this->ReadPropertyBoolean('InvertPanControl') ? $Speed : -$Speed),
                     'y' => 0
                 ]
             ]
@@ -645,7 +649,7 @@ class ONVIFMediaStream extends ONVIFModuleBase
             'ProfileToken' => $this->ReadPropertyString('Profile'),
             'Velocity'     => [
                 'PanTilt' => [
-                    'x' => -$Speed,
+                    'x' => ($this->ReadPropertyBoolean('InvertPanControl') ? $Speed : -$Speed),
                     'y' => 0
                 ]
             ]
@@ -681,7 +685,7 @@ class ONVIFMediaStream extends ONVIFModuleBase
             'Velocity'     => [
                 'PanTilt' => [
                     'x' => 0,
-                    'y' => $Speed
+                    'y' => ($this->ReadPropertyBoolean('InvertTiltControl') ? $Speed : -$Speed)
                 ]
             ]
         ];
@@ -717,7 +721,7 @@ class ONVIFMediaStream extends ONVIFModuleBase
             'Velocity'     => [
                 'PanTilt' => [
                     'x' => 0,
-                    'y' => -$Speed
+                    'y' => ($this->ReadPropertyBoolean('InvertTiltControl') ? $Speed : -$Speed)
                 ]
             ]
         ];
@@ -750,7 +754,7 @@ class ONVIFMediaStream extends ONVIFModuleBase
             'ProfileToken' => $this->ReadPropertyString('Profile'),
             'Velocity'     => [
                 'Zoom' => [
-                    'x' => $Speed
+                    'x' => ($this->ReadPropertyBoolean('InvertZoomControl') ? $Speed : -$Speed)
                 ]
             ]
         ];
@@ -783,7 +787,7 @@ class ONVIFMediaStream extends ONVIFModuleBase
             'ProfileToken' => $this->ReadPropertyString('Profile'),
             'Velocity'     => [
                 'Zoom' => [
-                    'x' => -$Speed
+                    'x' => ($this->ReadPropertyBoolean('InvertZoomControl') ? $Speed : -$Speed)
                 ]
             ]
         ];
@@ -954,7 +958,7 @@ class ONVIFMediaStream extends ONVIFModuleBase
             if ($Data['SourceValue'] != $this->ReadPropertyString('VideoSource')) {
                 return false;
             }
-            $Data['SourceName']='';
+            $Data['SourceName'] = '';
         }
         $PreName = str_replace($this->ReadPropertyString('EventTopic'), '', $Data['Topic']);
         return $this->SetEventStatusVariable($PreName, $EventProperties[$Data['Topic']], $Data);
@@ -1040,7 +1044,7 @@ class ONVIFMediaStream extends ONVIFModuleBase
             }
             foreach ($Presets as &$Preset) {
                 if ($Preset['Name'] = '') {
-                    $Preset['Name']=$Preset['token'];
+                    $Preset['Name'] = $Preset['token'];
                 }
             }
             $this->PTZ_Presets = $Presets;
@@ -1124,17 +1128,17 @@ class ONVIFMediaStream extends ONVIFModuleBase
         if ($this->ReadPropertyBoolean('EnablePanTiltHTML')) {
             $PanTiltSVG = str_replace(
                 [
-                '%%InstanceId%%',
-                '%%width%%',
-                '%%height',
-                '%%opacity%%'
-            ],
+                    '%%InstanceId%%',
+                    '%%width%%',
+                    '%%height',
+                    '%%opacity%%'
+                ],
                 [
-                $this->InstanceID,
-                $this->ReadPropertyInteger('PanTiltControlWidth'),
-                $this->ReadPropertyInteger('PanTiltControlHeight'),
-                sprintf('%F', $this->ReadPropertyInteger('PanTiltControlOpacity') / 100)
-            ],
+                    $this->InstanceID,
+                    $this->ReadPropertyInteger('PanTiltControlWidth'),
+                    $this->ReadPropertyInteger('PanTiltControlHeight'),
+                    sprintf('%F', $this->ReadPropertyInteger('PanTiltControlOpacity') / 100)
+                ],
                 file_get_contents(__DIR__ . '/../libs/PanTiltControl.svg')
             );
         }
@@ -1142,17 +1146,17 @@ class ONVIFMediaStream extends ONVIFModuleBase
         if ($this->ReadPropertyBoolean('EnableZoomHTML')) {
             $ZoomSVG = str_replace(
                 [
-                '%%InstanceId%%',
-                '%%width%%',
-                '%%height',
-                '%%opacity%%'
-            ],
+                    '%%InstanceId%%',
+                    '%%width%%',
+                    '%%height',
+                    '%%opacity%%'
+                ],
                 [
-                $this->InstanceID,
-                $this->ReadPropertyInteger('ZoomControlWidth'),
-                $this->ReadPropertyInteger('ZoomControlHeight'),
-                sprintf('%F', $this->ReadPropertyInteger('ZoomControlOpacity') / 100)
-            ],
+                    $this->InstanceID,
+                    $this->ReadPropertyInteger('ZoomControlWidth'),
+                    $this->ReadPropertyInteger('ZoomControlHeight'),
+                    sprintf('%F', $this->ReadPropertyInteger('ZoomControlOpacity') / 100)
+                ],
                 file_get_contents(__DIR__ . '/../libs/ZoomControl.svg')
             );
         }
