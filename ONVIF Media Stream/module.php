@@ -649,7 +649,7 @@ class ONVIFMediaStream extends ONVIFModuleBase
             'ProfileToken' => $this->ReadPropertyString('Profile'),
             'Velocity'     => [
                 'PanTilt' => [
-                    'x' => ($this->ReadPropertyBoolean('InvertPanControl') ? $Speed : -$Speed),
+                    'x' => ($this->ReadPropertyBoolean('InvertPanControl') ? -$Speed : $Speed),
                     'y' => 0
                 ]
             ]
@@ -721,7 +721,7 @@ class ONVIFMediaStream extends ONVIFModuleBase
             'Velocity'     => [
                 'PanTilt' => [
                     'x' => 0,
-                    'y' => ($this->ReadPropertyBoolean('InvertTiltControl') ? $Speed : -$Speed)
+                    'y' => ($this->ReadPropertyBoolean('InvertTiltControl') ? -$Speed : $Speed)
                 ]
             ]
         ];
@@ -787,7 +787,7 @@ class ONVIFMediaStream extends ONVIFModuleBase
             'ProfileToken' => $this->ReadPropertyString('Profile'),
             'Velocity'     => [
                 'Zoom' => [
-                    'x' => ($this->ReadPropertyBoolean('InvertZoomControl') ? $Speed : -$Speed)
+                    'x' => ($this->ReadPropertyBoolean('InvertZoomControl') ? -$Speed : $Speed)
                 ]
             ]
         ];
