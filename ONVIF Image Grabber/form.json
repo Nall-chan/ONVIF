@@ -56,7 +56,7 @@
         {
             "code": 104,
             "icon": "inactive",
-            "caption": "Configuration invalid"
+            "caption": "Configuration is invalid"
         },
         {
             "code": 201,

@@ -117,6 +117,7 @@
                 "items": [
                     {
                         "type": "Label",
+                        "name":"ScanLabel",                        
                         "caption": "Determine abilities of the devices:"
                     },
                     {
