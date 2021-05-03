@@ -151,10 +151,11 @@ class ONVIFModuleBase extends IPSModule
             }
         }
         return [
-            'VideoSources' => [],
-            'HasOutput'    => false,
-            'HasInput'     => false,
-            'XAddr'        => [
+            'VideoSources'     => [],
+            'VideoSourcesJPEG' => [],
+            'HasOutput'        => false,
+            'HasInput'         => false,
+            'XAddr'            => [
                 'Events'    => '',
                 'Media'     => '',
                 'PTZ'       => '',
