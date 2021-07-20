@@ -198,6 +198,8 @@ class ONVIFDiscovery extends IPSModule
 
     protected function DiscoverDevices()
     {
+        //IPS_Sleep(5000);
+        //return []; // testing
         $discoveryTimeout = time() + self::WS_DISCOVERY_TIMEOUT;
         $uuid = self::uuidV4();
         $discoveryMessage = str_replace('[UUID]', $uuid, self::WS_DISCOVERY_MESSAGE);

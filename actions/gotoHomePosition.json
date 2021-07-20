@@ -1,0 +1,25 @@
+{
+    "id": "{14E604D5-9C0C-F379-7C4E-E72E0CD0337F}",
+    "caption": "Set camera to home position",
+    "form": [],
+    "action": "ONVIF_GotoPresetHomePosition($_IPS['TARGET']);",
+    "readable": "echo 'ONVIF_GotoPresetHomePosition('.$_IPS['TARGET'].');';",
+    "category": "target",
+    "restrictions": {
+        "objectType": [
+            1
+        ],
+        "moduleID": [
+            "{FA889450-38B6-7E20-D4DC-F2C6D0B074FB}"
+        ],
+        "includeEnvironments": [
+            "TestCommands",
+            "Default"
+        ]
+    },
+    "locale": {
+        "de": {
+            "Set camera to home position": "Steuere Kamera auf Home-Position"
+        }
+    }
+}

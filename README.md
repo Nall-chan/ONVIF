@@ -1,6 +1,6 @@
 [![Version](https://img.shields.io/badge/Symcon-PHPModul-red.svg)](https://www.symcon.de/service/dokumentation/entwicklerbereich/sdk-tools/sdk-php/)
-[![Version](https://img.shields.io/badge/Modul%20Version-1.07-blue.svg)]()
-[![Version](https://img.shields.io/badge/Symcon%20Version-5.5%20%3E-green.svg)](https://www.symcon.de/forum/threads/41251-IP-Symcon-5-5-%28master%29)  
+[![Version](https://img.shields.io/badge/Modul%20Version-1.10-blue.svg)]()
+[![Version](https://img.shields.io/badge/Symcon%20Version-6.0%20%3E-green.svg)](https://www.symcon.de/forum/threads/41251-IP-Symcon-5-5-%28master%29)  
 [![License](https://img.shields.io/badge/License-CC%20BY--NC--SA%204.0-green.svg)](https://creativecommons.org/licenses/by-nc-sa/4.0/)
 [![Check Style](https://github.com/Nall-chan/ONVIF/workflows/Check%20Style/badge.svg)](https://github.com/Nall-chan/ONVIF/actions) [![Run Tests](https://github.com/Nall-chan/ONVIF/workflows/Run%20Tests/badge.svg)](https://github.com/Nall-chan/ONVIF/actions)  
 [![Spenden](https://www.paypalobjects.com/de_DE/DE/i/btn/btn_donate_SM.gif)](#spenden)  
@@ -87,6 +87,13 @@ Für das Discovery werden Pakete über die Multicast-Adresse `239.255.255.250` a
 
 ----------
 ## Changelog
+
+Version 1.10:  
+- Beta Release für Symcon 6.0  
+- Aktionen für Kamerasteuerung, Snapshot des Image Grabber und für Ansteuerung der Ausgänge.  
+
+Version 1.08:  
+- Fehlermeldungen vom Image Grabber, wenn IO nicht verbunden war.  
 
 Version 1.07:  
 - Die Ansteuerung der PTZ-Kommandos kann invertiert werden.  

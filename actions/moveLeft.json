@@ -1,0 +1,58 @@
+{
+    "id": "{22CE4FC9-D2D1-1DAD-1845-4059268B6394}",
+    "caption": "Pan camera to left",
+    "form": [
+        {
+            "type": "Label",
+            "caption": "Use zero for default speed value"
+        },
+        {
+            "type": "NumberSpinner",
+            "name": "SPEED",
+            "caption": "Speed",
+            "minimum": 0,
+            "digits": 2
+        },
+        {
+            "type": "Label",
+            "caption": "Use zero for infinity"
+        },
+        {
+            "type": "NumberSpinner",
+            "name": "TIME",
+            "caption": "Duration",
+            "minimum": 0,
+            "digits": 2,
+            "suffix": " seconds"
+        }
+    ],
+    "action": "ONVIF_MoveLeftSpeedTime($_IPS['TARGET'],$_IPS['SPEED'],$_IPS['TIME']);",
+    "readable": "echo 'ONVIF_MoveLeftSpeedTime('.$_IPS['TARGET'].','.$_IPS['SPEED'].','.$_IPS['TIME'].');';",
+    "category": "target",
+    "restrictions": {
+        "objectType": [
+            1
+        ],
+        "moduleID": [
+            "{FA889450-38B6-7E20-D4DC-F2C6D0B074FB}"
+        ],
+        "includeEnvironments": [
+            "TestCommands",
+            "Default"
+        ]
+    },
+    "locale": {
+        "de": {
+            "Pan camera to left": "Kamera nach links schwenken",
+            "Speed": "Geschwindigkeit",
+            "Use zero for default speed value": "Benutze Null für Standard Geschwindigkeit",
+            " seconds": " Sekunden",
+            "Duration": "Dauer",
+            "Use zero for infinity": "Benutze Null für unendlich",
+            "Pan camera left {SPEED, select, 0 {} other {with speed of {SPEED, number}}} {TIME, select, 0 {} other {for {TIME, number} seconds}}": "Kamera nach links schwenken {SPEED, select, 0 {} other {mit Geschwindigkeit von {SPEED, number}}} {TIME, select, 0 {} other {für {TIME, number} Sekunden}}",
+            "Pans the camera to the left for the specified time at the selected speed": "Schwenkt die Kamera nach links für die angegebene Zeit mit der ausgewählte Geschwindigkeit"
+        }
+    },
+    "description": "Pans the camera to the left for the specified time at the selected speed",
+    "format": "Pan camera left {SPEED, select, 0 {} other {with speed of {SPEED, number}}} {TIME, select, 0 {} other {for {TIME, number} seconds}}"
+}

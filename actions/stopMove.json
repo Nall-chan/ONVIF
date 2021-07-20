@@ -1,0 +1,27 @@
+{
+    "id": "{E1F66C87-61DC-7EDC-CB27-46FE61E60A26}",
+    "caption": "Stop camera",
+    "form": [],
+    "action": "ONVIF_MoveStop($_IPS['TARGET']);",
+    "readable": "echo 'ONVIF_MoveStop('.$_IPS['TARGET'].');';",
+    "category": "target",
+    "restrictions": {
+        "objectType": [
+            1
+        ],
+        "moduleID": [
+            "{FA889450-38B6-7E20-D4DC-F2C6D0B074FB}"
+        ],
+        "includeEnvironments": [
+            "TestCommands",
+            "Default"
+        ]
+    },
+    "locale": {
+        "de": {
+            "Stop camera": "Kamera stoppen",
+            "Stops the movement of the camera": "Hält die Bewegung der Kamera an"
+        }
+    },
+    "description": "Stops the movement of the camera"
+}

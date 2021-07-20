@@ -1,0 +1,27 @@
+{
+    "id": "{6BBCF532-DF12-9C05-106D-B268F07C0075}",
+    "caption": "Update image from camera",
+    "form": [],
+    "action": "ONVIF_UpdateImage($_IPS['TARGET']);",
+    "readable": "echo 'ONVIF_UpdateImage('.$_IPS['TARGET'].');';",
+    "category": "target",
+    "restrictions": {
+        "objectType": [
+            1
+        ],
+        "moduleID": [
+            "{18EA97C1-3CEC-80B7-4CAA-D91F8A2A0599}"
+        ],
+        "includeEnvironments": [
+            "TestCommands",
+            "Default"
+        ]
+    },
+    "locale": {
+        "de": {
+            "Update image from camera": "Bild von der Kamera aktualisieren",
+            "Loads a new image from the camera and stores it in the media object": "Lädt ein neues Bild von der Kamera und legt es im Medien-Objekt ab"
+        }
+    },
+    "description": "Loads a new image from the camera and stores it in the media object"
+}

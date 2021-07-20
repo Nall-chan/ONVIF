@@ -1,0 +1,37 @@
+{
+    "id": "{75451FDC-7E79-20B1-DDCC-06D6F3F757E8}",
+    "caption": "Set camera to preset",
+    "form": [
+        {
+            "type": "NumberSpinner",
+            "name": "SCENE",
+            "caption": "Number of preset",
+            "minimum": 0
+        }
+    ],
+    "action": "ONVIF_GotoPreset($_IPS['TARGET'],$_IPS['SCENE']);",
+    "readable": "echo 'ONVIF_GotoPreset('.$_IPS['TARGET'].','.$_IPS['SCENE'].');';",
+    "category": "target",
+    "restrictions": {
+        "objectType": [
+            1
+        ],
+        "moduleID": [
+            "{FA889450-38B6-7E20-D4DC-F2C6D0B074FB}"
+        ],
+        "includeEnvironments": [
+            "TestCommands",
+            "Default"
+        ]
+    },
+    "locale": {
+        "de": {
+            "Set camera to preset": "Steuere Kamera auf Vorposition",
+            "Number of preset": "Nummer der Vorposition",
+            "Set camera to preset number {SCENE}": "Steuer Kamera auf Vorpositions-Nummer {SCENE}",
+            "Controls the camera to the selected pre-position": "Steuert die Kamera auf die ausgewählte Vorposition"
+        }
+    },
+    "description": "Controls the camera to the selected pre-position",
+    "format": "Set camera to preset number {SCENE}"
+}

@@ -1,0 +1,58 @@
+{
+    "id": "{D4EBDE36-BFD1-FB35-A8C0-81C93FA4799D}",
+    "caption": "Zoom camera out",
+    "form": [
+        {
+            "type": "Label",
+            "caption": "Use zero for default speed value"
+        },
+        {
+            "type": "NumberSpinner",
+            "name": "SPEED",
+            "caption": "Speed",
+            "minimum": 0,
+            "digits": 2
+        },
+        {
+            "type": "Label",
+            "caption": "Use zero for infinity"
+        },
+        {
+            "type": "NumberSpinner",
+            "name": "TIME",
+            "caption": "Duration",
+            "minimum": 0,
+            "digits": 2,
+            "suffix": " seconds"
+        }
+    ],
+    "action": "ONVIF_ZoomFarSpeedTime($_IPS['TARGET'],$_IPS['SPEED'],$_IPS['TIME']);",
+    "readable": "echo 'ONVIF_ZoomFarSpeedTime('.$_IPS['TARGET'].','.$_IPS['SPEED'].','.$_IPS['TIME'].');';",
+    "category": "target",
+    "restrictions": {
+        "objectType": [
+            1
+        ],
+        "moduleID": [
+            "{FA889450-38B6-7E20-D4DC-F2C6D0B074FB}"
+        ],
+        "includeEnvironments": [
+            "TestCommands",
+            "Default"
+        ]
+    },
+    "locale": {
+        "de": {
+            "Zoom camera out": "Kamera herauszoomen",
+            "Speed": "Geschwindigkeit",
+            "Use zero for default speed value": "Benutze Null für Standard Geschwindigkeit",
+            " seconds": " Sekunden",
+            "Duration": "Dauer",
+            "Use zero for infinity": "Benutze Null für unendlich",
+            "Zoom camera out {SPEED, select, 0 {} other {with speed of {SPEED, number}}} {TIME, select, 0 {} other {for {TIME, number} seconds}}": "Kamera herauszoomen {SPEED, select, 0 {} other {mit Geschwindigkeit von {SPEED, number}}} {TIME, select, 0 {} other {für {TIME, number} Sekunden}}",
+            "Zoom the camera out for the specified time at the selected speed": "Zoom die Kamera raus für die angegebene Zeit mit der ausgewählten Geschwindigkeit"
+        }
+    },
+    "description": "Zoom the camera out for the specified time at the selected speed",
+    "format": "Zoom camera out {SPEED, select, 0 {} other {with speed of {SPEED, number}}} {TIME, select, 0 {} other {for {TIME, number} seconds}}"
+}
