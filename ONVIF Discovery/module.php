@@ -271,9 +271,11 @@ class ONVIFDiscovery extends IPSModule
                 $this->SendDebug('Soap Request ' . $IpValue, $ONVIFClient->client->__getLastRequest(), 0);
                 $this->SendDebug('Soap Response ' . $IpValue, $ONVIFClient->client->__getLastResponse(), 0);
                 $this->SendDebug('Read ' . $IpValue, json_encode($HostnameResult), 0);
-                $Name = $HostnameResult->HostnameInformation->Name;
-                if ($Name != '') {
-                    $Device['Name'] = $Name;
+                if (property_exists($HostnameResult->HostnameInformation, 'Name')) {
+                    $Name = $HostnameResult->HostnameInformation->Name;
+                    if ($Name != '') {
+                        $Device['Name'] = $Name;
+                    }
                 }
             } catch (Exception $e) {
                 $this->SendDebug('Soap Request Error ' . $IpValue, $ONVIFClient->client->__getLastRequest(), 0);
