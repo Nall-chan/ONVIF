@@ -1,9 +1,10 @@
-[![Version](https://img.shields.io/badge/Symcon-PHPModul-red.svg)](https://www.symcon.de/service/dokumentation/entwicklerbereich/sdk-tools/sdk-php/)
-[![Version](https://img.shields.io/badge/Modul%20Version-1.10-blue.svg)]()
-[![Version](https://img.shields.io/badge/Symcon%20Version-6.0%20%3E-green.svg)](https://www.symcon.de/forum/threads/41251-IP-Symcon-5-5-%28master%29)  
+[![SDK](https://img.shields.io/badge/Symcon-PHPModul-red.svg)](https://www.symcon.de/service/dokumentation/entwicklerbereich/sdk-tools/sdk-php/)
+[![Version](https://img.shields.io/badge/Modul%20Version-1.20-blue.svg)](https://community.symcon.de/t/modul-onvif-profil-s-fuer-ip-kameras-und-encoder/52036)
+[![Version](https://img.shields.io/badge/Symcon%20Version-6.1%20%3E-green.svg)](https://www.symcon.de/service/dokumentation/installation/migrationen/v60-v61-q1-2022/)  
 [![License](https://img.shields.io/badge/License-CC%20BY--NC--SA%204.0-green.svg)](https://creativecommons.org/licenses/by-nc-sa/4.0/)
-[![Check Style](https://github.com/Nall-chan/ONVIF/workflows/Check%20Style/badge.svg)](https://github.com/Nall-chan/ONVIF/actions) [![Run Tests](https://github.com/Nall-chan/ONVIF/workflows/Run%20Tests/badge.svg)](https://github.com/Nall-chan/ONVIF/actions)  
-[![Spenden](https://www.paypalobjects.com/de_DE/DE/i/btn/btn_donate_SM.gif)](../README.md#spenden)  
+[![Check Style](https://github.com/Nall-chan/ONVIF/workflows/Check%20Style/badge.svg)](https://github.com/Nall-chan/ONVIF/actions)
+[![Run Tests](https://github.com/Nall-chan/ONVIF/workflows/Run%20Tests/badge.svg)](https://github.com/Nall-chan/ONVIF/actions)  
+[![Spenden](https://www.paypalobjects.com/de_DE/DE/i/btn/btn_donate_SM.gif)](#2-spenden)  
 
 # ONVIF Events <!-- omit in toc -->
 Bildet verschiedene Ereignisse (Events) als Statusvariablen in Symcon ab.
@@ -22,9 +23,14 @@ Bildet verschiedene Ereignisse (Events) als Statusvariablen in Symcon ab.
   - [Beispiel 2: Ein einzelnes Ereignis, mehrere Quellen](#beispiel-2-ein-einzelnes-ereignis-mehrere-quellen)
   - [Beispiel 3: Ein Ordner](#beispiel-3-ein-ordner)
   - [Beispiel 4: Ein Teilbaum](#beispiel-4-ein-teilbaum)
+  - [Tips & Tricks](#tips--tricks)
 - [6. WebFront](#6-webfront)
 - [7. PHP-Funktionsreferenz](#7-php-funktionsreferenz)
-- [8. Tips & Tricks](#8-tips--tricks)
+- [8. Aktionen](#8-aktionen)
+- [9. Anhang](#9-anhang)
+  - [1. Changelog](#1-changelog)
+  - [2. Spenden](#2-spenden)
+- [10. Lizenz](#10-lizenz)
 
 ## 1. Funktionsumfang
 
@@ -61,9 +67,9 @@ Beispiel von Ereignissen:
 
 ![Beispiel](imgs/Config3.png)  
 
-| Name       | Text          | Beschreibung                                                                      |
-| ---------- | ------------- | --------------------------------------------------------------------------------- |
-| EventTopic | Ereignis-Pfad | Auswahl des Ereignis-Pfad ab welchen Ereignisse empfangen und verarbeitet werden. (*) |  
+| Name       | Text          | Beschreibung                                                                          |
+| ---------- | ------------- | ------------------------------------------------------------------------------------- |
+| EventTopic | Ereignis-Pfad | Auswahl des Ereignis-Pfad ab welchen Ereignisse empfangen und verarbeitet werden. (*) |
 
 (*)  _Durch eine Änderung des Ereignis-Pfad werden die alten Statusvariablen hinfällig und müssen manuell gelöscht werden._  
 
@@ -127,6 +133,11 @@ Da einige Ereignisse mehrere Quellen haben, werden z.B. für `VirtualInput` alle
 In diesem Beispiel fehlt eine Statusvariable für ` Network - Lost`, da das Gerät keine Ereignisse für das Event `tns1:Device/tnsaxis:Network/Lost` sendet.  
 Das ist nicht verwunderlich, da ohne Netzwerkverbindung kein Ereignis mehr versendet werden kann und somit das Gerät dieses Event nie mit einen `false` senden könnte.  
 
+### Tips & Tricks
+
+Events für Videoquellen können direkt in der [Stream-Instanz](../ONVIF%20Media%20Stream/README.md)  oder der [Image Grabber-Instanz](../ONVIF%20Image%20Grabber/README.md) verarbeitet werden.  
+Hier wird automatisch auf die korrekte `VideoSource` gefiltert, welche in diesen Instanzen konfiguriert wurde.  
+
 ## 6. WebFront
 
 Die direkte Darstellung der Statusvariablen von Ereignissen ist möglich; es wird aber empfohlen mit Links zu arbeiten.  
@@ -135,7 +146,27 @@ Die direkte Darstellung der Statusvariablen von Ereignissen ist möglich; es wir
 
 Keine Funktionen verfügbar.  
 
-## 8. Tips & Tricks
+## 8. Aktionen
 
-Events für Videoquellen können direkt in der [Stream-Instanz](../ONVIF%20Media%20Stream/README.md)  oder der [Image Grabber-Instanz](../ONVIF%20Image%20Grabber/README.md) verarbeitet werden.  
-Hier wird automatisch auf die korrekte `VideoSource` gefiltert, welche in diesen Instanzen konfiguriert wurde.  
+Keine Aktionen verfügbar.
+
+## 9. Anhang
+
+### 1. Changelog
+
+[Changelog der Library](../README.md#2-changelog)
+
+### 2. Spenden
+
+Die Library ist für die nicht kommerzielle Nutzung kostenlos, Schenkungen als Unterstützung für den Autor werden hier akzeptiert:  
+
+  PayPal:  
+<a href="https://www.paypal.com/donate?hosted_button_id=G2SLW2MEMQZH2" target="_blank"><img src="https://www.paypalobjects.com/de_DE/DE/i/btn/btn_donate_LG.gif" border="0" /></a>  
+
+  Wunschliste:  
+<a href="https://www.amazon.de/hz/wishlist/ls/YU4AI9AQT9F?ref_=wl_share" target="_blank"><img src="https://upload.wikimedia.org/wikipedia/commons/4/4a/Amazon_icon.svg" border="0" width="100"/></a>  
+
+## 10. Lizenz
+
+  IPS-Modul:  
+  [CC BY-NC-SA 4.0](https://creativecommons.org/licenses/by-nc-sa/4.0/)  
