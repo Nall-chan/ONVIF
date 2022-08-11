@@ -12,7 +12,7 @@ Stellt die Verbindung zu einem ONVIF-Gerät her.
 ## Inhaltsverzeichnis <!-- omit in toc -->
 
 - [1. Funktionsumfang](#1-funktionsumfang)
-- [2. Vorraussetzungen](#2-vorraussetzungen)
+- [2. Voraussetzungen](#2-vorraussetzungen)
 - [3. Software-Installation](#3-software-installation)
 - [4. Einrichten der Instanzen in IP-Symcon](#4-einrichten-der-instanzen-in-ip-symcon)
   - [Konfigurationsseite: Übersicht](#konfigurationsseite-übersicht)
@@ -32,7 +32,7 @@ Stellt die Verbindung zu einem ONVIF-Gerät her.
 * Interface für die Kommunikation mit einem ONVIF Profil S kompatiblen Gerät.  
 * Ereignisverwaltung für Geräte welche Events unterstützen.  
 
-## 2. Vorraussetzungen
+## 2. Voraussetzungen
 
 * IP-Symcon ab Version 6.0
 * Kameras oder Video-Encoder mit ONVIF Profil S Unterstützung.  

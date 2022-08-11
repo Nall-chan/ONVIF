@@ -12,7 +12,7 @@ Konfiguriert ein IPS Medien-Objekt anhand der Geräte-Fähigkeiten.
 ## Inhaltsverzeichnis <!-- omit in toc -->
 
 - [1. Funktionsumfang](#1-funktionsumfang)
-- [2. Vorraussetzungen](#2-vorraussetzungen)
+- [2. Voraussetzungen](#2-vorraussetzungen)
 - [3. Software-Installation](#3-software-installation)
 - [4. Einrichten der Instanzen in IP-Symcon](#4-einrichten-der-instanzen-in-ip-symcon)
   - [Konfigurationsseite allgemein:](#konfigurationsseite-allgemein)
@@ -43,7 +43,7 @@ Konfiguriert ein IPS Medien-Objekt anhand der Geräte-Fähigkeiten.
 * Stellt PTZ/SNZ (Schwenken / Neigen / Zommen) Funktionen bereit.  
 * PTZ Funktionen für das WebFront.  
 * 
-## 2. Vorraussetzungen
+## 2. Voraussetzungen
 
 * IP-Symcon ab Version 6.0
 * Kameras oder Video-Encoder mit ONVIF Profil S Unterstützung.
