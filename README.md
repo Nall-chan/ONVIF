@@ -1,31 +1,36 @@
-[![Version](https://img.shields.io/badge/Symcon-PHPModul-red.svg)](https://www.symcon.de/service/dokumentation/entwicklerbereich/sdk-tools/sdk-php/)
-[![Version](https://img.shields.io/badge/Modul%20Version-1.10-blue.svg)]()
-[![Version](https://img.shields.io/badge/Symcon%20Version-6.0%20%3E-green.svg)](https://www.symcon.de/forum/threads/41251-IP-Symcon-5-5-%28master%29)  
+[![SDK](https://img.shields.io/badge/Symcon-PHPModul-red.svg)](https://www.symcon.de/service/dokumentation/entwicklerbereich/sdk-tools/sdk-php/)
+[![Version](https://img.shields.io/badge/Modul%20Version-1.20-blue.svg)](https://community.symcon.de/t/modul-onvif-profil-s-fuer-ip-kameras-und-encoder/52036)
+[![Version](https://img.shields.io/badge/Symcon%20Version-6.1%20%3E-green.svg)](https://www.symcon.de/service/dokumentation/installation/migrationen/v60-v61-q1-2022/)  
 [![License](https://img.shields.io/badge/License-CC%20BY--NC--SA%204.0-green.svg)](https://creativecommons.org/licenses/by-nc-sa/4.0/)
-[![Check Style](https://github.com/Nall-chan/ONVIF/workflows/Check%20Style/badge.svg)](https://github.com/Nall-chan/ONVIF/actions) [![Run Tests](https://github.com/Nall-chan/ONVIF/workflows/Run%20Tests/badge.svg)](https://github.com/Nall-chan/ONVIF/actions)  
-[![Spenden](https://www.paypalobjects.com/de_DE/DE/i/btn/btn_donate_SM.gif)](#spenden)  
+[![Check Style](https://github.com/Nall-chan/ONVIF/workflows/Check%20Style/badge.svg)](https://github.com/Nall-chan/ONVIF/actions)
+[![Run Tests](https://github.com/Nall-chan/ONVIF/workflows/Run%20Tests/badge.svg)](https://github.com/Nall-chan/ONVIF/actions)  
+[![Spenden](https://www.paypalobjects.com/de_DE/DE/i/btn/btn_donate_SM.gif)](#6-spenden)  
 
 # ONVIF Profil S Library <!-- omit in toc -->
 
+Einbinden von ONVIF kompatiblen Geräten in IPS.  
+
 ## Inhaltsverzeichnis <!-- omit in toc -->
 
-- [Vorbemerkungen zur Library](#vorbemerkungen-zur-library)
-- [Vorbemerkungen zur Integration von Geräten](#vorbemerkungen-zur-integration-von-geräten)
-- [Hinweise zum Symcon-System / Host](#hinweise-zum-symcon-system--host)
-- [Folgende Module beinhaltet die ONVIF Library](#folgende-module-beinhaltet-die-onvif-library)
-- [Changelog](#changelog)
-- [Spenden](#spenden)
-- [Lizenz](#lizenz)
+- [1. Vorbemerkungen zur Library](#1-vorbemerkungen-zur-library)
+- [2. Vorbemerkungen zur Integration von Geräten](#2-vorbemerkungen-zur-integration-von-geräten)
+- [3. Hinweise zum Symcon-System / Host](#3-hinweise-zum-symcon-system--host)
+- [4. Enthaltende Module](#4-enthaltende-module)
+- [5. Anhang](#5-anhang)
+	- [1. GUID der Module](#1-guid-der-module)
+	- [2. Changelog](#2-changelog)
+	- [3. Spenden](#3-spenden)
+- [6. Lizenz](#6-lizenz)
 
 ----------
-## Vorbemerkungen zur Library
+## 1. Vorbemerkungen zur Library
 
 Diese Library wurde nicht dazu entwickelt komplett den Profil S Spezifikationen zu entsprechen oder deren gesamten Funktionsumfang abzubilden.  
 Vielmehr liegt der Schwerpunkt auf eine einfache und unkomplizierte Integration bestimmter Bestandteile (LiveStream, Steuerung) und Funktionen (Events, Digital Ein-/Ausgänge) in Symcon.  
 Dadurch ist es auch möglich Geräte in Symcon einzubinden welche ihrerseits die Spezifikationen nicht vollständig oder nicht korrekt umsetzen.  
 
 ----------
-## Vorbemerkungen zur Integration von Geräten  
+## 2. Vorbemerkungen zur Integration von Geräten  
 
 Es werden Instanzen zum auffinden (Discovery) und einrichten (Konfigurator) von Geräten in Symcon bereitgestellt.  
 Diese Instanzen werden nur korrekt funktionieren, wenn die betreffenden Geräte entsprechend Konfiguriert wurden.  
@@ -45,7 +50,7 @@ Es wird dringend empfohlen vor der Integration in IPS folgende Parameter in den 
 - h26x-Profile bzw. Media-Profile für ONVIF  
 
 ----------
-## Hinweise zum Symcon-System / Host  
+## 3. Hinweise zum Symcon-System / Host  
 
 Die Maximale Anzahl der gleichzeitig verwendbaren RTSP-Streams hängt von der Symcon Lizenz ab. Bitte hierzu die [Funktionsübersicht der Editionen](https://www.symcon.de/produkt/editionen/) beachten.  
 
@@ -59,7 +64,7 @@ Damit Geräte über das [Discovery-Modul](ONVIF%20Discovery/README.md) gefunden 
 Für das Discovery werden Pakete über die Multicast-Adresse `239.255.255.250` auf Port `3702` gesendet und empfangen.  
 
 ----------
-## Folgende Module beinhaltet die ONVIF Library
+## 4. Enthaltende Module
 
 - __ONVIF Discovery__ ([Dokumentation](ONVIF%20Discovery/README.md))
 	Erkennt ONVIF kompatible Geräte innerhalb des lokalen LAN.
@@ -85,8 +90,26 @@ Für das Discovery werden Pakete über die Multicast-Adresse `239.255.255.250` a
 - __ONVIF Events__ ([Dokumentation](ONVIF%20Events/README.md))
 	Bildet empfangbare ONVIF-Ereignisse in Symcon ab.  
 
+
+## 5. Anhang
+
+###  1. GUID der Module
+
+ 
+|        Modul        |     Typ      | Prefix |                  GUID                  |
+| :-----------------: | :----------: | :----: | :------------------------------------: |
+|   ONVIF Discovery   |  Discovery   | ONVIF  | {3E7839DC-5CC9-30A0-F48A-58DF2339EADD} |
+| ONVIF Configurator  | Konfigurator | ONVIF  | {C6A79C49-19D5-8D45-FFE5-5D77165FAEE6} |
+|      ONVIF IO       |      IO      | ONVIF  | {F40CA9A7-3B4D-4B26-7214-3A94B6074DFB} |
+| ONVIF Media Stream  |    Gerät     | ONVIF  | {FA889450-38B6-7E20-D4DC-F2C6D0B074FB} |
+| ONVIF Image Grabber |    Gerät     | ONVIF  | {18EA97C1-3CEC-80B7-4CAA-D91F8A2A0599} |
+|    ONVIF Events     |    Gerät     | ONVIF  | {62584C2E-4542-4EBF-1E92-299F4CF364E4} |
+|     ONVIF Input     |    Gerät     | ONVIF  | {73097230-1ECC-FEEB-5969-C85148DFA76E} |
+|    ONVIF Output     |    Gerät     | ONVIF  | {A44B3114-1F72-1FD1-96FB-D7E970BD8614} |
+
+
 ----------
-## Changelog
+### 2. Changelog
 
 Version 1.10:  
 - Beta Release für Symcon 6.0  
@@ -120,12 +143,18 @@ Version 1.00:
 - Beta Release für Symcon 5.5  
 
 ----------
-## Spenden  
+### 3. Spenden  
   
   Die Library ist für die nicht kommerzielle Nutzung kostenlos, Schenkungen als Unterstützung für den Autor werden hier akzeptiert:  
 
-<a href="https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=G2SLW2MEMQZH2" target="_blank"><img src="https://www.paypalobjects.com/de_DE/DE/i/btn/btn_donate_LG.gif" border="0" /></a>
+  PayPal:  
+<a href="https://www.paypal.com/donate?hosted_button_id=G2SLW2MEMQZH2" target="_blank"><img src="https://www.paypalobjects.com/de_DE/DE/i/btn/btn_donate_LG.gif" border="0" /></a>  
 
-## Lizenz  
+  Wunschliste:  
+<a href="https://www.amazon.de/hz/wishlist/ls/YU4AI9AQT9F?ref_=wl_share" target="_blank"><img src="https://upload.wikimedia.org/wikipedia/commons/4/4a/Amazon_icon.svg" border="0" width="100"/></a>  
 
-[CC BY-NC-SA 4.0](https://creativecommons.org/licenses/by-nc-sa/4.0/)  
+## 6. Lizenz
+
+  IPS-Modul:  
+  [CC BY-NC-SA 4.0](https://creativecommons.org/licenses/by-nc-sa/4.0/)  
+ 
