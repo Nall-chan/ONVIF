@@ -76,6 +76,12 @@
             "name": "ErrorPopup",
             "visible": false,
             "popup": {
+                "buttons": [
+                    {
+                        "caption": "Ignore",
+                        "onClick": "IPS_RequestAction($id, 'Freeze', 'EnableErrorPopup');"
+                    }
+                ],
                 "items": [
                     {
                         "type": "Label",

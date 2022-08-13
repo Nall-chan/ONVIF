@@ -4,15 +4,15 @@
 [![License](https://img.shields.io/badge/License-CC%20BY--NC--SA%204.0-green.svg)](https://creativecommons.org/licenses/by-nc-sa/4.0/)
 [![Check Style](https://github.com/Nall-chan/ONVIF/workflows/Check%20Style/badge.svg)](https://github.com/Nall-chan/ONVIF/actions)
 [![Run Tests](https://github.com/Nall-chan/ONVIF/workflows/Run%20Tests/badge.svg)](https://github.com/Nall-chan/ONVIF/actions)  
-[![Spenden](https://www.paypalobjects.com/de_DE/DE/i/btn/btn_donate_SM.gif)](#2-spenden)  
+[![Spenden](https://www.paypalobjects.com/de_DE/DE/i/btn/btn_donate_SM.gif)](#3-spenden)  
 
 # ONVIF Image Grabber <!-- omit in toc -->
-Speichert einzelne Snapshots als ein IPS Medien-Objekt.  
+Speichert einzelne Snapshots (Standbilder) als ein IPS Medien-Objekt.  
 
 ## Inhaltsverzeichnis <!-- omit in toc -->
 
 - [1. Funktionsumfang](#1-funktionsumfang)
-- [2. Voraussetzungen](#2-vorraussetzungen)
+- [2. Voraussetzungen](#2-voraussetzungen)
 - [3. Software-Installation](#3-software-installation)
 - [4. Einrichten der Instanzen in IP-Symcon](#4-einrichten-der-instanzen-in-ip-symcon)
 - [5. Statusvariablen](#5-statusvariablen)
@@ -21,11 +21,11 @@ Speichert einzelne Snapshots als ein IPS Medien-Objekt.
 - [6. WebFront](#6-webfront)
 - [7. PHP-Funktionsreferenz](#7-php-funktionsreferenz)
 - [8. Aktionen](#8-aktionen)
-  - [1. Tips & Tricks](#1-tips--tricks)
-  - [Bild bei Bewegung aktualisieren](#bild-bei-bewegung-aktualisieren)
 - [9. Anhang](#9-anhang)
-  - [1. Changelog](#1-changelog)
-  - [2. Spenden](#2-spenden)
+  - [1. Tips & Tricks](#1-tips--tricks)
+    - [__Bild bei Bewegung aktualisieren__](#bild-bei-bewegung-aktualisieren)
+  - [2. Changelog](#2-changelog)
+  - [3. Spenden](#3-spenden)
 - [10. Lizenz](#10-lizenz)
 
 ## 1. Funktionsumfang
@@ -34,12 +34,12 @@ Speichert einzelne Snapshots als ein IPS Medien-Objekt.
 
 ## 2. Voraussetzungen
 
-* IP-Symcon ab Version 6.0
+* IP-Symcon ab Version 6.1
 * Kameras oder Video-Encoder mit ONVIF Profil S Unterstützung.
 
 ## 3. Software-Installation
 
-* Über den Module Store das ['ONVIF'-Modul](../README.md) installieren.  
+* Dieses Modul ist Bestandteil der [ONVIF-Library](../README.md#3-software-installation).    
 
 ## 4. Einrichten der Instanzen in IP-Symcon
 
@@ -95,13 +95,20 @@ Im Fehlerfall wird eine Warnung erzeugt und `false` zurück gegeben, sonst `true
 
 ## 8. Aktionen
 
-//TODO
+Wenn eine 'ONVIF Image Grabber' Instanz als Ziel einer [`Aktion`](https://www.symcon.de/service/dokumentation/konzepte/automationen/ablaufplaene/aktionen/) ausgewählt wurde, steht folgende Aktion zur Verfügung:  
+
+![Aktionen](imgs/Actions.png)  
+* Bild von der Kamera aktualisieren  
+
+
+## 9. Anhang
 
 ### 1. Tips & Tricks
 
-### Bild bei Bewegung aktualisieren  
+#### __Bild bei Bewegung aktualisieren__  
+ 
 Es soll ein Bild geladen werden, sobald der Videosensor auslöst.  
-
+ 
 Hierzu ist unter `Ereignisse der Videoquelle` das Topic des Videosensor ausgewählt worden.
 Die Variable trägt in diesem Beispiel den Namen `State`.  
 
@@ -113,17 +120,13 @@ Damit eine wiederholte Auslösung des Videosensors auch ein neues Bild lädt, wi
 Das Ereignis muss jetzt noch eine Aktion erhalten, damit es das laden eines neuen Bildes vom Gerät anstoßen kann.  
 ![Event-Ziel](imgs/Event2.png)
 Also `Ziel` wird die Instanz des `ONVIF Image Grabber` gewählt, welcher das Bild aktualisieren soll.  
-Der `Aktionstyp` bleibt auf `Schalte Instanz` und bei `Statusvariable der Instanz` wird `Erweitert` eingetragen.  
-Die `Funktion` erhält dann noch den Eintrag `ONVIF_UpdateImage` und über `OK` wird das Ereignis gespeichert.  
+Als `Aktion` wird unter `Zielspezifisch` auf `Bild von der Kamera aktualisieren` ausgewählt und über `OK` wird das Ereignis gespeichert.  
 
-
-## 9. Anhang
-
-### 1. Changelog
+### 2. Changelog
 
 [Changelog der Library](../README.md#2-changelog)
 
-### 2. Spenden
+### 3. Spenden
 
 Die Library ist für die nicht kommerzielle Nutzung kostenlos, Schenkungen als Unterstützung für den Autor werden hier akzeptiert:  
 

@@ -8,8 +8,9 @@
             "Manufacturer": "Hersteller",
             "Serial Number": "Seriennummer",
             "Some devices could not be determined. Please check the credentials.": "Einige Geräte konnten nicht ermittelt werden. Bitte überprüfen Sie die Zugangsdaten.",
+            "Ignore": "Ignorieren",
             "Please wait!": "Bitte warten!",
-            "Determine abilities of the devices:": "Ermittle die Fähigkeiten der Geräte:",
+            "Determine abilities of the devices:": "Fähigkeiten der Geräte werden ermittelt:",
             "(Wait for end of discovery)": "(Warte auf Ende der Suche)",
             "Background discovery of ONVIF devices started": "Die Hintergrundsuche von ONVIF-Geräten wurde gestartet",
             "Background discovery of ONVIF found %d devices": "Die Hintergrundsuche von ONVIF hat %d Geräte gefunden",
@@ -18,6 +19,7 @@
             "End of background discovery of ONVIF devices": "Ende der Hintergrundsuche von ONVIF-Geräten",
             "List of hosts:": "Liste der Hosts",
             "Error message": "Fehlermeldung",
+            "The combination of Docker and NAT is not supported because Docker does not support multicast.\r\nPlease run the container in the host network.": "Die Kombination von Docker und NAT wird nicht unterstützt, da Docker keine Unterstützung für Multicast besitzt.\r\nBitte den Container im Host-Netzwerk ausführen.",
             "This module is free for non-commercial use,\r\nDonations in support of the author are accepted here:": "Dieses Modul ist für die nicht kommerzielle Nutzung kostenlos,\r\nSchenkungen als Unterstützung für den Autor werden hier akzeptiert:"
         }
     }

@@ -287,11 +287,11 @@ class ONVIFImageGrabber extends ONVIFModuleBase
                     ]
                 ];
             }
-            $Form['actions'][] = [
+            array_splice($Form['actions'], 1, 0, [[
                 'type'   => 'ExpansionPanel',
                 'caption'=> 'Stream properties',
                 'items'  => $ExpansionPanelVideoItems
-            ];
+            ]]);
         }
         $this->SendDebug('FORM', json_encode($Form), 0);
         $this->SendDebug('FORM', json_last_error_msg(), 0);

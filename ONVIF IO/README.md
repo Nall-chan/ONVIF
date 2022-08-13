@@ -12,7 +12,7 @@ Stellt die Verbindung zu einem ONVIF-Gerät her.
 ## Inhaltsverzeichnis <!-- omit in toc -->
 
 - [1. Funktionsumfang](#1-funktionsumfang)
-- [2. Voraussetzungen](#2-vorraussetzungen)
+- [2. Voraussetzungen](#2-voraussetzungen)
 - [3. Software-Installation](#3-software-installation)
 - [4. Einrichten der Instanzen in IP-Symcon](#4-einrichten-der-instanzen-in-ip-symcon)
   - [Konfigurationsseite: Übersicht](#konfigurationsseite-übersicht)
@@ -34,12 +34,12 @@ Stellt die Verbindung zu einem ONVIF-Gerät her.
 
 ## 2. Voraussetzungen
 
-* IP-Symcon ab Version 6.0
+* IP-Symcon ab Version 6.1
 * Kameras oder Video-Encoder mit ONVIF Profil S Unterstützung.  
 
 ## 3. Software-Installation
 
-* Über den Module Store das ['ONVIF'-Modul](../README.md) installieren.
+* Dieses Modul ist Bestandteil der [ONVIF-Library](../README.md#3-software-installation).  
 
 ## 4. Einrichten der Instanzen in IP-Symcon
 
@@ -52,12 +52,13 @@ Stellt die Verbindung zu einem ONVIF-Gerät her.
 
 ![Config](imgs/Config2.png)  
 
-| Name     | Text         | Beschreibung                                                                  |
-| -------- | ------------ | ----------------------------------------------------------------------------- |
-| Open     | Aktiv        | Öffnet/Aktiviert die Verbindung zum Gerät.                                    |
-| Address  | Adresse      | URL zum ONVIF Device-Service (z.B. http://192.168.1.111/onvif/device_service) |
-| Username | Benutzername | Benutzername für die Anmeldung                                                |
-| Password | Passwort     | Passwort zum Benutzernamen                                                    |
+| Name        | Text                | Beschreibung                                                                  |
+| ----------- | ------------------- | ----------------------------------------------------------------------------- |
+| Open        | Aktiv               | Öffnet/Aktiviert die Verbindung zum Gerät.                                    |
+| Address     | Adresse             | URL zum ONVIF Device-Service (z.B. http://192.168.1.111/onvif/device_service) |
+| Username    | Benutzername        | Benutzername für die Anmeldung                                                |
+| Password    | Passwort            | Passwort zum Benutzernamen                                                    |
+| WebHookPort | Experteneinstellung | Port unter welchem IPS erreichbar ist (3777)                                  |
 
 ### Konfigurationsseite: Ereignisse möglich  
 
@@ -65,6 +66,11 @@ Stellt die Verbindung zu einem ONVIF-Gerät her.
 
 Der Aktions-Bereich zeigt aktuelle Informationen zur Verbindung an, sofern das Gerät ONVIF-Ereignisse unterstützt.  
 Es wird der `Ereignis-Hook`, auf welchen Symcon die Nachrichten des Endgerätes empfängt angezeigt. Ebenso wie auch die `Abonnementreferenz`, welche Symcon vom Gerät erhalten hat.  
+Die IP-Adresse des `Ereignis-Hook` wird automatisch ermittelt, je nachdem über welchen Adresse das Gerät erreichbar ist.  
+<span style="color:red">**Diese Erkennung funktioniert nicht bei NAT, da hier die externe Adresse Symcon nicht automatisch ermitteln kann.  
+Es müssen die [Spezialschalter](https://www.symcon.de/service/dokumentation/entwicklerbereich/spezialschalter/) `NATSupport` und `NATPublicIP` benutzt werden**</span>  
+
+<span style="color:red">**Wird der übliche Port (3777) von Symcon nicht benutzt (z.B. forwarding NAT) so kann hier der Port, unter welchen Symcon erreichbar ist, angepasst werden.**</span> 
 
 In der Tabelle wird eine Liste aller vom Gerät gemeldeten Ereignissen angezeigt, welche sich in Symcon nutzen lassen. Über das Feld `Benutzt` wird angezeigt ob das Ereignis in einer Instanz konfiguriert wurde. Und über das Zahnrad einer Zeile werden diese Instanzen tabellarisch angezeigt.  
 

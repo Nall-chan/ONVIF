@@ -12,7 +12,7 @@ Beschreibung des Moduls.
 ## Inhaltsverzeichnis <!-- omit in toc -->
 
 - [1. Funktionsumfang](#1-funktionsumfang)
-- [2. Voraussetzungen](#2-vorraussetzungen)
+- [2. Voraussetzungen](#2-voraussetzungen)
 - [3. Software-Installation](#3-software-installation)
 - [4. Einrichten der Instanzen in IP-Symcon](#4-einrichten-der-instanzen-in-ip-symcon)
   - [Beispiel 1: Keine Digital IOs](#beispiel-1-keine-digital-ios)
@@ -33,12 +33,12 @@ Beschreibung des Moduls.
 
 ## 2. Voraussetzungen
 
-* IP-Symcon ab Version 6.0
+* IP-Symcon ab Version 6.1
 * Kameras oder Video-Encoder mit ONVIF Profil S Unterstützung.  
-* 
+
 ## 3. Software-Installation
 
-* Über den Module Store das ['ONVIF'-Modul](../README.md) installieren.  
+* Dieses Modul ist Bestandteil der [ONVIF-Library](../README.md#3-software-installation).    
 
 ## 4. Einrichten der Instanzen in IP-Symcon
 
@@ -53,7 +53,7 @@ Beschreibung des Moduls.
 - ONVIF Digital Input ([Dokumentation](../ONVIF%20Digital%20Input/README.md))
 - ONVIF Digital Output ([Dokumentation](../ONVIF%20Digital%20Output/README.md))
 
-Eventuell benötigte ONVIF Events Instanzen ([Dokumentation](../ONVIF%20Events/README.md)) sind manuell einzurichten.  
+**Eventuell benötigte ONVIF Events Instanzen ([Dokumentation](../ONVIF%20Events/README.md)) sind manuell einzurichten.**  
 
 ### Beispiel 1: Keine Digital IOs   
 ![Config](imgs/Config1.png)  

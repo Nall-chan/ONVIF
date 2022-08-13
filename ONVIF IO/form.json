@@ -17,12 +17,28 @@
                 {
                     "name": "Username",
                     "type": "ValidationTextBox",
-                    "caption": "Username"
+                    "caption": "Username",
+                    "width": "250px"
                 },
                 {
                     "name": "Password",
                     "type": "PasswordTextBox",
-                    "caption": "Password"
+                    "caption": "Password",
+                    "width": "250px"
+                }
+            ]
+        },
+        {
+            "type": "ExpansionPanel",
+            "caption": "Expert settings",
+            "width": "500px",
+            "items": [
+                {
+                    "type": "NumberSpinner",
+                    "name": "WebHookPort",
+                    "caption": "Port of event hook",
+                    "minimum": 0,
+                    "maximum": 65535
                 }
             ]
         }
@@ -110,6 +126,17 @@
                     "width": "200px"
                 },
                 {
+                    "caption": "Open Instance",
+                    "name": "OpenReceiversInstance",
+                    "visible": false,
+                    "edit": {
+                        "type": "OpenObjectButton",
+                        "name": "OpenInstanceButton",
+                        "enabled": false
+                    },
+                    "objectID": 0
+                },
+                {
                     "caption": "Events are used by this instances:",
                     "name": "Receivers",
                     "visible": false,
@@ -126,17 +153,20 @@
                             {
                                 "caption": "Instance",
                                 "name": "instanceID",
-                                "width": "90px"
+                                "width": "90px",
+                                "onClick": "IPS_RequestAction($id, 'UpdateOpenObjectButton', $Receivers['instanceID']);"
                             },
                             {
                                 "caption": "Type",
                                 "name": "Type",
-                                "width": "150px"
+                                "width": "150px",
+                                "onClick": "IPS_RequestAction($id, 'UpdateOpenObjectButton', $Receivers['instanceID']);"
                             },
                             {
                                 "caption": "Name",
                                 "name": "Name",
-                                "width": "auto"
+                                "width": "auto",
+                                "onClick": "IPS_RequestAction($id, 'UpdateOpenObjectButton', $Receivers['instanceID']);"
                             }
                         ]
                     }

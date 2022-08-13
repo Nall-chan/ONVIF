@@ -2,19 +2,6 @@
 
 declare(strict_types=1);
 
-/**
- * ONVIF base class
- *
- *
- * @author Nickola Trupcheff <n.trupcheff@gmail.com>
- * @version 0.1
- */
-
-/**
- * The ONVIF class
- *
- * Contains some needed functions it is used by the other classes. Not to be used directly.
- */
 class ONVIF
 {
     public $wsdl;
@@ -22,15 +9,6 @@ class ONVIF
     public $client;
     protected $login;
 
-    /**
-     * If you have troubles authorizing try syncing the time with the camera...
-     * and crazy as it sounds - capitalizing the first letter of the username
-     *
-     * @param string $wsdl URL for the modified devicemgmt.wsdl WSDL included with the library
-     * @param string $service Camera ONVIF URL
-     * @param string $username Camera username
-     * @param string $password Camera password
-     */
     public function __construct($wsdl, $service, $username = null, $password = null, $Headers = [], $ts_offset = 0)
     {
         $this->wsdl = $wsdl;
@@ -71,38 +49,6 @@ class ONVIF
         $this->client->__setSoapHeaders($Headers);
         ini_set('default_socket_timeout', '5');
         return;
-    }
-
-    public function obj_dump($object, $level = 1)
-    {
-        foreach ($object as $okey => $oval) {
-            if (is_array($oval) || is_object($oval)) {
-                for ($i = 0; $i < $level * 3; $i++) {
-                    echo ' ';
-                }
-                echo $okey . "\n";
-                $this->obj_dump($oval, $level + 1);
-            } elseif (is_bool($oval)) {
-                for ($i = 0; $i < $level * 3; $i++) {
-                    echo ' ';
-                }
-                printf("%s: %s\n", $okey, $oval ? 'true' : 'false');
-            } else {
-                for ($i = 0; $i < $level * 3; $i++) {
-                    echo ' ';
-                }
-                printf("%s: %s\n", $okey, $oval);
-            }
-        }
-    }
-
-    public function response_dump($name, $response)
-    {
-        echo "================================================================================\n";
-        echo "$name\n";
-        echo "--------------------------------------------------------------------------------\n";
-        $this->obj_dump($response, 1);
-        echo "================================================================================\n";
     }
 
     protected function soapClientWSSecurityHeader($user, $password, $ts_offset = 0)

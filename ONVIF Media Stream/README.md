@@ -12,7 +12,7 @@ Konfiguriert ein IPS Medien-Objekt anhand der Geräte-Fähigkeiten.
 ## Inhaltsverzeichnis <!-- omit in toc -->
 
 - [1. Funktionsumfang](#1-funktionsumfang)
-- [2. Voraussetzungen](#2-vorraussetzungen)
+- [2. Voraussetzungen](#2-voraussetzungen)
 - [3. Software-Installation](#3-software-installation)
 - [4. Einrichten der Instanzen in IP-Symcon](#4-einrichten-der-instanzen-in-ip-symcon)
   - [Konfigurationsseite allgemein:](#konfigurationsseite-allgemein)
@@ -42,17 +42,19 @@ Konfiguriert ein IPS Medien-Objekt anhand der Geräte-Fähigkeiten.
 * Instanz für die einfache Integration eines Media-Stream-Objektes innerhalb von Symcon.  
 * Stellt PTZ/SNZ (Schwenken / Neigen / Zommen) Funktionen bereit.  
 * PTZ Funktionen für das WebFront.  
-* 
+* PTZ Funktionen als PHP-Befehle und Aktionen.  
+  
 ## 2. Voraussetzungen
 
-* IP-Symcon ab Version 6.0
+* IP-Symcon ab Version 6.1
 * Kameras oder Video-Encoder mit ONVIF Profil S Unterstützung.
-* Geräte müssen h264 Streams bereitstellen. MJPEG/JPEG/h265 wird von Symcon nicht über RTSP unterstützt!  
+* Geräte müssen h264 Streams bereitstellen.  
+  (MJPEG/JPEG/h265 wird von Symcon nicht über RTSP unterstützt!)  
 * PTZ Overlay wird offiziell nur für das WebFront unterstützt.  
-* 
+  
 ## 3. Software-Installation
 
-* Über den Module Store das ['ONVIF'-Modul](../README.md) installieren.
+* Dieses Modul ist Bestandteil der [ONVIF-Library](../README.md#3-software-installation).  
 
 ## 4. Einrichten der Instanzen in IP-Symcon
 
@@ -134,7 +136,7 @@ __Diese Funktionen sind nur verfügbar, wenn das Gerät PTZ-Eigenschaft und Szen
 Durch das Aktiveren der Statusvariable für Szenen, ist es möglich in dem Gerät abgespeicherte PTZ-Positionen bzw. Szenen über Symcon aufzurufen bzw. anzufahren.  
 Die Verfügbaren Szenen werden dabei in der Tabelle dargestellt und können mit der Auswahlbox bei `Aktiv` dem Variablenprofil dieser Statusvariable hinzugefügt oder entfernt werden.  
 
-_Wird `EnablePresetVariable` deaktiviert, so wird auch die dazugehörige Stausvariable mitsamt Profile gelöscht._  
+_Wird `EnablePresetVariable` deaktiviert, so wird auch die dazugehörige Statusvariable mitsamt Profile gelöscht._  
 
 ### Testbereich Stream Eigenschaften:  
 
@@ -274,7 +276,17 @@ Befehl zum Anfahren der Home-Position.
   
 ## 8. Aktionen
 
-//TODO
+__Grundsätzlich können alle bedienbaren Statusvariablen als Ziel einer [`Aktion`](https://www.symcon.de/service/dokumentation/konzepte/automationen/ablaufplaene/aktionen/) mit 'Auf Wert schalten' angesteuert werden, so das hier keine speziellen Aktionen benutzt werden müssen.__
+
+Dennoch gibt es diverse Aktionen für die 'ONVIF Media Stream' Instanz.  
+Wenn so eine Instanz als Ziel einer Aktion ausgewählt wurde, stehen folgende Aktionen zur Verfügung:  
+![Aktionen](imgs/Actions.png)  
+* Steuere Kamera auf Home-Position
+* Steuere Kamera auf Vorposition
+* Kamera nach oben/unten neigen
+* Kamera nach links/rechts schwenken
+* Kamera stoppen
+* Kamera heran/heraus zoomen
 
 ## 9. Anhang
 

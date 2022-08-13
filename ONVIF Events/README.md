@@ -12,12 +12,12 @@ Bildet verschiedene Ereignisse (Events) als Statusvariablen in Symcon ab.
 ## Inhaltsverzeichnis <!-- omit in toc -->
 
 - [1. Funktionsumfang](#1-funktionsumfang)
-- [2. Voraussetzungen](#2-vorraussetzungen)
+- [2. Voraussetzungen](#2-voraussetzungen)
 - [3. Software-Installation](#3-software-installation)
 - [4. Einrichten der Instanzen in IP-Symcon](#4-einrichten-der-instanzen-in-ip-symcon)
   - [Anlegen der Instanz:](#anlegen-der-instanz)
   - [Zuordnen zur IO-Instanz:](#zuordnen-zur-io-instanz)
-  - [Auswahl des Ereignis-Pfad :](#auswahl-des-ereignis-pfad-)
+  - [Auswahl des Ereignis-Pfad](#auswahl-des-ereignis-pfad)
 - [5. Statusvariablen](#5-statusvariablen)
   - [Beispiel 1: Ein einzelnes Ereignis](#beispiel-1-ein-einzelnes-ereignis)
   - [Beispiel 2: Ein einzelnes Ereignis, mehrere Quellen](#beispiel-2-ein-einzelnes-ereignis-mehrere-quellen)
@@ -38,13 +38,13 @@ Bildet verschiedene Ereignisse (Events) als Statusvariablen in Symcon ab.
 
 ## 2. Voraussetzungen
 
-* IP-Symcon ab Version 6.0  
+* IP-Symcon ab Version 6.1  
 * Kameras oder Video-Encoder mit ONVIF Profil S Unterstützung.
 * Geräte müssen ONVIF-Events unterstützen.  
 
 ## 3. Software-Installation
 
-* Über den Module Store das ['ONVIF'-Modul](../README.md) installieren.  
+* Dieses Modul ist Bestandteil der [ONVIF-Library](../README.md#3-software-installation).    
 
 ## 4. Einrichten der Instanzen in IP-Symcon
 
@@ -53,7 +53,7 @@ Bildet verschiedene Ereignisse (Events) als Statusvariablen in Symcon ab.
  Unter 'Instanz hinzufügen' ist das 'ONVIF Events'-Modul unter dem Hersteller 'ONVIF' aufgeführt.
 ![Module](../imgs/Module.png)  
 
-Diese Instanzen können nicht über die dazugehörige Instanz des [Configurator-Moduls](../ONVIF%20Configurator/README.md) von diesem Geräte angelegt werden und müssen immer manuell erzeugt hinzugefügt werden.  
+Diese Instanzen können __nicht__ über die dazugehörige Instanz des [Configurator-Moduls](../ONVIF%20Configurator/README.md) von diesem Geräte angelegt werden und müssen immer manuell erzeugt hinzugefügt werden.  
 
 ### Zuordnen zur IO-Instanz:    
 
@@ -61,7 +61,7 @@ Diese Instanzen können nicht über die dazugehörige Instanz des [Configurator-
 Nach dem erzeugen der Instanz, muss zuerst über die Schaltfläche `Gateway ändern` die gewünschte IO-Instanz ausgewählt werden, von welcher Ereignisse empfangen werden sollen.  
 ![Config](imgs/Config2.png)  
 
-### Auswahl des Ereignis-Pfad :  
+### Auswahl des Ereignis-Pfad  
 
 Beispiel von Ereignissen:  
 

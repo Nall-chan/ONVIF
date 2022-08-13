@@ -179,7 +179,7 @@ class ONVIFDigitalOutput extends ONVIFModuleBase
             }
             $Actions[] = $Expansion;
         }
-        $Form['actions'] = $Actions;
+        $Form['actions'] = array_merge($Actions, $Form['actions']);
         $this->SendDebug('FORM', json_encode($Form), 0);
         $this->SendDebug('FORM', json_last_error_msg(), 0);
 

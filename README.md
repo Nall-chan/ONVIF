@@ -12,9 +12,12 @@ Einbinden von ONVIF kompatiblen Geräten in IPS.
 
 ## Inhaltsverzeichnis <!-- omit in toc -->
 
-- [1. Vorbemerkungen zur Library](#1-vorbemerkungen-zur-library)
-- [2. Vorbemerkungen zur Integration von Geräten](#2-vorbemerkungen-zur-integration-von-geräten)
-- [3. Hinweise zum Symcon-System / Host](#3-hinweise-zum-symcon-system--host)
+- [1. Vorbemerkungen](#1-vorbemerkungen)
+	- [Zur Library](#zur-library)
+	- [Zur Integration von Geräten](#zur-integration-von-geräten)
+	- [Hinweise zum Symcon-System / Host](#hinweise-zum-symcon-system--host)
+- [2. Voraussetzungen](#2-voraussetzungen)
+- [3. Software-Installation](#3-software-installation)
 - [4. Enthaltende Module](#4-enthaltende-module)
 - [5. Anhang](#5-anhang)
 	- [1. GUID der Module](#1-guid-der-module)
@@ -23,14 +26,15 @@ Einbinden von ONVIF kompatiblen Geräten in IPS.
 - [6. Lizenz](#6-lizenz)
 
 ----------
-## 1. Vorbemerkungen zur Library
+## 1. Vorbemerkungen
 
+### Zur Library
 Diese Library wurde nicht dazu entwickelt komplett den Profil S Spezifikationen zu entsprechen oder deren gesamten Funktionsumfang abzubilden.  
 Vielmehr liegt der Schwerpunkt auf eine einfache und unkomplizierte Integration bestimmter Bestandteile (LiveStream, Steuerung) und Funktionen (Events, Digital Ein-/Ausgänge) in Symcon.  
 Dadurch ist es auch möglich Geräte in Symcon einzubinden welche ihrerseits die Spezifikationen nicht vollständig oder nicht korrekt umsetzen.  
 
 ----------
-## 2. Vorbemerkungen zur Integration von Geräten  
+### Zur Integration von Geräten  
 
 Es werden Instanzen zum auffinden (Discovery) und einrichten (Konfigurator) von Geräten in Symcon bereitgestellt.  
 Diese Instanzen werden nur korrekt funktionieren, wenn die betreffenden Geräte entsprechend Konfiguriert wurden.  
@@ -50,7 +54,7 @@ Es wird dringend empfohlen vor der Integration in IPS folgende Parameter in den 
 - h26x-Profile bzw. Media-Profile für ONVIF  
 
 ----------
-## 3. Hinweise zum Symcon-System / Host  
+### Hinweise zum Symcon-System / Host  
 
 Die Maximale Anzahl der gleichzeitig verwendbaren RTSP-Streams hängt von der Symcon Lizenz ab. Bitte hierzu die [Funktionsübersicht der Editionen](https://www.symcon.de/produkt/editionen/) beachten.  
 
@@ -58,36 +62,50 @@ Um Ereignisse der Geräte in Symcon zu verarbeiten wird ein Webhook pro [IO-Modu
 Hier wird aktuell nur der interne WebServer von Symcon auf Port 3777 unterstützt.  
 Die IP-Adresse auf welchem Symcon die Daten empfängt wird automatisch ermittelt.  
 
-Bei System mit aktiven NAT-Support funktioniert die automatische Erkennung der eigenen IP-Adresse nicht. Hier wird die PublicIP aus den Symcon-Spezialschaltern benutzt.  
-Auch bei Systemen mit aktiven NAT-Support wird extern nur der Port 3777 unterstützt, und muss somit korrekt weitergeleitet werden.  
+Bei System mit aktiven NAT-Support funktioniert die automatische Erkennung der eigenen IP-Adresse nicht. __Hier wird die NATPublicIP aus den [Symcon-Spezialschaltern](https://www.symcon.de/service/dokumentation/entwicklerbereich/spezialschalter/) benutzt.__  
+<span style="color:red">**Auch bei Systemen mit aktiven NAT-Support wird extern nur der Port 3777 beim anlegen von IO-Instanzen unterstützt, und muss somit anschließend in den IO-Instanzen unter `Experteneinstellungen` korrekt auf den externen Port geändert werden.**</span>  
+  
 Damit Geräte über das [Discovery-Modul](ONVIF%20Discovery/README.md) gefunden werden können, müssen bei NAT Systemen Multicast-Pakete korrekt weitergeleitet werden.  
-Für das Discovery werden Pakete über die Multicast-Adresse `239.255.255.250` auf Port `3702` gesendet und empfangen.  
+<span style="color:red">**Discovery funktioniert nicht in einem Docker Container welcher per NAT angebunden ist. Diese Konstellation wird aufgrund der fehlenden Multicast Fähigkeiten von Docker nicht unterstützt.**</span>  
+Für das Discovery werden Pakete über die Multicast-Adresse `239.255.255.250` auf Port `3702` gesendet und auf UDP Port `3703` empfangen.  
 
 ----------
-## 4. Enthaltende Module
+## 2. Voraussetzungen
 
-- __ONVIF Discovery__ ([Dokumentation](ONVIF%20Discovery/README.md))
-	Erkennt ONVIF kompatible Geräte innerhalb des lokalen LAN.
+* IP-Symcon ab Version 6.1
+* Kameras oder Video-Encoder mit ONVIF Profil S Unterstützung.
 
-- __ONVIF Configurator__ ([Dokumentation](ONVIF%20Configurator/README.md))
+## 3. Software-Installation
+  
+  Über den 'Module-Store' in IPS das Modul 'ONVIF' hinzufügen.  
+   **Bei kommerzieller Nutzung (z.B. als Errichter oder Integrator) wenden Sie sich bitte an den Autor.**  
+![Module-Store](imgs/install.png) 
+
+  ## 4. Enthaltende Module
+
+- __ONVIF Discovery__ ([Dokumentation](ONVIF%20Discovery/README.md))  
+	Erkennt ONVIF kompatible Geräte innerhalb des lokalen LAN.  
+	<span style="color:red">**Funktioniert nicht in einem Docker Container welcher per NAT angebunden ist**</span>  
+ 
+- __ONVIF Configurator__ ([Dokumentation](ONVIF%20Configurator/README.md))  
 	Unterstützt beim Einrichten der verschiedenen Instanzen für ein ONVIF-Gerät.
 
-- __ONVIF IO__ ([Dokumentation](ONVIF%20IO/README.md))
+- __ONVIF IO__ ([Dokumentation](ONVIF%20IO/README.md))  
 	Stellt die Verbindung zu einem ONVIF-Gerät her.  
 
-- __ONVIF Media Stream__ ([Dokumentation](ONVIF%20Media%20Stream/README.md))
+- __ONVIF Media Stream__ ([Dokumentation](ONVIF%20Media%20Stream/README.md))  
 	Konfiguriert ein IPS Medien-Objekt (RTSP-Stream) anhand der Geräte-Fähigkeiten.  
 
-- __ONVIF Image Grabber__ ([Dokumentation](ONVIF%20Image%20Grabber/README.md))
+- __ONVIF Image Grabber__ ([Dokumentation](ONVIF%20Image%20Grabber/README.md))  
 	Lädt Snapshots (Standbilder) von dem Gerät und legt es in einem Media-Objekt ab.  
 
-- __ONVIF Digital Input__ ([Dokumentation](ONVIF%20Digital%20Input/README.md))
+- __ONVIF Digital Input__ ([Dokumentation](ONVIF%20Digital%20Input/README.md))  
 	Bildet die Digitalen Eingänge in Symcon ab.  
 
-- __ONVIF Digital Output__ ([Dokumentation](ONVIF%20Digital%20Output/README.md))
+- __ONVIF Digital Output__ ([Dokumentation](ONVIF%20Digital%20Output/README.md))  
 	Bildet Digitale Ausgänge (Relays) in Symcon ab.  
 
-- __ONVIF Events__ ([Dokumentation](ONVIF%20Events/README.md))
+- __ONVIF Events__ ([Dokumentation](ONVIF%20Events/README.md))  
 	Bildet empfangbare ONVIF-Ereignisse in Symcon ab.  
 
 
@@ -111,6 +129,12 @@ Für das Discovery werden Pakete über die Multicast-Adresse `239.255.255.250` a
 ----------
 ### 2. Changelog
 
+Version 1.20:  
+- Fehlermeldung in der Discovery Instanz bei ungültiger Anmeldung wird durch bestätigen mit 'Ignorieren' nicht mehr angezeigt, bis die Anmeldedaten geändert wurden.  
+- Es wird eine Meldung angezeigt, wenn die Discovery Instanz nicht funktioniert (Docker + NAT).  
+- Experteneinstellungen in den IO-Instanzen ermöglichen das ändern des Port vom Ereignis-Hook.  
+- Aktion für Digital Output war defekt.
+  
 Version 1.10:  
 - Beta Release für Symcon 6.0  
 - Aktionen für Kamerasteuerung, Snapshot des Image Grabber und für Ansteuerung der Ausgänge.  

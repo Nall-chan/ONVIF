@@ -16,12 +16,9 @@
         "usort($Form['options'], function($a,$b){",
         "   return strtolower($a['caption'])>strtolower($b['caption']);",
         "});",
-        "return [$Form];",
-        {
-            "type": "CheckBox",
-            "name": "ACTIVE",
-            "caption": "Output active?"
-        }
+        "$Form = [$Form];",
+        "$Form[]=['type' => 'CheckBox', 'name' => 'ACTIVE', 'caption' => 'Output active?'];",
+        "return $Form;"
     ],
     "action": "ONVIF_SetRelayOutputState($_IPS['TARGET'],$_IPS['IDENT'],$_IPS['ACTIVE']);",
     "readable": "echo 'ONVIF_SetRelayOutputState('.$_IPS['TARGET'].',\\''.$_IPS['IDENT'].'\\','.($_IPS['ACTIVE'] ? 'false' : 'true').');';",

@@ -7,10 +7,11 @@ eval('declare(strict_types=1);namespace ONVIFIO {?>' . file_get_contents(__DIR__
 eval('declare(strict_types=1);namespace ONVIFIO {?>' . file_get_contents(__DIR__ . '/../libs/helper/AttributeArrayHelper.php') . '}');
 eval('declare(strict_types=1);namespace ONVIFIO {?>' . file_get_contents(__DIR__ . '/../libs/helper/WebhookHelper.php') . '}');
 eval('declare(strict_types=1);namespace ONVIFIO {?>' . file_get_contents(__DIR__ . '/../libs/helper/SemaphoreHelper.php') . '}');
-require_once dirname(__DIR__) . '/libs/onvif-client-php/inc/ONVIF.inc.php';
+require_once dirname(__DIR__) . '/libs/ONVIF.inc.php';
 
 /**
  * @property string $Host
+ * @property integer $MyPort
  * @property bool isSubscribed
  */
 class ONVIFIO extends IPSModule
@@ -30,6 +31,7 @@ class ONVIFIO extends IPSModule
         $this->RegisterPropertyString('Address', '');
         $this->RegisterPropertyString('Username', '');
         $this->RegisterPropertyString('Password', '');
+        $this->RegisterPropertyInteger('WebHookPort', 3777);
         $this->RegisterAttributeArray('VideoSources', []);
         $this->RegisterAttributeArray('VideoSourcesJPEG', []);
         $this->RegisterAttributeInteger('Timestamp_Offset', 0);
@@ -43,6 +45,7 @@ class ONVIFIO extends IPSModule
         $this->RegisterAttributeBoolean('HasOutput', false);
         $this->RegisterTimer('RenewSubscription', 0, 'IPS_RequestAction(' . $this->InstanceID . ',"Renew",true);');
         $this->Host = '';
+        $this->MyPort = 3777;
         $this->isSubscribed = false;
         if (IPS_GetKernelRunlevel() == KR_READY) {
             $this->RegisterMessage($this->InstanceID, FM_CHILDREMOVED);
@@ -115,13 +118,16 @@ class ONVIFIO extends IPSModule
             $this->LogMessage($this->Translate('Address is invalid'), KL_ERROR);
             return;
         }
+        $MyPort = $this->ReadPropertyInteger('WebHookPort');
         $Host = $Url['scheme'] . '://' . $Url['host'] . $Url['port'];
         $ReloadCapabilities = ($this->Host != $Host);
+        $ReloadCapabilities = $ReloadCapabilities || ($this->MyPort != $MyPort);
         $ReloadCapabilities = $ReloadCapabilities || ($this->GetStatus() == 202);
         $ReloadCapabilities = $ReloadCapabilities || ($this->ReadAttributeString('ConsumerAddress') == '');
         $this->SendDebug('ReloadCapabilities', $ReloadCapabilities, 0);
         $this->SetSummary($Host);
         $this->Host = $Host;
+        $this->MyPort = $MyPort;
         $this->GetSystemDateAndTime(); // können nicht alle, also nicht weiter beachten. Wird aber für login benötigt, damit Zeitdifferenzen berücksichtigt werden.
         if (!$this->GetDeviceInformation()) { // not reachable
             $this->UpdateFormField('EventHook', 'caption', $this->ReadAttributeString('ConsumerAddress'));
@@ -292,6 +298,12 @@ class ONVIFIO extends IPSModule
             $this->ReloadForm();
             return;
         }
+        if ($Ident == 'UpdateOpenObjectButton') {
+            $this->UpdateFormField('OpenReceiversInstance', 'objectID', $Value);
+            $this->UpdateFormField('OpenReceiversInstance', 'enabled', true);
+            $this->UpdateFormField('OpenReceiversInstance', 'caption', sprintf($this->Translate('Open instance (%d): %s'), $Value, IPS_GetName($Value)));
+            return;
+        }
         if ($Ident == 'KernelReady') {
             return $this->KernelReady();
         }
@@ -339,9 +351,16 @@ class ONVIFIO extends IPSModule
 
     protected function GetConsumerAddress()
     {
+        $MyPort = (string) $this->ReadPropertyInteger('WebHookPort');
         if (IPS_GetOption('NATSupport')) {
             $ip = IPS_GetOption('NATPublicIP');
-            $Url = 'http://' . $ip . ':3777/hook/ONVIFEvents/IO/' . $this->InstanceID;
+            if ($ip == '') {
+                $this->SendDebug('NAT enabled ConsumerAddress', 'Invalid', 0);
+                $this->UpdateFormField('EventHook', 'caption', $this->Translate('NATPublicIP is missing in special switches!'));
+                $this->WriteAttributeString('ConsumerAddress', 'Invalid');
+                return false;
+            }
+            $Url = 'http://' . $ip . ':' . $MyPort . '/hook/ONVIFEvents/IO/' . $this->InstanceID;
             $this->SendDebug('NAT enabled ConsumerAddress', $Url, 0);
         } else {
             $sock = socket_create(AF_INET, SOCK_STREAM, SOL_TCP);
@@ -358,7 +377,7 @@ class ONVIFIO extends IPSModule
                 $this->WriteAttributeString('ConsumerAddress', 'Invalid');
                 return false;
             }
-            $Url = 'http://' . $ip . ':3777/hook/ONVIFEvents/IO/' . $this->InstanceID;
+            $Url = 'http://' . $ip . ':' . $MyPort . '/hook/ONVIFEvents/IO/' . $this->InstanceID;
             $this->SendDebug('ConsumerAddress', $Url, 0);
         }
         $this->UpdateFormField('EventHook', 'caption', $Url);
@@ -760,7 +779,7 @@ class ONVIFIO extends IPSModule
         $this->SendDebug('Send wsdl', $wsdl, 0);
         $this->SendDebug('Send Function', $Function, 0);
         $this->SendDebug('Send Params', $Params, 0);
-        $wsdl = dirname(__DIR__) . DIRECTORY_SEPARATOR . 'libs' . DIRECTORY_SEPARATOR . 'onvif-client-php' . DIRECTORY_SEPARATOR . 'WSDL' . DIRECTORY_SEPARATOR . $wsdl;
+        $wsdl = dirname(__DIR__) . DIRECTORY_SEPARATOR . 'libs' . DIRECTORY_SEPARATOR . 'WSDL' . DIRECTORY_SEPARATOR . $wsdl;
         if ($UseLogin) {
             $ONVIFClient = new ONVIF($wsdl, $URI, $this->ReadPropertyString('Username'), $this->ReadPropertyString('Password'), $Header, $this->ReadAttributeInteger('Timestamp_Offset'));
         } else {

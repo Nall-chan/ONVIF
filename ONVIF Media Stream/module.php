@@ -557,7 +557,7 @@ class ONVIFMediaStream extends ONVIFModuleBase
                     'type'=> 'TestCenter'
                 ]]
             ];
-            $Form['actions'] = $Actions;
+            $Form['actions'] = array_merge($Actions, $Form['actions']);
         }
         $Form['elements'][4]['popup']['items'][1]['visible'] = $this->ReadPropertyBoolean('EnablePresetVariable');
         $PresetProfile = json_decode($this->ReadPropertyString('PresetProfile'), true);

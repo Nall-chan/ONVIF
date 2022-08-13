@@ -30,13 +30,13 @@ Bildet die Digitalen Eingänge in Symcon ab.
 
 ## 2. Voraussetzungen
 
-* IP-Symcon ab Version 6.0
+* IP-Symcon ab Version 6.1
 * Kameras oder Video-Encoder mit ONVIF Profil S Unterstützung.
 * Geräte müssen über mindestens einen Digitalen Eingang verfügen.  
 
 ## 3. Software-Installation
 
-* Über den Module Store das ['ONVIF'-Modul](../README.md) installieren.
+* Dieses Modul ist Bestandteil der [ONVIF-Library](../README.md#3-software-installation).  
 
 ## 4. Einrichten der Instanzen in IP-Symcon
 

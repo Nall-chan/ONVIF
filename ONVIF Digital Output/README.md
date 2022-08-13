@@ -12,7 +12,7 @@ Bildet Digitale Ausgänge (Relays) in Symcon ab.
 ## Inhaltsverzeichnis  <!-- omit in toc -->  
 
 - [1. Funktionsumfang](#1-funktionsumfang)
-- [2. Voraussetzungen](#2-vorraussetzungen)
+- [2. Voraussetzungen](#2-voraussetzungen)
 - [3. Software-Installation](#3-software-installation)
 - [4. Einrichten der Instanzen in IP-Symcon](#4-einrichten-der-instanzen-in-ip-symcon)
 - [5. Statusvariablen](#5-statusvariablen)
@@ -31,7 +31,7 @@ Bildet Digitale Ausgänge (Relays) in Symcon ab.
 
 ## 2. Voraussetzungen
 
-* IP-Symcon ab Version 6.0
+* IP-Symcon ab Version 6.1
 * Kameras oder Video-Encoder mit ONVIF Profil S Unterstützung.
 * Geräte müssen über mindestens einen Digitalen Ausgang (bzw. Relais) verfügen.  
 
@@ -86,7 +86,12 @@ Schalte Ausgang 1 an.
 
 ## 8. Aktionen
 
-//TODO
+__Grundsätzlich können alle bedienbaren Statusvariablen als Ziel einer [`Aktion`](https://www.symcon.de/service/dokumentation/konzepte/automationen/ablaufplaene/aktionen/) mit 'Auf Wert schalten' angesteuert werden, so das hier keine speziellen Aktionen benutzt werden müssen.__
+
+Dennoch gibt es eine Aktion für die 'ONVIF Digital Output' Instanz.  
+Wenn so eine Instanz als Ziel einer Aktion ausgewählt wurde, steht folgende Aktion zur Verfügung:  
+![Aktionen](imgs/Actions.png)  
+* Aktivieren oder deaktivieren eines digitalen Ausgang  
 
 ## 9. Anhang
 
