@@ -3,7 +3,6 @@
     "caption": "Update image from camera",
     "form": [],
     "action": "ONVIF_UpdateImage($_IPS['TARGET']);",
-    "readable": "echo 'ONVIF_UpdateImage('.$_IPS['TARGET'].');';",
     "category": "target",
     "restrictions": {
         "objectType": [

@@ -21,7 +21,6 @@
         "return $Form;"
     ],
     "action": "ONVIF_SetRelayOutputState($_IPS['TARGET'],$_IPS['IDENT'],$_IPS['ACTIVE']);",
-    "readable": "echo 'ONVIF_SetRelayOutputState('.$_IPS['TARGET'].',\\''.$_IPS['IDENT'].'\\','.($_IPS['ACTIVE'] ? 'false' : 'true').');';",
     "category": "target",
     "restrictions": {
         "objectType": [

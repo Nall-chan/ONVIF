@@ -27,7 +27,6 @@
         }
     ],
     "action": "ONVIF_ZoomFarSpeedTime($_IPS['TARGET'],$_IPS['SPEED'],$_IPS['TIME']);",
-    "readable": "echo 'ONVIF_ZoomFarSpeedTime('.$_IPS['TARGET'].','.$_IPS['SPEED'].','.$_IPS['TIME'].');';",
     "category": "target",
     "restrictions": {
         "objectType": [

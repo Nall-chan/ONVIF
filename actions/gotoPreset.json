@@ -10,7 +10,6 @@
         }
     ],
     "action": "ONVIF_GotoPreset($_IPS['TARGET'],$_IPS['SCENE']);",
-    "readable": "echo 'ONVIF_GotoPreset('.$_IPS['TARGET'].','.$_IPS['SCENE'].');';",
     "category": "target",
     "restrictions": {
         "objectType": [

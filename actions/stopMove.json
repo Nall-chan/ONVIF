@@ -3,7 +3,6 @@
     "caption": "Stop camera",
     "form": [],
     "action": "ONVIF_MoveStop($_IPS['TARGET']);",
-    "readable": "echo 'ONVIF_MoveStop('.$_IPS['TARGET'].');';",
     "category": "target",
     "restrictions": {
         "objectType": [

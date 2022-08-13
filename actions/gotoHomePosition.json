@@ -3,7 +3,6 @@
     "caption": "Set camera to home position",
     "form": [],
     "action": "ONVIF_GotoPresetHomePosition($_IPS['TARGET']);",
-    "readable": "echo 'ONVIF_GotoPresetHomePosition('.$_IPS['TARGET'].');';",
     "category": "target",
     "restrictions": {
         "objectType": [

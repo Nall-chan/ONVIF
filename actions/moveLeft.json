@@ -27,7 +27,6 @@
         }
     ],
     "action": "ONVIF_MoveLeftSpeedTime($_IPS['TARGET'],$_IPS['SPEED'],$_IPS['TIME']);",
-    "readable": "echo 'ONVIF_MoveLeftSpeedTime('.$_IPS['TARGET'].','.$_IPS['SPEED'].','.$_IPS['TIME'].');';",
     "category": "target",
     "restrictions": {
         "objectType": [
