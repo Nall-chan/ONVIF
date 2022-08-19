@@ -221,8 +221,12 @@ class ONVIFDiscovery extends IPSModule
         $discoveryPort = self::WS_DISCOVERY_MULTICAST_PORT;
         $discoveryList = [];
         $sock = socket_create(AF_INET, SOCK_DGRAM, SOL_UDP);
-        socket_set_option($sock, SOL_SOCKET, SO_REUSEADDR, 1);
+        if (!$sock) {
+            return [];
+        }
         socket_set_option($sock, SOL_SOCKET, SO_RCVTIMEO, ['sec' => 0, 'usec' => 100000]);
+        socket_set_option($sock, SOL_SOCKET, SO_REUSEADDR, 1);
+        socket_set_option($sock, IPPROTO_IP, IP_MULTICAST_TTL, 4);
         socket_set_option($sock, SOL_SOCKET, SO_BROADCAST, 1);
         socket_bind($sock, '0', 3703);
         $this->SendDebug('Start Discovery', '', 0);

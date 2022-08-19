@@ -59,13 +59,15 @@ Es wird dringend empfohlen vor der Integration in IPS folgende Parameter in den 
 Die Maximale Anzahl der gleichzeitig verwendbaren RTSP-Streams hängt von der Symcon Lizenz ab. Bitte hierzu die [Funktionsübersicht der Editionen](https://www.symcon.de/produkt/editionen/) beachten.  
 
 Um Ereignisse der Geräte in Symcon zu verarbeiten wird ein Webhook pro [IO-Modul](ONVIF%20IO/README.md) erzeugt.  
-Hier wird aktuell nur der interne WebServer von Symcon auf Port 3777 unterstützt.  
-Die IP-Adresse auf welchem Symcon die Daten empfängt wird automatisch ermittelt.  
+Hier wird beim anlegen der Instanz automatisch nur der interne WebServer von Symcon auf Port 3777 eingetragen.
+Die IP-Adresse auf welchem Symcon die Daten empfängt wird automatisch ermittelt.
 
-Bei System mit aktiven NAT-Support funktioniert die automatische Erkennung der eigenen IP-Adresse nicht. __Hier wird die NATPublicIP aus den [Symcon-Spezialschaltern](https://www.symcon.de/service/dokumentation/entwicklerbereich/spezialschalter/) benutzt.__  
-<span style="color:red">**Auch bei Systemen mit aktiven NAT-Support wird extern nur der Port 3777 beim anlegen von IO-Instanzen unterstützt, und muss somit anschließend in den IO-Instanzen unter `Experteneinstellungen` korrekt auf den externen Port geändert werden.**</span>  
+Bei System mit aktiven NAT-Support funktioniert die automatische Erkennung der eigenen IP-Adresse nicht. __Hier wird automatisch die NATPublicIP aus den [Symcon-Spezialschaltern](https://www.symcon.de/service/dokumentation/entwicklerbereich/spezialschalter/) benutzt.__  
+<span style="color:red">**Auch bei Systemen mit aktiven NAT-Support wird extern automatisch nur der Port 3777 beim anlegen von IO-Instanzen unterstützt.**</span>  
   
-Damit Geräte über das [Discovery-Modul](ONVIF%20Discovery/README.md) gefunden werden können, müssen bei NAT Systemen Multicast-Pakete korrekt weitergeleitet werden.  
+Sollte es nötig sein, so können bei Bedarf die eigene IP und der Port, sowie die Verwendung von https,  in den IO-Instanzen unter `Experteneinstellungen` geändert und fixiert werden.
+
+Damit Geräte über das [Discovery-Modul](ONVIF%20Discovery/README.md) gefunden werden können, müssen bei in gerouteten Netzen und bei NAT Systemen Multicast-Pakete korrekt weitergeleitet werden.  
 <span style="color:red">**Discovery funktioniert nicht in einem Docker Container welcher per NAT angebunden ist. Diese Konstellation wird aufgrund der fehlenden Multicast Fähigkeiten von Docker nicht unterstützt.**</span>  
 Für das Discovery werden Pakete über die Multicast-Adresse `239.255.255.250` auf Port `3702` gesendet und auf UDP Port `3703` empfangen.  
 
@@ -132,7 +134,7 @@ Für das Discovery werden Pakete über die Multicast-Adresse `239.255.255.250` a
 Version 1.20:  
 - Fehlermeldung in der Discovery Instanz bei ungültiger Anmeldung wird durch bestätigen mit 'Ignorieren' nicht mehr angezeigt, bis die Anmeldedaten geändert wurden.  
 - Es wird eine Meldung angezeigt, wenn die Discovery Instanz nicht funktioniert (Docker + NAT).  
-- Experteneinstellungen in den IO-Instanzen ermöglichen das ändern des Port vom Ereignis-Hook.  
+- Experteneinstellungen in den IO-Instanzen ermöglichen das umstellen auf http/https und ändern der IP und Port vom Ereignis-Hook.  
 - Aktion für Digital Output war defekt.
   
 Version 1.10:  

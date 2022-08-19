@@ -11,7 +11,9 @@ require_once dirname(__DIR__) . '/libs/ONVIF.inc.php';
 
 /**
  * @property string $Host
+ * @property string $MyIP
  * @property integer $MyPort
+ * @property bool $MyHTTPS
  * @property bool isSubscribed
  */
 class ONVIFIO extends IPSModule
@@ -31,12 +33,13 @@ class ONVIFIO extends IPSModule
         $this->RegisterPropertyString('Address', '');
         $this->RegisterPropertyString('Username', '');
         $this->RegisterPropertyString('Password', '');
+        $this->RegisterPropertyString('WebHookIP', '');
+        $this->RegisterPropertyBoolean('WebHookHTTPS', false);
         $this->RegisterPropertyInteger('WebHookPort', 3777);
         $this->RegisterAttributeArray('VideoSources', []);
         $this->RegisterAttributeArray('VideoSourcesJPEG', []);
         $this->RegisterAttributeInteger('Timestamp_Offset', 0);
         $this->RegisterAttributeArray('XAddr', []);
-
         $this->RegisterAttributeArray('EventProperties', []);
         $this->RegisterAttributeString('ConsumerAddress', '');
         $this->RegisterAttributeString('SubscriptionReference', '');
@@ -45,7 +48,9 @@ class ONVIFIO extends IPSModule
         $this->RegisterAttributeBoolean('HasOutput', false);
         $this->RegisterTimer('RenewSubscription', 0, 'IPS_RequestAction(' . $this->InstanceID . ',"Renew",true);');
         $this->Host = '';
+        $this->MyIP = '';
         $this->MyPort = 3777;
+        $this->MyHTTPS = false;
         $this->isSubscribed = false;
         if (IPS_GetKernelRunlevel() == KR_READY) {
             $this->RegisterMessage($this->InstanceID, FM_CHILDREMOVED);
@@ -118,16 +123,22 @@ class ONVIFIO extends IPSModule
             $this->LogMessage($this->Translate('Address is invalid'), KL_ERROR);
             return;
         }
+        $MyIP = $this->ReadPropertyString('WebHookIP');
         $MyPort = $this->ReadPropertyInteger('WebHookPort');
+        $MyHTTPS = $this->ReadPropertyBoolean('WebHookHTTPS');
         $Host = $Url['scheme'] . '://' . $Url['host'] . $Url['port'];
         $ReloadCapabilities = ($this->Host != $Host);
+        $ReloadCapabilities = $ReloadCapabilities || ($this->MyIP != $MyIP);
         $ReloadCapabilities = $ReloadCapabilities || ($this->MyPort != $MyPort);
+        $ReloadCapabilities = $ReloadCapabilities || ($this->MyHTTPS != $MyHTTPS);
         $ReloadCapabilities = $ReloadCapabilities || ($this->GetStatus() == 202);
         $ReloadCapabilities = $ReloadCapabilities || ($this->ReadAttributeString('ConsumerAddress') == '');
         $this->SendDebug('ReloadCapabilities', $ReloadCapabilities, 0);
         $this->SetSummary($Host);
         $this->Host = $Host;
+        $this->MyIP = $MyIP;
         $this->MyPort = $MyPort;
+        $this->MyHTTPS = $MyHTTPS;
         $this->GetSystemDateAndTime(); // können nicht alle, also nicht weiter beachten. Wird aber für login benötigt, damit Zeitdifferenzen berücksichtigt werden.
         if (!$this->GetDeviceInformation()) { // not reachable
             $this->UpdateFormField('EventHook', 'caption', $this->ReadAttributeString('ConsumerAddress'));
@@ -351,35 +362,41 @@ class ONVIFIO extends IPSModule
 
     protected function GetConsumerAddress()
     {
-        $MyPort = (string) $this->ReadPropertyInteger('WebHookPort');
         if (IPS_GetOption('NATSupport')) {
             $ip = IPS_GetOption('NATPublicIP');
             if ($ip == '') {
-                $this->SendDebug('NAT enabled ConsumerAddress', 'Invalid', 0);
-                $this->UpdateFormField('EventHook', 'caption', $this->Translate('NATPublicIP is missing in special switches!'));
-                $this->WriteAttributeString('ConsumerAddress', 'Invalid');
-                return false;
+                $ip = $this->MyIP;
+                if ($ip == '') {
+                    $this->SendDebug('NAT enabled ConsumerAddress', 'Invalid', 0);
+                    $this->UpdateFormField('EventHook', 'caption', $this->Translate('NATPublicIP is missing in special switches!'));
+                    $this->WriteAttributeString('ConsumerAddress', 'Invalid');
+                    $this->ShowLastError('Error', $this->Translate('NAT support is active, but no public address is set.'));
+                    return false;
+                }
             }
-            $Url = 'http://' . $ip . ':' . $MyPort . '/hook/ONVIFEvents/IO/' . $this->InstanceID;
-            $this->SendDebug('NAT enabled ConsumerAddress', $Url, 0);
+            $Debug = 'NAT enabled ConsumerAddress';
         } else {
-            $sock = socket_create(AF_INET, SOCK_STREAM, SOL_TCP);
-            socket_bind($sock, '0.0.0.0', 0);
-            $Host = parse_url($this->Host);
-            $Host['port'] = isset($Host['port']) ? $Host['port'] : 80;
-            @socket_connect($sock, $Host['host'], $Host['port']);
-            $ip = '';
-            socket_getsockname($sock, $ip);
-            @socket_close($sock);
-            if ($ip == '0.0.0.0') {
-                $this->SendDebug('ConsumerAddress', 'Invalid', 0);
-                $this->UpdateFormField('EventHook', 'caption', $this->Translate('Invalid'));
-                $this->WriteAttributeString('ConsumerAddress', 'Invalid');
-                return false;
+            $ip = $this->MyIP;
+            if ($ip == '') {
+                $sock = socket_create(AF_INET, SOCK_STREAM, SOL_TCP);
+                socket_bind($sock, '0.0.0.0', 0);
+                $Host = parse_url($this->Host);
+                $Host['port'] = isset($Host['port']) ? $Host['port'] : 80;
+                @socket_connect($sock, $Host['host'], $Host['port']);
+                $ip = '';
+                socket_getsockname($sock, $ip);
+                @socket_close($sock);
+                if ($ip == '0.0.0.0') {
+                    $this->SendDebug('ConsumerAddress', 'Invalid', 0);
+                    $this->UpdateFormField('EventHook', 'caption', $this->Translate('Invalid'));
+                    $this->WriteAttributeString('ConsumerAddress', 'Invalid');                    
+                    return false;
+                }
             }
-            $Url = 'http://' . $ip . ':' . $MyPort . '/hook/ONVIFEvents/IO/' . $this->InstanceID;
-            $this->SendDebug('ConsumerAddress', $Url, 0);
+            $Debug = 'ConsumerAddress';
         }
+        $Url = ($this->MyHTTPS ? 'https://' : 'http://') . $ip . ':' . $this->MyPort . '/hook/ONVIFEvents/IO/' . $this->InstanceID;
+        $this->SendDebug($Debug, $Url, 0);
         $this->UpdateFormField('EventHook', 'caption', $Url);
         $this->WriteAttributeString('ConsumerAddress', $Url);
         return true;

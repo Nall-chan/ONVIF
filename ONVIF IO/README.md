@@ -52,13 +52,15 @@ Stellt die Verbindung zu einem ONVIF-Gerät her.
 
 ![Config](imgs/Config2.png)  
 
-| Name        | Text                | Beschreibung                                                                  |
-| ----------- | ------------------- | ----------------------------------------------------------------------------- |
-| Open        | Aktiv               | Öffnet/Aktiviert die Verbindung zum Gerät.                                    |
-| Address     | Adresse             | URL zum ONVIF Device-Service (z.B. http://192.168.1.111/onvif/device_service) |
-| Username    | Benutzername        | Benutzername für die Anmeldung                                                |
-| Password    | Passwort            | Passwort zum Benutzernamen                                                    |
-| WebHookPort | Experteneinstellung | Port unter welchem IPS erreichbar ist (3777)                                  |
+| Name         | Text                | Beschreibung                                                                  |
+| ------------ | ------------------- | ----------------------------------------------------------------------------- |
+| Open         | Aktiv               | Öffnet/Aktiviert die Verbindung zum Gerät.                                    |
+| Address      | Adresse             | URL zum ONVIF Device-Service (z.B. http://192.168.1.111/onvif/device_service) |
+| Username     | Benutzername        | Benutzername für die Anmeldung                                                |
+| Password     | Passwort            | Passwort zum Benutzernamen                                                    |
+| WebHookIP    | Experteneinstellung | IP Adresse unter welcher IPS von dem Gerät aus erreichbar ist.                |
+| WebHookPort  | Experteneinstellung | Port unter welchem IPS von dem Gerät aus erreichbar ist (3777)                |
+| WebHookHTTPS | Experteneinstellung | true wenn https benutzt werden soll                                           |
 
 ### Konfigurationsseite: Ereignisse möglich  
 

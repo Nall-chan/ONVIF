@@ -30,15 +30,30 @@
         },
         {
             "type": "ExpansionPanel",
-            "caption": "Expert settings",
-            "width": "500px",
+            "caption": "Expert settings event hook",
             "items": [
                 {
-                    "type": "NumberSpinner",
-                    "name": "WebHookPort",
-                    "caption": "Port of event hook",
-                    "minimum": 0,
-                    "maximum": 65535
+                    "type": "RowLayout",
+                    "items": [
+                        {
+                            "name": "WebHookIP",
+                            "type": "ValidationTextBox",
+                            "caption": "IP of event hook",
+                            "width": "250px"
+                        },
+                        {
+                            "type": "NumberSpinner",
+                            "name": "WebHookPort",
+                            "caption": "Port of event hook",
+                            "minimum": 0,
+                            "maximum": 65535
+                        },
+                        {
+                            "name": "WebHookHTTPS",
+                            "type": "CheckBox",
+                            "caption": "use https"
+                        }
+                    ]
                 }
             ]
         }
