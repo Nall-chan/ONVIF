@@ -72,8 +72,9 @@ class ONVIFDiscovery extends IPSModule
         $Form = json_decode(file_get_contents(__DIR__ . '/form.json'), true);
         if (IPS_GetOption('NATSupport') && strpos(IPS_GetKernelPlatform(), 'Docker')) {
             // not supported. Docker cannot forward Multicast :(
-            $Form['actions'][3]['popup']['items'][0]['caption'] = $this->Translate("The combination of Docker and NAT is not supported because Docker does not support multicast.\r\nPlease run the container in the host network.");
-            $Form['actions'][3]['popup']['closeCaption'] = 'OK';
+            $Form['actions'][3]['visible'] = false;
+            $Form['actions'][4]['popup']['items'][0]['caption'] = $this->Translate("The combination of Docker and NAT is not supported because Docker does not support multicast.\r\nPlease run the container in the host network.");
+            $Form['actions'][4]['visible'] = true;
             $this->SendDebug('FORM', json_encode($Form), 0);
             $this->SendDebug('FORM', json_last_error_msg(), 0);
             return json_encode($Form);
