@@ -139,6 +139,19 @@
             }
         },
         {
+            "type": "PopupAlert",
+            "visible": false,
+            "name": "NotFoundPopup",
+            "popup": {
+                "items": [
+                    {
+                        "type": "Label",
+                        "caption": "No device found"
+                    }
+                ]
+            }
+        },
+        {
             "type": "Label",
             "caption": "This module is free for non-commercial use,\r\nDonations in support of the author are accepted here:"
         },

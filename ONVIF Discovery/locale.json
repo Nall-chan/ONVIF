@@ -12,6 +12,7 @@
             "Please wait!": "Bitte warten!",
             "Determine abilities of the devices:": "Fähigkeiten der Geräte werden ermittelt:",
             "(Wait for end of discovery)": "(Warte auf Ende der Suche)",
+            "No device found": "Keine Geräte gefunden",
             "Background discovery of ONVIF devices started": "Die Hintergrundsuche von ONVIF-Geräten wurde gestartet",
             "Background discovery of ONVIF found %d devices": "Die Hintergrundsuche von ONVIF hat %d Geräte gefunden",
             "Scan of ONVIF device (%s) started": "Überprüfung von ONVIF-Geräte (%s) gestartet",

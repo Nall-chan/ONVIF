@@ -51,7 +51,7 @@ Es wird dringend empfohlen vor der Integration in IPS folgende Parameter in den 
 - Zeitsynchronisation  
 	- Nach Möglichkeit sollten die Geräte und der Symcon Host die Uhrzeit aus der gleichen Quelle beziehen (NTP-Server).  
 - PTZ-Vorpositionen / Szenen  (sofern vorhanden)  
-- h26x-Profile bzw. Media-Profile für ONVIF  
+- h264-Profile bzw. Media-Profile für ONVIF  
 
 ----------
 ### Hinweise zum Symcon-System / Host  

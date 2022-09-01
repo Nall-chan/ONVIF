@@ -97,7 +97,7 @@ class ONVIFDiscovery extends IPSModule
             $this->WriteAttributeString('Username', urldecode($Data[0]));
             $this->WriteAttributeString('Password', urldecode($Data[1]));
             $this->EnableErrorPopup = true;
-            $this->UpdateFormField('ScanLabel', 'caption', 'Determine abilities of the devices:');
+            $this->UpdateFormField('NotFoundPopup', 'visible', false);
             $this->UpdateFormField('ProgressPopup', 'visible', true);
             $this->ReloadForm();
             return;
@@ -182,7 +182,6 @@ class ONVIFDiscovery extends IPSModule
         $this->DevicesTotal = 0;
         $this->DevicesProcessed = -1;
         $this->UpdateFormField('ScanProgress', 'visible', true);
-        $this->UpdateFormField('ProgressPopup', 'closeCaption', 'Please wait!');
         $this->UpdateFormField('ScanProgress', 'caption', '(Wait for end of discovery)');
         $discoveryList = $this->DiscoverDevices();
         $this->DevicesTotal = count($discoveryList);
@@ -192,10 +191,10 @@ class ONVIFDiscovery extends IPSModule
         $this->SendDebug('Discover', sprintf($this->Translate('Background discovery of ONVIF found %d devices'), count($discoveryList)), 0);
         if ($this->DevicesTotal == 0) {
             $this->SendDebug('Discover', $this->Translate('End of background discovery of ONVIF devices'), 0);
-            $this->UpdateFormField('ProgressPopup', 'closeCaption', 'Damn it!');
+            $this->UpdateFormField('ProgressPopup', 'visible', false);
+            $this->UpdateFormField('NotFoundPopup', 'visible', true);
             $this->UpdateFormField('ScanProgress', 'visible', false);
             $this->UpdateFormField('ScanProgress', 'caption', '(Wait for end of discovery)');
-            $this->UpdateFormField('ScanLabel', 'caption', 'No device found');
             $this->DiscoveryIsRunning = false;
             return;
         }
