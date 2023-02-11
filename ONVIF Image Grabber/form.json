@@ -44,7 +44,7 @@
         {
             "type": "Button",
             "caption": "Update Image",
-            "onClick": "ONVIF_UpdateImage($id);"
+            "onClick": "IPS_RequestAction($id, 'UpdateImage', true);"
         },
         {
             "type": "Label",
