@@ -303,9 +303,16 @@ class ONVIFImageGrabber extends ONVIFModuleBase
         if (parent::RequestAction($Ident, $Value)) {
             return true;
         }
-        if ($Ident == 'RefreshProfileForm') {
-            $this->RefreshProfileForm($Value);
-            return true;
+        switch ($Ident) {
+            case 'RefreshProfileForm':
+                $this->RefreshProfileForm($Value);
+                return true;
+            case 'UpdateImage':
+                $this->UpdateImage();
+                if ((bool)$Value)){
+                    $this->ReloadForm();
+                }
+                return true;
         }
     }
     protected function IOChangeState($State)
