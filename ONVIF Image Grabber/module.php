@@ -309,7 +309,7 @@ class ONVIFImageGrabber extends ONVIFModuleBase
                 return true;
             case 'UpdateImage':
                 $this->UpdateImage();
-                if ((bool)$Value)){
+                if ((bool)$Value){
                     $this->ReloadForm();
                 }
                 return true;
