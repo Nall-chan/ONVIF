@@ -389,7 +389,7 @@ class ONVIFIO extends IPSModule
                 if ($ip == '0.0.0.0') {
                     $this->SendDebug('ConsumerAddress', 'Invalid', 0);
                     $this->UpdateFormField('EventHook', 'caption', $this->Translate('Invalid'));
-                    $this->WriteAttributeString('ConsumerAddress', 'Invalid');                    
+                    $this->WriteAttributeString('ConsumerAddress', 'Invalid');
                     return false;
                 }
             }
@@ -568,7 +568,8 @@ class ONVIFIO extends IPSModule
         $xpath->registerNamespace($wstop_ns, 'http://docs.oasis-open.org/wsn/t-1');
         $query = '//' . $wstop_ns . ':TopicSet';
         $prefixPathLen = strlen($xpath->query($query, null, true)[0]->getNodePath());
-        $query = '//*[@' . $wstop_ns . ":topic='true']/" . $tt_ns . ":MessageDescription[@IsProperty='true']/" . $tt_ns . ':Data/' . $tt_ns . ':SimpleItemDescription'; //[@Type='" . $xs_ns . ":boolean' or @Type='" . $xs_ns . ":string' or @Type='" . $xs_ns . ":int' or @Type='" . $tt_ns . ":RelayLogicalState']";
+        //$query = '//*[@' . $wstop_ns . ":topic='true']/" . $tt_ns . ":MessageDescription[@IsProperty='true']/" . $tt_ns . ':Data/' . $tt_ns . ':SimpleItemDescription'; //[@Type='" . $xs_ns . ":boolean' or @Type='" . $xs_ns . ":string' or @Type='" . $xs_ns . ":int' or @Type='" . $tt_ns . ":RelayLogicalState']";
+        $query = '//*[@' . $wstop_ns . ":topic='true']/" . $tt_ns . ':MessageDescription/' . $tt_ns . ':Data/' . $tt_ns . ':SimpleItemDescription'; //[@Type='" . $xs_ns . ":boolean' or @Type='" . $xs_ns . ":string' or @Type='" . $xs_ns . ":int' or @Type='" . $tt_ns . ":RelayLogicalState']";
         $wsTopics = $xpath->query($query);
         $Path = [];
         foreach ($wsTopics as $wsData) {
