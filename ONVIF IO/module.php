@@ -408,7 +408,7 @@ class ONVIFIO extends IPSModule
                 IPS_RunScriptText('IPS_Sleep(2000);IPS_RequestAction(' . $this->InstanceID . ',"EventsNotSupported",true);');
             }*/
         } else {
-            $this->Warnings = array_merge($this->Warnings, [$this->Translate('This device does not support ONVIF events, but it is mandatory.')]);            
+            $this->Warnings = array_merge($this->Warnings, [$this->Translate('This device does not support ONVIF events, but it is mandatory.')]);
             $this->LogMessage($this->Translate('Interface connected'), KL_MESSAGE);
             $this->SetStatus(IS_ACTIVE);
 //            IPS_RunScriptText('IPS_Sleep(1000);IPS_RequestAction(' . $this->InstanceID . ',"EventsNotSupported",true);');

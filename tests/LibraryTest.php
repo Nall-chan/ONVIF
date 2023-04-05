@@ -16,14 +16,14 @@ class LibraryTest extends TestCaseSymconValidation
         $this->validateModule(__DIR__ . '/../ONVIF Configurator');
     }
 
-    public function testValidateDiscovery(): void
-    {
-        $this->validateModule(__DIR__ . '/../ONVIF Discovery');
-    }
-
     public function testValidateIO(): void
     {
         $this->validateModule(__DIR__ . '/../ONVIF IO');
+    }
+
+    public function testValidateDiscovery(): void
+    {
+        $this->validateModule(__DIR__ . '/../ONVIF Discovery');
     }
 
     public function testValidateDI(): void
@@ -42,7 +42,6 @@ class LibraryTest extends TestCaseSymconValidation
     {
         $this->validateModule(__DIR__ . '/../ONVIF Media Stream');
     }
-
     public function testValidateImage(): void
     {
         $this->validateModule(__DIR__ . '/../ONVIF Image Grabber');

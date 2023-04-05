@@ -113,7 +113,7 @@ class ONVIFImageGrabber extends ONVIFModuleBase
             }
             if ($Source['Value'] != $this->ReadPropertyString('VideoSource')) {
                 $SkipEvent = true;
-                continue; 
+                continue;
             }
             $FoundEventIndex = $SourceIndex;
             break;
@@ -121,7 +121,7 @@ class ONVIFImageGrabber extends ONVIFModuleBase
         if ($FoundEventIndex !== false) {
             unset($Data['Sources'][$FoundEventIndex]);
         }
-        if ($SkipEvent){
+        if ($SkipEvent) {
             return false;
         }
         $PreName = str_replace($this->ReadPropertyString('EventTopic'), '', $Data['Topic']);
