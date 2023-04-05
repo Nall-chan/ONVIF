@@ -55,7 +55,7 @@ Stellt die Verbindung zu einem ONVIF-Gerät her.
 | Name         | Text                | Beschreibung                                                                  |
 | ------------ | ------------------- | ----------------------------------------------------------------------------- |
 | Open         | Aktiv               | Öffnet/Aktiviert die Verbindung zum Gerät.                                    |
-| Address      | Adresse             | URL zum ONVIF Device-Service (z.B. http://192.168.1.111/onvif/device_service) |
+| Address      | Adresse             | URL von dem Gerät (z.B. http://192.168.1.111:8080) |
 | Username     | Benutzername        | Benutzername für die Anmeldung                                                |
 | Password     | Passwort            | Passwort zum Benutzernamen                                                    |
 | WebHookIP    | Experteneinstellung | IP Adresse unter welcher IPS von dem Gerät aus erreichbar ist.                |

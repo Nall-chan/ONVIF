@@ -3,10 +3,13 @@
 declare(strict_types=1);
 
 require_once __DIR__ . '/../libs/ONVIFModuleBase.php';
-
+/**
+ * @property string $xAddr
+ * @property string $wsdl
+ */
 class ONVIFDigitalOutput extends ONVIFModuleBase
 {
-    const wsdl = 'devicemgmt-mod.wsdl';
+    const wsdl = \ONVIF\WSDL::Management; // default, wenn DeviceIO nicht genutzt
     const TopicFilter = 'relay';
 
     public function Create()
@@ -29,7 +32,25 @@ class ONVIFDigitalOutput extends ONVIFModuleBase
             return;
         }
         if ($this->HasActiveParent()) {
-            $this->GetRelayOutputs();
+            $Capabilities = @$this->GetCapabilities();
+            if (!$Capabilities) {
+                $this->SetStatus(IS_EBASE + 1);
+                return;
+            }
+            if ($Capabilities['XAddr'][\ONVIF\NS::DeviceIO]) {
+                $this->xAddr = $Capabilities['XAddr'][\ONVIF\NS::DeviceIO];
+                $this->wsdl = \ONVIF\WSDL::DeviceIO;
+            } else {
+                $this->xAddr = $Capabilities['XAddr'][\ONVIF\NS::Management];
+                $this->wsdl = \ONVIF\WSDL::Management;
+            }
+            $this->WriteAttributeArray('RelayOutputs', $Capabilities['RelayOutputs']);
+            foreach ($Capabilities['RelayOutputs'] as $Name => $RelayOutput) {
+                $Ident = str_replace([' - ', ':'], ['_', ''], $Name);
+                $Ident = preg_replace('/[^a-zA-Z\d]/u', '_', $Ident);
+                $this->RegisterVariableBoolean($Ident, $Name, '~Switch', 0);
+                $this->EnableAction($Ident);
+            }
             $Events = $this->ReadAttributeArray('EventProperties');
             if (count($Events) != 1) {
                 $this->SetStatus(IS_EBASE + 1);
@@ -49,29 +70,12 @@ class ONVIFDigitalOutput extends ONVIFModuleBase
             restore_error_handler();
             return false;
         }
-        $Events = $this->ReadAttributeArray('EventProperties');
-        $EventProperty = array_pop($Events);
-
-        switch (stristr($EventProperty['DataType'], ':')) {
-            case ':RelayLogicalState':
-                $SendValue = $Value ? 'active' : 'inactive';
-                break;
-            case ':bool':
-            case ':boolean':
-                $SendValue = $Value;
-                break;
-            default:
-            set_error_handler([$this, 'ModulErrorHandler']);
-                trigger_error($this->Translate('Unsupported Datatype'), E_USER_NOTICE);
-                restore_error_handler();
-                return false;
-        }
-
         $Params = [
             'RelayOutputToken' => $Ident,
-            'LogicalState'     => $SendValue
+            'LogicalState'     => $Value ? 'active' : 'inactive'
         ];
-        $Result = $this->SendData('', 'SetRelayOutputState', true, $Params);
+        $Result = $this->SendData($this->xAddr, 'SetRelayOutputState', true, $Params, $this->wsdl);
+
         if ($Result == false) {
             return false;
         }
@@ -96,22 +100,28 @@ class ONVIFDigitalOutput extends ONVIFModuleBase
         $this->SendDebug('ReceiveEvent', $Data, 0);
         $Events = $this->ReadAttributeArray('EventProperties');
         $EventProperty = array_pop($Events);
-
-        switch (stristr($EventProperty['DataType'], ':')) {
-            case ':RelayLogicalState':
-                $Value = $Data['DataValue'] == 'active';
-                break;
-            case ':bool':
-            case ':boolean':
-                $Value = ($Data['DataValue'] == 'true');
-                break;
-            default:
-                trigger_error($this->Translate('Unsupported Datatype'), E_USER_NOTICE);
-                return false;
+        $SourceIndex = array_search('tt:ReferenceToken', array_column($EventProperty['Sources'], 'Type'));
+        if ($SourceIndex === false) {
+            return;
         }
-        $Ident = $Data['SourceValue'];
+        $SourceName = $EventProperty['Sources'][$SourceIndex]['Name'];
+        $EventSourceIndex = array_search($SourceName, array_column($Data['Sources'], 'Name'));
+        if ($EventSourceIndex === false) {
+            return;
+        }
+        $Ident = $Data['Sources'][$EventSourceIndex]['Value'];
+        $DataIndex = array_search('tt:RelayLogicalState', array_column($EventProperty['Data'], 'Type'));
+        if ($DataIndex === false) {
+            return;
+        }
+        $DataName = $EventProperty['Data'][$SourceIndex]['Name'];
+        $EventDataIndex = array_search($DataName, array_column($Data['DataValues'], 'Name'));
+        if ($EventDataIndex === false) {
+            return;
+        }
+        $Value = $Data['DataValues'][$EventDataIndex]['Value'];
         $this->RegisterVariableBoolean($Ident, $Ident, '~Switch', 0);
-        $this->SetValueBoolean($Ident, $Value);
+        $this->SetValueBoolean($Ident, ($Value == 'active'));
     }
 
     public function GetConfigurationForm()
@@ -120,14 +130,14 @@ class ONVIFDigitalOutput extends ONVIFModuleBase
         $Form['elements'][0] = $this->GetConfigurationFormEventTopic($Form['elements'][0]);
         $Actions = [['type' => 'TestCenter']];
         $RelayOutputs = $this->ReadAttributeArray('RelayOutputs');
-        foreach ($RelayOutputs as $RelayOutput) {
+        foreach ($RelayOutputs as $Token => $RelayOutput) {
             $Expansion = [
                 'type'     => 'ExpansionPanel',
-                'caption'  => $this->Translate('Relay output: ') . $RelayOutput['token'],
+                'caption'  => $this->Translate('Relay output: ') . $Token,
                 'expanded' => true,
                 'items'    => []
             ];
-            if (isset($RelayOutput['Properties']['Mode'])) {
+            if (isset($RelayOutput['Mode'])) {
                 $Expansion['items'][] = [
                     'type'  => 'RowLayout',
                     'items' => [
@@ -138,12 +148,12 @@ class ONVIFDigitalOutput extends ONVIFModuleBase
                         ],
                         [
                             'type'    => 'Label',
-                            'caption' => $RelayOutput['Properties']['Mode']
+                            'caption' => $RelayOutput['Mode']
                         ]
                     ]
                 ];
-                if ($RelayOutput['Properties']['Mode'] != 'Bistable') {
-                    if (isset($RelayOutput['Properties']['DelayTime'])) {
+                if ($RelayOutput['Mode'] != 'Bistable') {
+                    if (isset($RelayOutput['DelayTime'])) {
                         $Expansion['items'][] = [
                             'type'  => 'RowLayout',
                             'items' => [
@@ -154,14 +164,14 @@ class ONVIFDigitalOutput extends ONVIFModuleBase
                                 ],
                                 [
                                     'type'    => 'Label',
-                                    'caption' => $RelayOutput['Properties']['DelayTime']
+                                    'caption' => $RelayOutput['DelayTime']
                                 ]
                             ]
                         ];
                     }
                 }
             }
-            if (isset($RelayOutput['Properties']['IdleState'])) {
+            if (isset($RelayOutput['IdleState'])) {
                 $Expansion['items'][] = [
                     'type'  => 'RowLayout',
                     'items' => [
@@ -172,7 +182,7 @@ class ONVIFDigitalOutput extends ONVIFModuleBase
                         ],
                         [
                             'type'    => 'Label',
-                            'caption' => $RelayOutput['Properties']['IdleState']
+                            'caption' => $RelayOutput['IdleState']
                         ]
                     ]
                 ];
@@ -184,28 +194,5 @@ class ONVIFDigitalOutput extends ONVIFModuleBase
         $this->SendDebug('FORM', json_last_error_msg(), 0);
 
         return json_encode($Form);
-    }
-
-    protected function GetRelayOutputs()
-    {
-        $Result = $this->SendData('', 'GetRelayOutputs', true);
-        if ($Result == false) {
-            return false;
-        }
-        $RelayOutputs = [];
-        if (is_array($Result->RelayOutputs)) {
-            foreach ($Result->RelayOutputs as $RelayOutput) {
-                $RelayOutputs[$RelayOutput->token] = json_decode(json_encode($RelayOutput), true);
-            }
-        } else {
-            $RelayOutputs[$Result->RelayOutputs->token] = json_decode(json_encode($Result->RelayOutputs), true);
-        }
-        $this->SendDebug('RelayOutputs', $RelayOutputs, 0);
-        $this->WriteAttributeArray('RelayOutputs', $RelayOutputs);
-        foreach ($RelayOutputs as $Ident => $RelayOutput) {
-            $this->RegisterVariableBoolean($Ident, $Ident, '~Switch', 0);
-            $this->EnableAction($Ident);
-        }
-        return true;
     }
 }

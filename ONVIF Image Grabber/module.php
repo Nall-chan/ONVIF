@@ -8,7 +8,7 @@ require_once __DIR__ . '/../libs/ONVIFModuleBase.php';
  */
 class ONVIFImageGrabber extends ONVIFModuleBase
 {
-    const wsdl = 'media-mod.wsdl';
+    const wsdl = \ONVIF\WSDL::Media; //'media-mod';
     const TopicFilter = 'videosource';
 
     public function Create()
@@ -96,11 +96,33 @@ class ONVIFImageGrabber extends ONVIFModuleBase
         if (!array_key_exists($Data['Topic'], $EventProperties)) {
             return false;
         }
-        if ($Data['SourceName'] != '') {
-            if ($Data['SourceValue'] != $this->ReadPropertyString('VideoSource')) {
-                return false;
+        $EventProperty = $EventProperties[$Data['Topic']];
+        $FoundEventIndex = false;
+        $SkipEvent = false;
+        foreach ($Data['Sources'] as $Source) {
+            str_replace(['Source', 'Video', 'Token'], '', $Source['Name'], $Count);
+            if (!$Count) {
+                continue;
             }
-            $Data['SourceName'] = '';
+            $SourceIndex = array_search($Source['Name'], array_column($EventProperty['Sources'], 'Name'));
+            if ($SourceIndex === false) {
+                continue;
+            }
+            if ($EventProperty['Sources'][$SourceIndex]['Type'] != 'tt:ReferenceToken') {
+                continue;
+            }
+            if ($Source['Value'] != $this->ReadPropertyString('VideoSource')) {
+                $SkipEvent = true;
+                continue; 
+            }
+            $FoundEventIndex = $SourceIndex;
+            break;
+        }
+        if ($FoundEventIndex !== false) {
+            unset($Data['Sources'][$FoundEventIndex]);
+        }
+        if ($SkipEvent){
+            return false;
         }
         $PreName = str_replace($this->ReadPropertyString('EventTopic'), '', $Data['Topic']);
         return $this->SetEventStatusVariable($PreName, $EventProperties[$Data['Topic']], $Data);
@@ -258,20 +280,22 @@ class ONVIFImageGrabber extends ONVIFModuleBase
                         ]
                     ]
                 ];
-                $ExpansionPanelVideoItems[] = [
-                    'type'  => 'RowLayout',
-                    'items' => [
-                        [
-                            'type'    => 'Label',
-                            'width'   => '200px',
-                            'caption' => 'Encoding-Interval:'
-                        ],
-                        [
-                            'type'    => 'Label',
-                            'caption' => $ActualProfile['RateControl']['EncodingInterval']
+                if (isset($ActualProfile['RateControl']['EncodingInterval'])) {
+                    $ExpansionPanelVideoItems[] = [
+                        'type'  => 'RowLayout',
+                        'items' => [
+                            [
+                                'type'    => 'Label',
+                                'width'   => '200px',
+                                'caption' => 'Encoding-Interval:'
+                            ],
+                            [
+                                'type'    => 'Label',
+                                'caption' => $ActualProfile['RateControl']['EncodingInterval']
+                            ]
                         ]
-                    ]
-                ];
+                    ];
+                }
                 $ExpansionPanelVideoItems[] = [
                     'type'  => 'RowLayout',
                     'items' => [
@@ -366,16 +390,31 @@ class ONVIFImageGrabber extends ONVIFModuleBase
         $Params = [
             'ProfileToken' => $this->ReadPropertyString('Profile')
         ];
-        $Result = $this->SendData($Capabilities['XAddr']['Media'], 'GetSnapshotUri', true, $Params);
-        if ($Result == false) {
-            return false;
+
+        if (($Capabilities['XAddr'][\ONVIF\NS::Media2]) != '') {
+            $Result = $this->SendData($Capabilities['XAddr'][\ONVIF\NS::Media2], 'GetSnapshotUri', true, $Params, \ONVIF\WSDL::Media2);
+            if ($Result == false) {
+                return false;
+            }
+            $SnapshotUriResult = json_decode(json_encode($Result), true);
+            if (!isset($SnapshotUriResult['Uri'])) {
+                return false;
+            }
+            $Uri = parse_url($SnapshotUriResult['Uri']);
+        } else {
+            $Result = $this->SendData($Capabilities['XAddr'][\ONVIF\NS::Media], 'GetSnapshotUri', true, $Params);
+            if ($Result == false) {
+                return false;
+            }
+            $SnapshotUriResult = json_decode(json_encode($Result), true);
+            if (!isset($SnapshotUriResult['MediaUri']['Uri'])) {
+                return false;
+            }
+            $Uri = parse_url($SnapshotUriResult['MediaUri']['Uri']);
         }
-        $SnapshotUriResult = json_decode(json_encode($Result), true);
-        if (!isset($SnapshotUriResult['MediaUri']['Uri'])) {
-            return false;
-        }
-        $Uri = parse_url($SnapshotUriResult['MediaUri']['Uri']);
+
         $Credentials = $this->GetCredentials();
+        $Uri['host'] = parse_url($this->GetUrl(), PHP_URL_HOST);
         if (($Credentials['Username'] != '') || ($Credentials['Password'] != '')) {
             $Uri['user'] = $Credentials['Username'];
             $Uri['pass'] = $Credentials['Password'];

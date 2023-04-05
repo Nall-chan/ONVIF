@@ -2,56 +2,116 @@
 
 declare(strict_types=1);
 
+namespace ONVIF;
+
+require_once __DIR__ . '/wsdl.php';
+
+class ONVIFsoapClient extends \SoapClient
+{
+    public $CurlInfo;
+    private $User;
+    private $Pass;
+    private $Options;
+
+    public function __construct(string $wsdl, array $options = [])
+    {
+        parent::__construct($wsdl, $options);
+        if (isset($options['login'])) {
+            $this->User = $options['login'];
+        } else {
+            $this->User = '';
+        }
+        if (isset($options['password'])) {
+            $this->Pass = $options['password'];
+        } else {
+            $this->User = '';
+        }
+        $this->Options = $options;
+    }
+    public function __doRequest($request, $location, $action, $version, $one_way = null)
+    {
+        $headers = [
+            'Method: POST',
+            'Connection: ' . ($this->Options['keep_alive'] ? 'Keep-Alive' : 'close'),
+            'User-Agent: ' . $this->Options['user_agent'],
+            'Content-Type: application/soap+xml; charset=utf-8',
+        ];
+
+        $ch = curl_init($location);
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+        curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
+        curl_setopt($ch, CURLOPT_TIMEOUT, $this->Options['connection_timeout']);
+        curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+        curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, 0);
+        curl_setopt($ch, CURLOPT_POST, true);
+        curl_setopt($ch, CURLOPT_POSTFIELDS, $request);
+        curl_setopt($ch, CURLOPT_HTTP_VERSION, CURL_HTTP_VERSION_1_1);
+        curl_setopt($ch, CURLOPT_HEADER, true);
+        curl_setopt($ch, CURLINFO_HEADER_OUT, true);
+        if (isset($this->Options['authentication'])) {
+            curl_setopt($ch, CURLOPT_HTTPAUTH, CURLAUTH_ANY);
+            curl_setopt($ch, CURLOPT_USERNAME, $this->User);
+            curl_setopt($ch, CURLOPT_PASSWORD, $this->Pass);
+        }
+        $response = curl_exec($ch);
+        $this->CurlInfo = curl_getinfo($ch);
+        $http_code = curl_getinfo($ch)['http_code'];
+        if ($http_code != 0) {
+            $this->__last_request_headers = curl_getinfo($ch)['request_header'];
+        }
+        $curl_errno = curl_errno($ch);
+        if ($curl_errno) {
+            throw new \SoapFault((string) $curl_errno, curl_error($ch));
+            return '';
+        }
+        if (!is_bool($response)) {
+            $Parts = explode("\r\n\r\n<?xml", $response);
+            $Headers = explode("\r\n\r\n", array_shift($Parts));
+            $this->__last_response_headers = array_pop($Headers);
+            if (count($Parts)) {
+                $response = '<?xml' . implode("\r\n\r\n<?xml", $Parts);
+            } else {
+                $response = '';
+            }
+        }
+        if (($http_code > 400) && ($request == '')) {
+            throw new \SoapFault((string) $http_code, explode("\r\n", $this->__last_response_headers)[0]);
+            return '';
+        }
+        return is_bool($response) ? '' : $response;
+    }
+}
+
 class ONVIF
 {
-    public $wsdl;
-    public $version;
     public $client;
-    protected $login;
 
-    public function __construct($wsdl, $service, $username = null, $password = null, $Headers = [], $ts_offset = 0)
+    public function __construct($wsdl, $service, $username = null, $password = null, $Headers = [])
     {
-        $this->wsdl = $wsdl;
         $Options = [
             'trace'              => true,
             'exceptions'         => true,
             'cache_wsdl'         => WSDL_CACHE_NONE,
-            'ssl_method '        => SOAP_SSL_METHOD_TLS,
             'connection_timeout' => 5,
             'user_agent'         => 'Symcon ONVIF-Lib by Nall-chan',
             'keep_alive'         => false,
             'soap_version'       => SOAP_1_2,
-            'compression'        => SOAP_COMPRESSION_ACCEPT | SOAP_COMPRESSION_GZIP | SOAP_COMPRESSION_DEFLATE,
-            'stream_context'     => stream_context_create(
-                [
-                    'ssl'  => [
-                        'verify_peer'       => false,
-                        'verify_peer_name'  => false,
-                        'allow_self_signed' => true
-                    ],
-                    'http' => [
-                        'protocol_version' => 1.1,
-                        'timeout'          => 5
-                    ],
-                ]
-            )
+            'location'           => $service
         ];
         if (($username != null) || ($password != null)) {
             $username = ($username == null ? '' : $username);
             $password = ($password == null ? '' : $password);
-            $Headers[] = $this->soapClientWSSecurityHeader($username, $password, $ts_offset);
             $Options['login'] = $username;
             $Options['password'] = $password;
             $Options['authentication'] = SOAP_AUTHENTICATION_DIGEST;
         }
-        $this->client = new SoapClient($this->wsdl, $Options);
-        $this->client->__setLocation($service);
+        $this->client = new ONVIFsoapClient($wsdl, $Options);
         $this->client->__setSoapHeaders($Headers);
         ini_set('default_socket_timeout', '5');
         return;
     }
 
-    protected function soapClientWSSecurityHeader($user, $password, $ts_offset = 0)
+    public static function soapClientWSSecurityHeader($user, $password, $ts_offset = 0)
     {
         $ts = time() - $ts_offset;
 
@@ -72,7 +132,7 @@ class ONVIF
         $encoding_type = 'http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-soap-message-security-1.0#Base64Binary';
 
         // Creating WSS identification header using SimpleXML
-        $root = new SimpleXMLElement('<root/>');
+        $root = new \SimpleXMLElement('<root/>');
 
         $security = $root->addChild('wsse:Security', null, $ns_wsse);
 
@@ -93,6 +153,6 @@ class ONVIF
         $full = $root->xpath('/root/wsse:Security');
         $auth = $full[0]->asXML();
 
-        return new SoapHeader($ns_wsse, 'Security', new SoapVar($auth, XSD_ANYXML), true);
+        return new \SoapHeader($ns_wsse, 'Security', new \SoapVar($auth, XSD_ANYXML), true);
     }
 }

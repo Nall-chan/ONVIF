@@ -20,7 +20,7 @@
             "End of background discovery of ONVIF devices": "Ende der Hintergrundsuche von ONVIF-Geräten",
             "List of hosts:": "Liste der Hosts",
             "Error message": "Fehlermeldung",
-            "The combination of Docker and NAT is not supported because Docker does not support multicast.\r\nPlease run the container in the host network.": "Die Kombination von Docker und NAT wird nicht unterstützt, da Docker keine Unterstützung für Multicast besitzt.\r\nBitte den Container im Host-Netzwerk ausführen.",
+            "The combination of Docker and NAT is not supported because Docker does not support multicast.\r\nPlease run the container in the host network.\r\nOr create and configure the required ONVIF Configurator instance manually.": "Die Kombination von Docker und NAT wird nicht unterstützt, da Docker keine Unterstützung für Multicast besitzt.\r\nBitte den Container im Host-Netzwerk ausführen.\r\nOder die benötigten ONVIF Konfigurator Instanzen manuell anlegen und konfigurieren.",
             "This module is free for non-commercial use,\r\nDonations in support of the author are accepted here:": "Dieses Modul ist für die nicht kommerzielle Nutzung kostenlos,\r\nSchenkungen als Unterstützung für den Autor werden hier akzeptiert:"
         }
     }

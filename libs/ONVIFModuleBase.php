@@ -8,6 +8,7 @@ eval('declare(strict_types=1);namespace ONVIFModuleBase {?>' . file_get_contents
 eval('declare(strict_types=1);namespace ONVIFModuleBase {?>' . file_get_contents(__DIR__ . '/../libs/helper/DebugHelper.php') . '}');
 eval('declare(strict_types=1);namespace ONVIFModuleBase {?>' . file_get_contents(__DIR__ . '/../libs/helper/ParentIOHelper.php') . '}');
 eval('declare(strict_types=1);namespace ONVIFModuleBase {?>' . file_get_contents(__DIR__ . '/../libs/helper/AttributeArrayHelper.php') . '}');
+require_once __DIR__ . '/wsdl.php';
 
 /**
  * @property int $ParentID
@@ -64,7 +65,6 @@ class ONVIFModuleBase extends IPSModule
         $this->RegisterParent();
         $Events = $this->GetEvents($this->ReadPropertyString('EventTopic'));
         $this->WriteAttributeArray('EventProperties', $Events);
-        $this->SendDebug('RegisterEvents', $Events, 0);
     }
 
     public function RequestAction($Ident, $Value)
@@ -151,17 +151,32 @@ class ONVIFModuleBase extends IPSModule
             }
         }
         return [
-            'VideoSources'     => [],
-            'VideoSourcesJPEG' => [],
-            'HasOutput'        => false,
-            'HasInput'         => false,
-            'XAddr'            => [
-                'Events'    => '',
-                'Media'     => '',
-                'PTZ'       => '',
-                'Imaging'   => '',
-                'Recording' => '',
-                'Replay'    => ''
+            'VideoSources'          => [],
+            'AudioSources'          => [],
+            'VideoSourcesJPEG'      => [],
+            'AnalyticsTokens'       => [],
+            'RelayOutputs'          => [],
+            'DigitalInputs'         => [],
+            'NbrOfVideoSources'     => 0,
+            'NbrOfAudioSources'     => 0,
+            'NbrOfOutputs'          => 0,
+            'NbrOfInputs'           => 0,
+            'NbrOfSerialPort'       => 0,
+            'HasSnapshotUri'        => false,
+            'HasRTSPStreaming'      => false,
+            'RuleSupport'           => false,
+            'AnalyticsModuleSupport'=> false,
+            'XAddr'                 => [
+                \ONVIF\NS::Event     => '',
+                \ONVIF\NS::Media     => '',
+                \ONVIF\NS::PTZ       => '',
+                \ONVIF\NS::Imaging   => '',
+                \ONVIF\NS::Analytics => '',
+                \ONVIF\NS::DeviceIO  => '',
+                \ONVIF\NS::Management=> '',
+                \ONVIF\NS::Media2    => '',
+                //'Recording' => '',
+                //'Replay'    => ''
             ]
         ];
     }
@@ -181,7 +196,21 @@ class ONVIFModuleBase extends IPSModule
         }
         return ['Username' => '', 'Password' => ''];
     }
-
+    protected function GetUrl()
+    {
+        if ($this->ParentID > 0) {
+            if ($this->HasActiveParent()) {
+                $Data = json_encode(['DataID' => '{9B9C8DA6-BC89-21BC-3E8C-BA6E534ABC37}', 'Function' => 'GetUrl']);
+                $answer = $this->SendDataToParent($Data);
+                if ($answer === false) {
+                    $this->SendDebug('GetUrl', 'No valid answer', 0);
+                    throw new Exception($this->Translate('No valid answer.'), E_USER_NOTICE);
+                }
+                return unserialize($answer);
+            }
+        }
+        return '';
+    }
     protected function SendData(string $URI, string $Function, bool $UseLogin = false, array $Params = [], string $wsdl = '')
     {
         $this->SendDebug('Send URI', $URI, 0);
@@ -235,8 +264,8 @@ class ONVIFModuleBase extends IPSModule
         $scheme = isset($parsed_url['scheme']) ? $parsed_url['scheme'] . '://' : '';
         $host = isset($parsed_url['host']) ? $parsed_url['host'] : '';
         $port = isset($parsed_url['port']) ? ':' . $parsed_url['port'] : '';
-        $user = isset($parsed_url['user']) ? $parsed_url['user'] : '';
-        $pass = isset($parsed_url['pass']) ? ':' . $parsed_url['pass'] : '';
+        $user = isset($parsed_url['user']) ? urlencode($parsed_url['user']) : '';
+        $pass = isset($parsed_url['pass']) ? ':' . urlencode($parsed_url['pass']) : '';
         $pass = ($user || $pass) ? "$pass@" : '';
         $path = isset($parsed_url['path']) ? $parsed_url['path'] : '';
         $query = isset($parsed_url['query']) ? '?' . $parsed_url['query'] : '';
@@ -284,43 +313,98 @@ class ONVIFModuleBase extends IPSModule
 
     protected function SetEventStatusVariable($PreName, $EventProperty, $Data)
     {
+        $NameParts = [];
         if ($PreName != '') {
-            $Name = $PreName . ' - ' . $Data['DataName'];
-        } else {
-            $Name = $Data['DataName'];
+            $NameParts[] = $PreName;
         }
-        if ($Data['SourceName'] != '') {
-            $Name .= ':' . $Data['SourceValue'];
+        if (count($Data['Sources'])) {
+            $DataName = [];
+            foreach ($Data['Sources'] as $DataSource) {
+                $DataName[] = $DataSource['Name'] . ':' . $DataSource['Value'];
+            }
+            $NameParts[] = implode(' - ', $DataName);
         }
-        $Ident = str_replace([' - ', ':'], ['_', ''], $Name);
-        $Ident = preg_replace('/[^a-zA-Z\d]/u', '_', $Ident);
-        switch (stristr($EventProperty['DataType'], ':')) {
-            case ':boolean':
-            case ':bool':
+        $PreName = implode('/', $NameParts);
+
+        if ((count($Data['DataValues']) == 0) && (count($EventProperty['Data']))) {
+            $Name = $PreName;
+            if ($Name == '') {
+                $Name = 'Event';
+            }
+            $Ident = str_replace([' - ', ':'], ['_', ''], $Name);
+            $Ident = preg_replace('/[^a-zA-Z\d]/u', '_', $Ident);
+            $this->RegisterVariableBoolean($Ident, $Name, '', 0);
+            $this->SetValueBoolean($Ident, true);
+            return true;
+        }
+
+        foreach ($Data['DataValues'] as $DataValue) {
+            if (count($EventProperty['Data'])) {
+                $DataIndex = array_search($DataValue['Name'], array_column($EventProperty['Data'], 'Name'));
+                if ($DataIndex === false) {
+                    continue; //Keine Beschreibung vom Datentyp vorhanden
+                }
+                $DataType = $EventProperty['Data'][$DataIndex]['Type'];
+            } else {
+                $DataType = 'xs:boolean';
+            }
+            if ($PreName == '') {
+                $Name = $DataValue['Name'];
+            } else {
+                $Name = $PreName . ' - ' . $DataValue['Name'];
+            }
+            $Ident = str_replace([' - ', ':'], ['_', ''], $Name);
+            $Ident = preg_replace('/[^a-zA-Z\d]/u', '_', $Ident);
+            switch ($DataType) {
+            case 'xs:boolean':
+            case 'tt:boolean':
+                $VariableValue = false;
+                if (strtolower($DataValue['Value']) === 'true') {
+                    $VariableValue = true;
+                }
+                if (intval($DataValue['Value']) === 1) {
+                    $VariableValue = true;
+                }
                 $this->RegisterVariableBoolean($Ident, $Name, '', 0);
-                $DataValue = false;
-                if (strtolower($Data['DataValue']) === 'true') {
-                    $DataValue = true;
-                }
-                if (intval($Data['DataValue']) === 1) {
-                    $DataValue = true;
-                }
-                $this->SetValueBoolean($Ident, $DataValue);
+                $this->SetValueBoolean($Ident, $VariableValue);
+            break;
+            case 'tt:RelayLogicalState':
+                $this->RegisterVariableBoolean($Ident, $Name, '', 0);
+                $this->SetValueBoolean($Ident, (strtolower($DataValue['Value']) === 'active'));
                 break;
-            case ':float':
-            case ':double':
-                $this->RegisterVariableFloat($Ident, $Name, '', 0);
-                $this->SetValueFloat($Ident, (float) $Data['DataValue']);
+            case 'xs:float':
+            case 'xs:double':
+            case 'xs:long':
+            case 'tt:float':
+            case 'tt:double':
+            case 'tt:long':
+                        $this->RegisterVariableFloat($Ident, $Name, '', 0);
+                $this->SetValueFloat($Ident, (float) $DataValue['Value']);
                 break;
-            case ':integer':
-            case ':int':
-                $this->RegisterVariableInteger($Ident, $Name, '', 0);
-                $this->SetValueInteger($Ident, (int) $Data['DataValue']);
+            case 'xs:integer':
+            case 'xs:int':
+            case 'xs:decimal':
+            case 'xs:short':
+            case 'xs:unsignedLong':
+            case 'xs:unsignedInt':
+            case 'xs:unsignedShort':
+            case 'xs:unsignedByte':
+            case 'tt:integer':
+            case 'tt:int':
+            case 'tt:decimal':
+            case 'tt:short':
+            case 'tt:unsignedLong':
+            case 'tt:unsignedInt':
+            case 'tt:unsignedShort':
+            case 'tt:unsignedByte':
+                        $this->RegisterVariableInteger($Ident, $Name, '', 0);
+                $this->SetValueInteger($Ident, (int) $DataValue['Value']);
                 break;
-            case ':string':
+            default:
                 $this->RegisterVariableString($Ident, $Name, '', 0);
-                $this->SetValueString($Ident, $Data['DataValue']);
+                $this->SetValueString($Ident, $DataValue['Value']);
                 break;
+            }
         }
         return true;
     }

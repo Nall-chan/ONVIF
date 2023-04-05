@@ -30,6 +30,7 @@
         },
         {
             "type": "ExpansionPanel",
+            "name": "WebHookExpansionPanel",
             "caption": "Expert settings event hook",
             "items": [
                 {
@@ -66,8 +67,16 @@
             "onClick": "IPS_RequestAction($id,'Reload',true);"
         },
         {
-            "name": "EventRow",
+            "name": "DeviceData",
+            "caption": "Device information",
+            "type": "ExpansionPanel",
+            "expanded": false,
+            "items": []
+        },
+        {
+            "name": "EventHookRow",
             "type": "RowLayout",
+            "visible": false,
             "items": [
                 {
                     "type": "Label",
@@ -121,38 +130,53 @@
                     "width": "auto"
                 },
                 {
-                    "caption": "Name of source",
-                    "name": "SourceName",
-                    "width": "200px"
-                },
-                {
-                    "caption": "Type of source",
-                    "name": "SourceType",
-                    "width": "200px"
-                },
-                {
-                    "caption": "Name of data",
-                    "name": "DataName",
-                    "width": "200px"
-                },
-                {
-                    "caption": "Type of data",
-                    "name": "DataType",
-                    "width": "200px"
-                },
-                {
-                    "caption": "Open Instance",
-                    "name": "OpenReceiversInstance",
+                    "caption": "Sources that send this topic",
+                    "name": "Sources",
                     "visible": false,
                     "edit": {
-                        "type": "OpenObjectButton",
-                        "name": "OpenInstanceButton",
-                        "enabled": false
-                    },
-                    "objectID": 0
+                        "type": "List",
+                        "add": false,
+                        "delete": false,
+                        "rowCount": 3,
+                        "columns": [
+                            {
+                                "caption": "Name",
+                                "name": "Name",
+                                "width": "auto"
+                            },
+                            {
+                                "caption": "Type",
+                                "name": "Type",
+                                "width": "150px"
+                            }
+                        ]
+                    }
                 },
                 {
-                    "caption": "Events are used by this instances:",
+                    "caption": "Values for this topic",
+                    "name": "Data",
+                    "visible": false,
+                    "edit": {
+                        "type": "List",
+                        "add": false,
+                        "delete": false,
+                        "rowCount": 3,
+                        "columns": [
+                            {
+                                "caption": "Name",
+                                "name": "Name",
+                                "width": "auto"
+                            },
+                            {
+                                "caption": "Type",
+                                "name": "Type",
+                                "width": "150px"
+                            }
+                        ]
+                    }
+                },
+                {
+                    "caption": "Events are processed by these instances",
                     "name": "Receivers",
                     "visible": false,
                     "edit": {
@@ -160,6 +184,7 @@
                         "name": "EventReceiver",
                         "add": false,
                         "delete": false,
+                        "rowCount": 3,
                         "sort": {
                             "column": "instanceID",
                             "direction": "ascending"
@@ -168,20 +193,17 @@
                             {
                                 "caption": "Instance",
                                 "name": "instanceID",
-                                "width": "90px",
-                                "onClick": "IPS_RequestAction($id, 'UpdateOpenObjectButton', $Receivers['instanceID']);"
+                                "width": "90px"
                             },
                             {
                                 "caption": "Type",
                                 "name": "Type",
-                                "width": "150px",
-                                "onClick": "IPS_RequestAction($id, 'UpdateOpenObjectButton', $Receivers['instanceID']);"
+                                "width": "150px"
                             },
                             {
                                 "caption": "Name",
                                 "name": "Name",
-                                "width": "auto",
-                                "onClick": "IPS_RequestAction($id, 'UpdateOpenObjectButton', $Receivers['instanceID']);"
+                                "width": "auto"
                             }
                         ]
                     }

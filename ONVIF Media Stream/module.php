@@ -17,8 +17,8 @@ eval('declare(strict_types=1);namespace ONVIFMediaStream {?>' . file_get_content
 class ONVIFMediaStream extends ONVIFModuleBase
 {
     use \ONVIFMediaStream\WebhookHelper;
-    const wsdl = 'media-mod.wsdl';
-    const PTZwsdl = 'ptz-mod.wsdl';
+    const wsdl = \ONVIF\WSDL::Media; // default für Media1
+    const PTZwsdl = \ONVIF\WSDL::PTZ; // statisch
     const TopicFilter = 'videosource';
 
     public function Create()
@@ -380,20 +380,22 @@ class ONVIFMediaStream extends ONVIFModuleBase
                         ]
                     ]
                 ];
-                $ExpansionPanelVideoItems[] = [
-                    'type'  => 'RowLayout',
-                    'items' => [
-                        [
-                            'type'    => 'Label',
-                            'width'   => '200px',
-                            'caption' => $this->Translate('Encoding-Interval:')
-                        ],
-                        [
-                            'type'    => 'Label',
-                            'caption' => $ActualProfile['RateControl']['EncodingInterval']
+                if (isset($ActualProfile['RateControl']['EncodingInterval'])) {
+                    $ExpansionPanelVideoItems[] = [
+                        'type'  => 'RowLayout',
+                        'items' => [
+                            [
+                                'type'    => 'Label',
+                                'width'   => '200px',
+                                'caption' => $this->Translate('Encoding-Interval:')
+                            ],
+                            [
+                                'type'    => 'Label',
+                                'caption' => $ActualProfile['RateControl']['EncodingInterval']
+                            ]
                         ]
-                    ]
-                ];
+                    ];
+                }
                 $ExpansionPanelVideoItems[] = [
                     'type'  => 'RowLayout',
                     'items' => [
@@ -954,11 +956,28 @@ class ONVIFMediaStream extends ONVIFModuleBase
         if (!array_key_exists($Data['Topic'], $EventProperties)) {
             return false;
         }
-        if ($Data['SourceName'] != '') {
-            if ($Data['SourceValue'] != $this->ReadPropertyString('VideoSource')) {
-                return false;
+        $EventProperty = $EventProperties[$Data['Topic']];
+        $FoundEventIndex = false;
+        foreach ($Data['Sources'] as $Source) {
+            str_replace(['Source', 'Video', 'Token'], '', $Source['Name'], $Count);
+            if (!$Count) {
+                continue;
             }
-            $Data['SourceName'] = '';
+            $SourceIndex = array_search($Source['Name'], array_column($EventProperty['Sources'], 'Name'));
+            if ($SourceIndex === false) {
+                continue;
+            }
+            if ($EventProperty['Sources'][$SourceIndex]['Type'] != 'tt:ReferenceToken') {
+                continue;
+            }
+            if ($Source['Value'] != $this->ReadPropertyString('VideoSource')) {
+                continue;
+            }
+            $FoundEventIndex = $SourceIndex;
+            break;
+        }
+        if ($FoundEventIndex !== false) {
+            unset($Data['Sources'][$FoundEventIndex]);
         }
         $PreName = str_replace($this->ReadPropertyString('EventTopic'), '', $Data['Topic']);
         return $this->SetEventStatusVariable($PreName, $EventProperties[$Data['Topic']], $Data);
@@ -1058,7 +1077,7 @@ class ONVIFMediaStream extends ONVIFModuleBase
         if ($Capabilities == false) {
             return false;
         }
-        $this->PTZ_xAddr = $Capabilities['XAddr']['PTZ'];
+        $this->PTZ_xAddr = $Capabilities['XAddr'][\ONVIF\NS::PTZ];
         foreach ($Capabilities['VideoSources'] as $VideoSource) {
             if ($this->ReadPropertyString('VideoSource') == $VideoSource['VideoSourceToken']) {
                 foreach ($VideoSource['Profile'] as $Profile) {
@@ -1070,25 +1089,44 @@ class ONVIFMediaStream extends ONVIFModuleBase
                 break;
             }
         }
-        $Params = [
-            'StreamSetup'  => [
-                'Stream'    => 'RTP-Unicast',
-                'Transport' => [
-                    'Protocol' => 'RTSP',
+
+        if (($Capabilities['XAddr'][\ONVIF\NS::Media2]) != '') {
+            $Params = [
+                'Protocol'     => 'RtspUnicast',
+                'ProfileToken' => $this->ReadPropertyString('Profile')
+            ];
+            $Result = $this->SendData($Capabilities['XAddr'][\ONVIF\NS::Media2], 'GetStreamUri', true, $Params, \ONVIF\WSDL::Media2);
+            if ($Result == false) {
+                return false;
+            }
+            $GetStreamUriResult = json_decode(json_encode($Result), true);
+            if (!isset($GetStreamUriResult['Uri'])) {
+                return false;
+            }
+            $Uri = parse_url($GetStreamUriResult['Uri']);
+        } else {
+            $Params = [
+                'StreamSetup'  => [
+                    'Stream'    => 'RTP-Unicast',
+                    'Transport' => [
+                        'Protocol' => 'RTSP',
+                    ],
                 ],
-            ],
-            'ProfileToken' => $this->ReadPropertyString('Profile')
-        ];
-        $Result = $this->SendData($Capabilities['XAddr']['Media'], 'GetStreamUri', true, $Params);
-        if ($Result == false) {
-            return false;
+                'ProfileToken' => $this->ReadPropertyString('Profile')
+            ];
+            $Result = $this->SendData($Capabilities['XAddr'][\ONVIF\NS::Media], 'GetStreamUri', true, $Params);
+            if ($Result == false) {
+                return false;
+            }
+            $GetStreamUriResult = json_decode(json_encode($Result), true);
+            if (!isset($GetStreamUriResult['MediaUri']['Uri'])) {
+                return false;
+            }
+            $Uri = parse_url($GetStreamUriResult['MediaUri']['Uri']);
         }
-        $GetStreamUriResult = json_decode(json_encode($Result), true);
-        if (!isset($GetStreamUriResult['MediaUri']['Uri'])) {
-            return false;
-        }
-        $Uri = parse_url($GetStreamUriResult['MediaUri']['Uri']);
+
         $Credentials = $this->GetCredentials();
+        $Uri['host'] = parse_url($this->GetUrl(), PHP_URL_HOST);
         if (($Credentials['Username'] != '') || ($Credentials['Password'] != '')) {
             $Uri['user'] = $Credentials['Username'];
             $Uri['pass'] = $Credentials['Password'];

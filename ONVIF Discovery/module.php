@@ -20,7 +20,7 @@ class ONVIFDiscovery extends IPSModule
     use \ONVIFDiscovery\BufferHelper;
     use \ONVIFDiscovery\DebugHelper;
     use \ONVIFDiscovery\Semaphore;
-    const WS_DISCOVERY_MESSAGE = '<?xml version="1.0" encoding="UTF-8"?><e:Envelope xmlns:e="http://www.w3.org/2003/05/soap-envelope" xmlns:w="http://schemas.xmlsoap.org/ws/2004/08/addressing" xmlns:d="http://schemas.xmlsoap.org/ws/2005/04/discovery" xmlns:dn="http://www.onvif.org/ver10/network/wsdl"><e:Header><w:MessageID>uuid:[UUID]</w:MessageID><w:To e:mustUnderstand="true">urn:schemas-xmlsoap-org:ws:2005:04:discovery</w:To><w:Action e:mustUnderstand="true">http://schemas.xmlsoap.org/ws/2005/04/discovery/Probe</w:Action></e:Header><e:Body><d:Probe><d:Types>dn:NetworkVideoTransmitter</d:Types></d:Probe></e:Body></e:Envelope>';
+    const WS_DISCOVERY_MESSAGE = '<?xml version="1.0" encoding="utf-8"?><e:Envelope xmlns:e="http://www.w3.org/2003/05/soap-envelope" xmlns:w="http://schemas.xmlsoap.org/ws/2004/08/addressing" xmlns:d="http://schemas.xmlsoap.org/ws/2005/04/discovery" xmlns:dn="http://www.onvif.org/ver10/network/wsdl"><e:Header><w:MessageID>uuid:[UUID]</w:MessageID><w:To e:mustUnderstand="true">urn:schemas-xmlsoap-org:ws:2005:04:discovery</w:To><w:Action e:mustUnderstand="true">http://schemas.xmlsoap.org/ws/2005/04/discovery/Probe</w:Action></e:Header><e:Body><d:Probe><d:Types>dn:NetworkVideoTransmitter</d:Types></d:Probe></e:Body></e:Envelope>';
 
     /**
      * The maximum number of seconds that will be allowed for the discovery request.
@@ -73,7 +73,7 @@ class ONVIFDiscovery extends IPSModule
         if (IPS_GetOption('NATSupport') && strpos(IPS_GetKernelPlatform(), 'Docker')) {
             // not supported. Docker cannot forward Multicast :(
             $Form['actions'][3]['visible'] = false;
-            $Form['actions'][4]['popup']['items'][0]['caption'] = $this->Translate("The combination of Docker and NAT is not supported because Docker does not support multicast.\r\nPlease run the container in the host network.");
+            $Form['actions'][4]['popup']['items'][0]['caption'] = $this->Translate("The combination of Docker and NAT is not supported because Docker does not support multicast.\r\nPlease run the container in the host network.\r\nOr create and configure the required ONVIF Configurator instance manually.");
             $Form['actions'][4]['visible'] = true;
             $this->SendDebug('FORM', json_encode($Form), 0);
             $this->SendDebug('FORM', json_last_error_msg(), 0);
@@ -94,6 +94,7 @@ class ONVIFDiscovery extends IPSModule
     public function RequestAction($Ident, $Value)
     {
         if ($Ident == 'Save') {
+            $this->DiscoveryIsRunning = false;
             $Data = explode(':', $Value);
             $this->WriteAttributeString('Username', urldecode($Data[0]));
             $this->WriteAttributeString('Password', urldecode($Data[1]));
@@ -124,7 +125,7 @@ class ONVIFDiscovery extends IPSModule
         foreach ($InstanceIDListConfigurator as $InstanceIDConfigurator) {
             $IO = IPS_GetInstance($InstanceIDConfigurator)['ConnectionID'];
             if ($IO > 0) {
-                $DevicesAddress[$InstanceIDConfigurator] = IPS_GetProperty($IO, 'Address');
+                $DevicesAddress[$InstanceIDConfigurator] = str_replace('/onvif/device_service', '', IPS_GetProperty($IO, 'Address'));
             }
         }
         $Devices = $this->Devices;
@@ -185,12 +186,7 @@ class ONVIFDiscovery extends IPSModule
         $this->UpdateFormField('ScanProgress', 'visible', true);
         $this->UpdateFormField('ScanProgress', 'caption', '(Wait for end of discovery)');
         $discoveryList = $this->DiscoverDevices();
-        $this->DevicesTotal = count($discoveryList);
-        $this->UpdateFormField('ScanProgress', 'maximum', count($discoveryList));
-        $this->UpdateFormField('ScanProgress', 'current', 0);
-        $this->UpdateFormField('ScanProgress', 'caption', '0 / ' . count($discoveryList));
-        $this->SendDebug('Discover', sprintf($this->Translate('Background discovery of ONVIF found %d devices'), count($discoveryList)), 0);
-        if ($this->DevicesTotal == 0) {
+        if (count($discoveryList) == 0) {
             $this->SendDebug('Discover', $this->Translate('End of background discovery of ONVIF devices'), 0);
             $this->UpdateFormField('ProgressPopup', 'visible', false);
             $this->UpdateFormField('NotFoundPopup', 'visible', true);
@@ -199,6 +195,11 @@ class ONVIFDiscovery extends IPSModule
             $this->DiscoveryIsRunning = false;
             return;
         }
+        $this->DevicesTotal = count($discoveryList);
+        $this->UpdateFormField('ScanProgress', 'maximum', count($discoveryList));
+        $this->UpdateFormField('ScanProgress', 'current', 0);
+        $this->UpdateFormField('ScanProgress', 'caption', '0 / ' . count($discoveryList));
+        $this->SendDebug('Discover', sprintf($this->Translate('Background discovery of ONVIF found %d devices'), count($discoveryList)), 0);
         $i = 0;
         $this->DevicesProcessed = 0;
         foreach ($discoveryList as $IP => $Device) {
@@ -228,9 +229,15 @@ class ONVIFDiscovery extends IPSModule
         socket_set_option($sock, SOL_SOCKET, SO_REUSEADDR, 1);
         socket_set_option($sock, IPPROTO_IP, IP_MULTICAST_TTL, 4);
         socket_set_option($sock, SOL_SOCKET, SO_BROADCAST, 1);
-        socket_bind($sock, '0', 3703);
-        $this->SendDebug('Start Discovery', '', 0);
-        socket_sendto($sock, $discoveryMessage, strlen($discoveryMessage), 0, self::WS_DISCOVERY_MULTICAST_ADDRESS, self::WS_DISCOVERY_MULTICAST_PORT);
+        $Bind = socket_bind($sock, gethostbyname(gethostname()), 3703);
+        $this->SendDebug('Start Discovery', $Bind, 0);
+        $Bytes = socket_sendto($sock, $discoveryMessage, strlen($discoveryMessage), 0, self::WS_DISCOVERY_MULTICAST_ADDRESS, self::WS_DISCOVERY_MULTICAST_PORT);
+        $this->SendDebug('Bytes send', $Bytes, 0);
+        if (!$Bytes) {
+            $this->SendDebug('Error on send discovery message', '', 0);
+            @socket_close($sock);
+            return $discoveryList;
+        }
         $response = $from = null;
         do {
             if (0 == @socket_recvfrom($sock, $response, 9999, 0, $from, $discoveryPort)) {
@@ -262,7 +269,7 @@ class ONVIFDiscovery extends IPSModule
         if (($this->ReadAttributeString('Username') != '') || ($this->ReadAttributeString('Password') != '')) {
             $UseLogin = true;
         }
-        $wsdl = dirname(__DIR__) . DIRECTORY_SEPARATOR . 'libs' . DIRECTORY_SEPARATOR . 'WSDL' . DIRECTORY_SEPARATOR . 'devicemgmt-mod.wsdl';
+        $wsdl = dirname(__DIR__) . DIRECTORY_SEPARATOR . 'libs' . DIRECTORY_SEPARATOR . 'WSDL' . DIRECTORY_SEPARATOR . \ONVIF\WSDL::Management;
         $this->SendDebug('Discover', sprintf($this->Translate('Scan of ONVIF device (%s) started'), $IP), 0);
         $Device = null;
         $DeviceOk = false;
@@ -271,41 +278,57 @@ class ONVIFDiscovery extends IPSModule
             $this->SendDebug('Request', $IpValue, 0);
             if ($UseLogin) {
                 $offset = $this->GetTimeOffset($IpValue);
-                $ONVIFClient = new ONVIF($wsdl, $IpValue, $this->ReadAttributeString('Username'), $this->ReadAttributeString('Password'), [], $offset);
+                $Header[] = \ONVIF\ONVIF::soapClientWSSecurityHeader($this->ReadAttributeString('Username'), $this->ReadAttributeString('Password'), $offset);
+                $ONVIFClient = new \ONVIF\ONVIF($wsdl, $IpValue . '/onvif/device_service', $this->ReadAttributeString('Username'), $this->ReadAttributeString('Password'), $Header);
             } else {
-                $ONVIFClient = new ONVIF($wsdl, $IpValue);
+                $ONVIFClient = new \ONVIF\ONVIF($wsdl, $IpValue . '/onvif/device_service');
             }
             try {
                 $result = $ONVIFClient->client->GetDeviceInformation();
+                $this->SendDebug('Soap Request Headers ' . $IpValue, $ONVIFClient->client->__getLastRequestHeaders(), 0);
                 $this->SendDebug('Soap Request ' . $IpValue, $ONVIFClient->client->__getLastRequest(), 0);
+                $this->SendDebug('Soap Response Headers ' . $IpValue, $ONVIFClient->client->__getLastResponseHeaders(), 0);
                 $this->SendDebug('Soap Response ' . $IpValue, $ONVIFClient->client->__getLastResponse(), 0);
-                $this->SendDebug('Read ' . $IpValue, json_encode($result), 0);
+                $this->SendDebug('Read result ' . $IpValue, $result, 0);
                 if ($Device === null) {
-                    $Device = json_decode(json_encode($result), true);
-                    $Device['Name'] = $Device['Model'];
+                    if ($result == '') {
+                        $Device['Name'] = $IpValue;
+                        $Device['Manufacturer'] = 'unknown';
+                        $Device['Model'] = 'unknown';
+                        $Device['FirmwareVersion'] = 'unknown';
+                        $Device['SerialNumber'] = 'unknown';
+                    } else {
+                        $Device = json_decode(json_encode($result), true);
+                        $Device['Name'] = $Device['Model'];
+                    }
                     $DeviceOk = true;
                 }
                 $Device['Address'][] = $IpValue;
                 $HostnameResult = $ONVIFClient->client->GetHostname();
                 $this->SendDebug('Soap Request ' . $IpValue, $ONVIFClient->client->__getLastRequest(), 0);
                 $this->SendDebug('Soap Response ' . $IpValue, $ONVIFClient->client->__getLastResponse(), 0);
-                $this->SendDebug('Read ' . $IpValue, json_encode($HostnameResult), 0);
+                $this->SendDebug('Read ' . $IpValue, $HostnameResult, 0);
                 if (property_exists($HostnameResult->HostnameInformation, 'Name')) {
-                    $Name = $HostnameResult->HostnameInformation->Name;
+                    $Name = (string) $HostnameResult->HostnameInformation->Name;
                     if ($Name != '') {
                         $Device['Name'] = $Name;
                     }
                 }
-            } catch (Exception $e) {
-                $this->SendDebug('Soap Request Error ' . $IpValue, $ONVIFClient->client->__getLastRequest(), 0);
-                $this->SendDebug('Soap Response Error ' . $IpValue, $ONVIFClient->client->__getLastResponse(), 0);
-                $this->SendDebug('Soap Response Error Message ' . $IpValue, $e->getMessage(), 0);
-                $Url = parse_url($IpValue);
-                $Url['port'] = isset($Url['port']) ? ':' . $Url['port'] : '';
-                $DeviceError[$Url['scheme'] . '://' . $Url['host'] . $Url['port']] = $e->getMessage();
+            } catch (SoapFault $e) {
+                if (!$DeviceOk) {
+                    $this->SendDebug('Soap Request Headers Error ' . $IpValue, $ONVIFClient->client->__getLastRequestHeaders(), 0);
+                    $this->SendDebug('Soap Request Error ' . $IpValue, $ONVIFClient->client->__getLastRequest(), 0);
+                    $this->SendDebug('Soap Response Headers Error ' . $IpValue, $ONVIFClient->client->__getLastResponseHeaders(), 0);
+                    $this->SendDebug('Soap Response Error ' . $IpValue, $ONVIFClient->client->__getLastResponse(), 0);
+                    $this->SendDebug('Soap Response Error Message ' . $IpValue, $e->getMessage(), 0);
+                    $Url = parse_url($IpValue);
+                    $Url['port'] = isset($Url['port']) ? ':' . $Url['port'] : '';
+                    $DeviceError[$Url['scheme'] . '://' . $Url['host'] . $Url['port']] = $e->getMessage();
+                }
             }
         }
         if ($DeviceOk) {
+            $this->SendDebug('DEVICE OK', $Device, 0);
             $this->lock('Devices');
             $this->Devices = array_merge($this->Devices, [$IP => $Device]);
             $this->unlock('Devices');
@@ -369,7 +392,12 @@ class ONVIFDiscovery extends IPSModule
         {
             return strpos($item, $ip);
         });
-        return array_values($filtermatches);
+        $filtermatches = array_values($filtermatches);
+        array_walk($filtermatches, function (&$item)
+        {
+            $item = str_replace('/onvif/device_service', '', $item);
+        });
+        return $filtermatches; //array_values($filtermatches);
     }
 
     /**
@@ -385,8 +413,8 @@ class ONVIFDiscovery extends IPSModule
             mt_rand(0, 0xffff),
             mt_rand(0, 0xffff),
             mt_rand(0, 0x0fff) | 0x4000, // this sequence must start with 4
-                                                mt_rand(0, 0x3fff) | 0x8000, // this sequence can start with 8, 9, A, or B
-                                                        mt_rand(0, 0xffff),
+            mt_rand(0, 0x3fff) | 0x8000, // this sequence can start with 8, 9, A, or B
+            mt_rand(0, 0xffff),
             mt_rand(0, 0xffff),
             mt_rand(0, 0xffff)
         );
@@ -394,14 +422,19 @@ class ONVIFDiscovery extends IPSModule
 
     protected function GetTimeOffset(string $IpValue)
     {
-        $wsdl = dirname(__DIR__) . DIRECTORY_SEPARATOR . 'libs' . DIRECTORY_SEPARATOR . 'WSDL' . DIRECTORY_SEPARATOR . 'devicemgmt-mod.wsdl';
-        $ONVIFClient = new ONVIF($wsdl, $IpValue);
+        $wsdl = dirname(__DIR__) . DIRECTORY_SEPARATOR . 'libs' . DIRECTORY_SEPARATOR . 'WSDL' . DIRECTORY_SEPARATOR . \ONVIF\WSDL::Management;
+        $ONVIFClient = new \ONVIF\ONVIF($wsdl, $IpValue);
         try {
             $camera_datetime = $ONVIFClient->client->GetSystemDateAndTime();
         } catch (SoapFault $e) {
             return 0;
         }
-
+        if (!$camera_datetime) {
+            return 0;
+        }
+        if (!property_exists($camera_datetime, 'SystemDateAndTime')) {
+            return 0;
+        }
         if (property_exists($camera_datetime->SystemDateAndTime, 'UTCDateTime')) {
             $camera_ts = gmmktime(
                 $camera_datetime->SystemDateAndTime->UTCDateTime->Time->Hour,
