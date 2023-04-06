@@ -555,8 +555,12 @@ class ONVIFIO extends IPSModule
                 $this->UpdateFormField('OpenReceiversInstance', 'enabled', true);
                 $this->UpdateFormField('OpenReceiversInstance', 'caption', sprintf($this->Translate('Open instance (%d): %s'), $Value, IPS_GetName($Value)));
                 return;
-            //case  'EventsNotSupported':
-                //return $this->EventsNotSupported();
+            case  'ShowLastError':
+                $Data = json_decode($Value, true);
+                $this->UpdateFormField('ErrorTitle', 'caption', $Data['Title']);
+                $this->UpdateFormField('ErrorText', 'caption', $Data['Message']);
+                $this->UpdateFormField('ErrorPopup', 'visible', true);
+                // No break. Add additional comment above this line if intentional
             case'KernelReady':
                 return $this->KernelReady();
         }
@@ -674,10 +678,11 @@ class ONVIFIO extends IPSModule
 
     protected function ShowLastError(string $ErrorMessage, string $ErrorTitle = 'Answer from Device:')
     {
-        IPS_Sleep(2000);
-        $this->UpdateFormField('ErrorTitle', 'caption', $ErrorTitle);
-        $this->UpdateFormField('ErrorText', 'caption', $ErrorMessage);
-        $this->UpdateFormField('ErrorPopup', 'visible', true);
+        $Data = json_encode([
+            'Message'=> $ErrorMessage,
+            'Title'  => $ErrorTitle
+        ]);
+        IPS_RunScriptText('IPS_Sleep(1000);IPS_RequestAction(' . $this->InstanceID . ',"ShowLastError",' . $Data . ');');
     }
 
     protected function GetConsumerAddress()
