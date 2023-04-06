@@ -668,7 +668,7 @@ class ONVIFIO extends IPSModule
             $Form['actions'][4]['values'] = $EventList;
         }
         $Warnings = $this->Warnings;
-        if (count($Warnings)) {
+        if (count($Warnings) && $this->ReadPropertyBoolean('Open')) {
             $WarningText = implode("\r\n", $Warnings);
             $Form['actions'][5]['visible'] = true;
             $Form['actions'][5]['popup']['items'][0]['caption'] = $this->Translate('Some features will not work properly');
