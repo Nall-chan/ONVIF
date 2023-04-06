@@ -175,6 +175,10 @@ class ONVIFIO extends IPSModule
             $this->SetStatus(IS_EBASE + 2);
             return;
         }
+        if ($this->lastSOAPError != '') {
+            $this->ShowLastError($this->lastSOAPError);
+            return;
+        }
         if (!$Scopes) {
             $Scopes = [\ONVIF\Scopes::ProfileS];
             $this->Warnings = array_merge($this->Warnings, [$this->Translate('Failed to get scopes, device not ONVIF compliant!')]);
@@ -301,7 +305,6 @@ class ONVIFIO extends IPSModule
                         $this->SetStatus(IS_EBASE + 2);
                         return;
                     }
-                    $this->GetVideoAnalyticsConfigurations();
                 }
 
                 // Wenn \ONVIF\WSDL::PTZ unterstützt
@@ -560,7 +563,7 @@ class ONVIFIO extends IPSModule
                 $this->UpdateFormField('ErrorTitle', 'caption', $Data['Title']);
                 $this->UpdateFormField('ErrorText', 'caption', $Data['Message']);
                 $this->UpdateFormField('ErrorPopup', 'visible', true);
-                // No break. Add additional comment above this line if intentional
+                return;
             case'KernelReady':
                 return $this->KernelReady();
         }
@@ -682,7 +685,8 @@ class ONVIFIO extends IPSModule
             'Message'=> $ErrorMessage,
             'Title'  => $ErrorTitle
         ]);
-        IPS_RunScriptText('IPS_Sleep(1000);IPS_RequestAction(' . $this->InstanceID . ',"ShowLastError",' . $Data . ');');
+        $this->SendDebug('last', $Data, 0);
+        IPS_RunScriptText('IPS_Sleep(1000);IPS_RequestAction(' . $this->InstanceID . ',"ShowLastError",\'' . $Data . '\');');
     }
 
     protected function GetConsumerAddress()
@@ -1288,27 +1292,6 @@ class ONVIFIO extends IPSModule
         $Result = json_decode(json_encode($AudioSources), true);
         return $Result;
     }
-    protected function GetVideoAnalyticsConfigurations()
-    {
-        $XAddr = $this->ReadAttributeArray('XAddr');
-        $GetVideoAnalyticsConfigurationsResult = $this->SendData($XAddr[\ONVIF\NS::Media], \ONVIF\WSDL::Media, 'GetVideoAnalyticsConfigurations', true);
-        if (is_a($GetVideoAnalyticsConfigurationsResult, 'SoapFault')) {
-            return false;
-        }
-        if (!property_exists($GetVideoAnalyticsConfigurationsResult, 'Configurations')) {
-            return false;
-        }
-        $VideoAnalyticsConfigurations = json_decode(json_encode($GetVideoAnalyticsConfigurationsResult->Configurations), true);
-        $AnalyticsTokens = [];
-        foreach ($VideoAnalyticsConfigurations as $VideoAnalyticsConfiguration) {
-            $Token = $VideoAnalyticsConfiguration['token'];
-            $Name = $VideoAnalyticsConfiguration['Name'];
-            $AnalyticsTokens[$Token] = $Name;
-        }
-        $this->SendDebug('AnalyticsTokens', $AnalyticsTokens, 0);
-        $this->WriteAttributeArray('AnalyticsTokens', $AnalyticsTokens);
-        return true;
-    }
 
     protected function GetSupportedAnalyticsModules(string $AnalyticsToken)
     {
@@ -1362,7 +1345,10 @@ class ONVIFIO extends IPSModule
     }
     protected function GetServices()
     {
-        $Services = $this->SendData('', \ONVIF\WSDL::Management/*'devicemgmt-mod'*/, 'GetServices', true);
+        $Params = [
+            'IncludeCapability'=> true
+        ];
+        $Services = $this->SendData('', \ONVIF\WSDL::Management, 'GetServices', true, $Params);
         if (is_a($Services, 'SoapFault')) {
             return false;
         }
