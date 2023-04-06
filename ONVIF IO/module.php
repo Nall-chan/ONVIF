@@ -674,7 +674,7 @@ class ONVIFIO extends IPSModule
 
     protected function ShowLastError(string $ErrorMessage, string $ErrorTitle = 'Answer from Device:')
     {
-        IPS_Sleep(500);
+        IPS_Sleep(2000);
         $this->UpdateFormField('ErrorTitle', 'caption', $ErrorTitle);
         $this->UpdateFormField('ErrorText', 'caption', $ErrorMessage);
         $this->UpdateFormField('ErrorPopup', 'visible', true);
@@ -830,6 +830,16 @@ class ONVIFIO extends IPSModule
         }
         $SubscriptionReference = $SubscribeResult->SubscriptionReference->Address->{'_'};
         $this->SendDebug('SubscriptionReference', $SubscriptionReference, 0);
+
+        $ReferenceUrl = parse_url($SubscriptionReference, PHP_URL_HOST);
+        $ReferenceUrl = $ReferenceUrl !== null ? $ReferenceUrl : 'INVALID';
+        if (strpos($this->ReadPropertyString('Address'), $ReferenceUrl) === false) {
+            $this->SendDebug('Warning', 'invalid Subscription-Reference, try to fix it', 0);
+            $Url = parse_url($SubscriptionReference);
+            $Url['host'] = parse_url($this->ReadPropertyString('Address'), PHP_URL_HOST);
+            $Url['port'] = parse_url($this->ReadPropertyString('Address'), PHP_URL_PORT);
+            $SubscriptionReference = self::unparse_url($Url);
+        }
         $this->WriteAttributeString('SubscriptionReference', $SubscriptionReference);
         $this->UpdateFormField('SubscriptionReference', 'caption', $SubscriptionReference);
         if (property_exists($SubscribeResult->SubscriptionReference, 'ReferenceParameters')) {
@@ -838,15 +848,6 @@ class ONVIFIO extends IPSModule
             $this->WriteAttributeString('SubscriptionId', $SubscriptionId);
         } else {
             $this->WriteAttributeString('SubscriptionId', '');
-        }
-        $ReferenceUrl = parse_url($SubscriptionReference, PHP_URL_HOST);
-        $ReferenceUrl = $ReferenceUrl !== null ? $ReferenceUrl : 'INVALID';
-        if (strpos($this->ReadPropertyString('Address'), $ReferenceUrl) === false) {
-            $this->SetStatus(IS_EBASE + 3);
-            $this->LogMessage($this->Translate('Connection lost'), KL_ERROR);
-            $this->LogMessage($this->Translate('This device send a invalid Subscription-Reference.'), KL_WARNING);
-            $this->ShowLastError($this->Translate('This device send a invalid Subscription-Reference.'), 'Warning:');
-            return false;
         }
         $this->isSubscribed = true;
         $this->SetTimerInterval('RenewSubscription', 55 * 1000);
@@ -1677,6 +1678,19 @@ class ONVIFIO extends IPSModule
             $this->Host = $Url['scheme'] . '://' . $Url['host'] . $Url['port'];
         }
         $this->ApplyChanges();
+    }
+    protected static function unparse_url($parsed_url)
+    {
+        $scheme = isset($parsed_url['scheme']) ? $parsed_url['scheme'] . '://' : '';
+        $host = isset($parsed_url['host']) ? $parsed_url['host'] : '';
+        $port = isset($parsed_url['port']) ? ':' . $parsed_url['port'] : '';
+        $user = isset($parsed_url['user']) ? urlencode($parsed_url['user']) : '';
+        $pass = isset($parsed_url['pass']) ? ':' . urlencode($parsed_url['pass']) : '';
+        $pass = ($user || $pass) ? "$pass@" : '';
+        $path = isset($parsed_url['path']) ? $parsed_url['path'] : '';
+        $query = isset($parsed_url['query']) ? '?' . $parsed_url['query'] : '';
+        $fragment = isset($parsed_url['fragment']) ? '#' . $parsed_url['fragment'] : '';
+        return "$scheme$user$pass$host$port$path$query$fragment";
     }
     private function GetEventMessageValues(DOMNodeList $xmlNodes)
     {
