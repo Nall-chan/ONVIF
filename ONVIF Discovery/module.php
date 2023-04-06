@@ -229,7 +229,7 @@ class ONVIFDiscovery extends IPSModule
         socket_set_option($sock, SOL_SOCKET, SO_REUSEADDR, 1);
         socket_set_option($sock, IPPROTO_IP, IP_MULTICAST_TTL, 4);
         socket_set_option($sock, SOL_SOCKET, SO_BROADCAST, 1);
-        $Bind = socket_bind($sock, gethostbyname(gethostname()), 3703);
+        $Bind = socket_bind($sock, '0', 3703);
         $this->SendDebug('Start Discovery', $Bind, 0);
         $Bytes = socket_sendto($sock, $discoveryMessage, strlen($discoveryMessage), 0, self::WS_DISCOVERY_MULTICAST_ADDRESS, self::WS_DISCOVERY_MULTICAST_PORT);
         $this->SendDebug('Bytes send', $Bytes, 0);
