@@ -891,11 +891,8 @@ class ONVIFIO extends IPSModule
             $name = $xml->firstChild->nodeName;
             $Header[] = new SoapHeader($ns, $name, new SoapVar($SubscriptionId, XSD_ANYXML), true);
         }
-        $Params = [
-            'TerminationTime' => 'PT1M'
-        ];
         $empty = '';
-        $SetSynchronizationPointResult = $this->SendData($SubscriptionReference, \ONVIF\WSDL::Event, 'SetSynchronizationPoint', true, $Params, $empty, $Header);
+        $SetSynchronizationPointResult = $this->SendData($SubscriptionReference, \ONVIF\WSDL::Event, 'SetSynchronizationPoint', true, [], $empty, $Header);
         if (is_a($SetSynchronizationPointResult, 'SoapFault')) {
             $this->LogMessage($this->Translate('Error SetSynchronizationPoint with:') . $SetSynchronizationPointResult->getMessage(), KL_ERROR);
             return false;
