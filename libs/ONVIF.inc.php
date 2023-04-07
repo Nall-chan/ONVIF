@@ -66,16 +66,22 @@ class ONVIFsoapClient extends \SoapClient
         }
         if (!is_bool($response)) {
             $Parts = explode("\r\n\r\n<?xml", $response);
+            if (count($Parts) == 1) {
+            }
             $Headers = explode("\r\n\r\n", array_shift($Parts));
-            $this->__last_response_headers = array_pop($Headers);
+            $LastHeader = array_pop($Headers);
+            if ($LastHeader == '') {
+                $LastHeader = array_pop($Headers);
+            }
+            $this->__last_response_headers = $LastHeader;
             if (count($Parts)) {
                 $response = '<?xml' . implode("\r\n\r\n<?xml", $Parts);
             } else {
                 $response = '';
             }
         }
-        if (($http_code > 400) && ($request == '')) {
-            throw new \SoapFault((string) $http_code, explode("\r\n", $this->__last_response_headers)[0]);
+        if (($http_code > 400) && ($response == '')) {
+            throw new \SoapFault('http:' . $http_code, explode("\r\n", $this->__last_response_headers)[0]);
             return '';
         }
         return is_bool($response) ? '' : $response;

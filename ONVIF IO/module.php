@@ -177,7 +177,11 @@ class ONVIFIO extends IPSModule
             $this->SetStatus(IS_EBASE + 2);
             return;
         }
-        if ($this->lastSOAPError != '') {
+        if (strpos($this->lastSOAPError, 'authorization') !== false) {
+            $this->ShowLastError($this->lastSOAPError);
+            return;
+        }
+        if (strpos($this->lastSOAPError, 'Unauthorized') !== false) {
             $this->ShowLastError($this->lastSOAPError);
             return;
         }
@@ -683,7 +687,7 @@ class ONVIFIO extends IPSModule
             'Message'=> $ErrorMessage,
             'Title'  => $ErrorTitle
         ]);
-        IPS_RunScriptText('IPS_Sleep(1000);IPS_RequestAction(' . $this->InstanceID . ',"ShowLastError",\'' . $Data . '\');');
+        IPS_RunScriptText('IPS_Sleep(1000);IPS_RequestAction(' . $this->InstanceID . ',"ShowLastError",' . var_export($Data, true) . ');');
     }
 
     protected function GetConsumerAddress()
@@ -770,6 +774,7 @@ class ONVIFIO extends IPSModule
         $this->SetTimerInterval('PullMessages', 1000);
         $this->SetStatus(IS_ACTIVE);
         $this->ReloadForm();
+        $this->SetSynchronizationPoint();
         return true;
     }
     protected function PullMessages()
@@ -780,9 +785,11 @@ class ONVIFIO extends IPSModule
             $this->LogMessage($this->Translate('Call PullMessages with no SubscriptionReference'), KL_ERROR);
             return $this->CreatePullPointSubscription();
         }
-        $Action = 'http://www.onvif.org/ver10/events/wsdl/PullPointSubscription/PullMessagesRequest';
+        /*$Action = 'http://www.onvif.org/ver10/events/wsdl/PullPointSubscription/PullMessagesRequest';
         $Header[] = new SoapHeader('http://www.w3.org/2005/08/addressing', 'Action', new SoapVar($Action, XSD_ANYURI, '', 'http://www.w3.org/2005/08/addressing'), true);
         $Header[] = new SoapHeader('http://www.w3.org/2005/08/addressing', 'To', new SoapVar($SubscriptionReference, XSD_ANYURI, '', 'http://www.w3.org/2005/08/addressing'), true);
+         */
+        $Header = [];
         $Params = [
             'Timeout'     => 'PT0S',
             'MessageLimit'=> 8
@@ -816,11 +823,11 @@ class ONVIFIO extends IPSModule
         if ($XAddr[\ONVIF\NS::Event] == '') {
             return false;
         }
-
-        $Action = 'http://docs.oasis-open.org/wsn/bw-2/SubscriptionManager/SubscribeRequest';
+        /*$Action = 'http://docs.oasis-open.org/wsn/bw-2/SubscriptionManager/SubscribeRequest';
         $Header[] = new SoapHeader('http://www.w3.org/2005/08/addressing', 'Action', new SoapVar($Action, XSD_ANYURI, '', 'http://www.w3.org/2005/08/addressing'), true);
         $Header[] = new SoapHeader('http://www.w3.org/2005/08/addressing', 'To', new SoapVar($this->Host . $XAddr[\ONVIF\NS::Event], XSD_ANYURI, '', 'http://www.w3.org/2005/08/addressing'), true);
-
+         */
+        $Header = [];
         $Params = [
             'ConsumerReference'      => [
                 'Address' => $this->ReadAttributeString('ConsumerAddress')
@@ -860,6 +867,39 @@ class ONVIFIO extends IPSModule
         $this->SetTimerInterval('RenewSubscription', 55 * 1000);
         $this->SetStatus(IS_ACTIVE);
         $this->ReloadForm();
+        $this->SetSynchronizationPoint();
+        return true;
+    }
+    protected function SetSynchronizationPoint()
+    {
+        $SubscriptionReference = $this->ReadAttributeString('SubscriptionReference');
+        if ($SubscriptionReference == '') {
+            $this->SendDebug('ERROR SetSynchronizationPoint', 'No SubscriptionReference', 0);
+            $this->LogMessage($this->Translate('Call SetSynchronizationPoint with no SubscriptionReference'), KL_ERROR);
+            return $this->Subscribe();
+        }
+        /*$Action = 'http://www.onvif.org/ver10/events/wsdl/PullPointSubscription/SetSynchronizationPointRequest';
+        $Header[] = new SoapHeader('http://www.w3.org/2005/08/addressing', 'Action', new SoapVar($Action, XSD_ANYURI, '', 'http://www.w3.org/2005/08/addressing'), true);
+        $Header[] = new SoapHeader('http://www.w3.org/2005/08/addressing', 'To', new SoapVar($SubscriptionReference, XSD_ANYURI, '', 'http://www.w3.org/2005/08/addressing'), true);
+         */
+        $Header = [];
+        $SubscriptionId = $this->ReadAttributeString('SubscriptionId');
+        if ($SubscriptionId != '') {
+            $xml = new DOMDocument();
+            $xml->loadXML($SubscriptionId);
+            $ns = $xml->firstChild->namespaceURI;
+            $name = $xml->firstChild->nodeName;
+            $Header[] = new SoapHeader($ns, $name, new SoapVar($SubscriptionId, XSD_ANYXML), true);
+        }
+        $Params = [
+            'TerminationTime' => 'PT1M'
+        ];
+        $empty = '';
+        $SetSynchronizationPointResult = $this->SendData($SubscriptionReference, \ONVIF\WSDL::Event, 'SetSynchronizationPoint', true, $Params, $empty, $Header);
+        if (is_a($SetSynchronizationPointResult, 'SoapFault')) {
+            $this->LogMessage($this->Translate('Error SetSynchronizationPoint with:') . $SetSynchronizationPointResult->getMessage(), KL_ERROR);
+            return false;
+        }
         return true;
     }
     protected function Renew()
@@ -873,7 +913,6 @@ class ONVIFIO extends IPSModule
         $Action = 'http://docs.oasis-open.org/wsn/bw-2/SubscriptionManager/RenewRequest';
         $Header[] = new SoapHeader('http://www.w3.org/2005/08/addressing', 'Action', new SoapVar($Action, XSD_ANYURI, '', 'http://www.w3.org/2005/08/addressing'), true);
         $Header[] = new SoapHeader('http://www.w3.org/2005/08/addressing', 'To', new SoapVar($SubscriptionReference, XSD_ANYURI, '', 'http://www.w3.org/2005/08/addressing'), true);
-
         $SubscriptionId = $this->ReadAttributeString('SubscriptionId');
         if ($SubscriptionId != '') {
             $xml = new DOMDocument();
@@ -882,7 +921,6 @@ class ONVIFIO extends IPSModule
             $name = $xml->firstChild->nodeName;
             $Header[] = new SoapHeader($ns, $name, new SoapVar($SubscriptionId, XSD_ANYXML), true);
         }
-
         $Params = [
             'TerminationTime' => 'PT1M'
         ];
@@ -919,7 +957,6 @@ class ONVIFIO extends IPSModule
             return false;
         }
         $Action = 'http://docs.oasis-open.org/wsn/bw-2/SubscriptionManager/UnsubscribeRequest';
-
         $Header[] = new SoapHeader('http://www.w3.org/2005/08/addressing', 'Action', new SoapVar($Action, XSD_ANYURI, '', 'http://www.w3.org/2005/08/addressing'), true);
         $Header[] = new SoapHeader('http://www.w3.org/2005/08/addressing', 'To', new SoapVar($SubscriptionReference, XSD_ANYURI, '', 'http://www.w3.org/2005/08/addressing'), true);
         $SubscriptionId = $this->ReadAttributeString('SubscriptionId');
@@ -929,7 +966,7 @@ class ONVIFIO extends IPSModule
             $xml->loadXML($SubscriptionId);
             $ns = $xml->firstChild->namespaceURI;
             $name = $xml->firstChild->nodeName;
-            $Header[] = new SoapHeader($ns, $name, new SoapVar($SubscriptionId, XSD_ANYXML), true);
+            $Header[] = new SoapHeader($ns, $name, new SoapVar($SubscriptionId, XSD_ANYXML));
         }
 
         $empty = '';
