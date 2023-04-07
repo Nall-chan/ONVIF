@@ -59,6 +59,7 @@ class ONVIFIO extends IPSModule
         $this->RegisterAttributeString('ConsumerAddress', '');
         $this->RegisterAttributeString('SubscriptionReference', '');
         $this->RegisterAttributeString('SubscriptionId', '');
+        $this->RegisterAttributeInteger('CapabilitiesVersion', 0);
         $this->RegisterTimer('RenewSubscription', 0, 'IPS_RequestAction(' . $this->InstanceID . ',"Renew",true);');
         $this->RegisterTimer('PullMessages', 0, 'IPS_RequestAction(' . $this->InstanceID . ',"PullMessages",true);');
         $this->Host = '';
@@ -150,6 +151,7 @@ class ONVIFIO extends IPSModule
         $ReloadCapabilities = $ReloadCapabilities || ($this->MyHTTPS != $MyHTTPS);
         $ReloadCapabilities = $ReloadCapabilities || ($this->GetStatus() == 202);
         $ReloadCapabilities = $ReloadCapabilities || ($this->ReadAttributeString('ConsumerAddress') == '');
+        $ReloadCapabilities = $ReloadCapabilities || ($this->ReadAttributeInteger('CapabilitiesVersion') == 0); //Force on initial update, Version 0
         $this->SendDebug('ReloadCapabilities', $ReloadCapabilities, 0);
         $this->SetSummary($Host);
         $this->Host = $Host;
@@ -187,6 +189,7 @@ class ONVIFIO extends IPSModule
 
         $this->SendDebug('ProfileBitMask', $this->Profile->toString(), 0);
         if ($ReloadCapabilities) {
+            $this->WriteAttributeInteger('CapabilitiesVersion', 1); // This is Version 1
             // 3.ONVIF Request GetServices
             $XAddr = $this->GetServices(); // besorgt XAddr, Pflicht bei T, selten bei S unterstützt.
             if (!$XAddr) {
@@ -680,7 +683,6 @@ class ONVIFIO extends IPSModule
             'Message'=> $ErrorMessage,
             'Title'  => $ErrorTitle
         ]);
-        $this->SendDebug('last', $Data, 0);
         IPS_RunScriptText('IPS_Sleep(1000);IPS_RequestAction(' . $this->InstanceID . ',"ShowLastError",\'' . $Data . '\');');
     }
 
@@ -1525,7 +1527,7 @@ class ONVIFIO extends IPSModule
         $this->SendDebug('Send Params', $Params, 0);
         $wsdl = dirname(__DIR__) . '/libs/WSDL/' . $wsdl;
         if ($UseLogin) {
-            if ($this->Profile->HasProfile(\ONVIF\Profile::S)) { // Nur Profile S Geräte können WSSecurity
+            if ($this->Profile->HasProfile(\ONVIF\Profile::S) || ($Function == 'GetScopes')) { // Nur Profile S Geräte können WSSecurity
                 if ($this->ReadPropertyString('Password') != '') {
                     $Header[] = \ONVIF\ONVIF::soapClientWSSecurityHeader($this->ReadPropertyString('Username'), $this->ReadPropertyString('Password'), $this->ReadAttributeInteger('Timestamp_Offset'));
                 }
