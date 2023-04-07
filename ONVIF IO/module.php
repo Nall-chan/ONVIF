@@ -769,6 +769,7 @@ class ONVIFIO extends IPSModule
         $this->isSubscribed = true;
         $this->SetTimerInterval('PullMessages', 1000);
         $this->SetStatus(IS_ACTIVE);
+        $this->ReloadForm();
         return true;
     }
     protected function PullMessages()
@@ -858,6 +859,7 @@ class ONVIFIO extends IPSModule
         $this->isSubscribed = true;
         $this->SetTimerInterval('RenewSubscription', 55 * 1000);
         $this->SetStatus(IS_ACTIVE);
+        $this->ReloadForm();
         return true;
     }
     protected function Renew()

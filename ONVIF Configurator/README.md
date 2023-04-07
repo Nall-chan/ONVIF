@@ -1,5 +1,5 @@
 [![SDK](https://img.shields.io/badge/Symcon-PHPModul-red.svg)](https://www.symcon.de/service/dokumentation/entwicklerbereich/sdk-tools/sdk-php/)
-[![Version](https://img.shields.io/badge/Modul%20Version-1.23-blue.svg)](https://community.symcon.de/t/modul-onvif-profil-s-fuer-ip-kameras-und-encoder/52036)
+[![Version](https://img.shields.io/badge/Modul%20Version-2.00-blue.svg)](https://community.symcon.de/t/modul-onvif-profil-s-fuer-ip-kameras-und-encoder/52036)
 [![Version](https://img.shields.io/badge/Symcon%20Version-6.1%20%3E-green.svg)](https://www.symcon.de/service/dokumentation/installation/migrationen/v60-v61-q1-2022/)  
 [![License](https://img.shields.io/badge/License-CC%20BY--NC--SA%204.0-green.svg)](https://creativecommons.org/licenses/by-nc-sa/4.0/)
 [![Check Style](https://github.com/Nall-chan/ONVIF/workflows/Check%20Style/badge.svg)](https://github.com/Nall-chan/ONVIF/actions)
@@ -18,6 +18,7 @@ Beschreibung des Moduls.
   - [Beispiel 1: Keine Digital IOs](#beispiel-1-keine-digital-ios)
   - [Beispiel 2: Mit Digital IOs](#beispiel-2-mit-digital-ios)
   - [Beispiel 3: Multikanal-Geräte](#beispiel-3-multikanal-geräte)
+  - [Beispiel 4: Mit Events und mehreren Profilen](#beispiel-4-mit-events-und-mehreren-profilen)
 - [5. Statusvariablen](#5-statusvariablen)
 - [6. WebFront](#6-webfront)
 - [7. PHP-Funktionsreferenz](#7-php-funktionsreferenz)
@@ -52,8 +53,7 @@ Beschreibung des Moduls.
 - ONVIF Image Grabber ([Dokumentation](../ONVIF%20Image%20Grabber/README.md))
 - ONVIF Digital Input ([Dokumentation](../ONVIF%20Digital%20Input/README.md))
 - ONVIF Digital Output ([Dokumentation](../ONVIF%20Digital%20Output/README.md))
-
-**Eventuell benötigte ONVIF Events Instanzen ([Dokumentation](../ONVIF%20Events/README.md)) sind manuell einzurichten.**  
+- ONVIF Events ([Dokumentation](../ONVIF%20Events/README.md))
 
 ### Beispiel 1: Keine Digital IOs   
 ![Config](imgs/Config1.png)  
@@ -67,6 +67,13 @@ Dieses Gerät hat ebenfalls nur einen Videoeingang (Videosignal / Videoquelle), 
 ![Config](imgs/Config3.png)
 Dieses Gerät stellt 5 Videosignale (Videoquellen) bereit.  
 In diesem Fall sind es 4 Videoeingänge und ein Quad-Bild aller 4 Videoeingänge.
+
+### Beispiel 4: Mit Events und mehreren Profilen
+![Config](imgs/Config4.png)
+Dieses Gerät stellt 3 Parent Topics für Events bereit.  
+In diesem Fall sind es `RecordingConfig`, `Media` und `IVA` (=> Intelligent Video Analytics).  
+Außerdem werden pro Videosignal mehr als ein Profil angeboten.  
+Hier ist die Stream-Instanz für das `HD Bit Rate`-Profil schon vorhanden und der Konfigurator bietet jetzt zusätzlich noch `Image optimized` als weiteres Profil für eine Instanz an.  
 
 ## 5. Statusvariablen
 

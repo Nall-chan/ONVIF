@@ -1,5 +1,5 @@
 [![SDK](https://img.shields.io/badge/Symcon-PHPModul-red.svg)](https://www.symcon.de/service/dokumentation/entwicklerbereich/sdk-tools/sdk-php/)
-[![Version](https://img.shields.io/badge/Modul%20Version-1.23-blue.svg)](https://community.symcon.de/t/modul-onvif-profil-s-fuer-ip-kameras-und-encoder/52036)
+[![Version](https://img.shields.io/badge/Modul%20Version-2.00-blue.svg)](https://community.symcon.de/t/modul-onvif-profil-s-fuer-ip-kameras-und-encoder/52036)
 [![Version](https://img.shields.io/badge/Symcon%20Version-6.1%20%3E-green.svg)](https://www.symcon.de/service/dokumentation/installation/migrationen/v60-v61-q1-2022/)  
 [![License](https://img.shields.io/badge/License-CC%20BY--NC--SA%204.0-green.svg)](https://creativecommons.org/licenses/by-nc-sa/4.0/)
 [![Check Style](https://github.com/Nall-chan/ONVIF/workflows/Check%20Style/badge.svg)](https://github.com/Nall-chan/ONVIF/actions)
@@ -16,7 +16,6 @@ Stellt die Verbindung zu einem ONVIF-Gerät her.
 - [3. Software-Installation](#3-software-installation)
 - [4. Einrichten der Instanzen in IP-Symcon](#4-einrichten-der-instanzen-in-ip-symcon)
   - [Konfigurationsseite: Übersicht](#konfigurationsseite-übersicht)
-  - [Konfigurationsseite: Ereignisse möglich](#konfigurationsseite-ereignisse-möglich)
   - [Konfigurationsseite: Ereignisse nicht möglich](#konfigurationsseite-ereignisse-nicht-möglich)
 - [5. Statusvariablen](#5-statusvariablen)
 - [6. WebFront](#6-webfront)
@@ -50,8 +49,6 @@ Stellt die Verbindung zu einem ONVIF-Gerät her.
  
  ### Konfigurationsseite: Übersicht
 
-![Config](imgs/Config2.png)  
-
 | Name         | Text                | Beschreibung                                                                  |
 | ------------ | ------------------- | ----------------------------------------------------------------------------- |
 | Open         | Aktiv               | Öffnet/Aktiviert die Verbindung zum Gerät.                                    |
@@ -62,17 +59,20 @@ Stellt die Verbindung zu einem ONVIF-Gerät her.
 | WebHookPort  | Experteneinstellung | Port unter welchem IPS von dem Gerät aus erreichbar ist (3777)                |
 | WebHookHTTPS | Experteneinstellung | true wenn https benutzt werden soll                                           |
 
-### Konfigurationsseite: Ereignisse möglich  
+![Config](imgs/Config2.png)  
 
-![Config](imgs/Config1.png)  
+Der Aktions-Bereich zeigt aktuelle Informationen zur Verbindung an.
 
-Der Aktions-Bereich zeigt aktuelle Informationen zur Verbindung an, sofern das Gerät ONVIF-Ereignisse unterstützt.  
-Es wird der `Ereignis-Hook`, auf welchen Symcon die Nachrichten des Endgerätes empfängt angezeigt. Ebenso wie auch die `Abonnementreferenz`, welche Symcon vom Gerät erhalten hat.  
+Unter `Geräteinformationen` werden die gemeldeten Informationen und erkannten Fähigkeiten aufgeführt.  
+
+Sofern das Gerät ONVIF-Ereignisse unterstützt, wird eine Adresse unter  `Abonnementreferenz` angezeigt, welche Symcon vom Gerät erhalten hat. 
+
+Für Geräte welche das ONVIF Profile S unterstützen, wird der `Ereignis-Hook`, auf welchen Symcon die Nachrichten des Endgerätes empfängt angezeigt.  
 Die IP-Adresse des `Ereignis-Hook` wird automatisch ermittelt, je nachdem über welchen Adresse das Gerät erreichbar ist.  
 <span style="color:red">**Diese Erkennung funktioniert nicht bei NAT, da hier die externe Adresse Symcon nicht automatisch ermitteln kann.  
 Es müssen die [Spezialschalter](https://www.symcon.de/service/dokumentation/entwicklerbereich/spezialschalter/) `NATSupport` und `NATPublicIP` benutzt werden**</span>  
-
 <span style="color:red">**Wird der übliche Port (3777) von Symcon nicht benutzt (z.B. forwarding NAT) so kann hier der Port, unter welchen Symcon erreichbar ist, angepasst werden.**</span> 
+
 
 In der Tabelle wird eine Liste aller vom Gerät gemeldeten Ereignissen angezeigt, welche sich in Symcon nutzen lassen. Über das Feld `Benutzt` wird angezeigt ob das Ereignis in einer Instanz konfiguriert wurde. Und über das Zahnrad einer Zeile werden diese Instanzen tabellarisch angezeigt.  
 
