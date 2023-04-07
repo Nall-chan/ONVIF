@@ -10,6 +10,7 @@
             "Error on read capabilities.": "Fehler beim Lesen der Fähigkeiten.",
             "Instance has no active parent.": "Instanz hat kein aktives übergeordnetes Element.",
             "Unknown error.": "Unbekannter Fehler.",
+            "No valid answer.": "Keine gültige Antwort.",
             "none": "keine",
             "nothing": "keins",
             "Videoencoder-Profilename:": "Videoencoder-Profilname:",
@@ -25,6 +26,7 @@
             "Use in-memory cache": "Benutze In-Memory Cache",
             "Update Image": "Jetzt aktualisieren",
             "seconds": "Sekunden",
+            "Image": "Bild",
             "This module is free for non-commercial use,\r\nDonations in support of the author are accepted here:": "Dieses Modul ist für die nicht kommerzielle Nutzung kostenlos,\r\nSchenkungen als Unterstützung für den Autor werden hier akzeptiert:"
         }
     }

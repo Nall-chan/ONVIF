@@ -99,7 +99,7 @@ class ONVIFDigitalInput extends ONVIFModuleBase
                         [
                             'type'    => 'Label',
                             'width'   => '100px',
-                            'caption' => $this->Translate('IdleState:')
+                            'caption' => $this->Translate('IdleState: ')
                         ],
                         [
                             'type'    => 'Label',

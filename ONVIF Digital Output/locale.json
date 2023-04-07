@@ -9,11 +9,12 @@
             "Invalid Ident": "Ungültiger Ident",
             "Unsupported Datatype": "Nicht unterstützen Datentyp",
             "Relay output: ": "Relaisausgang: ",
-            "Mode:": "Modus:",
-            "DelayTime:": "Verzögerung:",
-            "IdleState:": "Ruhelage:",
+            "Mode: ": "Modus: ",
+            "DelayTime: ": "Verzögerung: ",
+            "IdleState: ": "Ruhelage: ",
             "Instance has no active parent.": "Instanz hat kein aktives übergeordnetes Element.",
             "Unknown error.": "Unbekannter Fehler.",
+            "No valid answer.": "Keine gültige Antwort.",
             "This module is free for non-commercial use,\r\nDonations in support of the author are accepted here:": "Dieses Modul ist für die nicht kommerzielle Nutzung kostenlos,\r\nSchenkungen als Unterstützung für den Autor werden hier akzeptiert:"
         }
     }

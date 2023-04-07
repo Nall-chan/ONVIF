@@ -546,17 +546,12 @@ class ONVIFIO extends IPSModule
                     $this->WriteAttributeString('ConsumerAddress', '');
                     return;
                 }
-                $this->UpdateFormField('ErrorTitle', 'caption', 'Please wait!');
-                $this->UpdateFormField('ErrorText', 'caption', 'Determine abilities of this device');
+                $this->UpdateFormField('ErrorTitle', 'caption', $this->Translate('Please wait!'));
+                $this->UpdateFormField('ErrorText', 'caption', $this->Translate('Determine abilities of this device'));
                 $this->UpdateFormField('ErrorPopup', 'visible', true);
                 $this->WriteAttributeString('ConsumerAddress', '');
                 $this->ApplyChanges();
                 $this->ReloadForm();
-                return;
-            case  'UpdateOpenObjectButton':
-                $this->UpdateFormField('OpenReceiversInstance', 'objectID', $Value);
-                $this->UpdateFormField('OpenReceiversInstance', 'enabled', true);
-                $this->UpdateFormField('OpenReceiversInstance', 'caption', sprintf($this->Translate('Open instance (%d): %s'), $Value, IPS_GetName($Value)));
                 return;
             case  'ShowLastError':
                 $Data = json_decode($Value, true);

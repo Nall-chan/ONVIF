@@ -144,7 +144,7 @@ class ONVIFDigitalOutput extends ONVIFModuleBase
                         [
                             'type'    => 'Label',
                             'width'   => '100px',
-                            'caption' => $this->Translate('Mode:')
+                            'caption' => $this->Translate('Mode: ')
                         ],
                         [
                             'type'    => 'Label',
@@ -160,7 +160,7 @@ class ONVIFDigitalOutput extends ONVIFModuleBase
                                 [
                                     'type'    => 'Label',
                                     'width'   => '100px',
-                                    'caption' => $this->Translate('DelayTime:')
+                                    'caption' => $this->Translate('DelayTime: ')
                                 ],
                                 [
                                     'type'    => 'Label',
@@ -178,7 +178,7 @@ class ONVIFDigitalOutput extends ONVIFModuleBase
                         [
                             'type'    => 'Label',
                             'width'   => '100px',
-                            'caption' => $this->Translate('IdleState:')
+                            'caption' => $this->Translate('IdleState: ')
                         ],
                         [
                             'type'    => 'Label',

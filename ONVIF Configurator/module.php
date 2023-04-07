@@ -188,7 +188,7 @@ class ONVIFConfigurator extends ONVIFModuleBase
                     ];
                 }
                 if (count($Create) == 1) {
-                    $Device['name']=$VideoSource['VideoSourceName'] . ' (' . $Profile['Name'] . ')';
+                    $Device['name'] = $VideoSource['VideoSourceName'] . ' (' . $Profile['Name'] . ')';
                     $Create = array_shift($Create);
                 }
                 $Device['create'] = $Create;
@@ -212,7 +212,7 @@ class ONVIFConfigurator extends ONVIFModuleBase
             'location'      => [$this->Translate('ONVIF Devices'), IPS_GetName($this->InstanceID)]
         ];
         $StreamJPEGValues = [];
-        $IPSStreamJPEGInstances = $this->GetInstanceList(self::GUID_ONVIF_IMAGE_GRABBER, ['Profile','VideoSource']);
+        $IPSStreamJPEGInstances = $this->GetInstanceList(self::GUID_ONVIF_IMAGE_GRABBER, ['Profile', 'VideoSource']);
         foreach ($Capabilities['VideoSourcesJPEG'] as $VideoSourceJPEG) {
             foreach ($VideoSourceJPEG['Profile'] as $ProfileIndex =>$Profile) {
                 $InstanceID = array_search($Profile['token'] . ':' . $VideoSourceJPEG['VideoSourceToken'], $IPSStreamJPEGInstances);
@@ -224,7 +224,7 @@ class ONVIFConfigurator extends ONVIFModuleBase
                         'VideoSource' => $VideoSourceJPEG['VideoSourceToken'],
                         'name'        => IPS_GetName($InstanceID),
                         'Location'    => stristr(IPS_GetLocation($InstanceID), IPS_GetName($InstanceID), true),
-                        'create'=> $StreamJPEGCreateParams
+                        'create'      => $StreamJPEGCreateParams
                     ];
                     $Device['create']['configuration'] = [
                         'VideoSource' => $VideoSourceJPEG['VideoSourceToken'],
@@ -251,18 +251,18 @@ class ONVIFConfigurator extends ONVIFModuleBase
                     ];
                 }
                 if (count($Create) == 1) {
-                    $Device['name']=$VideoSourceJPEG['VideoSourceName'] . ' (' . $Profile['Name'] . ')';
+                    $Device['name'] = $VideoSourceJPEG['VideoSourceName'] . ' (' . $Profile['Name'] . ')';
                     $Create = array_shift($Create);
                 }
                 $Device['create'] = $Create;
                 $StreamJPEGValues[] = $Device;
-            }  
+            }
         }
         foreach ($IPSStreamJPEGInstances as $InstanceID => $VideoSourceJPEG) {
             $Device = [
                 'instanceID'  => $InstanceID,
                 'type'        => 'Image Grabber',
-                'VideoSource' =>  explode(':', $VideoSourceJPEG)[1],
+                'VideoSource' => explode(':', $VideoSourceJPEG)[1],
                 'name'        => IPS_GetName($InstanceID),
                 'Location'    => stristr(IPS_GetLocation($InstanceID), IPS_GetName($InstanceID), true)
             ];
