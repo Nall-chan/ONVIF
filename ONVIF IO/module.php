@@ -356,18 +356,18 @@ class ONVIFIO extends IPSModule
                     }
 
                     foreach (array_keys($AnalyticsTokens) as $AnalyticsToken) {
-                        if ($this->ReadAttributeBoolean('AnalyticsModuleSupport')) {
+//                        if ($this->ReadAttributeBoolean('AnalyticsModuleSupport')) {
                             $AnalyticsModulesTopicData = $this->GetSupportedAnalyticsModules($AnalyticsToken);
                             if ($AnalyticsModulesTopicData) {
                                 $AllEventProperties = array_merge($AllEventProperties, $AnalyticsModulesTopicData);
                             }
-                        }
-                        if ($this->ReadAttributeBoolean('RuleSupport')) {
+//                        }
+//                        if ($this->ReadAttributeBoolean('RuleSupport')) {
                             $SupportedRuleTopicData = $this->GetSupportedRules($AnalyticsToken);
                             if ($SupportedRuleTopicData) {
                                 $AllEventProperties = array_merge($AllEventProperties, $SupportedRuleTopicData);
                             }
-                        }
+//                        }
                     }
                 } else {
                     if (count($AnalyticsTokens)) {
