@@ -53,6 +53,16 @@
             "Please wait!": "Bitte warten!",
             "Determine abilities of this device": "Ermittle die Fähigkeiten des Gerätes",
             "Sender not Authorized": "Nicht autorisiert",
+            "Manufacturer: ": "Hersteller: ",
+            "Serial number: ": "Seriennummer: ",
+            "Supported ONVIF Profile: ": "Unterstützte ONVIF Profile: ",
+            "supported": "unterstützt",
+            "not supported": "nicht unterstützt",
+            "Videosources: ": "Videoquellen: ",
+            "Audiosources: ": "Audioquellen: ",
+            "Inputs: ": "Eingänge: ",
+            "Outputs: ": "Ausgänge: ",
+            "Serial ports: ": "Serialports: ",
             "This module is free for non-commercial use,\r\nDonations in support of the author are accepted here:": "Dieses Modul ist für die nicht kommerzielle Nutzung kostenlos,\r\nSchenkungen als Unterstützung für den Autor werden hier akzeptiert:"
         }
     }

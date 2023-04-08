@@ -67,11 +67,17 @@
             "onClick": "IPS_RequestAction($id,'Reload',true);"
         },
         {
-            "name": "DeviceData",
+            "name": "DeviceDataPanel",
             "caption": "Device information",
             "type": "ExpansionPanel",
             "expanded": false,
-            "items": []
+            "items": [
+                {
+                    "name": "DeviceData",
+                    "type": "RowLayout",
+                    "items": []
+                }
+            ]
         },
         {
             "name": "EventHookRow",

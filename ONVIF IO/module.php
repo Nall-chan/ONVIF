@@ -278,7 +278,11 @@ class ONVIFIO extends IPSModule
                     if ($MediaCapabilities) {
                         $Capabilities = $MediaCapabilities['Capabilities'];
                         $this->WriteAttributeBoolean('HasRTSPStreaming', $Capabilities['StreamingCapabilities']['RTSPStreaming'] || $Capabilities['StreamingCapabilities']['RTP_RTSP_TCP']);
-                        $this->WriteAttributeBoolean('HasSnapshotUri', $Capabilities['SnapshotUri']);
+                        if (isset($Capabilities['SnapshotUri'])) {
+                            $this->WriteAttributeBoolean('HasSnapshotUri', $Capabilities['SnapshotUri']);
+                        } else {
+                            $this->WriteAttributeBoolean('HasSnapshotUri', true);
+                        }
                     } else {
                         if ($this->Profile->HasProfile(\ONVIF\Profile::T)) { //Profile T ist GetServiceCapabilities bei Media2 Pflicht
                             $this->Warnings = array_merge($this->Warnings, [$this->Translate('Failed to get Media2 service capabilities. Device reported ONVIF T scope, but is not compliant!')]);
@@ -300,12 +304,17 @@ class ONVIFIO extends IPSModule
                         } else {
                             $this->WriteAttributeBoolean('HasRTSPStreaming', $Capabilities['StreamingCapabilities']['RTP_TCP'] || $Capabilities['StreamingCapabilities']['RTP_RTSP_TCP']);
                         }
+                        if (isset($Capabilities['SnapshotUri'])) {
+                            $this->WriteAttributeBoolean('HasSnapshotUri', $Capabilities['SnapshotUri']);
+                        } else {
+                            $this->WriteAttributeBoolean('HasSnapshotUri', true);
+                        }
                     } else {
                         if ($this->Profile->HasProfile(\ONVIF\Profile::T)) { //Profile T ist GetServiceCapabilities bei Media Pflicht
                             $this->Warnings = array_merge($this->Warnings, [$this->Translate('Failed to get Media service capabilities. Device reported ONVIF T scope, but is not compliant!')]);
                         }
                     }
-                    $this->WriteAttributeBoolean('HasSnapshotUri', true);
+
                     // 4c.ONVIF Request GetProfiles an \ONVIF\WSDL::Media
                     if (!$this->GetProfiles()) {
                         $this->SetStatus(IS_EBASE + 2);
@@ -357,16 +366,16 @@ class ONVIFIO extends IPSModule
 
                     foreach (array_keys($AnalyticsTokens) as $AnalyticsToken) {
 //                        if ($this->ReadAttributeBoolean('AnalyticsModuleSupport')) {
-                            $AnalyticsModulesTopicData = $this->GetSupportedAnalyticsModules($AnalyticsToken);
-                            if ($AnalyticsModulesTopicData) {
-                                $AllEventProperties = array_merge($AllEventProperties, $AnalyticsModulesTopicData);
-                            }
+                        $AnalyticsModulesTopicData = $this->GetSupportedAnalyticsModules($AnalyticsToken);
+                        if ($AnalyticsModulesTopicData) {
+                            $AllEventProperties = array_merge($AllEventProperties, $AnalyticsModulesTopicData);
+                        }
 //                        }
 //                        if ($this->ReadAttributeBoolean('RuleSupport')) {
-                            $SupportedRuleTopicData = $this->GetSupportedRules($AnalyticsToken);
-                            if ($SupportedRuleTopicData) {
-                                $AllEventProperties = array_merge($AllEventProperties, $SupportedRuleTopicData);
-                            }
+                        $SupportedRuleTopicData = $this->GetSupportedRules($AnalyticsToken);
+                        if ($SupportedRuleTopicData) {
+                            $AllEventProperties = array_merge($AllEventProperties, $SupportedRuleTopicData);
+                        }
 //                        }
                     }
                 } else {
@@ -558,7 +567,6 @@ class ONVIFIO extends IPSModule
                 return $this->KernelReady();
         }
     }
-
     public function GetConfigurationForm()
     {
         $Form = json_decode(file_get_contents(__DIR__ . '/form.json'), true);
@@ -566,76 +574,7 @@ class ONVIFIO extends IPSModule
             if ($this->Profile->Profile == \ONVIF\Profile::T) {
                 $Form['elements'][3]['visible'] = false;
             }
-            $Form['actions'][1]['expanded'] = true;
-            $Device = $this->GetDeviceInformation();
-            if ($Device) {
-                $InfoItems = [
-                    [
-                        'width'     => '400px',
-                        'type'      => 'Label',
-                        'caption'   => 'Model: ' . $Device['Model']
-                    ],
-                    [
-                        'type'      => 'Label',
-                        'caption'   => 'Manufacturer: ' . $Device['Manufacturer']
-                    ],
-                    [
-                        'type'      => 'Label',
-                        'caption'   => 'Firmware: ' . $Device['FirmwareVersion']
-                    ],
-                    [
-                        'type'      => 'Label',
-                        'caption'   => 'Serial number: ' . $Device['SerialNumber']
-                    ]
-                ];
-            }
-
-            $InfoItems[] =
-            [
-                'width'     => '400px',
-                'type'      => 'Label',
-                'caption'   => 'Profile: ' . $this->Profile->toString()
-            ];
-            $DeviceItems = [
-                [
-                    'width'     => '200px',
-                    'type'      => 'Label',
-                    'caption'   => 'VideoSources: ' . $this->ReadAttributeInteger('NbrOfVideoSources')
-                ],
-                [
-                    'type'      => 'Label',
-                    'caption'   => 'AudioSources: ' . $this->ReadAttributeInteger('NbrOfAudioSources')
-                ],
-                [
-                    'type'      => 'Label',
-                    'caption'   => 'Inputs: ' . $this->ReadAttributeInteger('NbrOfInputs')
-                ],
-                [
-                    'type'      => 'Label',
-                    'caption'   => 'Outputs: ' . $this->ReadAttributeInteger('NbrOfOutputs')
-                ],
-                [
-                    'type'      => 'Label',
-                    'caption'   => 'Serial ports: ' . $this->ReadAttributeInteger('NbrOfSerialPorts')
-                ]
-            ];
-
-            $Items = [
-                [
-                    'type'    => 'RowLayout',
-                    'items'   => [
-                        [
-                            'type' => 'ColumnLayout',
-                            'items'=> $InfoItems
-                        ],
-                        [
-                            'type' => 'ColumnLayout',
-                            'items'=> $DeviceItems
-                        ]
-                    ]
-                ]
-            ];
-            $Form['actions'][1]['items'] = $Items;
+            $Form['actions'][1]['items'][0]['items'] = $this->GetDeviceDataForForm();
             $SubscriptionReference = $this->ReadAttributeString('SubscriptionReference');
             if ($SubscriptionReference == '') {
                 $SubscriptionReference = $this->Translate('This device not support events.');
@@ -667,6 +606,94 @@ class ONVIFIO extends IPSModule
         $this->SendDebug('FORM', json_encode($Form), 0);
         $this->SendDebug('FORM', json_last_error_msg(), 0);
         return json_encode($Form);
+    }
+    protected function GetDeviceDataForForm()
+    {
+        $Device = $this->GetDeviceInformation();
+        if ($Device) {
+            $InfoItems = [
+                [
+                    'width'     => '400px',
+                    'type'      => 'Label',
+                    'caption'   => 'Model: ' . $Device['Model']
+                ],
+                [
+                    'type'      => 'Label',
+                    'caption'   => $this->Translate('Manufacturer: ') . $Device['Manufacturer']
+                ],
+                [
+                    'type'      => 'Label',
+                    'caption'   => 'Firmware: ' . $Device['FirmwareVersion']
+                ],
+                [
+                    'type'      => 'Label',
+                    'caption'   => $this->Translate('Serial number: ') . $Device['SerialNumber']
+                ]
+            ];
+        }
+
+        $InfoItems[] =
+    [
+        'width'     => '400px',
+        'type'      => 'Label',
+        'caption'   => $this->Translate('Supported ONVIF Profile: ') . $this->Profile->toString()
+    ];
+        $DeviceItems = [
+            [
+                'width'     => '200px',
+                'type'      => 'Label',
+                'caption'   => $this->Translate('Videosources: ') . $this->ReadAttributeInteger('NbrOfVideoSources')
+            ],
+            [
+                'type'      => 'Label',
+                'caption'   => $this->Translate('Audiosources: ') . $this->ReadAttributeInteger('NbrOfAudioSources')
+            ],
+            [
+                'type'      => 'Label',
+                'caption'   => $this->Translate('Inputs: ') . $this->ReadAttributeInteger('NbrOfInputs')
+            ],
+            [
+                'type'      => 'Label',
+                'caption'   => $this->Translate('Outputs: ') . $this->ReadAttributeInteger('NbrOfOutputs')
+            ],
+            [
+                'type'      => 'Label',
+                'caption'   => $this->Translate('Serial ports: ') . $this->ReadAttributeInteger('NbrOfSerialPorts')
+            ],
+            [
+                'type'      => 'Label',
+                'caption'   => 'RTSP Streaming: ' . ($this->ReadAttributeBoolean('HasRTSPStreaming') ? $this->Translate('supported') : $this->Translate('not supported'))
+            ],
+            [
+                'type'      => 'Label',
+                'caption'   => 'Snapshots: ' . ($this->ReadAttributeBoolean('HasSnapshotUri') ? $this->Translate('supported') : $this->Translate('not supported'))
+            ],
+            [
+                'type'      => 'Label',
+                'caption'   => 'Analytics: ' . ($this->ReadAttributeBoolean('AnalyticsModuleSupport') ? $this->Translate('supported') : $this->Translate('not supported'))
+            ],
+            [
+                'type'      => 'Label',
+                'caption'   => 'Rules: ' . ($this->ReadAttributeBoolean('RuleSupport') ? $this->Translate('supported') : $this->Translate('not supported'))
+            ]
+
+        ];
+
+        return  [
+            [
+                'type'    => 'RowLayout',
+                'items'   => [
+                    [
+                        'type' => 'ColumnLayout',
+                        'items'=> $InfoItems
+                    ],
+                    [
+                        'type' => 'ColumnLayout',
+                        'items'=> $DeviceItems
+                    ]
+                ]
+            ]
+        ];
     }
 
     protected function ShowLastError(string $ErrorMessage, string $ErrorTitle = 'Answer from Device:')
@@ -762,6 +789,10 @@ class ONVIFIO extends IPSModule
         $this->isSubscribed = true;
         $this->SetTimerInterval('PullMessages', 1000);
         $this->SetStatus(IS_ACTIVE);
+        $this->UpdateFormField('DeviceData', 'items', json_encode($this->GetDeviceDataForForm()));
+        $this->UpdateFormField('DeviceDataPanel', 'visible', true);
+        $this->UpdateFormField('DeviceDataPanel', 'expanded', true);
+        $this->UpdateFormField('Events', 'visible', true);
         $this->SetSynchronizationPoint();
         return true;
     }
@@ -848,6 +879,11 @@ class ONVIFIO extends IPSModule
         $this->isSubscribed = true;
         $this->SetTimerInterval('RenewSubscription', 55 * 1000);
         $this->SetStatus(IS_ACTIVE);
+        $this->UpdateFormField('DeviceData', 'items', json_encode($this->GetDeviceDataForForm()));
+        $this->UpdateFormField('DeviceDataPanel', 'visible', true);
+        $this->UpdateFormField('DeviceDataPanel', 'expanded', true);
+        $this->UpdateFormField('Events', 'visible', true);
+
         $this->SetSynchronizationPoint();
         return true;
     }
@@ -1226,6 +1262,14 @@ class ONVIFIO extends IPSModule
                 } else {
                     $XAddr[\ONVIF\NS::Media2] = $MediaUrl;
                 }
+                $HasRTSPStreaming = false;
+                if (isset($CapabilitiesResult['Capabilities']['Media']['StreamingCapabilities']['RTP_TCP'])) {
+                    $HasRTSPStreaming = $CapabilitiesResult['Capabilities']['Media']['StreamingCapabilities']['RTP_TCP'];
+                }
+                if (isset($CapabilitiesResult['Capabilities']['Media']['StreamingCapabilities']['RTP_RTSP_TCP'])) {
+                    $HasRTSPStreaming = $HasRTSPStreaming || $CapabilitiesResult['Capabilities']['Media']['StreamingCapabilities']['RTP_RTSP_TCP'];
+                }
+                $this->WriteAttributeBoolean('HasRTSPStreaming', $HasRTSPStreaming);
             }
             if (isset($CapabilitiesResult['Capabilities']['PTZ']['XAddr'])) {
                 $XAddr[\ONVIF\NS::PTZ] = parse_url($CapabilitiesResult['Capabilities']['PTZ']['XAddr'], PHP_URL_PATH);

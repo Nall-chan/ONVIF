@@ -49,15 +49,18 @@ class ONVIFModuleBase extends IPSModule
 
     public function ApplyChanges()
     {
+        $EventTopic = $this->ReadPropertyString('EventTopic');
+        $PullEvents = ($EventTopic != $this->EventTopic);
         //Never delete this line!
         parent::ApplyChanges();
         $this->RegisterMessage($this->InstanceID, FM_CONNECT);
         $this->RegisterMessage($this->InstanceID, FM_DISCONNECT);
-        $EventTopic = $this->ReadPropertyString('EventTopic');
+
         if ($EventTopic == '') {
-            $EventTopic = 'NOTHING';
+            $TopicFilter = '.*"Topic":"NOTHING".*';
+        } else {
+            $TopicFilter = '.*"Topic":"' . preg_quote(substr(json_encode($EventTopic), 1, -1)) . '.*';
         }
-        $TopicFilter = '.*"Topic":"' . preg_quote(substr(json_encode($EventTopic), 1, -1)) . '.*';
         $this->SetReceiveDataFilter($TopicFilter);
         $this->SendDebug('SetReceiveDataFilter', $TopicFilter, 0);
 
@@ -65,13 +68,11 @@ class ONVIFModuleBase extends IPSModule
             return;
         }
         $this->RegisterParent();
-        $Events = $this->GetEvents($this->ReadPropertyString('EventTopic'));
+        $Events = $this->GetEvents($EventTopic);
         $this->WriteAttributeArray('EventProperties', $Events);
-        if (($EventTopic != '') && ($this->HasActiveParent())) {
-            if ($EventTopic != $this->EventTopic) {
-                $this->$EventTopic = $EventTopic;
-                IPS_RunScriptText('IPS_RequestAction(' . $this->InstanceID . ',"SetSynchronizationPoint",true);');
-            }
+        if ($PullEvents && ($this->HasActiveParent())) {
+            $this->$EventTopic = $EventTopic;
+            IPS_RunScriptText('IPS_RequestAction(' . $this->InstanceID . ',"SetSynchronizationPoint",true);');
         }
     }
 
