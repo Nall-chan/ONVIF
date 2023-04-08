@@ -31,6 +31,7 @@
             "Failed to get Media2 service capabilities. Device reported ONVIF T scope, but is not compliant!": "Fehler beim Abrufen der Media2-Dienstfunktionen. Das Gerät hat den ONVIF T-Scope gemeldet, ist aber nicht konform!",
             "Failed to get Imaging service capabilities. Device reported ONVIF T scope, but is not compliant!": "Imaging-Dienstfunktionen konnten nicht abgerufen werden. Das Gerät hat den ONVIF T-Scope gemeldet, ist aber nicht konform!",
             "Failed to get Event service capabilities. Device reported ONVIF T scope, but is not compliant!": "Ereignisdienstfunktionen konnten nicht abgerufen werden. Das Gerät hat den ONVIF T-Scope gemeldet, ist aber nicht konform!",
+            "Analytics events could not be retrieved. The device reported AnalyticsTokens, but the Analytics namespace and XAddr were not reported!": "Analytics-Ereignisse konnten nicht abgerufen werden. Das Gerät hat AnalyticsTokens gemeldet, aber der Analytics-Namespace und XAddr wurden nicht gemeldet!",
             "This device not support events.": "Dieses Gerät unterstützt keine Ereignisse.",
             "This device does not support ONVIF events, but it is mandatory.": "Dieses Gerät unterstützt keine ONVIF-Ereignisse, dies ist jedoch obligatorisch.",
             "Some features will not work properly": "Einige Funktionen werden nicht richtig funktionieren",

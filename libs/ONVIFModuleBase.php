@@ -12,6 +12,7 @@ require_once __DIR__ . '/wsdl.php';
 
 /**
  * @property int $ParentID
+ * @property string $EventTopic
  */
 class ONVIFModuleBase extends IPSModule
 {
@@ -33,6 +34,7 @@ class ONVIFModuleBase extends IPSModule
         //Never delete this line!
         parent::Create();
         $this->RegisterPropertyString('EventTopic', '');
+        $this->EventTopic = '';
         $this->RegisterAttributeArray('EventProperties', []);
         if (IPS_GetKernelRunlevel() != KR_READY) {
             $this->RegisterMessage(0, IPS_KERNELSTARTED);
@@ -65,11 +67,21 @@ class ONVIFModuleBase extends IPSModule
         $this->RegisterParent();
         $Events = $this->GetEvents($this->ReadPropertyString('EventTopic'));
         $this->WriteAttributeArray('EventProperties', $Events);
+        if (($EventTopic != '') && ($this->HasActiveParent())) {
+            if ($EventTopic != $this->EventTopic) {
+                $this->$EventTopic = $EventTopic;
+                IPS_RunScriptText('IPS_RequestAction(' . $this->InstanceID . ',"SetSynchronizationPoint",true);');
+            }
+        }
     }
 
     public function RequestAction($Ident, $Value)
     {
         if ($this->IORequestAction($Ident, $Value)) {
+            return true;
+        }
+        if ($Ident == 'SetSynchronizationPoint') {
+            $this->SetSynchronizationPoint();
             return true;
         }
         return false;
@@ -106,6 +118,7 @@ class ONVIFModuleBase extends IPSModule
     protected function IOChangeState($State)
     {
         if ($State == IS_ACTIVE) {
+            $this->EventTopic = $this->ReadPropertyString('EventTopic');
             $this->ApplyChanges();
             $this->ReloadForm();
         }
@@ -134,7 +147,16 @@ class ONVIFModuleBase extends IPSModule
 
         return $answer;
     }
-
+    protected function SetSynchronizationPoint()
+    {
+        if ($this->ParentID > 0) {
+            if ($this->HasActiveParent()) {
+                $this->SendDebug('SetSynchronizationPoint', '', 0);
+                $Data = json_encode(['DataID' => '{9B9C8DA6-BC89-21BC-3E8C-BA6E534ABC37}', 'Function' => 'SetSynchronizationPoint']);
+                $this->SendDataToParent($Data);
+            }
+        }
+    }
     protected function GetCapabilities()
     {
         if ($this->ParentID > 0) {
