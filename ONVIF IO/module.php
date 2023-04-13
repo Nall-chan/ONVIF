@@ -114,11 +114,12 @@ class ONVIFIO extends IPSModule
     {
         $this->SetTimerInterval('RenewSubscription', 0);
         $this->SetTimerInterval('PullMessages', 0);
-
+        if ($this->GetStatus() == IS_ACTIVE) { // block childs
+            $this->SetStatus(IS_INACTIVE);
+        }
         if ($this->isSubscribed) {
             $this->Unsubscribe();
         }
-
         //Never delete this line!
         parent::ApplyChanges();
         if (IPS_GetKernelRunlevel() != KR_READY) {

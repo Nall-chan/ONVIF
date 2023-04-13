@@ -8,7 +8,7 @@ require_once __DIR__ . '/wsdl.php';
 
 class ONVIFsoapClient extends \SoapClient
 {
-    public $CurlInfo;
+    //public $CurlInfo;
     private $User;
     private $Pass;
     private $Options;
@@ -54,7 +54,7 @@ class ONVIFsoapClient extends \SoapClient
             curl_setopt($ch, CURLOPT_PASSWORD, $this->Pass);
         }
         $response = curl_exec($ch);
-        $this->CurlInfo = curl_getinfo($ch);
+        //$this->CurlInfo = curl_getinfo($ch);
         $http_code = curl_getinfo($ch)['http_code'];
         if ($http_code != 0) {
             $this->__last_request_headers = curl_getinfo($ch)['request_header'];
