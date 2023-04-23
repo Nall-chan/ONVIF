@@ -153,7 +153,7 @@ Für das Discovery werden Pakete über die Multicast-Adresse `239.255.255.250` a
 - Childs versuchen keine Daten mehr abzurufen, wenn der IO noch nicht fertig initialisiert ist.    
 - Übersetzungen ergänzt / verbessert.  
 
- <sup>*1</sup> Sofern von den Geräten untertützt.  
+ <sup>*1</sup> Sofern von den Geräten unterstützt.  
 
 ---  
 **Version 1.23:**  
