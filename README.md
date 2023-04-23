@@ -138,10 +138,11 @@ Für das Discovery werden Pakete über die Multicast-Adresse `239.255.255.250` a
 ----------
 ### 2. Changelog
 
-Version 2.00:  
-- Verbindungsaufbau des IO überarbeitet.  
+**Version 2.00:**  
+- Verbindungsaufbau des IO überarbeitet.
 - Wechsel von PHP-Streams auf CURL zur Unterstützung von HTTP digest Authentifizierung.  
-- Unterstützung von ONVIF T Profil.  
+- Sonderzeichen in Passwörtern und auch Benutzernamen sind jetzt möglich. <sup>*1</sup>  
+- Unterstützung von ONVIF T Profil. <sup>*1</sup>  
 - Damit einher gehende Unterstützung von PullMessages für reine Profil T Geräte.  
 - Unterstützung der Rule & Analytics Funktionen für die Events.  
 - IO Instanz zeigt Geräte-Informationen und dessen erkannte Fähigkeiten an.  
@@ -149,46 +150,59 @@ Version 2.00:
 - Auswertung von allen Quellen und allen Daten der Events. (Achtung, hierdurch können neue Statusvariablen angelegt werden und alte ungültig werden!)  
 - Konfigurator bietet jetzt von allen Events das Parent-Topics zum Erstellen einer Events-Instanz an.  
 - Verbesserte Erkennung von Relais und Digitalen Eingängen.  
+- Childs versuchen keine Daten mehr abzurufen, wenn der IO noch nicht fertig initialisiert ist.    
 - Übersetzungen ergänzt / verbessert.  
 
-Version 1.23:  
+ <sup>*1</sup> Sofern von den Geräten untertützt.  
+
+---  
+**Version 1.23:**  
 - Image im Testbereich des ImageGrabber wurde nicht aktualisiert.  
 
-Version 1.20:  
+---  
+**Version 1.20:**  
 - Fehlermeldung in der Discovery Instanz bei ungültiger Anmeldung wird durch bestätigen mit 'Ignorieren' nicht mehr angezeigt, bis die Anmeldedaten geändert wurden.  
 - Es wird eine Meldung angezeigt, wenn die Discovery Instanz nicht funktioniert (Docker + NAT).  
 - Experteneinstellungen in den IO-Instanzen ermöglichen das umstellen auf http/https und ändern der IP und Port vom Ereignis-Hook.  
 - Aktion für Digital Output war defekt.
   
-Version 1.10:  
+---  
+**Version 1.10:**  
 - Beta Release für Symcon 6.0  
 - Aktionen für Kamerasteuerung, Snapshot des Image Grabber und für Ansteuerung der Ausgänge.  
 
-Version 1.08:  
+---  
+**Version 1.08:**  
 - Fehlermeldungen vom Image Grabber, wenn IO nicht verbunden war.  
 
-Version 1.07:  
+---  
+**Version 1.07:**  
 - Die Ansteuerung der PTZ-Kommandos kann invertiert werden.  
 - Eventuelle Fehlermeldung wenn die Option `Variablenprofil benutzt Namen der Szenen` aktiviert war.  
 
-Version 1.06:
+---  
+**Version 1.06:**  
 - Eventuell wurden die Topics eines Events falsch ermittelt.  
 - Statusvariablen für Topics mit Sonderzeichen wurden nicht korrekt angelegt.  
 
-Version 1.05:  
+---  
+**Version 1.05:**  
 - Fehlermeldung wenn Geräte keinen Namen für PTZ-Szenen geliefert haben.  
 - Fehlermeldung im IO wenn Geräte keine Auflösung, kein Encoding oder keine Bitrate gemeldet haben.  
 
-Version 1.02:  
+---  
+**Version 1.02:**  
 - ONVIF_StopPTZ und das Anhalten beim loslassen der PTZ-Overlay Steuerung hat bei einigen Geräten nicht funktioniert  
 - Profile ONVIF.Time und ONVIF.Speed waren bei der Beschreibung vertauscht  
 - Fehlende Übersetzungen ergänzt  
 
-Version 1.01:  
+---  
+**Version 1.01:**  
 - Release für Symcon 5.5  
 - Fehlende Übersetzungen ergänzt  
 
-Version 1.00:  
+---  
+**Version 1.00:**  
 - Beta Release für Symcon 5.5  
 
 ----------
