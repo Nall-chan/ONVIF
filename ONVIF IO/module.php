@@ -910,7 +910,7 @@ class ONVIFIO extends IPSModule
         $empty = '';
         $SetSynchronizationPointResult = $this->SendData($SubscriptionReference, \ONVIF\WSDL::Event, 'SetSynchronizationPoint', true, [], $empty);
         if (is_a($SetSynchronizationPointResult, 'SoapFault')) {
-            $this->LogMessage($this->Translate('Error SetSynchronizationPoint with:') . $SetSynchronizationPointResult->getMessage(), KL_ERROR);
+            $this->LogMessage($this->Translate('Error SetSynchronizationPoint with:') . '(' . $SetSynchronizationPointResult->getCode() . ')' . $SetSynchronizationPointResult->getMessage(), KL_ERROR);
             return false;
         }
         return true;

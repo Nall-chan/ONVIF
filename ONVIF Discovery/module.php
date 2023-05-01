@@ -25,13 +25,13 @@ class ONVIFDiscovery extends IPSModule
     /**
      * The maximum number of seconds that will be allowed for the discovery request.
      */
-    const WS_DISCOVERY_TIMEOUT = 10;
+    const WS_DISCOVERY_TIMEOUT = 3;
 
     /**
      * The multicast address to use in the socket for the discovery request.
      */
     const WS_DISCOVERY_MULTICAST_ADDRESS = '239.255.255.250';
-
+    const WS_DISCOVERY_MULTICAST_ADDRESSV6 = '[ff02::c]';
     /**
      * The port that will be used in the socket for the discovery request.
      */
@@ -211,55 +211,103 @@ class ONVIFDiscovery extends IPSModule
             }
         }
     }
-
     protected function DiscoverDevices()
     {
         //IPS_Sleep(5000);
         //return []; // testing
-        $discoveryTimeout = time() + self::WS_DISCOVERY_TIMEOUT;
+        $Interfaces = $this->getIPAdresses();
         $uuid = self::uuidV4();
         $discoveryMessage = str_replace('[UUID]', $uuid, self::WS_DISCOVERY_MESSAGE);
-        $discoveryPort = self::WS_DISCOVERY_MULTICAST_PORT;
         $discoveryList = [];
-        $sock = socket_create(AF_INET, SOCK_DGRAM, SOL_UDP);
-        if (!$sock) {
-            return [];
+
+        foreach ($Interfaces['ipv6'] as $IP => $Interface) {
+            $sock = socket_create(AF_INET6, SOCK_DGRAM, SOL_UDP);
+            if ($sock) {
+                socket_set_option($sock, SOL_SOCKET, SO_RCVTIMEO, ['sec' => 0, 'usec' => 100000]);
+                socket_set_option($sock, SOL_SOCKET, SO_REUSEADDR, 1);
+                socket_set_option($sock, IPPROTO_IPV6, IPV6_MULTICAST_HOPS, 4);
+                socket_set_option($sock, IPPROTO_IPV6, IPV6_MULTICAST_IF, $Interface);
+                socket_set_option($sock, SOL_SOCKET, SO_BROADCAST, 1);
+                socket_bind($sock, $IP, 3703);
+                $discoveryTimeout = time() + self::WS_DISCOVERY_TIMEOUT;
+                $this->SendDebug('Start Discovery(' . $Interface . ')', $IP, 0);
+                $Bytes = socket_sendto($sock, $discoveryMessage, strlen($discoveryMessage), 0, self::WS_DISCOVERY_MULTICAST_ADDRESSV6, self::WS_DISCOVERY_MULTICAST_PORT);
+                $this->SendDebug('Bytes send', $Bytes, 0);
+                if (!$Bytes) {
+                    $this->SendDebug('Error on send discovery message', '', 0);
+                    @socket_close($sock);
+                    return $discoveryList;
+                }
+                $response = $from = null;
+                $Port = 0;
+                do {
+                    if (0 == @socket_recvfrom($sock, $response, 9999, 0, $from, $Port)) {
+                        continue;
+                    }
+                    $this->SendDebug('Receive', $response, 0);
+                    $xml = new DOMDocument();
+                    if (false === $xml->loadXML($response)) {
+                        $this->SendDebug('Error on parse XML', $response, 0);
+                        continue;
+                    }
+                    if (!self::relatesToMatch($uuid, $xml)) {
+                        $this->SendDebug('Skip Data', 'UUID incorrect', 0);
+                        continue;
+                    }
+                    $xAddrs = self::getProbeMatchXAddrs($xml, $from);
+                    $this->SendDebug('Receive from', $from, 0);
+                    $this->SendDebug('Receive address', $xAddrs, 0);
+                    $discoveryList[$from] = $xAddrs;
+                } while (time() < $discoveryTimeout);
+                socket_close($sock);
+            } else {
+                $this->SendDebug('Error on create Socket ipv6', $IP, 0);
+            }
         }
-        socket_set_option($sock, SOL_SOCKET, SO_RCVTIMEO, ['sec' => 0, 'usec' => 100000]);
-        socket_set_option($sock, SOL_SOCKET, SO_REUSEADDR, 1);
-        socket_set_option($sock, IPPROTO_IP, IP_MULTICAST_TTL, 4);
-        socket_set_option($sock, SOL_SOCKET, SO_BROADCAST, 1);
-        $Bind = socket_bind($sock, '0', 3703);
-        $this->SendDebug('Start Discovery', $Bind, 0);
-        $Bytes = socket_sendto($sock, $discoveryMessage, strlen($discoveryMessage), 0, self::WS_DISCOVERY_MULTICAST_ADDRESS, self::WS_DISCOVERY_MULTICAST_PORT);
-        $this->SendDebug('Bytes send', $Bytes, 0);
-        if (!$Bytes) {
-            $this->SendDebug('Error on send discovery message', '', 0);
-            @socket_close($sock);
-            return $discoveryList;
+        foreach ($Interfaces['ipv4'] as $IP => $Interface) {
+            $sock = socket_create(AF_INET, SOCK_DGRAM, SOL_UDP);
+            if ($sock) {
+                socket_set_option($sock, SOL_SOCKET, SO_RCVTIMEO, ['sec' => 0, 'usec' => 100000]);
+                socket_set_option($sock, SOL_SOCKET, SO_REUSEADDR, 1);
+                socket_set_option($sock, IPPROTO_IP, IP_MULTICAST_TTL, 4);
+                socket_set_option($sock, IPPROTO_IP, IP_MULTICAST_IF, $Interface);
+                socket_set_option($sock, SOL_SOCKET, SO_BROADCAST, 1);
+                socket_bind($sock, $IP, 3703);
+                $discoveryTimeout = time() + self::WS_DISCOVERY_TIMEOUT;
+                $this->SendDebug('Start Discovery(' . $Interface . ')', $IP, 0);
+                $Bytes = socket_sendto($sock, $discoveryMessage, strlen($discoveryMessage), 0, self::WS_DISCOVERY_MULTICAST_ADDRESS, self::WS_DISCOVERY_MULTICAST_PORT);
+                $this->SendDebug('Bytes send', $Bytes, 0);
+                if (!$Bytes) {
+                    $this->SendDebug('Error on send discovery message', '', 0);
+                    @socket_close($sock);
+                    return $discoveryList;
+                }
+                $response = $from = null;
+                $Port = 0;
+                do {
+                    if (0 == @socket_recvfrom($sock, $response, 9999, 0, $from, $Port)) {
+                        continue;
+                    }
+                    $this->SendDebug('Receive', $response, 0);
+                    $xml = new DOMDocument();
+                    if (false === $xml->loadXML($response)) {
+                        $this->SendDebug('Error on parse XML', $response, 0);
+                        continue;
+                    }
+                    if (!self::relatesToMatch($uuid, $xml)) {
+                        $this->SendDebug('Skip Data', 'UUID incorrect', 0);
+                        continue;
+                    }
+                    $xAddrs = self::getProbeMatchXAddrs($xml, $from);
+                    $this->SendDebug('Receive from', $from, 0);
+                    $this->SendDebug('Receive address', $xAddrs, 0);
+                    $discoveryList[$from] = $xAddrs;
+                } while (time() < $discoveryTimeout);
+                socket_close($sock);
+            } else {
+                $this->SendDebug('Error on create Socket ipv4', $IP, 0);
+            }
         }
-        $response = $from = null;
-        do {
-            if (0 == @socket_recvfrom($sock, $response, 9999, 0, $from, $discoveryPort)) {
-                continue;
-            }
-            $this->SendDebug('Receive', $response, 0);
-            $xml = new DOMDocument();
-            if (false === $xml->loadXML($response)) {
-                $this->SendDebug('Error on parse XML', $response, 0);
-                continue;
-            }
-            if (!self::relatesToMatch($uuid, $xml)) {
-                $this->SendDebug('Skip Data', 'UUID incorrect', 0);
-                continue;
-            }
-            $xAddrs = self::getProbeMatchXAddrs($xml, $from);
-            $this->SendDebug('Receive from', $from, 0);
-            $this->SendDebug('Receive address', $xAddrs, 0);
-            $discoveryList[$from] = $xAddrs;
-            usleep(10000);
-        } while (time() < $discoveryTimeout);
-        socket_close($sock);
         return $discoveryList;
     }
 
@@ -458,5 +506,40 @@ class ONVIFDiscovery extends IPSModule
             return time() - $camera_ts;
         }
         return 0;
+    }
+
+    private function getIPAdresses()
+    {
+        $Interfaces = SYS_GetNetworkInfo();
+        $InterfaceIndexes = array_column($Interfaces, 'Description', 'InterfaceIndex');
+        $Networks = net_get_interfaces();
+        $Addresses = [];
+        foreach ($Networks as $Interface) {
+            if (!$Interface['up']) {
+                continue;
+            }
+            $InterfaceIndex = array_search($Interface['description'], $InterfaceIndexes);
+            foreach ($Interface['unicast'] as $Address) {
+                switch ($Address['family']) {
+                    case 23:
+                        $family = 'ipv6';
+                        if ($Address['address'] == '::1') {
+                            continue 2;
+                        }
+                        $Address['address'] = '[' . $Address['address'] . ']';
+                        break;
+                    case 2:
+                        if ($Address['address'] == '127.0.0.1') {
+                            continue 2;
+                        }
+                        $family = 'ipv4';
+                        break;
+                    default:
+                        continue 2;
+                }
+                $Addresses[$family][$Address['address']] = $InterfaceIndex; //$Interface['description'];
+            }
+        }
+        return $Addresses;
     }
 }

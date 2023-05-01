@@ -152,6 +152,7 @@ Für das Discovery werden Pakete über die Multicast-Adresse `239.255.255.250` a
 - Verbesserte Erkennung von Relais und Digitalen Eingängen.  
 - Childs versuchen keine Daten mehr abzurufen, wenn der IO noch nicht fertig initialisiert ist.    
 - Übersetzungen ergänzt / verbessert.  
+- Discovery sucht jetzt auf allen Netzwerkschnittstellen und IP-Adressen nach Geräten.  
 
  <sup>*1</sup> Sofern von den Geräten unterstützt.  
 
