@@ -231,12 +231,10 @@ class ONVIFDiscovery extends IPSModule
                 socket_bind($sock, $IP, 3703);
                 $discoveryTimeout = time() + self::WS_DISCOVERY_TIMEOUT;
                 $this->SendDebug('Start Discovery(' . $Interface . ')', $IP, 0);
-                $Bytes = socket_sendto($sock, $discoveryMessage, strlen($discoveryMessage), 0, self::WS_DISCOVERY_MULTICAST_ADDRESSV6, self::WS_DISCOVERY_MULTICAST_PORT);
-                $this->SendDebug('Bytes send', $Bytes, 0);
-                if (!$Bytes) {
-                    $this->SendDebug('Error on send discovery message', '', 0);
+                if (@socket_sendto($sock, $discoveryMessage, strlen($discoveryMessage), 0, self::WS_DISCOVERY_MULTICAST_ADDRESSV6, self::WS_DISCOVERY_MULTICAST_PORT) === false) {
+                    $this->SendDebug('Error on send discovery message', $IP, 0);
                     @socket_close($sock);
-                    return $discoveryList;
+                    continue;
                 }
                 $response = $from = null;
                 $Port = 0;
@@ -275,12 +273,10 @@ class ONVIFDiscovery extends IPSModule
                 socket_bind($sock, $IP, 3703);
                 $discoveryTimeout = time() + self::WS_DISCOVERY_TIMEOUT;
                 $this->SendDebug('Start Discovery(' . $Interface . ')', $IP, 0);
-                $Bytes = socket_sendto($sock, $discoveryMessage, strlen($discoveryMessage), 0, self::WS_DISCOVERY_MULTICAST_ADDRESS, self::WS_DISCOVERY_MULTICAST_PORT);
-                $this->SendDebug('Bytes send', $Bytes, 0);
-                if (!$Bytes) {
-                    $this->SendDebug('Error on send discovery message', '', 0);
+                if (@socket_sendto($sock, $discoveryMessage, strlen($discoveryMessage), 0, self::WS_DISCOVERY_MULTICAST_ADDRESS, self::WS_DISCOVERY_MULTICAST_PORT) === false) {
+                    $this->SendDebug('Error on send discovery message', $IP, 0);
                     @socket_close($sock);
-                    return $discoveryList;
+                    continue;
                 }
                 $response = $from = null;
                 $Port = 0;
