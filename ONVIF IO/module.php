@@ -162,7 +162,7 @@ class ONVIFIO extends IPSModule
         // 1.ONVIF Request GetSystemDateAndTime
         $Reachable = $this->GetSystemDateAndTime(); // können nicht alle, also nicht weiter beachten. Wird aber für login mit WSSecurityHeader benötigt, damit Zeitdifferenzen bei berücksichtigt werden.
         // 2.ONVIF Request GetScopes
-        $Scopes = $this->GetScopes(); // die sagen ob G, S oder und T
+        $Scopes = $this->GetScopes(); // die sagen aus ob G, S oder und T
         if (!$Scopes && !$Reachable) { // not reachable
             $this->UpdateFormField('EventHook', 'caption', $this->ReadAttributeString('ConsumerAddress'));
             $this->WriteAttributeString('SubscriptionReference', '');
@@ -1320,9 +1320,12 @@ class ONVIFIO extends IPSModule
         if (is_a($Scopes, 'SoapFault')) {
             return false;
         }
-        $Scopes = json_decode(json_encode($Scopes), true)['Scopes'];
+        $Scopes = json_decode(json_encode($Scopes), true);
+        if (!array_key_exists('Scopes', $Scopes)) {
+            return false;
+        }
         $Result = [];
-        foreach ($Scopes as $Scope) {
+        foreach ($Scopes['Scopes'] as $Scope) {
             $Result[] = $Scope['ScopeItem'];
         }
         return $Result;

@@ -125,8 +125,11 @@ class Profile
         $this->Profile = 0;
         foreach ($Scopes as $Scope) {
             if (array_key_exists($Scope, self::$ScopesToProfile)) {
-                $this->Profile += self::$ScopesToProfile[$Scope];
+                $this->Profile |= self::$ScopesToProfile[$Scope];
             }
+        }
+        if ($this->Profile == 0) {
+            $this->Profile = self::S;
         }
     }
     public function __sleep()
