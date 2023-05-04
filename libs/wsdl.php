@@ -128,9 +128,6 @@ class Profile
                 $this->Profile |= self::$ScopesToProfile[$Scope];
             }
         }
-        if ($this->Profile == 0) {
-            $this->Profile = self::S;
-        }
     }
     public function __sleep()
     {

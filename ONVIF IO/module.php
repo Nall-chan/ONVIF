@@ -190,7 +190,10 @@ class ONVIFIO extends IPSModule
             $this->Warnings = array_merge($this->Warnings, [$this->Translate('Failed to get scopes, device not ONVIF compliant!')]);
         }
         $this->Profile = new \ONVIF\Profile($Scopes);
-
+        if ($this->Profile->Profile == 0) {
+            $this->Profile->Profile = \ONVIF\Profile::S;
+            $this->Warnings = array_merge($this->Warnings, [$this->Translate('No profile in scopes, device not ONVIF compliant!')]);
+        }
         $this->SendDebug('ProfileBitMask', $this->Profile->toString(), 0);
         if ($ReloadCapabilities) {
             $this->WriteAttributeInteger('CapabilitiesVersion', 1); // This is Version 1
