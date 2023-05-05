@@ -189,12 +189,16 @@ class ONVIFIO extends IPSModule
             $Scopes = [\ONVIF\Scopes::ProfileS];
             $this->Warnings = array_merge($this->Warnings, [$this->Translate('Failed to get scopes, device not ONVIF compliant!')]);
         }
-        $this->Profile = new \ONVIF\Profile($Scopes);
-        if ($this->Profile->Profile == 0) {
-            $this->Profile->Profile = \ONVIF\Profile::S;
+        $Profile = new \ONVIF\Profile($Scopes);
+        $this->SendDebug('ProfileBitMask', $Profile->toString(), 0);
+        if ($Profile->Profile == 0) {
+            $Profile->Profile = \ONVIF\Profile::S;
+            $this->SendDebug('Fallback ProfileBitMask', $Profile->toString(), 0);
             $this->Warnings = array_merge($this->Warnings, [$this->Translate('No profile in scopes, device not ONVIF compliant!')]);
         }
-        $this->SendDebug('ProfileBitMask', $this->Profile->toString(), 0);
+        $this->lock('Profile');
+        $this->Profile = $Profile;
+        $this->unlock('Profile');
         if ($ReloadCapabilities) {
             $this->WriteAttributeInteger('CapabilitiesVersion', 1); // This is Version 1
             // 3.ONVIF Request GetServices
@@ -635,13 +639,14 @@ class ONVIFIO extends IPSModule
                 ]
             ];
         }
-
+        $this->lock('Profile');
         $InfoItems[] =
     [
         'width'     => '400px',
         'type'      => 'Label',
         'caption'   => $this->Translate('Supported ONVIF Profile: ') . $this->Profile->toString()
     ];
+        $this->unlock('Profile');
         $DeviceItems = [
             [
                 'width'     => '200px',
