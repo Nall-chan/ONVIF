@@ -47,6 +47,9 @@ class ONVIFEvents extends ONVIFModuleBase
     public function GetConfigurationForm()
     {
         $Form = json_decode(file_get_contents(__DIR__ . '/form.json'), true);
+        if ($this->GetStatus() == IS_CREATING) {
+            return json_encode($Form);
+        }
         $Form['elements'][0] = $this->GetConfigurationFormEventTopic($Form['elements'][0], false, [':VideoSource', ':PTZ', '/Relay', '/DigitalInput']);
         $this->SendDebug('FORM', json_encode($Form), 0);
         $this->SendDebug('FORM', json_last_error_msg(), 0);

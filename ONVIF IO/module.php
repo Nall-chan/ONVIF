@@ -578,6 +578,9 @@ class ONVIFIO extends IPSModule
     public function GetConfigurationForm()
     {
         $Form = json_decode(file_get_contents(__DIR__ . '/form.json'), true);
+        if ($this->GetStatus() == IS_CREATING) {
+            return json_encode($Form);
+        }
         if ($this->GetStatus() == IS_ACTIVE) {
             if ($this->Profile->Profile == \ONVIF\Profile::T) {
                 $Form['elements'][3]['visible'] = false;

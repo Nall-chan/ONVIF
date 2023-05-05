@@ -131,6 +131,9 @@ class ONVIFImageGrabber extends ONVIFModuleBase
     public function GetConfigurationForm()
     {
         $Form = json_decode(file_get_contents(__DIR__ . '/form.json'), true);
+        if ($this->GetStatus() == IS_CREATING) {
+            return json_encode($Form);
+        }
         if (!$this->HasActiveParent() || ($this->ParentID == 0)) {
             $Form['actions'][] = [
                 'type'  => 'PopupAlert',

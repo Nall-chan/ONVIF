@@ -127,6 +127,9 @@ class ONVIFDigitalOutput extends ONVIFModuleBase
     public function GetConfigurationForm()
     {
         $Form = json_decode(file_get_contents(__DIR__ . '/form.json'), true);
+        if ($this->GetStatus() == IS_CREATING) {
+            return json_encode($Form);
+        }
         $Form['elements'][0] = $this->GetConfigurationFormEventTopic($Form['elements'][0]);
         $Actions = [['type' => 'TestCenter']];
         $RelayOutputs = $this->ReadAttributeArray('RelayOutputs');
