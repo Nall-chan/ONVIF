@@ -8,10 +8,10 @@ require_once __DIR__ . '/../libs/ONVIFModuleBase.php';
  */
 class ONVIFImageGrabber extends ONVIFModuleBase
 {
-    const wsdl = \ONVIF\WSDL::Media; //'media-mod';
-    const TopicFilter = 'videosource';
+    public const wsdl = \ONVIF\WSDL::Media; //'media-mod';
+    public const TopicFilter = 'videosource';
 
-    public function Create()
+    public function Create(): void
     {
         //Never delete this line!
         parent::Create();
@@ -22,7 +22,7 @@ class ONVIFImageGrabber extends ONVIFModuleBase
         $this->RegisterTimer('UpdateImage', 0, 'ONVIF_UpdateImage(' . $this->InstanceID . ');');
         $this->ImageURL = false;
     }
-    public function ApplyChanges()
+    public function ApplyChanges(): void
     {
         //Never delete this line!
         parent::ApplyChanges();
@@ -53,7 +53,7 @@ class ONVIFImageGrabber extends ONVIFModuleBase
             $this->SetStatus(IS_EBASE + 1);
         }
     }
-    public function UpdateImage()
+    public function UpdateImage(): bool
     {
         $URL = $this->ImageURL;
         if ($URL == false) {
@@ -87,14 +87,14 @@ class ONVIFImageGrabber extends ONVIFModuleBase
         IPS_SetMediaContent($MediaId, base64_encode($Result));
         return true;
     }
-    public function ReceiveData($JSONString)
+    public function ReceiveData(string $JSONString): string
     {
         $Data = json_decode($JSONString, true);
         unset($Data['DataID']);
         $this->SendDebug('ReceiveEvent', $Data, 0);
         $EventProperties = $this->ReadAttributeArray('EventProperties');
         if (!array_key_exists($Data['Topic'], $EventProperties)) {
-            return false;
+            return '';
         }
         $EventProperty = $EventProperties[$Data['Topic']];
         $FoundEventIndex = false;
@@ -122,13 +122,14 @@ class ONVIFImageGrabber extends ONVIFModuleBase
             unset($Data['Sources'][$FoundEventIndex]);
         }
         if ($SkipEvent) {
-            return false;
+            return '';
         }
         $PreName = str_replace($this->ReadPropertyString('EventTopic'), '', $Data['Topic']);
-        return $this->SetEventStatusVariable($PreName, $EventProperties[$Data['Topic']], $Data);
+        $this->SetEventStatusVariable($PreName, $EventProperties[$Data['Topic']], $Data);
+        return '';
     }
 
-    public function GetConfigurationForm()
+    public function GetConfigurationForm(): string
     {
         $Form = json_decode(file_get_contents(__DIR__ . '/form.json'), true);
         if ($this->GetStatus() == IS_CREATING) {
@@ -325,24 +326,25 @@ class ONVIFImageGrabber extends ONVIFModuleBase
 
         return json_encode($Form);
     }
-    public function RequestAction($Ident, $Value)
+    public function RequestAction(string $Ident, mixed $Value, bool $done = false): void
     {
-        if (parent::RequestAction($Ident, $Value)) {
-            return true;
+        parent::RequestAction($Ident, $Value, $done);
+        if ($done) {
+            return;
         }
         switch ($Ident) {
             case 'RefreshProfileForm':
                 $this->RefreshProfileForm($Value);
-                return true;
+                return;
             case 'UpdateImage':
                 $this->UpdateImage();
                 if ((bool) $Value) {
                     $this->ReloadForm();
                 }
-                return true;
+                return;
         }
     }
-    protected function IOChangeState($State)
+    protected function IOChangeState(int $State): void
     {
         parent::IOChangeState($State);
 
@@ -350,11 +352,11 @@ class ONVIFImageGrabber extends ONVIFModuleBase
             $this->SetTimerInterval('UpdateImage', 0);
         }
     }
-    protected function RefreshProfileForm($NewVideoSource)
+    protected function RefreshProfileForm(string $NewVideoSource): void
     {
         $Capabilities = @$this->GetCapabilities();
         if ($Capabilities == false) {
-            return false;
+            return;
         }
         $ProfileOptions = [];
         $ProfileOptions[] = [
@@ -374,7 +376,7 @@ class ONVIFImageGrabber extends ONVIFModuleBase
         $this->UpdateFormField('Profile', 'options', json_encode($ProfileOptions));
     }
 
-    protected function GetSnapshotUri()
+    protected function GetSnapshotUri(): false|string
     {
         $Capabilities = @$this->GetCapabilities();
         if ($Capabilities == false) {
@@ -426,7 +428,7 @@ class ONVIFImageGrabber extends ONVIFModuleBase
         $this->SendDebug('MediaURL', $MediaURL, 0);
         return $MediaURL;
     }
-    protected function GetMediaId()
+    protected function GetMediaId(): int
     {
         $MediaId = @$this->GetIDForIdent('IMAGE');
         if ($MediaId == false) {

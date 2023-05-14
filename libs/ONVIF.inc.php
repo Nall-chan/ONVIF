@@ -9,9 +9,9 @@ require_once __DIR__ . '/wsdl.php';
 class ONVIFsoapClient extends \SoapClient
 {
     //public $CurlInfo;
-    private $User;
-    private $Pass;
-    private $Options;
+    private string $User;
+    private string $Pass;
+    private array $Options;
 
     public function __construct(string $wsdl, array $options = [])
     {
@@ -28,7 +28,7 @@ class ONVIFsoapClient extends \SoapClient
         }
         $this->Options = $options;
     }
-    public function __doRequest($request, $location, $action, $version, $one_way = null)
+    public function __doRequest(string $request, string $location, string $action, int $version, bool $one_way = false): ?string
     {
         $headers = [
             'Method: POST',
@@ -92,7 +92,7 @@ class ONVIF
 {
     public $client;
 
-    public function __construct($wsdl, $service, $username = null, $password = null, $Headers = [])
+    public function __construct(string $wsdl, string $service, ?string $username = null, ?string $password = null, array $Headers = [])
     {
         $Options = [
             'trace'              => true,
@@ -117,7 +117,7 @@ class ONVIF
         return;
     }
 
-    public static function soapClientWSSecurityHeader($user, $password, $ts_offset = 0)
+    public static function soapClientWSSecurityHeader(string $user, string $password, int $ts_offset = 0): \SoapHeader
     {
         $ts = time() - $ts_offset;
 

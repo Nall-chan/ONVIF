@@ -18,7 +18,7 @@ require_once dirname(__DIR__) . '/libs/ONVIF.inc.php';
  * @property \ONVIF\Profile $Profile
  * @property array $Warnings
  */
-class ONVIFIO extends IPSModule
+class ONVIFIO extends IPSModuleStrict
 {
     use \ONVIFIO\DebugHelper;
     use \ONVIFIO\BufferHelper;
@@ -27,7 +27,7 @@ class ONVIFIO extends IPSModule
     use \ONVIFIO\Semaphore;
     protected $lastSOAPError = '';
 
-    public function Create()
+    public function Create(): void
     {
         //Never delete this line!
         parent::Create();
@@ -79,7 +79,7 @@ class ONVIFIO extends IPSModule
     /**
      * Interne Funktion des SDK.
      */
-    public function Destroy()
+    public function Destroy(): void
     {
         if (!IPS_InstanceExists($this->InstanceID)) {
             $this->UnregisterHook('/hook/ONVIFEvents/IO/' . $this->InstanceID);
@@ -87,12 +87,12 @@ class ONVIFIO extends IPSModule
         parent::Destroy();
     }
 
-    public function MessageSink($TimeStamp, $SenderID, $Message, $Data)
+    public function MessageSink(int $TimeStamp, int $SenderID, int $Message, array $Data): void
     {
         switch ($Message) {
             case IPS_KERNELSTARTED:
-                    $this->UnregisterMessage(0, IPS_KERNELSTARTED);
-                    IPS_RequestAction($this->InstanceID, 'KernelReady', true);
+                $this->UnregisterMessage(0, IPS_KERNELSTARTED);
+                IPS_RequestAction($this->InstanceID, 'KernelReady', true);
                 break;
             case FM_CHILDREMOVED:
                 $this->lock('EventProperties');
@@ -110,7 +110,7 @@ class ONVIFIO extends IPSModule
         }
     }
 
-    public function ApplyChanges()
+    public function ApplyChanges(): void
     {
         $this->SetTimerInterval('RenewSubscription', 0);
         $this->SetTimerInterval('PullMessages', 0);
@@ -429,7 +429,7 @@ class ONVIFIO extends IPSModule
         }
     }
 
-    public function ForwardData($JSONString)
+    public function ForwardData(string $JSONString): string
     {
         $Data = json_decode($JSONString, true);
         unset($Data['DataID']);
@@ -452,7 +452,7 @@ class ONVIFIO extends IPSModule
             return serialize($Capabilities);
         }
         if ($Data['Function'] == 'SetSynchronizationPoint') {
-            return $this->SetSynchronizationPoint();
+            return serialize($this->SetSynchronizationPoint());
         }
         if ($Data['Function'] == 'GetUrl') {
             return serialize($this->Host);
@@ -541,17 +541,21 @@ class ONVIFIO extends IPSModule
         return serialize($Result);
     }
 
-    public function RequestAction($Ident, $Value)
+    public function RequestAction(string $Ident, mixed $Value): void
     {
         switch ($Ident) {
             case 'Subscribe':
-                return $this->Subscribe();
+                $this->Subscribe();
+                return;
             case 'CreatePullPointSubscription':
-                return $this->CreatePullPointSubscription();
+                $this->CreatePullPointSubscription();
+                return;
             case 'PullMessages':
-                return $this->PullMessages();
+                $this->PullMessages();
+                return;
             case 'Renew':
-                return $this->Renew();
+                $this->Renew();
+                return;
             case  'Reload':
                 $this->Unsubscribe();
                 if ($this->GetStatus() == IS_INACTIVE) {
@@ -572,10 +576,11 @@ class ONVIFIO extends IPSModule
                 $this->UpdateFormField('ErrorPopup', 'visible', true);
                 return;
             case'KernelReady':
-                return $this->KernelReady();
+                $this->KernelReady();
+                return;
         }
     }
-    public function GetConfigurationForm()
+    public function GetConfigurationForm(): string
     {
         $Form = json_decode(file_get_contents(__DIR__ . '/form.json'), true);
         if ($this->GetStatus() == IS_CREATING) {
@@ -618,7 +623,7 @@ class ONVIFIO extends IPSModule
         $this->SendDebug('FORM', json_last_error_msg(), 0);
         return json_encode($Form);
     }
-    protected function GetDeviceDataForForm()
+    protected function GetDeviceDataForForm(): array
     {
         $Device = $this->GetDeviceInformation();
         if ($Device) {
@@ -708,7 +713,7 @@ class ONVIFIO extends IPSModule
         ];
     }
 
-    protected function ShowLastError(string $ErrorMessage, string $ErrorTitle = 'Answer from Device:')
+    protected function ShowLastError(string $ErrorMessage, string $ErrorTitle = 'Answer from Device:'): void
     {
         $Data = json_encode([
             'Message'=> $ErrorMessage,
@@ -717,7 +722,7 @@ class ONVIFIO extends IPSModule
         IPS_RunScriptText('IPS_Sleep(1000);IPS_RequestAction(' . $this->InstanceID . ',"ShowLastError",' . var_export($Data, true) . ');');
     }
 
-    protected function GetConsumerAddress()
+    protected function GetConsumerAddress(): bool
     {
         if (IPS_GetOption('NATSupport')) {
             $ip = IPS_GetOption('NATPublicIP');
@@ -760,7 +765,7 @@ class ONVIFIO extends IPSModule
         $this->WriteAttributeString('ConsumerAddress', $Url);
         return true;
     }
-    protected function CreatePullPointSubscription()
+    protected function CreatePullPointSubscription(): bool
     {
         $XAddr = $this->ReadAttributeArray('XAddr');
         if ($XAddr[\ONVIF\NS::Event] == '') {
@@ -808,7 +813,7 @@ class ONVIFIO extends IPSModule
         $this->SetSynchronizationPoint();
         return true;
     }
-    protected function PullMessages()
+    protected function PullMessages(): bool
     {
         if (!$this->isSubscribed) {
             return true;
@@ -846,7 +851,7 @@ class ONVIFIO extends IPSModule
         }
         return $this->DecodeNotificationMessage($Response);
     }
-    protected function Subscribe()
+    protected function Subscribe(): bool
     {
         $XAddr = $this->ReadAttributeArray('XAddr');
         if ($XAddr[\ONVIF\NS::Event] == '') {
@@ -899,7 +904,7 @@ class ONVIFIO extends IPSModule
         $this->SetSynchronizationPoint();
         return true;
     }
-    protected function SetSynchronizationPoint()
+    protected function SetSynchronizationPoint(): bool
     {
         if (!$this->isSubscribed) {
             return true;
@@ -926,7 +931,7 @@ class ONVIFIO extends IPSModule
         }
         return true;
     }
-    protected function Renew()
+    protected function Renew(): bool
     {
         if (!$this->isSubscribed) {
             return true;
@@ -971,7 +976,7 @@ class ONVIFIO extends IPSModule
         return true;
     }
 
-    protected function Unsubscribe()
+    protected function Unsubscribe(): bool
     {
         if (!$this->isSubscribed) {
             return true;
@@ -1007,7 +1012,7 @@ class ONVIFIO extends IPSModule
 
         return true;
     }
-    protected function GetEventProperties()
+    protected function GetEventProperties(): false|array
     {
         $XAddr = $this->ReadAttributeArray('XAddr');
         if ($XAddr[\ONVIF\NS::Event] == '') {
@@ -1045,7 +1050,7 @@ class ONVIFIO extends IPSModule
         return $TopicData;
     }
 
-    protected function GetProfiles2(string $Token = null, string $ConfigurationEnumeration = \ONVIF\Media2Conf::All)
+    protected function GetProfiles2(string $Token = null, string $ConfigurationEnumeration = \ONVIF\Media2Conf::All): bool
     {
         $XAddr = $this->ReadAttributeArray('XAddr');
         $Params['Type'] = $ConfigurationEnumeration;
@@ -1065,7 +1070,7 @@ class ONVIFIO extends IPSModule
             $Profiles = json_decode(json_encode($ProfileResult), true)['Profiles'];
         }
 
-        $H264Profiles = array_filter($Profiles, function ($Profile)
+        $H264Profiles = array_filter($Profiles, function (array $Profile)
         {
             if (isset($Profile['Configurations']['VideoEncoder']['Encoding'])) {
                 if (strtoupper($Profile['Configurations']['VideoEncoder']['Encoding']) == 'JPEG') {
@@ -1097,7 +1102,7 @@ class ONVIFIO extends IPSModule
         $H264VideoSources = array_values($H264VideoSourcesItems);
         $this->SendDebug('VideoSources H.26x', $H264VideoSources, 0);
         $this->WriteAttributeArray('VideoSources', $H264VideoSources);
-        $JPEGProfiles = array_filter($Profiles, function ($Profile)
+        $JPEGProfiles = array_filter($Profiles, function (array $Profile)
         {
             if (isset($Profile['Configurations']['VideoEncoder']['Encoding'])) {
                 if (strtoupper($Profile['Configurations']['VideoEncoder']['Encoding']) == 'JPEG') {
@@ -1132,7 +1137,7 @@ class ONVIFIO extends IPSModule
         $this->SendDebug('VideoSources JPEG', $JPEGVideoSources, 0);
         $this->WriteAttributeArray('VideoSourcesJPEG', $JPEGVideoSources);
         $AnalyticsTokens = [];
-        $AnalyticsProfiles = array_filter($Profiles, function ($Profile)
+        $AnalyticsProfiles = array_filter($Profiles, function (array $Profile)
         {
             if (isset($Profile['Configurations']['Analytics'])) {
                 return true;
@@ -1147,7 +1152,7 @@ class ONVIFIO extends IPSModule
         $this->WriteAttributeArray('AnalyticsTokens', $AnalyticsTokens);
         return true;
     }
-    protected function GetProfiles()
+    protected function GetProfiles(): bool
     {
         $XAddr = $this->ReadAttributeArray('XAddr');
         $ProfileResult = $this->SendData($XAddr[\ONVIF\NS::Media], \ONVIF\WSDL::Media, 'GetProfiles', true);
@@ -1163,7 +1168,7 @@ class ONVIFIO extends IPSModule
             $Profiles = json_decode(json_encode($ProfileResult), true)['Profiles'];
         }
 
-        $H264Profiles = array_filter($Profiles, function ($Profile)
+        $H264Profiles = array_filter($Profiles, function (array $Profile)
         {
             if (isset($Profile['VideoEncoderConfiguration']['Encoding'])) {
                 if (strtoupper($Profile['VideoEncoderConfiguration']['Encoding']) == 'JPEG') {
@@ -1196,7 +1201,7 @@ class ONVIFIO extends IPSModule
         $this->SendDebug('VideoSources H.26x', $H264VideoSources, 0);
         $this->WriteAttributeArray('VideoSources', $H264VideoSources);
 
-        $JPEGProfiles = array_filter($Profiles, function ($Profile)
+        $JPEGProfiles = array_filter($Profiles, function (array $Profile)
         {
             if (isset($Profile['VideoEncoderConfiguration']['Encoding'])) {
                 if (strtoupper($Profile['VideoEncoderConfiguration']['Encoding']) == 'JPEG') {
@@ -1227,7 +1232,7 @@ class ONVIFIO extends IPSModule
         $this->SendDebug('VideoSources JPEG', $JPEGVideoSources, 0);
         $this->WriteAttributeArray('VideoSourcesJPEG', $JPEGVideoSources);
         $AnalyticsTokens = [];
-        $AnalyticsProfiles = array_filter($Profiles, function ($Profile)
+        $AnalyticsProfiles = array_filter($Profiles, function (array $Profile)
         {
             if (isset($Profile['VideoAnalyticsConfiguration'])) {
                 return true;
@@ -1242,7 +1247,7 @@ class ONVIFIO extends IPSModule
         $this->WriteAttributeArray('AnalyticsTokens', $AnalyticsTokens);
         return true;
     }
-    protected function GetCapabilities()
+    protected function GetCapabilities(): array
     {
         $XAddr = [
             \ONVIF\NS::Management => '/onvif/device_service',
@@ -1325,7 +1330,7 @@ class ONVIFIO extends IPSModule
         $this->WriteAttributeArray('XAddr', $XAddr);
         return $XAddr;
     }
-    protected function GetScopes()
+    protected function GetScopes(): false|array
     {
         $Scopes = $this->SendData('', \ONVIF\WSDL::Management, 'GetScopes', true);
         if (is_a($Scopes, 'SoapFault')) {
@@ -1341,7 +1346,7 @@ class ONVIFIO extends IPSModule
         }
         return $Result;
     }
-    protected function GetNodes()
+    protected function GetNodes(): false|array
     {
         $XAddr = $this->ReadAttributeArray('XAddr');
         $Nodes = $this->SendData($XAddr[\ONVIF\NS::PTZ], \ONVIF\WSDL::PTZ, 'GetNodes', true);
@@ -1351,7 +1356,7 @@ class ONVIFIO extends IPSModule
         $Result = json_decode(json_encode($Nodes), true);
         return $Result;
     }
-    protected function GetVideoSources($Uri, $WSDL)
+    protected function GetVideoSources($Uri, $WSDL): false|array
     {
         $VideoSources = $this->SendData($Uri, $WSDL, 'GetVideoSources', true);
         if (is_a($VideoSources, 'SoapFault')) {
@@ -1360,7 +1365,7 @@ class ONVIFIO extends IPSModule
         $Result = json_decode(json_encode($VideoSources), true);
         return $Result;
     }
-    protected function GetAudioSources($Uri, $WSDL)
+    protected function GetAudioSources($Uri, $WSDL): false|array
     {
         $AudioSources = $this->SendData($Uri, $WSDL, 'GetAudioSources', true);
         if (is_a($AudioSources, 'SoapFault')) {
@@ -1370,7 +1375,7 @@ class ONVIFIO extends IPSModule
         return $Result;
     }
 
-    protected function GetSupportedAnalyticsModules(string $AnalyticsToken)
+    protected function GetSupportedAnalyticsModules(string $AnalyticsToken): false|array
     {
         $XAddr = $this->ReadAttributeArray('XAddr');
         $Params = [
@@ -1383,7 +1388,7 @@ class ONVIFIO extends IPSModule
         }
         return $this->DecodeAnalyticsAndRuleResponse($Response);
     }
-    protected function GetSupportedRules(string $AnalyticsToken)
+    protected function GetSupportedRules(string $AnalyticsToken): false|array
     {
         $XAddr = $this->ReadAttributeArray('XAddr');
         $Params = [
@@ -1396,7 +1401,7 @@ class ONVIFIO extends IPSModule
         }
         return $this->DecodeAnalyticsAndRuleResponse($Response);
     }
-    protected function DecodeAnalyticsAndRuleResponse(string $ResponseXML)
+    protected function DecodeAnalyticsAndRuleResponse(string $ResponseXML): array
     {
         $xml = new DOMDocument();
         $xml->loadXML($ResponseXML);
@@ -1420,7 +1425,7 @@ class ONVIFIO extends IPSModule
         }
         return $TopicData;
     }
-    protected function GetServices()
+    protected function GetServices(): false|array
     {
         $Params = [
             'IncludeCapability'=> true
@@ -1448,7 +1453,7 @@ class ONVIFIO extends IPSModule
         $this->WriteAttributeArray('XAddr', $XAddr);
         return $XAddr;
     }
-    protected function GetServiceCapabilities($Uri, $WSDL)
+    protected function GetServiceCapabilities($Uri, $WSDL): false|array
     {
         $ServiceCapabilities = $this->SendData($Uri, $WSDL, 'GetServiceCapabilities', true);
         if (is_a($ServiceCapabilities, 'SoapFault')) {
@@ -1457,7 +1462,7 @@ class ONVIFIO extends IPSModule
         $Result = json_decode(json_encode($ServiceCapabilities), true);
         return $Result;
     }
-    protected function GetDeviceInformation()
+    protected function GetDeviceInformation(): false|array
     {
         $DeviceInformation = $this->SendData('', \ONVIF\WSDL::Management, 'GetDeviceInformation', true);
         if (is_a($DeviceInformation, 'SoapFault')) {
@@ -1466,7 +1471,7 @@ class ONVIFIO extends IPSModule
         $Result = json_decode(json_encode($DeviceInformation), true);
         return $Result;
     }
-    protected function GetDigitalInputs()
+    protected function GetDigitalInputs(): bool
     {
         $XAddr = $this->ReadAttributeArray('XAddr');
         $DigitalInputResponse = $this->SendData($XAddr[\ONVIF\NS::DeviceIO], \ONVIF\WSDL::DeviceIO, 'GetDigitalInputs', true);
@@ -1491,7 +1496,7 @@ class ONVIFIO extends IPSModule
                 $DigitalInputProperties = json_decode(json_encode($DigitalInputResponse->DigitalInputs), true);
                 unset($DigitalInputProperties['token']);
                 if (!count($DigitalInputProperties)) {
-                    $DigitalInputProperties = $this->GetDigitalInputConfigurationOptions($DigitalInput->token);
+                    $DigitalInputProperties = $this->GetDigitalInputConfigurationOptions($DigitalInputResponse->DigitalInputs->token);
                 }
                 $DigitalInputs[$DigitalInputResponse->DigitalInputs->token] = $DigitalInputProperties;
             }
@@ -1500,7 +1505,7 @@ class ONVIFIO extends IPSModule
         }
         return true;
     }
-    protected function GetDigitalInputConfigurationOptions(string $Token)
+    protected function GetDigitalInputConfigurationOptions(string $Token): array
     {
         $XAddr = $this->ReadAttributeArray('XAddr');
         $Params['Token'] = $Token;
@@ -1528,7 +1533,7 @@ class ONVIFIO extends IPSModule
         return $Result;
     }*/
 
-    protected function GetRelayOutputs($Uri, $WSDL)
+    protected function GetRelayOutputs($Uri, $WSDL): bool
     {
         $RelayOutputResponse = $this->SendData($Uri, $WSDL, 'GetRelayOutputs', true);
         if (is_a($RelayOutputResponse, 'SoapFault')) {
@@ -1548,7 +1553,7 @@ class ONVIFIO extends IPSModule
         $this->WriteAttributeArray('RelayOutputs', $RelayOutputs);
         return true;
     }
-    protected function GetSystemDateAndTime()
+    protected function GetSystemDateAndTime(): bool
     {
         $camera_datetime = $this->SendData('', \ONVIF\WSDL::Management, 'GetSystemDateAndTime');
         if (is_a($camera_datetime, 'SoapFault')) {
@@ -1592,7 +1597,7 @@ class ONVIFIO extends IPSModule
      * @param bool $UseLogin
      * @param array $Params
      */
-    protected function SendData(string $URI, string $wsdl, string $Function, bool $UseLogin = false, array $Params = [], string &$Response = '', array $Header = [])
+    protected function SendData(string $URI, string $wsdl, string $Function, bool $UseLogin = false, array $Params = [], string &$Response = '', array $Header = []): mixed
     {
         if ($URI == '') {
             $URI = $this->Host . '/onvif/device_service';
@@ -1616,6 +1621,8 @@ class ONVIFIO extends IPSModule
         } else {
             $ONVIFClient = new \ONVIF\ONVIF($wsdl, $URI, null, null, $Header);
         }
+        while (!$this->lock($wsdl)) {
+        }
         try {
             if (count($Params) == 0) {
                 $Result = $ONVIFClient->client->{$Function}();
@@ -1638,12 +1645,14 @@ class ONVIFIO extends IPSModule
             $this->SendDebug('Soap Response Error (' . $e->getCode() . ')', $e->getMessage(), 0);
             $this->lastSOAPError = $e->getMessage();
             unset($ONVIFClient);
+            $this->unlock($wsdl);
             return $e;
         }
         unset($ONVIFClient);
+        $this->unlock($wsdl);
         return $Result;
     }
-    protected function GetEventReceiverFormValues()
+    protected function GetEventReceiverFormValues(): array
     {
         $EventList = [];
         $Events = $this->ReadAttributeArray('EventProperties');
@@ -1669,7 +1678,7 @@ class ONVIFIO extends IPSModule
         }
         return $EventList;
     }
-    protected function ProcessHookData()
+    protected function ProcessHookData(): void
     {
         if ($this->ReadPropertyBoolean('Open') == false) {
             http_response_code(404);
@@ -1693,9 +1702,9 @@ class ONVIFIO extends IPSModule
 
         $Data = file_get_contents('php://input');
         $this->SendDebug('Event', $Data, 0);
-        return $this->DecodeNotificationMessage($Data);
+        $this->DecodeNotificationMessage($Data);
     }
-    protected function DecodeNotificationMessage(string $NotificationMessageXML)
+    protected function DecodeNotificationMessage(string $NotificationMessageXML): bool
     {
         $xml = new DOMDocument();
         $xml->loadXML($NotificationMessageXML);
@@ -1737,7 +1746,7 @@ class ONVIFIO extends IPSModule
             $this->SendDataToChildren(json_encode($EventData));
         }
     }
-    protected function KernelReady()
+    protected function KernelReady(): void
     {
         $this->RegisterMessage($this->InstanceID, FM_CHILDREMOVED);
         $Url = parse_url($this->ReadPropertyString('Address'));
@@ -1747,7 +1756,7 @@ class ONVIFIO extends IPSModule
         }
         $this->ApplyChanges();
     }
-    protected static function unparse_url($parsed_url)
+    protected static function unparse_url($parsed_url): string
     {
         $scheme = isset($parsed_url['scheme']) ? $parsed_url['scheme'] . '://' : '';
         $host = isset($parsed_url['host']) ? $parsed_url['host'] : '';
@@ -1760,7 +1769,7 @@ class ONVIFIO extends IPSModule
         $fragment = isset($parsed_url['fragment']) ? '#' . $parsed_url['fragment'] : '';
         return "$scheme$user$pass$host$port$path$query$fragment";
     }
-    private function GetEventMessageValues(DOMNodeList $xmlNodes)
+    private function GetEventMessageValues(DOMNodeList $xmlNodes): array
     {
         $Results = [];
         foreach ($xmlNodes as $Node) {
@@ -1771,7 +1780,7 @@ class ONVIFIO extends IPSModule
         }
         return $Results;
     }
-    private function GetEventMessageDescriptionValues(DOMNodeList $xmlNodes, array $ValueNS)
+    private function GetEventMessageDescriptionValues(DOMNodeList $xmlNodes, array $ValueNS): array
     {
         $Results = [];
         foreach ($xmlNodes as $Node) {
@@ -1782,7 +1791,7 @@ class ONVIFIO extends IPSModule
         }
         return $Results;
     }
-    private function ConvertToMyNamespace(string $Value, array $ValueNS)
+    private function ConvertToMyNamespace(string $Value, array $ValueNS): string
     {
         $Parts = explode(':', $Value);
         $MyNS = array_search($Parts[0], $ValueNS);

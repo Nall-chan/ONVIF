@@ -15,29 +15,29 @@ require_once dirname(__DIR__) . '/libs/ONVIF.inc.php';
  * @property bool $DiscoveryIsRunning
  * @property bool $EnableErrorPopup
  */
-class ONVIFDiscovery extends IPSModule
+class ONVIFDiscovery extends IPSModuleStrict
 {
     use \ONVIFDiscovery\BufferHelper;
     use \ONVIFDiscovery\DebugHelper;
     use \ONVIFDiscovery\Semaphore;
-    const WS_DISCOVERY_MESSAGE = '<?xml version="1.0" encoding="utf-8"?><e:Envelope xmlns:e="http://www.w3.org/2003/05/soap-envelope" xmlns:w="http://schemas.xmlsoap.org/ws/2004/08/addressing" xmlns:d="http://schemas.xmlsoap.org/ws/2005/04/discovery" xmlns:dn="http://www.onvif.org/ver10/network/wsdl"><e:Header><w:MessageID>uuid:[UUID]</w:MessageID><w:To e:mustUnderstand="true">urn:schemas-xmlsoap-org:ws:2005:04:discovery</w:To><w:Action e:mustUnderstand="true">http://schemas.xmlsoap.org/ws/2005/04/discovery/Probe</w:Action></e:Header><e:Body><d:Probe><d:Types>dn:NetworkVideoTransmitter</d:Types></d:Probe></e:Body></e:Envelope>';
+    public const WS_DISCOVERY_MESSAGE = '<?xml version="1.0" encoding="utf-8"?><e:Envelope xmlns:e="http://www.w3.org/2003/05/soap-envelope" xmlns:w="http://schemas.xmlsoap.org/ws/2004/08/addressing" xmlns:d="http://schemas.xmlsoap.org/ws/2005/04/discovery" xmlns:dn="http://www.onvif.org/ver10/network/wsdl"><e:Header><w:MessageID>uuid:[UUID]</w:MessageID><w:To e:mustUnderstand="true">urn:schemas-xmlsoap-org:ws:2005:04:discovery</w:To><w:Action e:mustUnderstand="true">http://schemas.xmlsoap.org/ws/2005/04/discovery/Probe</w:Action></e:Header><e:Body><d:Probe><d:Types>dn:NetworkVideoTransmitter</d:Types></d:Probe></e:Body></e:Envelope>';
 
     /**
      * The maximum number of seconds that will be allowed for the discovery request.
      */
-    const WS_DISCOVERY_TIMEOUT = 3;
+    public const WS_DISCOVERY_TIMEOUT = 3;
 
     /**
      * The multicast address to use in the socket for the discovery request.
      */
-    const WS_DISCOVERY_MULTICAST_ADDRESS = '239.255.255.250';
-    const WS_DISCOVERY_MULTICAST_ADDRESSV6 = '[ff02::c]';
+    public const WS_DISCOVERY_MULTICAST_ADDRESS = '239.255.255.250';
+    public const WS_DISCOVERY_MULTICAST_ADDRESSV6 = '[ff02::c]';
     /**
      * The port that will be used in the socket for the discovery request.
      */
-    const WS_DISCOVERY_MULTICAST_PORT = 3702;
+    public const WS_DISCOVERY_MULTICAST_PORT = 3702;
 
-    public function Create()
+    public function Create(): void
     {
         //Never delete this line!
         parent::Create();
@@ -51,13 +51,13 @@ class ONVIFDiscovery extends IPSModule
         $this->EnableErrorPopup = true;
     }
 
-    public function Destroy()
+    public function Destroy(): void
     {
         //Never delete this line!
         parent::Destroy();
     }
 
-    public function ApplyChanges()
+    public function ApplyChanges(): void
     {
         //Never delete this line!
         parent::ApplyChanges();
@@ -67,7 +67,7 @@ class ONVIFDiscovery extends IPSModule
     /**
      * Interne Funktion des SDK.
      */
-    public function GetConfigurationForm()
+    public function GetConfigurationForm(): string
     {
         $Form = json_decode(file_get_contents(__DIR__ . '/form.json'), true);
         if ($this->GetStatus() == IS_CREATING) {
@@ -94,7 +94,7 @@ class ONVIFDiscovery extends IPSModule
         return json_encode($Form);
     }
 
-    public function RequestAction($Ident, $Value)
+    public function RequestAction(string $Ident, mixed $Value): void
     {
         if ($Ident == 'Save') {
             $this->DiscoveryIsRunning = false;
@@ -120,7 +120,7 @@ class ONVIFDiscovery extends IPSModule
             $this->EnableErrorPopup = false;
         }
     }
-    protected function GetConfigurationValues()
+    protected function GetConfigurationValues(): array
     {
         $InstanceIDListConfigurator = IPS_GetInstanceListByModuleID('{C6A79C49-19D5-8D45-FFE5-5D77165FAEE6}');
         $DevicesAddress = [];
@@ -175,7 +175,7 @@ class ONVIFDiscovery extends IPSModule
         }
         return $DeviceValues;
     }
-    protected function Discover()
+    protected function Discover(): void
     {
         if ($this->DiscoveryIsRunning) {
             return;
@@ -214,7 +214,7 @@ class ONVIFDiscovery extends IPSModule
             }
         }
     }
-    protected function DiscoverDevices()
+    protected function DiscoverDevices(): array
     {
         //IPS_Sleep(5000);
         //return []; // testing
@@ -310,7 +310,7 @@ class ONVIFDiscovery extends IPSModule
         return $discoveryList;
     }
 
-    protected function ScanDevice(string $IP, array $IpValues)
+    protected function ScanDevice(string $IP, array $IpValues): void
     {
         $UseLogin = false;
         if (($this->ReadAttributeString('Username') != '') || ($this->ReadAttributeString('Password') != '')) {
@@ -414,7 +414,7 @@ class ONVIFDiscovery extends IPSModule
         }
     }
 
-    protected static function relatesToMatch($uuid, $xmlDOMDoc)
+    protected static function relatesToMatch(string $uuid, DOMDocument $xmlDOMDoc): bool
     {
         $relatesNodes = $xmlDOMDoc->getElementsByTagName('RelatesTo');
         foreach ($relatesNodes as $node) {
@@ -425,7 +425,7 @@ class ONVIFDiscovery extends IPSModule
         return false;
     }
 
-    protected static function getProbeMatchXAddrs($xmlDOMDoc, $ip)
+    protected static function getProbeMatchXAddrs(DOMDocument $xmlDOMDoc, string $ip): array
     {
         $matches = [];
         $probeMatchNodes = $xmlDOMDoc->getElementsByTagName('ProbeMatch');
@@ -435,12 +435,12 @@ class ONVIFDiscovery extends IPSModule
                 $matches = array_merge($matches, explode(' ', $addrsNode->nodeValue));
             }
         }
-        $filtermatches = array_filter($matches, function ($item) use ($ip)
+        $filtermatches = array_filter($matches, function (string $item) use ($ip)
         {
             return strpos($item, $ip);
         });
         $filtermatches = array_values($filtermatches);
-        array_walk($filtermatches, function (&$item)
+        array_walk($filtermatches, function (string &$item)
         {
             $item = str_replace('/onvif/device_service', '', $item);
         });
@@ -452,7 +452,7 @@ class ONVIFDiscovery extends IPSModule
      *
      * @return string A random uuid.
      */
-    protected static function uuidV4()
+    protected static function uuidV4(): string
     {
         return sprintf(
             '%04x%04x-%04x-%04x-%04x-%04x%04x%04x',
@@ -467,7 +467,7 @@ class ONVIFDiscovery extends IPSModule
         );
     }
 
-    protected function GetTimeOffset(string $IpValue)
+    protected function GetTimeOffset(string $IpValue): int
     {
         $wsdl = dirname(__DIR__) . DIRECTORY_SEPARATOR . 'libs' . DIRECTORY_SEPARATOR . 'WSDL' . DIRECTORY_SEPARATOR . \ONVIF\WSDL::Management;
         $ONVIFClient = new \ONVIF\ONVIF($wsdl, $IpValue);
@@ -507,7 +507,7 @@ class ONVIFDiscovery extends IPSModule
         return 0;
     }
 
-    private function getIPAdresses()
+    private function getIPAdresses(): array
     {
         $Interfaces = SYS_GetNetworkInfo();
         $InterfaceIndexes = array_column($Interfaces, 'Description', 'InterfaceIndex');

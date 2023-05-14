@@ -9,10 +9,10 @@ require_once __DIR__ . '/../libs/ONVIFModuleBase.php';
  */
 class ONVIFDigitalOutput extends ONVIFModuleBase
 {
-    const wsdl = \ONVIF\WSDL::Management; // default, wenn DeviceIO nicht genutzt
-    const TopicFilter = 'relay';
+    public const wsdl = \ONVIF\WSDL::Management; // default, wenn DeviceIO nicht genutzt
+    public const TopicFilter = 'relay';
 
-    public function Create()
+    public function Create(): void
     {
         //Never delete this line!
         parent::Create();
@@ -20,7 +20,7 @@ class ONVIFDigitalOutput extends ONVIFModuleBase
         $this->RegisterPropertyBoolean('EmulateStatus', false);
     }
 
-    public function ApplyChanges()
+    public function ApplyChanges(): void
     {
         //Never delete this line!
         parent::ApplyChanges();
@@ -46,7 +46,7 @@ class ONVIFDigitalOutput extends ONVIFModuleBase
             }
             $this->WriteAttributeArray('RelayOutputs', $Capabilities['RelayOutputs']);
             foreach ($Capabilities['RelayOutputs'] as $Name => $RelayOutput) {
-                $Ident = str_replace([' - ', ':'], ['_', ''], $Name);
+                $Ident = str_replace([' - ', ':'], ['_', ''], (string) $Name);
                 $Ident = preg_replace('/[^a-zA-Z\d]/u', '_', $Ident);
                 $this->RegisterVariableBoolean($Ident, $Name, '~Switch', 0);
                 $this->EnableAction($Ident);
@@ -62,7 +62,7 @@ class ONVIFDigitalOutput extends ONVIFModuleBase
         $this->SetStatus(IS_ACTIVE);
     }
 
-    public function SetRelayOutputState(string $Ident, bool $Value)
+    public function SetRelayOutputState(string $Ident, bool $Value): bool
     {
         if (!array_key_exists($Ident, $this->ReadAttributeArray('RelayOutputs'))) {
             set_error_handler([$this, 'ModulErrorHandler']);
@@ -85,15 +85,17 @@ class ONVIFDigitalOutput extends ONVIFModuleBase
         return true;
     }
 
-    public function RequestAction($Ident, $Value)
+    public function RequestAction(string $Ident, mixed $Value, bool $done = false): void
     {
-        if (parent::RequestAction($Ident, $Value)) {
-            return true;
+        parent::RequestAction($Ident, $Value, $done);
+        if ($done) {
+            return;
         }
-        return $this->SetRelayOutputState($Ident, $Value);
+        $this->SetRelayOutputState($Ident, $Value);
+        return;
     }
 
-    public function ReceiveData($JSONString)
+    public function ReceiveData(string $JSONString): string
     {
         $Data = json_decode($JSONString, true);
         unset($Data['DataID']);
@@ -102,29 +104,29 @@ class ONVIFDigitalOutput extends ONVIFModuleBase
         $EventProperty = array_pop($Events);
         $SourceIndex = array_search('tt:ReferenceToken', array_column($EventProperty['Sources'], 'Type'));
         if ($SourceIndex === false) {
-            return;
+            return '';
         }
         $SourceName = $EventProperty['Sources'][$SourceIndex]['Name'];
         $EventSourceIndex = array_search($SourceName, array_column($Data['Sources'], 'Name'));
         if ($EventSourceIndex === false) {
-            return;
+            return '';
         }
         $Ident = $Data['Sources'][$EventSourceIndex]['Value'];
         $DataIndex = array_search('tt:RelayLogicalState', array_column($EventProperty['Data'], 'Type'));
         if ($DataIndex === false) {
-            return;
+            return '';
         }
         $DataName = $EventProperty['Data'][$SourceIndex]['Name'];
         $EventDataIndex = array_search($DataName, array_column($Data['DataValues'], 'Name'));
         if ($EventDataIndex === false) {
-            return;
+            return '';
         }
         $Value = $Data['DataValues'][$EventDataIndex]['Value'];
         $this->RegisterVariableBoolean($Ident, $Ident, '~Switch', 0);
         $this->SetValueBoolean($Ident, ($Value == 'active'));
     }
 
-    public function GetConfigurationForm()
+    public function GetConfigurationForm(): string
     {
         $Form = json_decode(file_get_contents(__DIR__ . '/form.json'), true);
         if ($this->GetStatus() == IS_CREATING) {

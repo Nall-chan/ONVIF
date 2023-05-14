@@ -6,14 +6,14 @@ namespace ONVIF;
 
 class WSDL
 {
-    const Management = 'ver10/device/wsdl/devicemgmt.wsdl';
-    const Media = 'ver10/media/wsdl/media.wsdl';
-    const Event = 'ver10/events/wsdl/event.wsdl';
-    const Media2 = 'ver20/media/wsdl/media.wsdl';
-    const PTZ = 'ver20/ptz/wsdl/ptz.wsdl';
-    const DeviceIO = 'ver10/deviceio.wsdl';
-    const Imaging = 'ver20/imaging/wsdl/imaging.wsdl';
-    const Analytics = 'ver20/analytics/wsdl/analytics.wsdl';
+    public const Management = 'ver10/device/wsdl/devicemgmt.wsdl';
+    public const Media = 'ver10/media/wsdl/media.wsdl';
+    public const Event = 'ver10/events/wsdl/event.wsdl';
+    public const Media2 = 'ver20/media/wsdl/media.wsdl';
+    public const PTZ = 'ver20/ptz/wsdl/ptz.wsdl';
+    public const DeviceIO = 'ver10/deviceio.wsdl';
+    public const Imaging = 'ver20/imaging/wsdl/imaging.wsdl';
+    public const Analytics = 'ver20/analytics/wsdl/analytics.wsdl';
     public static $getWSDL = [
         self::Management => NS::Management,
         self::Media      => NS::Media,
@@ -27,14 +27,14 @@ class WSDL
 }
 class NS
 {
-    const Management = 'http://www.onvif.org/ver10/device/wsdl';
-    const Media = 'http://www.onvif.org/ver10/media/wsdl';
-    const Event = 'http://www.onvif.org/ver10/events/wsdl';
-    const Media2 = 'http://www.onvif.org/ver20/media/wsdl';
-    const PTZ = 'http://www.onvif.org/ver20/ptz/wsdl';
-    const DeviceIO = 'http://www.onvif.org/ver10/deviceIO/wsdl';
-    const Imaging = 'http://www.onvif.org/ver20/imaging/wsdl';
-    const Analytics = 'http://www.onvif.org/ver20/analytics/wsdl';
+    public const Management = 'http://www.onvif.org/ver10/device/wsdl';
+    public const Media = 'http://www.onvif.org/ver10/media/wsdl';
+    public const Event = 'http://www.onvif.org/ver10/events/wsdl';
+    public const Media2 = 'http://www.onvif.org/ver20/media/wsdl';
+    public const PTZ = 'http://www.onvif.org/ver20/ptz/wsdl';
+    public const DeviceIO = 'http://www.onvif.org/ver10/deviceIO/wsdl';
+    public const Imaging = 'http://www.onvif.org/ver20/imaging/wsdl';
+    public const Analytics = 'http://www.onvif.org/ver20/analytics/wsdl';
     // all other NS
     public static $Namespaces = [
         's'      => 'http://www.w3.org/2003/05/soap-envelope',
@@ -83,31 +83,31 @@ class NS
 
 class Media2Conf
 {
-    const All = 'All';
-    const VideoSource = 'VideoSource';
-    const VideoEncoder = 'VideoEncoder';
-    const AudioSource = 'AudioSource';
-    const AudioEncoder = 'AudioEncoder';
-    const AudioOutput = 'AudioOutput';
-    const AudioDecoder = 'AudioDecoder';
-    const Metadata = 'Metadata';
-    const Analytics = 'Analytics';
-    const PTZ = 'PTZ';
-    const Receiver = 'Receiver';
+    public const All = 'All';
+    public const VideoSource = 'VideoSource';
+    public const VideoEncoder = 'VideoEncoder';
+    public const AudioSource = 'AudioSource';
+    public const AudioEncoder = 'AudioEncoder';
+    public const AudioOutput = 'AudioOutput';
+    public const AudioDecoder = 'AudioDecoder';
+    public const Metadata = 'Metadata';
+    public const Analytics = 'Analytics';
+    public const PTZ = 'PTZ';
+    public const Receiver = 'Receiver';
 }
 
 class Scopes
 {
-    const ProfileT = 'onvif://www.onvif.org/Profile/T';
-    const ProfileG = 'onvif://www.onvif.org/Profile/G';
-    const ProfileS = 'onvif://www.onvif.org/Profile/Streaming';
+    public const ProfileT = 'onvif://www.onvif.org/Profile/T';
+    public const ProfileG = 'onvif://www.onvif.org/Profile/G';
+    public const ProfileS = 'onvif://www.onvif.org/Profile/Streaming';
 }
 
 class Profile
 {
-    const S = 1; // Streaming und WS-Event
-    const G = 2; // Recording (ohne streaming!)
-    const T = 4; // Streaming und pull point Event, Image Settings
+    public const S = 1; // Streaming und WS-Event
+    public const G = 2; // Recording (ohne streaming!)
+    public const T = 4; // Streaming und pull point Event, Image Settings
 
     public static $ScopesToProfile = [
         Scopes::ProfileS         => self::S,

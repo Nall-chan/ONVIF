@@ -6,12 +6,12 @@ require_once __DIR__ . '/../libs/ONVIFModuleBase.php';
 
 class ONVIFEvents extends ONVIFModuleBase
 {
-    const wsdl = '';
-    public function Create()
+    public const wsdl = '';
+    public function Create(): void
     {
         parent::Create();
     }
-    public function ApplyChanges()
+    public function ApplyChanges(): void
     {
         //Never delete this line!
         parent::ApplyChanges();
@@ -31,20 +31,21 @@ class ONVIFEvents extends ONVIFModuleBase
         }
     }
 
-    public function ReceiveData($JSONString)
+    public function ReceiveData(string $JSONString): string
     {
         $Data = json_decode($JSONString, true);
         unset($Data['DataID']);
         $this->SendDebug('ReceiveEvent', $Data, 0);
         $EventProperties = $this->ReadAttributeArray('EventProperties');
         if (!array_key_exists($Data['Topic'], $EventProperties)) {
-            return false;
+            return '';
         }
         $PreName = str_replace($this->ReadPropertyString('EventTopic'), '', $Data['Topic']);
-        return $this->SetEventStatusVariable($PreName, $EventProperties[$Data['Topic']], $Data);
+        $this->SetEventStatusVariable($PreName, $EventProperties[$Data['Topic']], $Data);
+        return '';
     }
 
-    public function GetConfigurationForm()
+    public function GetConfigurationForm(): string
     {
         $Form = json_decode(file_get_contents(__DIR__ . '/form.json'), true);
         if ($this->GetStatus() == IS_CREATING) {

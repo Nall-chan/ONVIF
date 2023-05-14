@@ -17,9 +17,9 @@ eval('declare(strict_types=1);namespace ONVIFMediaStream {?>' . file_get_content
 class ONVIFMediaStream extends ONVIFModuleBase
 {
     use \ONVIFMediaStream\WebhookHelper;
-    const wsdl = \ONVIF\WSDL::Media; // default für Media1
-    const PTZwsdl = \ONVIF\WSDL::PTZ; // statisch
-    const TopicFilter = 'videosource';
+    public const wsdl = \ONVIF\WSDL::Media; // default für Media1
+    public const PTZwsdl = \ONVIF\WSDL::PTZ; // statisch
+    public const TopicFilter = 'videosource';
 
     public function Create()
     {
@@ -859,18 +859,19 @@ class ONVIFMediaStream extends ONVIFModuleBase
         return $this->SendData($this->PTZ_xAddr, 'GotoHomePosition', true, $Params, self::PTZwsdl);
     }
 
-    public function RequestAction($Ident, $Value)
+    public function RequestAction(string $Ident, mixed $Value, bool $done = false): void
     {
-        if (parent::RequestAction($Ident, $Value)) {
-            return true;
+        parent::RequestAction($Ident, $Value, $done);
+        if ($done) {
+            return;
         }
         if ($Ident == 'RefreshProfileForm') {
             $this->RefreshProfileForm($Value);
-            return true;
+            return;
         }
         if ($Ident == 'RefreshEnablePresetProfileForm') {
             $this->RefreshPresetProfileForm($Value);
-            return true;
+            return;
         }
         $Speed = 0;
         if (@$this->GetIDForIdent('SPEED')) {
@@ -881,83 +882,80 @@ class ONVIFMediaStream extends ONVIFModuleBase
             $Time = $this->GetValue('TIME');
         }
         switch ($Ident) {
-        case 'PRESET':
-            if ($this->GotoPreset($Value)) {
-                $this->SetValue('PRESET', $Value);
-                return true;
-            }
-            return false;
-        case 'TIME':
-        case 'SPEED':
-            $this->SetValueFloat($Ident, $Value);
-        return true;
-        case 'PT':
-            $Result = false;
-            switch ($Value) {
-                case 0:
-                    $Result = $this->MoveLeftSpeedTime($Speed, $Time);
-                break;
-                case 1:
-                    $Result = $this->MoveUpSpeedTime($Speed, $Time);
-                break;
-                case 2:
-                    $Result = $this->MoveStop();
-                break;
-                case 3:
-                    $Result = $this->MoveDownSpeedTime($Speed, $Time);
-                break;
-                case 4:
-                    $Result = $this->MoveRightSpeedTime($Speed, $Time);
-                break;
-                default:
-                    set_error_handler([$this, 'ModulErrorHandler']);
-                    trigger_error($this->Translate('Invalid Value.'), E_USER_NOTICE);
-                    restore_error_handler();
-                    return false;
-
-            }
-            if ($Result) {
-                $this->SetValueInteger('PT', $Value);
-            }
-            return $Result;
-        case 'ZOOM':
-            $Result = false;
-            switch ($Value) {
-                case 0:
-                    $Result = $this->ZoomFarSpeedTime($Speed, $Time);
-                break;
-                case 1:
-                    $Result = $this->ZoomStop();
-                break;
-                case 2:
-                    $Result = $this->ZoomNearSpeedTime($Speed, $Time);
-                break;
+            case 'PRESET':
+                if ($this->GotoPreset($Value)) {
+                    $this->SetValue('PRESET', $Value);
+                }
+                return;
+            case 'TIME':
+            case 'SPEED':
+                $this->SetValueFloat($Ident, $Value);
+                return;
+            case 'PT':
+                $Result = false;
+                switch ($Value) {
+                    case 0:
+                        $Result = $this->MoveLeftSpeedTime($Speed, $Time);
+                        break;
+                    case 1:
+                        $Result = $this->MoveUpSpeedTime($Speed, $Time);
+                        break;
+                    case 2:
+                        $Result = $this->MoveStop();
+                        break;
+                    case 3:
+                        $Result = $this->MoveDownSpeedTime($Speed, $Time);
+                        break;
+                    case 4:
+                        $Result = $this->MoveRightSpeedTime($Speed, $Time);
+                        break;
                     default:
-                    set_error_handler([$this, 'ModulErrorHandler']);
-                    trigger_error($this->Translate('Invalid Value.'), E_USER_NOTICE);
-                    restore_error_handler();
-                    return false;
-
-            }
-            if ($Result) {
-                $this->SetValueInteger('ZOOM', $Value);
-            }
-            return $Result;
-    }
+                        set_error_handler([$this, 'ModulErrorHandler']);
+                        trigger_error($this->Translate('Invalid Value.'), E_USER_NOTICE);
+                        restore_error_handler();
+                        return;
+                }
+                if ($Result) {
+                    $this->SetValueInteger('PT', $Value);
+                }
+                return;
+            case 'ZOOM':
+                $Result = false;
+                switch ($Value) {
+                    case 0:
+                        $Result = $this->ZoomFarSpeedTime($Speed, $Time);
+                        break;
+                    case 1:
+                        $Result = $this->ZoomStop();
+                        break;
+                    case 2:
+                        $Result = $this->ZoomNearSpeedTime($Speed, $Time);
+                        break;
+                    default:
+                        set_error_handler([$this, 'ModulErrorHandler']);
+                        trigger_error($this->Translate('Invalid Value.'), E_USER_NOTICE);
+                        restore_error_handler();
+                        return;
+                }
+                if ($Result) {
+                    $this->SetValueInteger('ZOOM', $Value);
+                }
+                return;
+        }
         set_error_handler([$this, 'ModulErrorHandler']);
         trigger_error($this->Translate('Invalid Ident.'), E_USER_NOTICE);
         restore_error_handler();
-        return false;
+        return;
     }
 
-    public function ReceiveData($JSONString)
+    public function ReceiveData(string $JSONString): string
     {
         $Data = json_decode($JSONString, true);
         unset($Data['DataID']);
         $this->SendDebug('ReceiveEvent', $Data, 0);
         $EventProperties = $this->ReadAttributeArray('EventProperties');
         if (!array_key_exists($Data['Topic'], $EventProperties)) {
-            return false;
+            return '';
         }
         $EventProperty = $EventProperties[$Data['Topic']];
         $FoundEventIndex = false;
@@ -983,10 +981,11 @@ class ONVIFMediaStream extends ONVIFModuleBase
             unset($Data['Sources'][$FoundEventIndex]);
         }
         $PreName = str_replace($this->ReadPropertyString('EventTopic'), '', $Data['Topic']);
-        return $this->SetEventStatusVariable($PreName, $EventProperties[$Data['Topic']], $Data);
+        $this->SetEventStatusVariable($PreName, $EventProperties[$Data['Topic']], $Data);
+        return '';
     }
 
-    protected function IOChangeState($State)
+    protected function IOChangeState(int $State): void
     {
         parent::IOChangeState($State);
 
@@ -1257,48 +1256,48 @@ class ONVIFMediaStream extends ONVIFModuleBase
             return;
         }
         switch ($_GET['action']) {
-        case 'StopPTZ':
-            $this->StopPTZ();
-            echo 'OK';
-            return;
-        case 'StartPTZ':
-            switch ($_GET['value']) {
-                case 'left':
-                    if ($this->MoveLeft()) {
-                        echo 'OK';
-                    }
-                    return;
-                case 'right':
-                    if ($this->MoveRight()) {
-                        echo 'OK';
-                    }
-                    return;
-                case 'up':
-                    if ($this->MoveUp()) {
-                        echo 'OK';
-                    }
-                    return;
-                case 'down':
-                    if ($this->MoveDown()) {
-                        echo 'OK';
-                    }
-                    return;
-                case 'near':
-                    if ($this->ZoomNear()) {
-                        echo 'OK';
-                    }
-                    return;
-                case 'far':
-                    if ($this->ZoomFar()) {
-                        echo 'OK';
-                    }
-                    return;
-                default:
-                    echo $this->Translate('Invalid parameters.');
-                    return;
-            }
-            break;
-    }
+            case 'StopPTZ':
+                $this->StopPTZ();
+                echo 'OK';
+                return;
+            case 'StartPTZ':
+                switch ($_GET['value']) {
+                    case 'left':
+                        if ($this->MoveLeft()) {
+                            echo 'OK';
+                        }
+                        return;
+                    case 'right':
+                        if ($this->MoveRight()) {
+                            echo 'OK';
+                        }
+                        return;
+                    case 'up':
+                        if ($this->MoveUp()) {
+                            echo 'OK';
+                        }
+                        return;
+                    case 'down':
+                        if ($this->MoveDown()) {
+                            echo 'OK';
+                        }
+                        return;
+                    case 'near':
+                        if ($this->ZoomNear()) {
+                            echo 'OK';
+                        }
+                        return;
+                    case 'far':
+                        if ($this->ZoomFar()) {
+                            echo 'OK';
+                        }
+                        return;
+                    default:
+                        echo $this->Translate('Invalid parameters.');
+                        return;
+                }
+                break;
+        }
         echo $this->Translate('Invalid parameters.');
         return;
     }

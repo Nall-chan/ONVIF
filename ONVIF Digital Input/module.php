@@ -6,15 +6,15 @@ require_once __DIR__ . '/../libs/ONVIFModuleBase.php';
 
 class ONVIFDigitalInput extends ONVIFModuleBase
 {
-    const wsdl = \ONVIF\WSDL::Management;
-    const TopicFilter = 'input';
-    public function Create()
+    public const wsdl = \ONVIF\WSDL::Management;
+    public const TopicFilter = 'input';
+    public function Create(): void
     {
         //Never delete this line!
         parent::Create();
         $this->RegisterAttributeArray('DigitalInputs', []);
     }
-    public function ApplyChanges()
+    public function ApplyChanges(): void
     {
         //Never delete this line!
         parent::ApplyChanges();
@@ -48,17 +48,17 @@ class ONVIFDigitalInput extends ONVIFModuleBase
         }
     }
 
-    public function ReceiveData($JSONString)
+    public function ReceiveData(string $JSONString): string
     {
         $Data = json_decode($JSONString, true);
         unset($Data['DataID']);
         $this->SendDebug('ReceiveEvent', $Data, 0);
         $EventProperties = $this->ReadAttributeArray('EventProperties');
         if (!array_key_exists($Data['Topic'], $EventProperties)) {
-            return false;
+            return '';
         }
         if ((count($Data['Sources']) != 1) || (count($Data['DataValues']) != 1)) {
-            return false;
+            return '';
         }
 
         $Name = $Data['Sources'][0]['Value'];
@@ -76,10 +76,10 @@ class ONVIFDigitalInput extends ONVIFModuleBase
 
         $this->RegisterVariableBoolean($Ident, $Name, '', 0);
         $this->SetValueBoolean($Ident, $VariableValue);
-        return true;
+        return '';
     }
 
-    public function GetConfigurationForm()
+    public function GetConfigurationForm(): string
     {
         $Form = json_decode(file_get_contents(__DIR__ . '/form.json'), true);
         if ($this->GetStatus() == IS_CREATING) {

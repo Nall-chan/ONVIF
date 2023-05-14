@@ -14,7 +14,7 @@ require_once __DIR__ . '/wsdl.php';
  * @property int $ParentID
  * @property string $EventTopic
  */
-class ONVIFModuleBase extends IPSModule
+class ONVIFModuleBase extends IPSModuleStrict
 {
     use \ONVIFModuleBase\BufferHelper,
         \ONVIFModuleBase\VariableProfileHelper,
@@ -22,14 +22,14 @@ class ONVIFModuleBase extends IPSModule
         \ONVIFModuleBase\DebugHelper,
         \ONVIFModuleBase\AttributeArrayHelper,
         \ONVIFModuleBase\InstanceStatus {
-        \ONVIFModuleBase\InstanceStatus::MessageSink as IOMessageSink; // MessageSink gibt es sowohl hier in der Klasse, als auch im Trait InstanceStatus. Hier wird für die Methode im Trait ein Alias benannt.
-        \ONVIFModuleBase\InstanceStatus::RegisterParent as IORegisterParent;
-        \ONVIFModuleBase\InstanceStatus::RequestAction as IORequestAction;
-    }
-    const wsdl = '';
-    const TopicFilter = '';
+            \ONVIFModuleBase\InstanceStatus::MessageSink as IOMessageSink; // MessageSink gibt es sowohl hier in der Klasse, als auch im Trait InstanceStatus. Hier wird für die Methode im Trait ein Alias benannt.
+            \ONVIFModuleBase\InstanceStatus::RegisterParent as IORegisterParent;
+            \ONVIFModuleBase\InstanceStatus::RequestAction as IORequestAction;
+        }
+    public const wsdl = '';
+    public const TopicFilter = '';
 
-    public function Create()
+    public function Create(): void
     {
         //Never delete this line!
         parent::Create();
@@ -41,13 +41,13 @@ class ONVIFModuleBase extends IPSModule
         }
     }
 
-    public function Destroy()
+    public function Destroy(): void
     {
         //Never delete this line!
         parent::Destroy();
     }
 
-    public function ApplyChanges()
+    public function ApplyChanges(): void
     {
         $EventTopic = $this->ReadPropertyString('EventTopic');
         $PullEvents = ($EventTopic != $this->EventTopic);
@@ -76,19 +76,21 @@ class ONVIFModuleBase extends IPSModule
         }
     }
 
-    public function RequestAction($Ident, $Value)
+    public function RequestAction(string $Ident, mixed $Value, bool &$done = false): void
     {
+        $done = false;
         if ($this->IORequestAction($Ident, $Value)) {
-            return true;
+            $done = true;
+            return;
         }
         if ($Ident == 'SetSynchronizationPoint') {
             $this->SetSynchronizationPoint();
-            return true;
+            $done = true;
+            return;
         }
-        return false;
     }
 
-    public function MessageSink($TimeStamp, $SenderID, $Message, $Data)
+    public function MessageSink(int $TimeStamp, int $SenderID, int $Message, array $Data): void
     {
         $this->IOMessageSink($TimeStamp, $SenderID, $Message, $Data);
 
@@ -100,7 +102,7 @@ class ONVIFModuleBase extends IPSModule
         }
     }
 
-    protected function KernelReady()
+    protected function KernelReady(): void
     {
         $this->RegisterParent();
         if ($this->HasActiveParent()) {
@@ -108,7 +110,7 @@ class ONVIFModuleBase extends IPSModule
         }
     }
 
-    protected function RegisterParent()
+    protected function RegisterParent(): void
     {
         $this->IORegisterParent();
     }
@@ -116,7 +118,7 @@ class ONVIFModuleBase extends IPSModule
     /**
      * Wird ausgeführt wenn sich der Status vom Parent ändert.
      */
-    protected function IOChangeState($State)
+    protected function IOChangeState(int $State): void
     {
         if ($State == IS_ACTIVE) {
             $this->EventTopic = $this->ReadPropertyString('EventTopic');
@@ -125,7 +127,7 @@ class ONVIFModuleBase extends IPSModule
         }
     }
 
-    protected function GetEvents(string $Pattern = '', int $InstanceID = -1, array $SkippedTopics = [])
+    protected function GetEvents(string $Pattern = '', int $InstanceID = -1, array $SkippedTopics = []): false|array
     {
         $answer = [];
         if ($this->ParentID == 0) {
@@ -148,7 +150,7 @@ class ONVIFModuleBase extends IPSModule
 
         return $answer;
     }
-    protected function SetSynchronizationPoint()
+    protected function SetSynchronizationPoint(): void
     {
         if ($this->ParentID > 0) {
             if ($this->HasActiveParent()) {
@@ -158,7 +160,7 @@ class ONVIFModuleBase extends IPSModule
             }
         }
     }
-    protected function GetCapabilities()
+    protected function GetCapabilities(): array
     {
         if ($this->ParentID > 0) {
             if ($this->HasActiveParent()) {
@@ -204,7 +206,7 @@ class ONVIFModuleBase extends IPSModule
         ];
     }
 
-    protected function GetCredentials()
+    protected function GetCredentials(): array
     {
         if ($this->ParentID > 0) {
             if ($this->HasActiveParent()) {
@@ -219,7 +221,7 @@ class ONVIFModuleBase extends IPSModule
         }
         return ['Username' => '', 'Password' => ''];
     }
-    protected function GetUrl()
+    protected function GetUrl(): string
     {
         if ($this->ParentID > 0) {
             if ($this->HasActiveParent()) {
@@ -234,7 +236,7 @@ class ONVIFModuleBase extends IPSModule
         }
         return '';
     }
-    protected function SendData(string $URI, string $Function, bool $UseLogin = false, array $Params = [], string $wsdl = '')
+    protected function SendData(string $URI, string $Function, bool $UseLogin = false, array $Params = [], string $wsdl = ''): false|string|array
     {
         $this->SendDebug('Send URI', $URI, 0);
         if ($wsdl == '') {
@@ -282,7 +284,7 @@ class ONVIFModuleBase extends IPSModule
         return $Result;
     }
 
-    protected static function unparse_url($parsed_url)
+    protected static function unparse_url(array $parsed_url): string
     {
         $scheme = isset($parsed_url['scheme']) ? $parsed_url['scheme'] . '://' : '';
         $host = isset($parsed_url['host']) ? $parsed_url['host'] : '';
@@ -296,14 +298,14 @@ class ONVIFModuleBase extends IPSModule
         return "$scheme$user$pass$host$port$path$query$fragment";
     }
 
-    protected function ModulErrorHandler($errno, $errstr)
+    protected function ModulErrorHandler(int $errno, string $errstr): void
     {
-        $this->SendDebug('ERROR', utf8_decode($errstr), 0);
+        $this->SendDebug('ERROR', $errstr, 0);
         echo $errstr . "\r\n";
         //return true;
     }
 
-    protected function GetConfigurationFormEventTopic(array $Form, bool $AddNothingIndex = false, array $SkippedTopics = [])
+    protected function GetConfigurationFormEventTopic(array $Form, bool $AddNothingIndex = false, array $SkippedTopics = []): array
     {
         $Events = $this->GetEvents(static::TopicFilter, 0, $SkippedTopics);
         if (count($Events) == 0) {
@@ -334,7 +336,7 @@ class ONVIFModuleBase extends IPSModule
         return $Form;
     }
 
-    protected function SetEventStatusVariable($PreName, $EventProperty, $Data)
+    protected function SetEventStatusVariable(string $PreName, array $EventProperty, array $Data): void
     {
         $NameParts = [];
         if ($PreName != '') {
@@ -358,7 +360,7 @@ class ONVIFModuleBase extends IPSModule
             $Ident = preg_replace('/[^a-zA-Z\d]/u', '_', $Ident);
             $this->RegisterVariableBoolean($Ident, $Name, '', 0);
             $this->SetValueBoolean($Ident, true);
-            return true;
+            return;
         }
 
         foreach ($Data['DataValues'] as $DataValue) {
@@ -379,56 +381,56 @@ class ONVIFModuleBase extends IPSModule
             $Ident = str_replace([' - ', ':'], ['_', ''], $Name);
             $Ident = preg_replace('/[^a-zA-Z\d]/u', '_', $Ident);
             switch ($DataType) {
-            case 'xs:boolean':
-            case 'tt:boolean':
-                $VariableValue = false;
-                if (strtolower($DataValue['Value']) === 'true') {
-                    $VariableValue = true;
-                }
-                if (intval($DataValue['Value']) === 1) {
-                    $VariableValue = true;
-                }
-                $this->RegisterVariableBoolean($Ident, $Name, '', 0);
-                $this->SetValueBoolean($Ident, $VariableValue);
-            break;
-            case 'tt:RelayLogicalState':
-                $this->RegisterVariableBoolean($Ident, $Name, '', 0);
-                $this->SetValueBoolean($Ident, (strtolower($DataValue['Value']) === 'active'));
-                break;
-            case 'xs:float':
-            case 'xs:double':
-            case 'xs:long':
-            case 'tt:float':
-            case 'tt:double':
-            case 'tt:long':
-                        $this->RegisterVariableFloat($Ident, $Name, '', 0);
-                $this->SetValueFloat($Ident, (float) $DataValue['Value']);
-                break;
-            case 'xs:integer':
-            case 'xs:int':
-            case 'xs:decimal':
-            case 'xs:short':
-            case 'xs:unsignedLong':
-            case 'xs:unsignedInt':
-            case 'xs:unsignedShort':
-            case 'xs:unsignedByte':
-            case 'tt:integer':
-            case 'tt:int':
-            case 'tt:decimal':
-            case 'tt:short':
-            case 'tt:unsignedLong':
-            case 'tt:unsignedInt':
-            case 'tt:unsignedShort':
-            case 'tt:unsignedByte':
-                        $this->RegisterVariableInteger($Ident, $Name, '', 0);
-                $this->SetValueInteger($Ident, (int) $DataValue['Value']);
-                break;
-            default:
-                $this->RegisterVariableString($Ident, $Name, '', 0);
-                $this->SetValueString($Ident, $DataValue['Value']);
-                break;
+                case 'xs:boolean':
+                case 'tt:boolean':
+                    $VariableValue = false;
+                    if (strtolower($DataValue['Value']) === 'true') {
+                        $VariableValue = true;
+                    }
+                    if (intval($DataValue['Value']) === 1) {
+                        $VariableValue = true;
+                    }
+                    $this->RegisterVariableBoolean($Ident, $Name, '', 0);
+                    $this->SetValueBoolean($Ident, $VariableValue);
+                    break;
+                case 'tt:RelayLogicalState':
+                    $this->RegisterVariableBoolean($Ident, $Name, '', 0);
+                    $this->SetValueBoolean($Ident, (strtolower($DataValue['Value']) === 'active'));
+                    break;
+                case 'xs:float':
+                case 'xs:double':
+                case 'xs:long':
+                case 'tt:float':
+                case 'tt:double':
+                case 'tt:long':
+                    $this->RegisterVariableFloat($Ident, $Name, '', 0);
+                    $this->SetValueFloat($Ident, (float) $DataValue['Value']);
+                    break;
+                case 'xs:integer':
+                case 'xs:int':
+                case 'xs:decimal':
+                case 'xs:short':
+                case 'xs:unsignedLong':
+                case 'xs:unsignedInt':
+                case 'xs:unsignedShort':
+                case 'xs:unsignedByte':
+                case 'tt:integer':
+                case 'tt:int':
+                case 'tt:decimal':
+                case 'tt:short':
+                case 'tt:unsignedLong':
+                case 'tt:unsignedInt':
+                case 'tt:unsignedShort':
+                case 'tt:unsignedByte':
+                    $this->RegisterVariableInteger($Ident, $Name, '', 0);
+                    $this->SetValueInteger($Ident, (int) $DataValue['Value']);
+                    break;
+                default:
+                    $this->RegisterVariableString($Ident, $Name, '', 0);
+                    $this->SetValueString($Ident, $DataValue['Value']);
+                    break;
             }
         }
-        return true;
+        return;
     }
 }

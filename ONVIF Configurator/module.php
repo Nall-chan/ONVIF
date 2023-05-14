@@ -6,14 +6,14 @@ require_once dirname(__DIR__) . '/libs/ONVIFModuleBase.php';
 
 class ONVIFConfigurator extends ONVIFModuleBase
 {
-    const wsdl = \ONVIF\WSDL::Management;
-    const GUID_ONVIF_DIGITAL_INPUT = '{73097230-1ECC-FEEB-5969-C85148DFA76E}';
-    const GUID_ONVIF_DIGITAL_OUTPUT = '{A44B3114-1F72-1FD1-96FB-D7E970BD8614}';
-    const GUID_ONVIF_MEDIA_STREAM = '{FA889450-38B6-7E20-D4DC-F2C6D0B074FB}';
-    const GUID_ONVIF_IMAGE_GRABBER = '{18EA97C1-3CEC-80B7-4CAA-D91F8A2A0599}';
-    const GUID_ONVIF_EVENT = '{62584C2E-4542-4EBF-1E92-299F4CF364E4}';
+    public const wsdl = \ONVIF\WSDL::Management;
+    public const GUID_ONVIF_DIGITAL_INPUT = '{73097230-1ECC-FEEB-5969-C85148DFA76E}';
+    public const GUID_ONVIF_DIGITAL_OUTPUT = '{A44B3114-1F72-1FD1-96FB-D7E970BD8614}';
+    public const GUID_ONVIF_MEDIA_STREAM = '{FA889450-38B6-7E20-D4DC-F2C6D0B074FB}';
+    public const GUID_ONVIF_IMAGE_GRABBER = '{18EA97C1-3CEC-80B7-4CAA-D91F8A2A0599}';
+    public const GUID_ONVIF_EVENT = '{62584C2E-4542-4EBF-1E92-299F4CF364E4}';
 
-    public function GetConfigurationForm()
+    public function GetConfigurationForm(): string
     {
         $Form = json_decode(file_get_contents(__DIR__ . '/form.json'), true);
         if ($this->GetStatus() == IS_CREATING) {
@@ -280,7 +280,7 @@ class ONVIFConfigurator extends ONVIFModuleBase
         return json_encode($Form);
     }
 
-    protected function GetInstanceList(string $GUID, array $ConfigParam = [])
+    protected function GetInstanceList(string $GUID, array $ConfigParam = []): array
     {
         $InstanceIDList = array_filter(IPS_GetInstanceListByModuleID($GUID), [$this, 'FilterInstances']);
         if (count($ConfigParam)) {
@@ -291,17 +291,17 @@ class ONVIFConfigurator extends ONVIFModuleBase
         return $InstanceIDList;
     }
 
-    protected function FilterInstances(int $InstanceID)
+    protected function FilterInstances(int $InstanceID): bool
     {
         return IPS_GetInstance($InstanceID)['ConnectionID'] == $this->ParentID;
     }
 
-    protected function GetConfigParam(&$item1, int $InstanceID, array $ConfigParam)
+    protected function GetConfigParam(&$item1, int $InstanceID, array $ConfigParam): void
     {
         $item1 = implode(':', array_intersect_key(json_decode(IPS_GetConfiguration($InstanceID), true), array_flip($ConfigParam)));
     }
 
-    protected function GetConfigurationArray(string $GUID, bool $isValid, array $CreateParams = [])
+    protected function GetConfigurationArray(string $GUID, bool $isValid, array $CreateParams = []): array
     {
         $IPSInstances = $this->GetInstanceList($GUID);
 
