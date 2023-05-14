@@ -13,4 +13,4 @@ jobs:
       - name: Checkout module
         uses: actions/checkout@master
       - name: Check style
-        uses: Nall-chan/action-style@master
+        uses: Nall-chan/action-style@strict
