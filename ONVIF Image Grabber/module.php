@@ -430,8 +430,8 @@ class ONVIFImageGrabber extends ONVIFModuleBase
     }
     protected function GetMediaId(): int
     {
-        $MediaId = @$this->GetIDForIdent('IMAGE');
-        if ($MediaId == false) {
+        $MediaId = $this->FindIDByIdent('IMAGE');
+        if (!$MediaId) {
             $MediaId = IPS_CreateMedia(MEDIATYPE_IMAGE);
             IPS_SetParent($MediaId, $this->InstanceID);
             IPS_SetName($MediaId, $this->Translate('Image'));

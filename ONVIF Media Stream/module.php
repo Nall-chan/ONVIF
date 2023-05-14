@@ -874,11 +874,11 @@ class ONVIFMediaStream extends ONVIFModuleBase
             return;
         }
         $Speed = 0;
-        if (@$this->GetIDForIdent('SPEED')) {
+        if ($this->FindIDByIdent('SPEED')) {
             $Speed = $this->GetValue('SPEED');
         }
         $Time = 0;
-        if (@$this->GetIDForIdent('TIME')) {
+        if ($this->FindIDByIdent('TIME')) {
             $Time = $this->GetValue('TIME');
         }
         switch ($Ident) {
@@ -991,7 +991,7 @@ class ONVIFMediaStream extends ONVIFModuleBase
 
         if ($State == IS_INACTIVE) {
             $this->SetMedia('');
-            if (@$this->GetIDForIdent('PTZControlHtml')) {
+            if ($this->FindIDByIdent('PTZControlHtml')) {
                 $this->SetValueString('PTZControlHtml', '');
             }
         }
@@ -1144,8 +1144,8 @@ class ONVIFMediaStream extends ONVIFModuleBase
     }
     protected function GetMediaId(): int
     {
-        $MediaId = @$this->GetIDForIdent('STREAM');
-        if ($MediaId == false) {
+        $MediaId = $this->FindIDByIdent('STREAM');
+        if (!$MediaId) {
             $MediaId = IPS_CreateMedia(MEDIATYPE_STREAM);
             IPS_SetParent($MediaId, $this->InstanceID);
             IPS_SetName($MediaId, $this->Translate('Stream'));
@@ -1156,8 +1156,8 @@ class ONVIFMediaStream extends ONVIFModuleBase
     protected function WritePTZInHTMLBox(): void
     {
         $this->RegisterVariableString('PTZControlHtml', 'PTZ Control for Webfront', '~HTMLBox', 5);
-        $mId = @$this->GetIDForIdent('STREAM');
-        if ($mId == false) {
+        $mId = $this->FindIDByIdent('STREAM');
+        if (!$mId) {
             $this->SetValueString('PTZControlHtml', '');
             return;
         }
