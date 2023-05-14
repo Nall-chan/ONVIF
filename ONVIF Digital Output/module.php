@@ -85,7 +85,7 @@ class ONVIFDigitalOutput extends ONVIFModuleBase
         return true;
     }
 
-    public function RequestAction(string $Ident, mixed $Value, bool $done = false): void
+    public function RequestAction(string $Ident, mixed $Value, bool &$done = false): void
     {
         parent::RequestAction($Ident, $Value, $done);
         if ($done) {
@@ -124,6 +124,7 @@ class ONVIFDigitalOutput extends ONVIFModuleBase
         $Value = $Data['DataValues'][$EventDataIndex]['Value'];
         $this->RegisterVariableBoolean($Ident, $Ident, '~Switch', 0);
         $this->SetValueBoolean($Ident, ($Value == 'active'));
+        return '';
     }
 
     public function GetConfigurationForm(): string

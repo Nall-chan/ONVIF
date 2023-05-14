@@ -915,6 +915,10 @@ class ONVIFIO extends IPSModuleStrict
             $this->LogMessage($this->Translate('Call SetSynchronizationPoint with no SubscriptionReference'), KL_ERROR);
             return false;
         }
+        $Action = 'http://www.onvif.org/ver10/events/wsdl/PullPointSubscription/SetSynchronizationPointRequest';
+        $Header[] = new SoapHeader('http://www.w3.org/2005/08/addressing', 'Action', new SoapVar($Action, XSD_ANYURI, '', 'http://www.w3.org/2005/08/addressing'), true);
+        $Header[] = new SoapHeader('http://www.w3.org/2005/08/addressing', 'To', new SoapVar($SubscriptionReference, XSD_ANYURI, '', 'http://www.w3.org/2005/08/addressing'), true);
+
         $SubscriptionId = $this->ReadAttributeString('SubscriptionId');
         if ($SubscriptionId != '') {
             $xml = new DOMDocument();
@@ -924,7 +928,7 @@ class ONVIFIO extends IPSModuleStrict
             $Header[] = new SoapHeader($ns, $name, new SoapVar($SubscriptionId, XSD_ANYXML), true);
         }
         $empty = '';
-        $SetSynchronizationPointResult = $this->SendData($SubscriptionReference, \ONVIF\WSDL::Event, 'SetSynchronizationPoint', true, [], $empty);
+        $SetSynchronizationPointResult = $this->SendData($SubscriptionReference, \ONVIF\WSDL::Event, 'SetSynchronizationPoint', true, [], $empty, $Header);
         if (is_a($SetSynchronizationPointResult, 'SoapFault')) {
             $this->LogMessage($this->Translate('Error SetSynchronizationPoint with:') . '(' . $SetSynchronizationPointResult->getCode() . ')' . $SetSynchronizationPointResult->getMessage(), KL_ERROR);
             return false;
@@ -1597,7 +1601,7 @@ class ONVIFIO extends IPSModuleStrict
      * @param bool $UseLogin
      * @param array $Params
      */
-    protected function SendData(string $URI, string $wsdl, string $Function, bool $UseLogin = false, array $Params = [], string &$Response = '', array $Header = []): mixed
+    protected function SendData(string $URI, string $wsdl, string $Function, bool $UseLogin = false, array $Params = [], string &$Response = '', array $Header = []): SoapFault|stdClass
     {
         if ($URI == '') {
             $URI = $this->Host . '/onvif/device_service';
@@ -1678,7 +1682,7 @@ class ONVIFIO extends IPSModuleStrict
         }
         return $EventList;
     }
-    protected function ProcessHookData(): void
+    protected function ProcessHookData()
     {
         if ($this->ReadPropertyBoolean('Open') == false) {
             http_response_code(404);
@@ -1701,6 +1705,9 @@ class ONVIFIO extends IPSModuleStrict
         header('Content-Type: text/plain');
 
         $Data = file_get_contents('php://input');
+        if (empty($Data)) {
+            return;
+        }
         $this->SendDebug('Event', $Data, 0);
         $this->DecodeNotificationMessage($Data);
     }

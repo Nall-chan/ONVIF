@@ -21,7 +21,7 @@ class ONVIFMediaStream extends ONVIFModuleBase
     public const PTZwsdl = \ONVIF\WSDL::PTZ; // statisch
     public const TopicFilter = 'videosource';
 
-    public function Create()
+    public function Create(): void
     {
         //Never delete this line!
         parent::Create();
@@ -119,7 +119,7 @@ class ONVIFMediaStream extends ONVIFModuleBase
     /**
      * Interne Funktion des SDK.
      */
-    public function Destroy()
+    public function Destroy(): void
     {
         if (!IPS_InstanceExists($this->InstanceID)) {
             $this->UnregisterHook('/hook/ONVIF/PTZ/' . $this->InstanceID);
@@ -127,7 +127,7 @@ class ONVIFMediaStream extends ONVIFModuleBase
         parent::Destroy();
     }
 
-    public function ApplyChanges()
+    public function ApplyChanges(): void
     {
         //Never delete this line!
         parent::ApplyChanges();
@@ -225,7 +225,7 @@ class ONVIFMediaStream extends ONVIFModuleBase
         }
     }
 
-    public function GetConfigurationForm()
+    public function GetConfigurationForm(): string
     {
         $Form = json_decode(file_get_contents(__DIR__ . '/form.json'), true);
         if ($this->GetStatus() == IS_CREATING) {
@@ -596,19 +596,19 @@ class ONVIFMediaStream extends ONVIFModuleBase
         return json_encode($Form);
     }
 
-    public function MoveLeft()
+    public function MoveLeft(): bool
     {
         return $this->MoveLeftSpeedTime(0, 0);
     }
-    public function MoveLeftTime(float $Time)
+    public function MoveLeftTime(float $Time): bool
     {
         return $this->MoveLeftSpeedTime(0, $Time);
     }
-    public function MoveLeftSpeed(float $Speed)
+    public function MoveLeftSpeed(float $Speed): bool
     {
         return $this->MoveLeftSpeedTime($Speed, 0);
     }
-    public function MoveLeftSpeedTime(float $Speed, float $Time)
+    public function MoveLeftSpeedTime(float $Speed, float $Time): bool
     {
         if ($this->PTZ_token == '') {
             return false;
@@ -630,19 +630,19 @@ class ONVIFMediaStream extends ONVIFModuleBase
         }
         return $this->SendData($this->PTZ_xAddr, 'ContinuousMove', true, $Params, self::PTZwsdl);
     }
-    public function MoveRight()
+    public function MoveRight(): bool
     {
         return $this->MoveRightSpeedTime(0, 0);
     }
-    public function MoveRightSpeed(float $Speed)
+    public function MoveRightSpeed(float $Speed): bool
     {
         return $this->MoveRightSpeedTime($Speed, 0);
     }
-    public function MoveRightTime(float $Time)
+    public function MoveRightTime(float $Time): bool
     {
         return $this->MoveRightSpeedTime(0, $Time);
     }
-    public function MoveRightSpeedTime(float $Speed, float $Time)
+    public function MoveRightSpeedTime(float $Speed, float $Time): bool
     {
         if ($this->PTZ_token == '') {
             return false;
@@ -665,19 +665,19 @@ class ONVIFMediaStream extends ONVIFModuleBase
         return $this->SendData($this->PTZ_xAddr, 'ContinuousMove', true, $Params, self::PTZwsdl);
     }
 
-    public function MoveUp()
+    public function MoveUp(): bool
     {
         return $this->MoveUpSpeedTime(0, 0);
     }
-    public function MoveUpSpeed(float $Speed)
+    public function MoveUpSpeed(float $Speed): bool
     {
         return $this->MoveUpSpeedTime($Speed, 0);
     }
-    public function MoveUpTime(float $Time)
+    public function MoveUpTime(float $Time): bool
     {
         return $this->MoveUpSpeedTime(0, $Time);
     }
-    public function MoveUpSpeedTime(float $Speed, float $Time)
+    public function MoveUpSpeedTime(float $Speed, float $Time): bool
     {
         if ($this->PTZ_token == '') {
             return false;
@@ -700,20 +700,20 @@ class ONVIFMediaStream extends ONVIFModuleBase
         return $this->SendData($this->PTZ_xAddr, 'ContinuousMove', true, $Params, self::PTZwsdl);
     }
 
-    public function MoveDown()
+    public function MoveDown(): bool
     {
         return $this->MoveDownSpeedTime(0, 0);
     }
-    public function MoveDownSpeed(float $Speed)
+    public function MoveDownSpeed(float $Speed): bool
     {
         return $this->MoveDownSpeedTime($Speed, 0);
     }
-    public function MoveDownTime(float $Time)
+    public function MoveDownTime(float $Time): bool
     {
         return $this->MoveDownSpeedTime(0, $Time);
     }
 
-    public function MoveDownSpeedTime(float $Speed, float $Time)
+    public function MoveDownSpeedTime(float $Speed, float $Time): bool
     {
         if ($this->PTZ_token == '') {
             return false;
@@ -735,19 +735,19 @@ class ONVIFMediaStream extends ONVIFModuleBase
         }
         return $this->SendData($this->PTZ_xAddr, 'ContinuousMove', true, $Params, self::PTZwsdl);
     }
-    public function ZoomNear()
+    public function ZoomNear(): bool
     {
         return $this->ZoomNearSpeedTime(0, 0);
     }
-    public function ZoomNearSpeed(float $Speed)
+    public function ZoomNearSpeed(float $Speed): bool
     {
         return $this->ZoomNearSpeedTime($Speed, 0);
     }
-    public function ZoomNearTime(float $Time)
+    public function ZoomNearTime(float $Time): bool
     {
         return $this->ZoomNearSpeedTime(0, $Time);
     }
-    public function ZoomNearSpeedTime(float $Speed, float $Time)
+    public function ZoomNearSpeedTime(float $Speed, float $Time): bool
     {
         if ($this->PTZ_token == '') {
             return false;
@@ -768,19 +768,19 @@ class ONVIFMediaStream extends ONVIFModuleBase
         }
         return $this->SendData($this->PTZ_xAddr, 'ContinuousMove', true, $Params, self::PTZwsdl);
     }
-    public function ZoomFar()
+    public function ZoomFar(): bool
     {
         return $this->ZoomFarSpeedTime(0, 0);
     }
-    public function ZoomFarSpeed(float $Speed)
+    public function ZoomFarSpeed(float $Speed): bool
     {
         return $this->ZoomFarSpeedTime($Speed, 0);
     }
-    public function ZoomFarTime(float $Time)
+    public function ZoomFarTime(float $Time): bool
     {
         return $this->ZoomFarSpeedTime(0, $Time);
     }
-    public function ZoomFarSpeedTime(float $Speed, float $Time)
+    public function ZoomFarSpeedTime(float $Speed, float $Time): bool
     {
         if ($this->PTZ_token == '') {
             return false;
@@ -801,7 +801,7 @@ class ONVIFMediaStream extends ONVIFModuleBase
         }
         return $this->SendData($this->PTZ_xAddr, 'ContinuousMove', true, $Params, self::PTZwsdl);
     }
-    public function StopPTZ()
+    public function StopPTZ(): bool
     {
         if ($this->PTZ_token == '') {
             return false;
@@ -810,7 +810,7 @@ class ONVIFMediaStream extends ONVIFModuleBase
         return $this->SendData($this->PTZ_xAddr, 'Stop', true, $Params, self::PTZwsdl);
     }
 
-    public function MoveStop()
+    public function MoveStop(): bool
     {
         if ($this->PTZ_token == '') {
             return false;
@@ -819,7 +819,7 @@ class ONVIFMediaStream extends ONVIFModuleBase
         return $this->SendData($this->PTZ_xAddr, 'Stop', true, $Params, self::PTZwsdl);
     }
 
-    public function ZoomStop()
+    public function ZoomStop(): bool
     {
         if ($this->PTZ_token == '') {
             return false;
@@ -828,7 +828,7 @@ class ONVIFMediaStream extends ONVIFModuleBase
         return $this->SendData($this->PTZ_xAddr, 'Stop', true, $Params, self::PTZwsdl);
     }
 
-    public function GotoPreset(int $Preset)
+    public function GotoPreset(int $Preset): bool
     {
         $PresetTokenList = $this->PresetTokenList;
         if (!array_key_exists($Preset, $PresetTokenList)) {
@@ -841,7 +841,7 @@ class ONVIFMediaStream extends ONVIFModuleBase
         return $this->GotoPresetToken($Token);
     }
 
-    public function GotoPresetToken(string $PresetToken)
+    public function GotoPresetToken(string $PresetToken): bool
     {
         if ($this->PTZ_token == '') {
             return false;
@@ -850,7 +850,7 @@ class ONVIFMediaStream extends ONVIFModuleBase
         return $this->SendData($this->PTZ_xAddr, 'GotoPreset', true, $Params, self::PTZwsdl);
     }
 
-    public function GotoPresetHomePosition()
+    public function GotoPresetHomePosition(): bool
     {
         if ($this->PTZ_token == '') {
             return false;
@@ -859,7 +859,7 @@ class ONVIFMediaStream extends ONVIFModuleBase
         return $this->SendData($this->PTZ_xAddr, 'GotoHomePosition', true, $Params, self::PTZwsdl);
     }
 
-    public function RequestAction(string $Ident, mixed $Value, bool $done = false): void
+    public function RequestAction(string $Ident, mixed $Value, bool &$done = false): void
     {
         parent::RequestAction($Ident, $Value, $done);
         if ($done) {
@@ -996,15 +996,15 @@ class ONVIFMediaStream extends ONVIFModuleBase
             }
         }
     }
-    protected function RefreshPresetProfileForm($EnablePresetProfileForm)
+    protected function RefreshPresetProfileForm(bool $EnablePresetProfileForm): void
     {
         $this->UpdateFormField('PresetProfile', 'visible', $EnablePresetProfileForm);
     }
-    protected function RefreshProfileForm($NewVideoSource)
+    protected function RefreshProfileForm(string $NewVideoSource): void
     {
         $Capabilities = @$this->GetCapabilities();
         if ($Capabilities == false) {
-            return false;
+            return;
         }
         $ProfileOptions = [];
         $ProfileOptions[] = [
@@ -1026,7 +1026,7 @@ class ONVIFMediaStream extends ONVIFModuleBase
         $this->UpdateFormField('ConfigurePrePositions', 'enabled', false);
     }
 
-    protected function GetPTZCapabilities()
+    protected function GetPTZCapabilities(): bool
     {
         if ($this->PTZ_token == '') {
             return false;
@@ -1073,7 +1073,7 @@ class ONVIFMediaStream extends ONVIFModuleBase
         return true;
     }
 
-    protected function GetStreamUri()
+    protected function GetStreamUri(): false|string
     {
         $Capabilities = @$this->GetCapabilities();
         if ($Capabilities == false) {
@@ -1138,11 +1138,11 @@ class ONVIFMediaStream extends ONVIFModuleBase
         return $MediaURL;
     }
 
-    protected function SetMedia($StreamURL)
+    protected function SetMedia(string $StreamURL): void
     {
         IPS_SetMediaFile($this->GetMediaId(), $StreamURL, false);
     }
-    protected function GetMediaId()
+    protected function GetMediaId(): int
     {
         $MediaId = @$this->GetIDForIdent('STREAM');
         if ($MediaId == false) {
@@ -1153,7 +1153,7 @@ class ONVIFMediaStream extends ONVIFModuleBase
         }
         return $MediaId;
     }
-    protected function WritePTZInHTMLBox()
+    protected function WritePTZInHTMLBox(): void
     {
         $this->RegisterVariableString('PTZControlHtml', 'PTZ Control for Webfront', '~HTMLBox', 5);
         $mId = @$this->GetIDForIdent('STREAM');

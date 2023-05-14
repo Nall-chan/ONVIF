@@ -236,7 +236,7 @@ class ONVIFModuleBase extends IPSModuleStrict
         }
         return '';
     }
-    protected function SendData(string $URI, string $Function, bool $UseLogin = false, array $Params = [], string $wsdl = ''): false|string|array
+    protected function SendData(string $URI, string $Function, bool $UseLogin = false, array $Params = [], string $wsdl = ''): bool|stdClass
     {
         $this->SendDebug('Send URI', $URI, 0);
         if ($wsdl == '') {

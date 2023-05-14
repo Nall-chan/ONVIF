@@ -326,7 +326,7 @@ class ONVIFImageGrabber extends ONVIFModuleBase
 
         return json_encode($Form);
     }
-    public function RequestAction(string $Ident, mixed $Value, bool $done = false): void
+    public function RequestAction(string $Ident, mixed $Value, bool &$done = false): void
     {
         parent::RequestAction($Ident, $Value, $done);
         if ($done) {
