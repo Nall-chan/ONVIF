@@ -17,6 +17,14 @@ require_once dirname(__DIR__) . '/libs/ONVIF.inc.php';
  * @property bool $isSubscribed
  * @property \ONVIF\Profile $Profile
  * @property array $Warnings
+ * @method void RegisterAttributeArray(string $name, mixed $Value, int $Size = 0)
+ * @method mixed ReadAttributeArray(string $name)
+ * @method void WriteAttributeArray(string $name, mixed $value)
+ * @method bool SendDebug(string $Message, mixed $Data, int $Format)
+ * @method bool lock(string $ident)
+ * @method void unlock(string $ident)
+ * @method void RegisterHook(string $WebHook)
+ * @method void UnregisterHook(string $WebHook)
  */
 class ONVIFIO extends IPSModuleStrict
 {
