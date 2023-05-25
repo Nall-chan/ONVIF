@@ -234,8 +234,7 @@ class ONVIFDiscovery extends IPSModuleStrict
                 socket_set_option($sock, IPPROTO_IPV6, IPV6_MULTICAST_HOPS, 4);
                 socket_set_option($sock, IPPROTO_IPV6, IPV6_MULTICAST_IF, $Interface);
                 socket_set_option($sock, SOL_SOCKET, SO_BROADCAST, 1);
-                if (@socket_bind($sock, $IP, 3703) == false)
-                {
+                if (@socket_bind($sock, $IP, 3703) == false) {
                     continue;
                 }
                 $discoveryTimeout = time() + self::WS_DISCOVERY_TIMEOUT;
@@ -279,8 +278,7 @@ class ONVIFDiscovery extends IPSModuleStrict
                 socket_set_option($sock, IPPROTO_IP, IP_MULTICAST_TTL, 4);
                 socket_set_option($sock, IPPROTO_IP, IP_MULTICAST_IF, $Interface);
                 socket_set_option($sock, SOL_SOCKET, SO_BROADCAST, 1);
-                if (@socket_bind($sock, $IP, 3703) == false)
-                {
+                if (@socket_bind($sock, $IP, 3703) == false) {
                     continue;
                 }
                 $discoveryTimeout = time() + self::WS_DISCOVERY_TIMEOUT;
