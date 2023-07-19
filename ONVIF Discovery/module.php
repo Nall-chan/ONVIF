@@ -510,24 +510,26 @@ class ONVIFDiscovery extends IPSModule
     private function getIPAdresses()
     {
         $Interfaces = SYS_GetNetworkInfo();
-        $InterfaceIndexes = array_column($Interfaces, 'Description', 'InterfaceIndex');
+        $InterfaceDescriptions = array_column($Interfaces, 'Description', 'InterfaceIndex');
         $Networks = net_get_interfaces();
         $Addresses = [];
-        foreach ($Networks as $Interface) {
+        foreach ($Networks as $InterfaceDescription => $Interface) {
             if (!$Interface['up']) {
                 continue;
             }
-            $InterfaceIndex = array_search($Interface['description'], $InterfaceIndexes);
+            if (array_key_exists('description', $Interface)) {
+                $InterfaceDescription = array_search($Interface['description'], $InterfaceDescriptions);
+            }
             foreach ($Interface['unicast'] as $Address) {
                 switch ($Address['family']) {
-                    case 23:
-                        $family = 'ipv6';
+                    case AF_INET6:
                         if ($Address['address'] == '::1') {
                             continue 2;
                         }
                         $Address['address'] = '[' . $Address['address'] . ']';
+                        $family = 'ipv6';
                         break;
-                    case 2:
+                    case AF_INET:
                         if ($Address['address'] == '127.0.0.1') {
                             continue 2;
                         }
@@ -536,7 +538,7 @@ class ONVIFDiscovery extends IPSModule
                     default:
                         continue 2;
                 }
-                $Addresses[$family][$Address['address']] = $InterfaceIndex; //$Interface['description'];
+                $Addresses[$family][$Address['address']] = $InterfaceDescription;
             }
         }
         return $Addresses;
