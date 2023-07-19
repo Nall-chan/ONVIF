@@ -231,7 +231,9 @@ class ONVIFDiscovery extends IPSModule
                 socket_set_option($sock, IPPROTO_IPV6, IPV6_MULTICAST_HOPS, 4);
                 socket_set_option($sock, IPPROTO_IPV6, IPV6_MULTICAST_IF, $Interface);
                 socket_set_option($sock, SOL_SOCKET, SO_BROADCAST, 1);
-                socket_bind($sock, $IP, 3703);
+                if (@socket_bind($sock, $IP, 3703) == false) {
+                    continue;
+                }
                 $discoveryTimeout = time() + self::WS_DISCOVERY_TIMEOUT;
                 $this->SendDebug('Start Discovery(' . $Interface . ')', $IP, 0);
                 if (@socket_sendto($sock, $discoveryMessage, strlen($discoveryMessage), 0, self::WS_DISCOVERY_MULTICAST_ADDRESSV6, self::WS_DISCOVERY_MULTICAST_PORT) === false) {
@@ -273,7 +275,9 @@ class ONVIFDiscovery extends IPSModule
                 socket_set_option($sock, IPPROTO_IP, IP_MULTICAST_TTL, 4);
                 socket_set_option($sock, IPPROTO_IP, IP_MULTICAST_IF, $Interface);
                 socket_set_option($sock, SOL_SOCKET, SO_BROADCAST, 1);
-                socket_bind($sock, $IP, 3703);
+                if (@socket_bind($sock, $IP, 3703) == false) {
+                    continue;
+                }
                 $discoveryTimeout = time() + self::WS_DISCOVERY_TIMEOUT;
                 $this->SendDebug('Start Discovery(' . $Interface . ')', $IP, 0);
                 if (@socket_sendto($sock, $discoveryMessage, strlen($discoveryMessage), 0, self::WS_DISCOVERY_MULTICAST_ADDRESS, self::WS_DISCOVERY_MULTICAST_PORT) === false) {
