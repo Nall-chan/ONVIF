@@ -14,7 +14,7 @@ require_once __DIR__ . '/wsdl.php';
  * @property int $ParentID
  * @property string $EventTopic
  * @method void RegisterAttributeArray(string $name, mixed $Value, int $Size = 0)
- * @method mixed ReadAttributeArray(string $name)
+ * @method array ReadAttributeArray(string $name)
  * @method void WriteAttributeArray(string $name, mixed $value)
  * @method bool SendDebug(string $Message, mixed $Data, int $Format)
  * @method void SetValueBoolean(string $Ident, bool $value)
