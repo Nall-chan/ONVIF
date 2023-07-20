@@ -15,6 +15,7 @@ require_once dirname(__DIR__) . '/libs/ONVIF.inc.php';
  * @property integer $MyPort
  * @property bool $MyHTTPS
  * @property bool $isSubscribed
+ * @property bool $WaitForFirstEvent
  * @property \ONVIF\Profile $Profile
  * @property array $Warnings
  */
@@ -69,6 +70,7 @@ class ONVIFIO extends IPSModule
         $this->isSubscribed = false;
         $this->Profile = new \ONVIF\Profile();
         $this->Warnings = [];
+        $this->WaitForFirstEvent = false;
         if (IPS_GetKernelRunlevel() == KR_READY) {
             $this->RegisterMessage($this->InstanceID, FM_CHILDREMOVED);
         } else {
@@ -859,11 +861,13 @@ class ONVIFIO extends IPSModule
             'InitialTerminationTime' => 'PT1M'
         ];
         $Response = '';
+        $this->WaitForFirstEvent = true;
         $SubscribeResult = $this->SendData($XAddr[\ONVIF\NS::Event], \ONVIF\WSDL::Event, 'Subscribe', true, $Params, $Response);
         if (is_a($SubscribeResult, 'SoapFault')) {
             $this->SetStatus(IS_EBASE + 3);
             $this->LogMessage($this->Translate('Connection lost'), KL_ERROR);
             $this->ShowLastError($SubscribeResult->getMessage());
+            $this->WaitForFirstEvent = false;
             return false;
         }
         $SubscriptionReference = $SubscribeResult->SubscriptionReference->Address->{'_'};
@@ -890,14 +894,22 @@ class ONVIFIO extends IPSModule
         }
         $this->isSubscribed = true;
         $this->SetTimerInterval('RenewSubscription', 55 * 1000);
-        $this->SetStatus(IS_ACTIVE);
         $this->UpdateFormField('DeviceData', 'items', json_encode($this->GetDeviceDataForForm()));
         $this->UpdateFormField('DeviceDataPanel', 'visible', true);
         $this->UpdateFormField('DeviceDataPanel', 'expanded', true);
         $this->UpdateFormField('Events', 'visible', true);
 
         $this->SetSynchronizationPoint();
-        return true;
+        for ($i = 0; $i < 400; $i++) {
+            if (!$this->WaitForFirstEvent) {
+                $this->SetStatus(IS_ACTIVE);
+                return true;
+            }
+            IPS_Sleep(5);
+        }
+        $this->WaitForFirstEvent = false;
+        $this->SetStatus(IS_EBASE + 4);
+        return false;
     }
     protected function SetSynchronizationPoint()
     {
@@ -1693,6 +1705,9 @@ class ONVIFIO extends IPSModule
 
         $Data = file_get_contents('php://input');
         $this->SendDebug('Event', $Data, 0);
+        if ($this->WaitForFirstEvent) {
+            $this->WaitForFirstEvent = false;
+        }
         return $this->DecodeNotificationMessage($Data);
     }
     protected function DecodeNotificationMessage(string $NotificationMessageXML)
