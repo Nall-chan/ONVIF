@@ -33,7 +33,7 @@ class ONVIFDigitalInput extends ONVIFModuleBase
             }
             $this->WriteAttributeArray('DigitalInputs', $Capabilities['DigitalInputs']);
             foreach ($Capabilities['DigitalInputs'] as $Name => $DigitalInput) {
-                $Ident = str_replace([' - ', ':'], ['_', ''], $Name);
+                $Ident = str_replace([' - ', ':'], ['_', ''], (string) $Name);
                 $Ident = preg_replace('/[^a-zA-Z\d]/u', '_', $Ident);
                 $this->RegisterVariableBoolean($Ident, $Name, '~Switch', 0);
             }

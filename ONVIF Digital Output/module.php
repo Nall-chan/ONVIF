@@ -46,7 +46,7 @@ class ONVIFDigitalOutput extends ONVIFModuleBase
             }
             $this->WriteAttributeArray('RelayOutputs', $Capabilities['RelayOutputs']);
             foreach ($Capabilities['RelayOutputs'] as $Name => $RelayOutput) {
-                $Ident = str_replace([' - ', ':'], ['_', ''], $Name);
+                $Ident = str_replace([' - ', ':'], ['_', ''], (string) $Name);
                 $Ident = preg_replace('/[^a-zA-Z\d]/u', '_', $Ident);
                 $this->RegisterVariableBoolean($Ident, $Name, '~Switch', 0);
                 $this->EnableAction($Ident);
