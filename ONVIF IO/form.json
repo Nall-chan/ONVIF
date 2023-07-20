@@ -281,6 +281,11 @@
             "code": 203,
             "icon": "error",
             "caption": "Connection lost"
+        },
+        {
+            "code": 204,
+            "icon": "error",
+            "caption": "No events received (check firewall)"
         }
     ]
 }
