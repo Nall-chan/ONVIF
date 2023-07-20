@@ -40,6 +40,7 @@
             "NAT support is active, but no public address is set.": "NAT Support ist aktiv, aber es wurde keine PublicIP konfiguriert.",
             "Invalid": "Ungültig",
             "Connection lost": "Verbindung verloren",
+            "No events received (check firewall)": "Keine Events empfangen (Firewall prüfen)",
             "This device send a invalid Subscription-Reference.": "Dieses Gerät sendet eine ungültige Abonnement-Referenz.",
             "Call PullMessages with no SubscriptionReference": "PullMessages wurde ohne SubscriptionReference gestartet",
             "Error PullMessages with:": "Fehler bei PullMessages mit:",
