@@ -547,7 +547,11 @@ class ONVIFIO extends IPSModule
     {
         switch ($Ident) {
             case 'Subscribe':
-                return $this->Subscribe();
+                if ($this->Subscribe()) {
+                    return;
+                }
+                // WSSubscription failed, try PullPointSubscription
+                // No break. Add additional comment above this line if intentional
             case 'CreatePullPointSubscription':
                 return $this->CreatePullPointSubscription();
             case 'PullMessages':
@@ -626,7 +630,7 @@ class ONVIFIO extends IPSModule
         if ($Device) {
             $InfoItems = [
                 [
-                    'width'     => '400px',
+                    'width'     => '450px',
                     'type'      => 'Label',
                     'caption'   => 'Model: ' . $Device['Model']
                 ],
@@ -645,12 +649,16 @@ class ONVIFIO extends IPSModule
             ];
         }
         $this->lock('Profile');
-        $InfoItems[] =
-    [
-        'width'     => '400px',
-        'type'      => 'Label',
-        'caption'   => $this->Translate('Supported ONVIF Profile: ') . $this->Profile->toString()
-    ];
+        $InfoItems[] = [
+            'width'     => '450px',
+            'type'      => 'Label',
+            'caption'   => $this->Translate('Supported ONVIF Profile: ') . $this->Profile->toString()
+        ];
+        $InfoItems[] = [
+            'type'      => 'Label',
+            'caption'   => $this->Translate('Used event handling: ') . ($this->GetTimerInterval('RenewSubscription') ? 'WS-BaseNotification' : ($this->GetTimerInterval('PullMessages') ? 'PullPoint' : $this->Translate('none')))
+        ];
+
         $this->unlock('Profile');
         $DeviceItems = [
             [
@@ -858,15 +866,16 @@ class ONVIFIO extends IPSModule
             'ConsumerReference'      => [
                 'Address' => $this->ReadAttributeString('ConsumerAddress')
             ],
-            'InitialTerminationTime' => 'PT1M'
+            'InitialTerminationTime' => 'PT60S'
         ];
         $Response = '';
         $this->WaitForFirstEvent = true;
         $SubscribeResult = $this->SendData($XAddr[\ONVIF\NS::Event], \ONVIF\WSDL::Event, 'Subscribe', true, $Params, $Response);
         if (is_a($SubscribeResult, 'SoapFault')) {
-            $this->SetStatus(IS_EBASE + 3);
+            /*$this->SetStatus(IS_EBASE + 3);
             $this->LogMessage($this->Translate('Connection lost'), KL_ERROR);
             $this->ShowLastError($SubscribeResult->getMessage());
+             */
             $this->WaitForFirstEvent = false;
             return false;
         }
@@ -1010,13 +1019,11 @@ class ONVIFIO extends IPSModule
             $name = $xml->firstChild->nodeName;
             $Header[] = new SoapHeader($ns, $name, new SoapVar($SubscriptionId, XSD_ANYXML));
         }
-
         $empty = '';
         $UnsubscribeResult = $this->SendData($SubscriptionReference, \ONVIF\WSDL::Event, 'Unsubscribe', true, [], $empty, $Header);
         if (is_a($UnsubscribeResult, 'SoapFault')) {
             trigger_error($UnsubscribeResult->getMessage(), E_USER_NOTICE);
         }
-
         return true;
     }
     protected function GetEventProperties()
