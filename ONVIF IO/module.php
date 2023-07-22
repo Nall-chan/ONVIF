@@ -57,6 +57,8 @@ class ONVIFIO extends IPSModule
         $this->RegisterAttributeBoolean('HasRTSPStreaming', false);
         $this->RegisterAttributeBoolean('RuleSupport', false);
         $this->RegisterAttributeBoolean('AnalyticsModuleSupport', false);
+        $this->RegisterAttributeBoolean('WSSubscriptionPolicySupport', false);
+        $this->RegisterAttributeBoolean('WSPullPointSupport', false);
         $this->RegisterAttributeString('ConsumerAddress', '');
         $this->RegisterAttributeString('SubscriptionReference', '');
         $this->RegisterAttributeString('SubscriptionId', '');
@@ -352,7 +354,12 @@ class ONVIFIO extends IPSModule
                 if ($XAddr[\ONVIF\NS::Event]) {
                     $EventCapabilities = $this->GetServiceCapabilities($XAddr[\ONVIF\NS::Event], \ONVIF\WSDL::Event); // noch ohne Funktion.. todo
                     if ($EventCapabilities) {
+                        $Capabilities = $EventCapabilities['Capabilities'];
+                        $this->WriteAttributeBoolean('WSSubscriptionPolicySupport', $Capabilities['WSSubscriptionPolicySupport']);
+                        $this->WriteAttributeBoolean('WSPullPointSupport', $Capabilities['WSPullPointSupport']);
                     } else {
+                        $this->WriteAttributeBoolean('WSSubscriptionPolicySupport', false);
+                        $this->WriteAttributeBoolean('WSPullPointSupport', false);
                         if ($this->Profile->HasProfile(\ONVIF\Profile::T)) { //Profile T ist GetServiceCapabilities bei Event Pflicht
                             $this->Warnings = array_merge($this->Warnings, [$this->Translate('Failed to get Event service capabilities. Device reported ONVIF T scope, but is not compliant!')]);
                         }
@@ -656,6 +663,14 @@ class ONVIFIO extends IPSModule
         ];
         $InfoItems[] = [
             'type'      => 'Label',
+            'caption'   => $this->Translate('Event subscription: ') . ($this->ReadAttributeBoolean('WSSubscriptionPolicySupport') ? $this->Translate('supported') : $this->Translate('not supported'))
+        ];
+        $InfoItems[] = [
+            'type'      => 'Label',
+            'caption'   => $this->Translate('Event PullPoint: ') . ($this->ReadAttributeBoolean('WSPullPointSupport') ? $this->Translate('supported') : $this->Translate('not supported'))
+        ];
+        $InfoItems[] = [
+            'type'      => 'Label',
             'caption'   => $this->Translate('Used event handling: ') . ($this->GetTimerInterval('RenewSubscription') ? 'WS-BaseNotification' : ($this->GetTimerInterval('PullMessages') ? 'PullPoint' : $this->Translate('none')))
         ];
 
@@ -772,6 +787,7 @@ class ONVIFIO extends IPSModule
     }
     protected function CreatePullPointSubscription()
     {
+        $this->WriteAttributeString('ConsumerAddress', '');
         $XAddr = $this->ReadAttributeArray('XAddr');
         if ($XAddr[\ONVIF\NS::Event] == '') {
             return false;
@@ -851,10 +867,11 @@ class ONVIFIO extends IPSModule
             $this->SetTimerInterval('PullMessages', 0);
             return false;
         }
-        if (!property_exists($PullMessagesResult, 'NotificationMessage')) {
-            return true;
+        if (property_exists($PullMessagesResult, 'NotificationMessage')) {
+            $this->DecodeNotificationMessage($Response);
         }
-        return $this->DecodeNotificationMessage($Response);
+        $this->SetStatus(IS_ACTIVE);
+        return true;
     }
     protected function Subscribe()
     {
@@ -909,7 +926,7 @@ class ONVIFIO extends IPSModule
         $this->UpdateFormField('Events', 'visible', true);
 
         $this->SetSynchronizationPoint();
-        for ($i = 0; $i < 400; $i++) {
+        for ($i = 0; $i < 1000; $i++) {
             if (!$this->WaitForFirstEvent) {
                 $this->SetStatus(IS_ACTIVE);
                 return true;

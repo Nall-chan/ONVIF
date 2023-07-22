@@ -58,6 +58,8 @@
             "Manufacturer: ": "Hersteller: ",
             "Serial number: ": "Seriennummer: ",
             "Supported ONVIF Profile: ": "Unterstützte ONVIF Profile: ",
+            "Event subscription: ": "Ereignisse abonnieren: ",
+            "Event PullPoint: ": "Ereignisse anfordern: ",
             "Used event handling: ": "Genutzte Ereignis Verarbeitung: ",
             "none": "keins",
             "supported": "unterstützt",
