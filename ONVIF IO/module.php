@@ -792,11 +792,14 @@ class ONVIFIO extends IPSModule
         if ($XAddr[\ONVIF\NS::Event] == '') {
             return false;
         }
+        $Action = 'http://www.onvif.org/ver10/events/wsdl/EventPortType/CreatePullPointSubscriptionRequest';
+        $Header[] = new SoapHeader('http://www.w3.org/2005/08/addressing', 'Action', new SoapVar($Action, XSD_ANYURI, '', 'http://www.w3.org/2005/08/addressing'), true);
+        $Header[] = new SoapHeader('http://www.w3.org/2005/08/addressing', 'To', new SoapVar($this->Host . $XAddr[\ONVIF\NS::Event], XSD_ANYURI, '', 'http://www.w3.org/2005/08/addressing'), true);
         $empty = '';
         $Params = [
             'InitialTerminationTime' => 'PT60S'
         ];
-        $CreatePullPointResult = $this->SendData($XAddr[\ONVIF\NS::Event], \ONVIF\WSDL::Event, 'CreatePullPointSubscription', true, $Params, $empty);
+        $CreatePullPointResult = $this->SendData($XAddr[\ONVIF\NS::Event], \ONVIF\WSDL::Event, 'CreatePullPointSubscription', true, $Params, $empty, $Header);
         if (is_a($CreatePullPointResult, 'SoapFault')) {
             $this->SetStatus(IS_EBASE + 3);
             $this->LogMessage($this->Translate('Connection lost'), KL_ERROR);
@@ -845,12 +848,15 @@ class ONVIFIO extends IPSModule
             $this->LogMessage($this->Translate('Call PullMessages with no SubscriptionReference'), KL_ERROR);
             return $this->CreatePullPointSubscription();
         }
+        $Action = 'http://www.onvif.org/ver10/events/wsdl/PullPointSubscription/PullMessagesRequest';
+        $Header[] = new SoapHeader('http://www.w3.org/2005/08/addressing', 'Action', new SoapVar($Action, XSD_ANYURI, '', 'http://www.w3.org/2005/08/addressing'), true);
+        $Header[] = new SoapHeader('http://www.w3.org/2005/08/addressing', 'To', new SoapVar($SubscriptionReference, XSD_ANYURI, '', 'http://www.w3.org/2005/08/addressing'), true);
         $Params = [
-            'Timeout'     => 'PT0S',
-            'MessageLimit'=> 8
+            'Timeout'     => 'PT1S',
+            'MessageLimit'=> 32
         ];
         $Response = '';
-        $PullMessagesResult = $this->SendData($SubscriptionReference, \ONVIF\WSDL::Event, 'PullMessages', true, $Params, $Response);
+        $PullMessagesResult = $this->SendData($SubscriptionReference, \ONVIF\WSDL::Event, 'PullMessages', true, $Params, $Response, $Header);
         if (is_a($PullMessagesResult, 'SoapFault')) {
             $this->SendDebug('ERROR PullMessages', 'No Response', 0);
             $this->LogMessage($this->Translate('Error PullMessages with:') . $PullMessagesResult->getMessage(), KL_ERROR);
@@ -879,6 +885,9 @@ class ONVIFIO extends IPSModule
         if ($XAddr[\ONVIF\NS::Event] == '') {
             return false;
         }
+        $Action = 'http://docs.oasis-open.org/wsn/bw-2/NotificationProducer/SubscribeRequest';
+        $Header[] = new SoapHeader('http://www.w3.org/2005/08/addressing', 'Action', new SoapVar($Action, XSD_ANYURI, '', 'http://www.w3.org/2005/08/addressing'), true);
+        $Header[] = new SoapHeader('http://www.w3.org/2005/08/addressing', 'To', new SoapVar($this->Host . $XAddr[\ONVIF\NS::Event], XSD_ANYURI, '', 'http://www.w3.org/2005/08/addressing'), true);
         $Params = [
             'ConsumerReference'      => [
                 'Address' => $this->ReadAttributeString('ConsumerAddress')
@@ -887,7 +896,7 @@ class ONVIFIO extends IPSModule
         ];
         $Response = '';
         $this->WaitForFirstEvent = true;
-        $SubscribeResult = $this->SendData($XAddr[\ONVIF\NS::Event], \ONVIF\WSDL::Event, 'Subscribe', true, $Params, $Response);
+        $SubscribeResult = $this->SendData($XAddr[\ONVIF\NS::Event], \ONVIF\WSDL::Event, 'Subscribe', true, $Params, $Response, $Header);
         if (is_a($SubscribeResult, 'SoapFault')) {
             /*$this->SetStatus(IS_EBASE + 3);
             $this->LogMessage($this->Translate('Connection lost'), KL_ERROR);
