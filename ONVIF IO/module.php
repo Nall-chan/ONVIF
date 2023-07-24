@@ -64,7 +64,7 @@ class ONVIFIO extends IPSModule
         $this->RegisterAttributeString('SubscriptionId', '');
         $this->RegisterAttributeInteger('CapabilitiesVersion', 0);
         $this->RegisterTimer('RenewSubscription', 0, 'IPS_RequestAction(' . $this->InstanceID . ',"Renew",true);');
-        $this->RegisterTimer('PullMessages', 0, 'IPS_RequestAction(' . $this->InstanceID . ',"PullMessages",true);');
+        //$this->RegisterTimer('PullMessages', 0, 'IPS_RequestAction(' . $this->InstanceID . ',"PullMessages",true);');
         $this->Host = '';
         $this->MyIP = '';
         $this->MyPort = 3777;
@@ -117,7 +117,7 @@ class ONVIFIO extends IPSModule
     public function ApplyChanges()
     {
         $this->SetTimerInterval('RenewSubscription', 0);
-        $this->SetTimerInterval('PullMessages', 0);
+        //$this->SetTimerInterval('PullMessages', 0);
         if ($this->GetStatus() == IS_ACTIVE) { // block childs
             $this->SetStatus(IS_INACTIVE);
         }
@@ -154,7 +154,6 @@ class ONVIFIO extends IPSModule
         $ReloadCapabilities = $ReloadCapabilities || ($this->MyPort != $MyPort);
         $ReloadCapabilities = $ReloadCapabilities || ($this->MyHTTPS != $MyHTTPS);
         $ReloadCapabilities = $ReloadCapabilities || ($this->GetStatus() == 202);
-        $ReloadCapabilities = $ReloadCapabilities || ($this->ReadAttributeString('ConsumerAddress') == '');
         $ReloadCapabilities = $ReloadCapabilities || ($this->ReadAttributeInteger('CapabilitiesVersion') == 0); //Force on initial update, Version 0
         $this->SendDebug('ReloadCapabilities', $ReloadCapabilities, 0);
         $this->SetSummary($Host);
@@ -355,8 +354,8 @@ class ONVIFIO extends IPSModule
                     $EventCapabilities = $this->GetServiceCapabilities($XAddr[\ONVIF\NS::Event], \ONVIF\WSDL::Event); // noch ohne Funktion.. todo
                     if ($EventCapabilities) {
                         $Capabilities = $EventCapabilities['Capabilities'];
-                        $this->WriteAttributeBoolean('WSSubscriptionPolicySupport', $Capabilities['WSSubscriptionPolicySupport']);
-                        $this->WriteAttributeBoolean('WSPullPointSupport', $Capabilities['WSPullPointSupport']);
+                        $this->WriteAttributeBoolean('WSSubscriptionPolicySupport', isset($Capabilities['WSSubscriptionPolicySupport']) ? $Capabilities['WSSubscriptionPolicySupport'] : false);
+                        $this->WriteAttributeBoolean('WSPullPointSupport', isset($Capabilities['WSPullPointSupport']) ? $Capabilities['WSPullPointSupport'] : false);
                     } else {
                         $this->WriteAttributeBoolean('WSSubscriptionPolicySupport', false);
                         $this->WriteAttributeBoolean('WSPullPointSupport', false);
@@ -374,12 +373,8 @@ class ONVIFIO extends IPSModule
                 $AnalyticsTokens = $this->ReadAttributeArray('AnalyticsTokens');
                 if ($XAddr[\ONVIF\NS::Analytics]) {
                     $AnalyticsCapabilities = $this->GetServiceCapabilities($XAddr[\ONVIF\NS::Analytics], \ONVIF\WSDL::Analytics);
-                    if (isset($AnalyticsCapabilities['Capabilities']['AnalyticsModuleSupport'])) {
-                        $this->WriteAttributeBoolean('AnalyticsModuleSupport', $AnalyticsCapabilities['Capabilities']['AnalyticsModuleSupport']);
-                    }
-                    if (isset($AnalyticsCapabilities['Capabilities']['RuleSupport'])) {
-                        $this->WriteAttributeBoolean('RuleSupport', $AnalyticsCapabilities['Capabilities']['RuleSupport']);
-                    }
+                    $this->WriteAttributeBoolean('AnalyticsModuleSupport', isset($AnalyticsCapabilities['Capabilities']['AnalyticsModuleSupport']) ? $AnalyticsCapabilities['Capabilities']['AnalyticsModuleSupport'] : false);
+                    $this->WriteAttributeBoolean('RuleSupport', isset($AnalyticsCapabilities['Capabilities']['RuleSupport']) ? $AnalyticsCapabilities['Capabilities']['RuleSupport'] : false);
 
                     foreach (array_keys($AnalyticsTokens) as $AnalyticsToken) {
 //                        if ($this->ReadAttributeBoolean('AnalyticsModuleSupport')) {
@@ -560,10 +555,21 @@ class ONVIFIO extends IPSModule
                 if ($this->Subscribe()) {
                     return;
                 }
+                $this->WriteAttributeString('ConsumerAddress', '');
+                $this->UpdateFormField('EventHookRow', 'visible', false);
                 // WSSubscription failed, try PullPointSubscription
                 // No break. Add additional comment above this line if intentional
             case 'CreatePullPointSubscription':
-                return $this->CreatePullPointSubscription();
+                if ($this->CreatePullPointSubscription()) {
+                    $this->SetSynchronizationPoint();
+                    $this->UpdateFormField('DeviceData', 'items', json_encode($this->GetDeviceDataForForm()));
+                    $this->UpdateFormField('DeviceDataPanel', 'visible', true);
+                    $this->UpdateFormField('DeviceDataPanel', 'expanded', true);
+                    $this->UpdateFormField('Events', 'visible', true);
+                }
+                // Start PullMessages loop
+                IPS_RunScriptText('IPS_RequestAction(' . $this->InstanceID . ',"PullMessages",true);');
+                return true;
             case 'PullMessages':
                 return $this->PullMessages();
             case 'Renew':
@@ -578,6 +584,7 @@ class ONVIFIO extends IPSModule
                 $this->UpdateFormField('ErrorText', 'caption', $this->Translate('Determine abilities of this device'));
                 $this->UpdateFormField('ErrorPopup', 'visible', true);
                 $this->WriteAttributeString('ConsumerAddress', '');
+                $this->WriteAttributeInteger('CapabilitiesVersion', 0);
                 $this->ApplyChanges();
                 $this->ReloadForm();
                 return;
@@ -664,6 +671,7 @@ class ONVIFIO extends IPSModule
             'type'      => 'Label',
             'caption'   => $this->Translate('Supported ONVIF Profile: ') . $this->Profile->toString()
         ];
+        /*
         $InfoItems[] = [
             'type'      => 'Label',
             'caption'   => $this->Translate('Event subscription: ') . ($this->ReadAttributeBoolean('WSSubscriptionPolicySupport') ? $this->Translate('supported') : $this->Translate('not supported'))
@@ -671,11 +679,7 @@ class ONVIFIO extends IPSModule
         $InfoItems[] = [
             'type'      => 'Label',
             'caption'   => $this->Translate('Event PullPoint: ') . ($this->ReadAttributeBoolean('WSPullPointSupport') ? $this->Translate('supported') : $this->Translate('not supported'))
-        ];
-        $InfoItems[] = [
-            'type'      => 'Label',
-            'caption'   => $this->Translate('Used event handling: ') . ($this->GetTimerInterval('RenewSubscription') ? 'WS-BaseNotification' : ($this->GetTimerInterval('PullMessages') ? 'PullPoint' : $this->Translate('none')))
-        ];
+        ];*/
 
         $this->unlock('Profile');
         $DeviceItems = [
@@ -790,8 +794,6 @@ class ONVIFIO extends IPSModule
     }
     protected function CreatePullPointSubscription()
     {
-        $this->WriteAttributeString('ConsumerAddress', '');
-        $this->UpdateFormField('EventHookRow', 'visible', false);
         $XAddr = $this->ReadAttributeArray('XAddr');
         if ($XAddr[\ONVIF\NS::Event] == '') {
             return false;
@@ -799,6 +801,9 @@ class ONVIFIO extends IPSModule
         $Action = 'http://www.onvif.org/ver10/events/wsdl/EventPortType/CreatePullPointSubscriptionRequest';
         $Header[] = new SoapHeader('http://www.w3.org/2005/08/addressing', 'Action', new SoapVar($Action, XSD_ANYURI, '', 'http://www.w3.org/2005/08/addressing'), true);
         $Header[] = new SoapHeader('http://www.w3.org/2005/08/addressing', 'To', new SoapVar($this->Host . $XAddr[\ONVIF\NS::Event], XSD_ANYURI, '', 'http://www.w3.org/2005/08/addressing'), true);
+        $Address[] = new SoapVar('http://www.w3.org/2005/08/addressing/anonymous', XSD_ANYURI, '', 'http://www.w3.org/2005/08/addressing', 'Address', 'http://www.w3.org/2005/08/addressing');
+        $Header[] = new SoapHeader('http://www.w3.org/2005/08/addressing', 'ReplyTo', new SoapVar($Address, SOAP_ENC_OBJECT, '', 'http://www.w3.org/2005/08/addressing'));
+        $Header[] = new SoapHeader('http://www.w3.org/2005/08/addressing', 'MessageID', new SoapVar(self::generateMessageID(), XSD_ANYURI, '', 'http://www.w3.org/2005/08/addressing'));
         $empty = '';
         $Params = [
             'InitialTerminationTime' => 'PT60S'
@@ -807,7 +812,14 @@ class ONVIFIO extends IPSModule
         if (is_a($CreatePullPointResult, 'SoapFault')) {
             $this->SetStatus(IS_EBASE + 3);
             $this->LogMessage($this->Translate('Connection lost'), KL_ERROR);
+            /** @var SoapFault $CreatePullPointResult */
             $this->ShowLastError($CreatePullPointResult->getMessage());
+            return false;
+        }
+        if (!is_object($CreatePullPointResult)) {
+            $this->SetStatus(IS_EBASE + 3);
+            $this->LogMessage($this->Translate('Connection lost'), KL_ERROR);
+            $this->ShowLastError('No Response');
             return false;
         }
         $SubscriptionReference = $CreatePullPointResult->SubscriptionReference->Address->{'_'};
@@ -832,18 +844,17 @@ class ONVIFIO extends IPSModule
             $this->WriteAttributeString('SubscriptionId', '');
         }
         $this->isSubscribed = true;
-        $this->SetSynchronizationPoint();
-        $this->SetTimerInterval('PullMessages', 1000);
-        $this->UpdateFormField('DeviceData', 'items', json_encode($this->GetDeviceDataForForm()));
-        $this->UpdateFormField('DeviceDataPanel', 'visible', true);
-        $this->UpdateFormField('DeviceDataPanel', 'expanded', true);
-        $this->UpdateFormField('Events', 'visible', true);
+        $this->SetTimerInterval('RenewSubscription', 55 * 1000);
+        //if ($this->GetStatus() != IS_ACTIVE) {
         $this->SetStatus(IS_ACTIVE);
+        //}
         return true;
     }
     protected function PullMessages()
     {
+        //$this->SetTimerInterval('PullMessages', 0);
         if (!$this->isSubscribed) {
+            // Exit PullMessages loop
             return true;
         }
         $SubscriptionReference = $this->ReadAttributeString('SubscriptionReference');
@@ -855,27 +866,39 @@ class ONVIFIO extends IPSModule
         $Action = 'http://www.onvif.org/ver10/events/wsdl/PullPointSubscription/PullMessagesRequest';
         $Header[] = new SoapHeader('http://www.w3.org/2005/08/addressing', 'Action', new SoapVar($Action, XSD_ANYURI, '', 'http://www.w3.org/2005/08/addressing'), true);
         $Header[] = new SoapHeader('http://www.w3.org/2005/08/addressing', 'To', new SoapVar($SubscriptionReference, XSD_ANYURI, '', 'http://www.w3.org/2005/08/addressing'), true);
+        $Address[] = new SoapVar('http://www.w3.org/2005/08/addressing/anonymous', XSD_ANYURI, '', 'http://www.w3.org/2005/08/addressing', 'Address', 'http://www.w3.org/2005/08/addressing');
+        $Header[] = new SoapHeader('http://www.w3.org/2005/08/addressing', 'ReplyTo', new SoapVar($Address, SOAP_ENC_OBJECT, '', 'http://www.w3.org/2005/08/addressing'));
+        $Header[] = new SoapHeader('http://www.w3.org/2005/08/addressing', 'MessageID', new SoapVar(self::generateMessageID(), XSD_ANYURI, '', 'http://www.w3.org/2005/08/addressing'));
         $Params = [
-            'Timeout'     => 'PT1S',
-            'MessageLimit'=> 256
+            'Timeout'     => 'PT10S',
+            'MessageLimit'=> 32
         ];
         $Response = '';
-        $PullMessagesResult = $this->SendData($SubscriptionReference, \ONVIF\WSDL::Event, 'PullMessages', true, $Params, $Response, $Header);
+        $PullMessagesResult = $this->SendData($SubscriptionReference, \ONVIF\WSDL::Event, 'PullMessages', true, $Params, $Response, $Header, 15);
         if (is_a($PullMessagesResult, 'SoapFault')) {
-            $this->SendDebug('ERROR PullMessages', 'No Response', 0);
-            $this->LogMessage($this->Translate('Error PullMessages with:') . $PullMessagesResult->getMessage(), KL_ERROR);
-            $this->SetStatus(IS_EBASE + 3);
-            $this->isSubscribed = false;
-            $this->SetTimerInterval('PullMessages', 0);
+            //$this->SetTimerInterval('PullMessages', 0);
+            //return $this->CreatePullPointSubscription();
+            if ($this->isSubscribed) {
+                /** @var SoapFault $PullMessagesResult */
+                $this->SendDebug('ERROR PullMessages', 'No Response', 0);
+                $this->LogMessage($this->Translate('Error PullMessages with:') . $PullMessagesResult->getMessage(), KL_ERROR);
+                $this->SetStatus(IS_EBASE + 3);
+                $this->isSubscribed = false;
+            }
             return false;
         }
         if (!is_object($PullMessagesResult)) {
+            //$this->SetTimerInterval('PullMessages', 0);
             $this->SendDebug('ERROR PullMessages', 'No Response', 0);
             $this->LogMessage($this->Translate('Error PullMessages with no Response'), KL_ERROR);
             $this->SetStatus(IS_EBASE + 3);
             $this->isSubscribed = false;
-            $this->SetTimerInterval('PullMessages', 0);
             return false;
+        }
+        //$this->SetTimerInterval('PullMessages', 0);
+        if ($this->isSubscribed) {
+            // Continue PullMessages loop when subscribed
+            IPS_RunScriptText('IPS_RequestAction(' . $this->InstanceID . ',"PullMessages",true);');
         }
         if (property_exists($PullMessagesResult, 'NotificationMessage')) {
             $this->DecodeNotificationMessage($Response);
@@ -888,9 +911,13 @@ class ONVIFIO extends IPSModule
         if ($XAddr[\ONVIF\NS::Event] == '') {
             return false;
         }
+        $this->lock('EventHandler');
         $Action = 'http://docs.oasis-open.org/wsn/bw-2/NotificationProducer/SubscribeRequest';
         $Header[] = new SoapHeader('http://www.w3.org/2005/08/addressing', 'Action', new SoapVar($Action, XSD_ANYURI, '', 'http://www.w3.org/2005/08/addressing'), true);
         $Header[] = new SoapHeader('http://www.w3.org/2005/08/addressing', 'To', new SoapVar($this->Host . $XAddr[\ONVIF\NS::Event], XSD_ANYURI, '', 'http://www.w3.org/2005/08/addressing'), true);
+        $Address[] = new SoapVar('http://www.w3.org/2005/08/addressing/anonymous', XSD_ANYURI, '', 'http://www.w3.org/2005/08/addressing', 'Address', 'http://www.w3.org/2005/08/addressing');
+        $Header[] = new SoapHeader('http://www.w3.org/2005/08/addressing', 'ReplyTo', new SoapVar($Address, SOAP_ENC_OBJECT, '', 'http://www.w3.org/2005/08/addressing'));
+        $Header[] = new SoapHeader('http://www.w3.org/2005/08/addressing', 'MessageID', new SoapVar(self::generateMessageID(), XSD_ANYURI, '', 'http://www.w3.org/2005/08/addressing'));
         $Params = [
             'ConsumerReference'      => [
                 'Address' => $this->ReadAttributeString('ConsumerAddress')
@@ -901,11 +928,8 @@ class ONVIFIO extends IPSModule
         $this->WaitForFirstEvent = true;
         $SubscribeResult = $this->SendData($XAddr[\ONVIF\NS::Event], \ONVIF\WSDL::Event, 'Subscribe', true, $Params, $Response, $Header);
         if (is_a($SubscribeResult, 'SoapFault') || (!is_object($SubscribeResult))) {
-            /*$this->SetStatus(IS_EBASE + 3);
-            $this->LogMessage($this->Translate('Connection lost'), KL_ERROR);
-            $this->ShowLastError($SubscribeResult->getMessage());
-             */
             $this->WaitForFirstEvent = false;
+            $this->unlock('EventHandler');
             return false;
         }
         $SubscriptionReference = $SubscribeResult->SubscriptionReference->Address->{'_'};
@@ -933,7 +957,8 @@ class ONVIFIO extends IPSModule
         $this->isSubscribed = true;
         $this->SetTimerInterval('RenewSubscription', 55 * 1000);
         $this->SetSynchronizationPoint();
-        for ($i = 0; $i < 1000; $i++) {
+        $this->unlock('EventHandler');
+        for ($i = 0; $i < 500; $i++) {
             if (!$this->WaitForFirstEvent) {
                 $this->UpdateFormField('DeviceData', 'items', json_encode($this->GetDeviceDataForForm()));
                 $this->UpdateFormField('DeviceDataPanel', 'visible', true);
@@ -942,7 +967,7 @@ class ONVIFIO extends IPSModule
                 $this->SetStatus(IS_ACTIVE);
                 return true;
             }
-            IPS_Sleep(5);
+            IPS_Sleep(8);
         }
         $this->Unsubscribe();
         $this->WaitForFirstEvent = false;
@@ -968,6 +993,7 @@ class ONVIFIO extends IPSModule
         $empty = '';
         $SetSynchronizationPointResult = $this->SendData($SubscriptionReference, \ONVIF\WSDL::Event, 'SetSynchronizationPoint', true, [], $empty);
         if (is_a($SetSynchronizationPointResult, 'SoapFault')) {
+            /** @var SoapFault $SetSynchronizationPointResult */
             $this->LogMessage($this->Translate('Error SetSynchronizationPoint with:') . '(' . $SetSynchronizationPointResult->getCode() . ')' . $SetSynchronizationPointResult->getMessage(), KL_ERROR);
             return false;
         }
@@ -978,15 +1004,20 @@ class ONVIFIO extends IPSModule
         if (!$this->isSubscribed) {
             return true;
         }
+        $this->lock('EventHandler');
         $SubscriptionReference = $this->ReadAttributeString('SubscriptionReference');
         if ($SubscriptionReference == '') {
             $this->SendDebug('ERROR Renew', 'No SubscriptionReference', 0);
             $this->LogMessage($this->Translate('Call Renew with no SubscriptionReference'), KL_ERROR);
+            $this->unlock('EventHandler');
             return false;
         }
         $Action = 'http://docs.oasis-open.org/wsn/bw-2/SubscriptionManager/RenewRequest';
         $Header[] = new SoapHeader('http://www.w3.org/2005/08/addressing', 'Action', new SoapVar($Action, XSD_ANYURI, '', 'http://www.w3.org/2005/08/addressing'), true);
         $Header[] = new SoapHeader('http://www.w3.org/2005/08/addressing', 'To', new SoapVar($SubscriptionReference, XSD_ANYURI, '', 'http://www.w3.org/2005/08/addressing'), true);
+        $Address[] = new SoapVar('http://www.w3.org/2005/08/addressing/anonymous', XSD_ANYURI, '', 'http://www.w3.org/2005/08/addressing', 'Address', 'http://www.w3.org/2005/08/addressing');
+        $Header[] = new SoapHeader('http://www.w3.org/2005/08/addressing', 'ReplyTo', new SoapVar($Address, SOAP_ENC_OBJECT, '', 'http://www.w3.org/2005/08/addressing'));
+        $Header[] = new SoapHeader('http://www.w3.org/2005/08/addressing', 'MessageID', new SoapVar(self::generateMessageID(), XSD_ANYURI, '', 'http://www.w3.org/2005/08/addressing'));
         $SubscriptionId = $this->ReadAttributeString('SubscriptionId');
         if ($SubscriptionId != '') {
             $xml = new DOMDocument();
@@ -1001,10 +1032,12 @@ class ONVIFIO extends IPSModule
         $empty = '';
         $RenewResult = $this->SendData($SubscriptionReference, \ONVIF\WSDL::Event, 'Renew', true, $Params, $empty, $Header);
         if (is_a($RenewResult, 'SoapFault')) {
+            /** @var RenewResult $PullMessagesResult */
             $this->LogMessage($this->Translate('Error Renew Subscription with:') . $RenewResult->getMessage(), KL_ERROR);
             $this->SetStatus(IS_EBASE + 3);
             $this->isSubscribed = false;
             $this->SetTimerInterval('RenewSubscription', 0);
+            $this->unlock('EventHandler');
             return false;
         }
         if (!is_object($RenewResult)) {
@@ -1013,18 +1046,20 @@ class ONVIFIO extends IPSModule
             $this->SetStatus(IS_EBASE + 3);
             $this->isSubscribed = false;
             $this->SetTimerInterval('RenewSubscription', 0);
+            $this->unlock('EventHandler');
             return false;
         }
+        $this->unlock('EventHandler');
         return true;
     }
-
     protected function Unsubscribe()
     {
         if (!$this->isSubscribed) {
             return true;
         }
+        $this->lock('EventHandler');
         $this->SetTimerInterval('RenewSubscription', 0);
-        $this->SetTimerInterval('PullMessages', 0);
+        //$this->SetTimerInterval('PullMessages', 0);
         $this->isSubscribed = false;
         $this->UpdateFormField('SubscriptionReference', 'caption', '');
         $this->UpdateFormField('SubscriptionReferenceRow', 'visible', false);
@@ -1040,6 +1075,9 @@ class ONVIFIO extends IPSModule
         $Action = 'http://docs.oasis-open.org/wsn/bw-2/SubscriptionManager/UnsubscribeRequest';
         $Header[] = new SoapHeader('http://www.w3.org/2005/08/addressing', 'Action', new SoapVar($Action, XSD_ANYURI, '', 'http://www.w3.org/2005/08/addressing'), true);
         $Header[] = new SoapHeader('http://www.w3.org/2005/08/addressing', 'To', new SoapVar($SubscriptionReference, XSD_ANYURI, '', 'http://www.w3.org/2005/08/addressing'), true);
+        $Address[] = new SoapVar('http://www.w3.org/2005/08/addressing/anonymous', XSD_ANYURI, '', 'http://www.w3.org/2005/08/addressing', 'Address', 'http://www.w3.org/2005/08/addressing');
+        $Header[] = new SoapHeader('http://www.w3.org/2005/08/addressing', 'ReplyTo', new SoapVar($Address, SOAP_ENC_OBJECT, '', 'http://www.w3.org/2005/08/addressing'));
+        $Header[] = new SoapHeader('http://www.w3.org/2005/08/addressing', 'MessageID', new SoapVar(self::generateMessageID(), XSD_ANYURI, '', 'http://www.w3.org/2005/08/addressing'));
         if ($SubscriptionId != '') {
             $xml = new DOMDocument();
             $xml->loadXML($SubscriptionId);
@@ -1050,8 +1088,10 @@ class ONVIFIO extends IPSModule
         $empty = '';
         $UnsubscribeResult = $this->SendData($SubscriptionReference, \ONVIF\WSDL::Event, 'Unsubscribe', true, [], $empty, $Header);
         if (is_a($UnsubscribeResult, 'SoapFault')) {
+            /** @var SoapFault $UnsubscribeResult */
             trigger_error($UnsubscribeResult->getMessage(), E_USER_NOTICE);
         }
+        $this->unlock('EventHandler');
         return true;
     }
     protected function GetEventProperties()
@@ -1639,7 +1679,7 @@ class ONVIFIO extends IPSModule
      * @param bool $UseLogin
      * @param array $Params
      */
-    protected function SendData(string $URI, string $wsdl, string $Function, bool $UseLogin = false, array $Params = [], string &$Response = '', array $Header = [])
+    protected function SendData(string $URI, string $wsdl, string $Function, bool $UseLogin = false, array $Params = [], string &$Response = '', array $Header = [], int $Timeout = 5)
     {
         if ($URI == '') {
             $URI = $this->Host . '/onvif/device_service';
@@ -1659,9 +1699,9 @@ class ONVIFIO extends IPSModule
                     $Header[] = \ONVIF\ONVIF::soapClientWSSecurityHeader($this->ReadPropertyString('Username'), $this->ReadPropertyString('Password'), $this->ReadAttributeInteger('Timestamp_Offset'));
                 }
             }
-            $ONVIFClient = new \ONVIF\ONVIF($wsdl, $URI, $this->ReadPropertyString('Username'), $this->ReadPropertyString('Password'), $Header);
+            $ONVIFClient = new \ONVIF\ONVIF($wsdl, $URI, $this->ReadPropertyString('Username'), $this->ReadPropertyString('Password'), $Header, $Timeout);
         } else {
-            $ONVIFClient = new \ONVIF\ONVIF($wsdl, $URI, null, null, $Header);
+            $ONVIFClient = new \ONVIF\ONVIF($wsdl, $URI, null, null, $Header, $Timeout);
         }
         try {
             if (count($Params) == 0) {
@@ -1718,7 +1758,7 @@ class ONVIFIO extends IPSModule
     }
     protected function ProcessHookData()
     {
-        if ($this->ReadPropertyBoolean('Open') == false) {
+        if (($this->ReadPropertyBoolean('Open') == false) || ($this->GetTimerInterval('RenewSubscription') == 0)) {
             http_response_code(404);
             header('Connection: close');
             header('Server: Symcon ' . IPS_GetKernelVersion());
@@ -1809,6 +1849,17 @@ class ONVIFIO extends IPSModule
         $query = isset($parsed_url['query']) ? '?' . $parsed_url['query'] : '';
         $fragment = isset($parsed_url['fragment']) ? '#' . $parsed_url['fragment'] : '';
         return "$scheme$user$pass$host$port$path$query$fragment";
+    }
+
+    protected static function generateMessageID()
+    {
+        $uuid = md5(uniqid((string) mt_rand(), true));
+        $MessageID = 'urn:uuid:' . substr($uuid, 0, 8) . '-' .
+                substr($uuid, 8, 4) . '-' .
+                substr($uuid, 12, 4) . '-' .
+                substr($uuid, 16, 4) . '-' .
+                substr($uuid, 20, 12);
+        return $MessageID;
     }
     private function GetEventMessageValues(DOMNodeList $xmlNodes)
     {

@@ -93,13 +93,13 @@ class ONVIF
 {
     public $client;
 
-    public function __construct($wsdl, $service, $username = null, $password = null, $Headers = [])
+    public function __construct($wsdl, $service, $username = null, $password = null, $Headers = [], $Timeout = 5)
     {
         $Options = [
             'trace'              => true,
             'exceptions'         => true,
             'cache_wsdl'         => WSDL_CACHE_NONE,
-            'connection_timeout' => 5,
+            'connection_timeout' => $Timeout,
             'user_agent'         => 'Symcon ONVIF-Lib by Nall-chan',
             'keep_alive'         => false,
             'soap_version'       => SOAP_1_2,
@@ -114,7 +114,7 @@ class ONVIF
         }
         $this->client = new ONVIFsoapClient($wsdl, $Options);
         $this->client->__setSoapHeaders($Headers);
-        ini_set('default_socket_timeout', '5');
+        ini_set('default_socket_timeout', (string) $Timeout);
         return;
     }
 
