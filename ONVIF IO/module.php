@@ -900,7 +900,7 @@ class ONVIFIO extends IPSModule
         $Response = '';
         $this->WaitForFirstEvent = true;
         $SubscribeResult = $this->SendData($XAddr[\ONVIF\NS::Event], \ONVIF\WSDL::Event, 'Subscribe', true, $Params, $Response, $Header);
-        if (is_a($SubscribeResult, 'SoapFault')) {
+        if (is_a($SubscribeResult, 'SoapFault') || (!is_object($SubscribeResult))) {
             /*$this->SetStatus(IS_EBASE + 3);
             $this->LogMessage($this->Translate('Connection lost'), KL_ERROR);
             $this->ShowLastError($SubscribeResult->getMessage());
