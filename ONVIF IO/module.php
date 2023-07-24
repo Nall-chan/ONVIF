@@ -461,6 +461,9 @@ class ONVIFIO extends IPSModule
             return serialize($Capabilities);
         }
         if ($Data['Function'] == 'SetSynchronizationPoint') {
+            if (!$this->isSubscribed) {
+                return true;
+            }
             return $this->SetSynchronizationPoint();
         }
         if ($Data['Function'] == 'GetUrl') {
@@ -788,6 +791,7 @@ class ONVIFIO extends IPSModule
     protected function CreatePullPointSubscription()
     {
         $this->WriteAttributeString('ConsumerAddress', '');
+        $this->UpdateFormField('EventHookRow', 'visible', false);
         $XAddr = $this->ReadAttributeArray('XAddr');
         if ($XAddr[\ONVIF\NS::Event] == '') {
             return false;
@@ -828,13 +832,13 @@ class ONVIFIO extends IPSModule
             $this->WriteAttributeString('SubscriptionId', '');
         }
         $this->isSubscribed = true;
+        $this->SetSynchronizationPoint();
         $this->SetTimerInterval('PullMessages', 1000);
-        $this->SetStatus(IS_ACTIVE);
         $this->UpdateFormField('DeviceData', 'items', json_encode($this->GetDeviceDataForForm()));
         $this->UpdateFormField('DeviceDataPanel', 'visible', true);
         $this->UpdateFormField('DeviceDataPanel', 'expanded', true);
         $this->UpdateFormField('Events', 'visible', true);
-        $this->SetSynchronizationPoint();
+        $this->SetStatus(IS_ACTIVE);
         return true;
     }
     protected function PullMessages()
@@ -853,7 +857,7 @@ class ONVIFIO extends IPSModule
         $Header[] = new SoapHeader('http://www.w3.org/2005/08/addressing', 'To', new SoapVar($SubscriptionReference, XSD_ANYURI, '', 'http://www.w3.org/2005/08/addressing'), true);
         $Params = [
             'Timeout'     => 'PT1S',
-            'MessageLimit'=> 32
+            'MessageLimit'=> 256
         ];
         $Response = '';
         $PullMessagesResult = $this->SendData($SubscriptionReference, \ONVIF\WSDL::Event, 'PullMessages', true, $Params, $Response, $Header);
@@ -876,7 +880,6 @@ class ONVIFIO extends IPSModule
         if (property_exists($PullMessagesResult, 'NotificationMessage')) {
             $this->DecodeNotificationMessage($Response);
         }
-        $this->SetStatus(IS_ACTIVE);
         return true;
     }
     protected function Subscribe()
@@ -929,28 +932,25 @@ class ONVIFIO extends IPSModule
         }
         $this->isSubscribed = true;
         $this->SetTimerInterval('RenewSubscription', 55 * 1000);
-        $this->UpdateFormField('DeviceData', 'items', json_encode($this->GetDeviceDataForForm()));
-        $this->UpdateFormField('DeviceDataPanel', 'visible', true);
-        $this->UpdateFormField('DeviceDataPanel', 'expanded', true);
-        $this->UpdateFormField('Events', 'visible', true);
-
         $this->SetSynchronizationPoint();
         for ($i = 0; $i < 1000; $i++) {
             if (!$this->WaitForFirstEvent) {
+                $this->UpdateFormField('DeviceData', 'items', json_encode($this->GetDeviceDataForForm()));
+                $this->UpdateFormField('DeviceDataPanel', 'visible', true);
+                $this->UpdateFormField('DeviceDataPanel', 'expanded', true);
+                $this->UpdateFormField('Events', 'visible', true);
                 $this->SetStatus(IS_ACTIVE);
                 return true;
             }
             IPS_Sleep(5);
         }
+        $this->Unsubscribe();
         $this->WaitForFirstEvent = false;
         $this->SetStatus(IS_EBASE + 4);
         return false;
     }
     protected function SetSynchronizationPoint()
     {
-        if (!$this->isSubscribed) {
-            return true;
-        }
         $SubscriptionReference = $this->ReadAttributeString('SubscriptionReference');
         if ($SubscriptionReference == '') {
             $this->SendDebug('ERROR SetSynchronizationPoint', 'No SubscriptionReference', 0);
@@ -1026,8 +1026,12 @@ class ONVIFIO extends IPSModule
         $this->SetTimerInterval('RenewSubscription', 0);
         $this->SetTimerInterval('PullMessages', 0);
         $this->isSubscribed = false;
+        $this->UpdateFormField('SubscriptionReference', 'caption', '');
+        $this->UpdateFormField('SubscriptionReferenceRow', 'visible', false);
         $SubscriptionReference = $this->ReadAttributeString('SubscriptionReference');
         $this->WriteAttributeString('SubscriptionReference', '');
+        $SubscriptionId = $this->ReadAttributeString('SubscriptionId');
+        $this->WriteAttributeString('SubscriptionId', '');
         if ($SubscriptionReference == '') {
             $this->SendDebug('ERROR Unsubscribe', 'No SubscriptionReference', 0);
             $this->LogMessage($this->Translate('Call Renew with no SubscriptionReference'), KL_ERROR);
@@ -1036,8 +1040,6 @@ class ONVIFIO extends IPSModule
         $Action = 'http://docs.oasis-open.org/wsn/bw-2/SubscriptionManager/UnsubscribeRequest';
         $Header[] = new SoapHeader('http://www.w3.org/2005/08/addressing', 'Action', new SoapVar($Action, XSD_ANYURI, '', 'http://www.w3.org/2005/08/addressing'), true);
         $Header[] = new SoapHeader('http://www.w3.org/2005/08/addressing', 'To', new SoapVar($SubscriptionReference, XSD_ANYURI, '', 'http://www.w3.org/2005/08/addressing'), true);
-        $SubscriptionId = $this->ReadAttributeString('SubscriptionId');
-        $this->WriteAttributeString('SubscriptionId', '');
         if ($SubscriptionId != '') {
             $xml = new DOMDocument();
             $xml->loadXML($SubscriptionId);
