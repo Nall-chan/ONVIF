@@ -310,11 +310,11 @@ class ONVIFIO extends IPSModule
                     $MediaCapabilities = $this->GetServiceCapabilities($XAddr[\ONVIF\NS::Media], \ONVIF\WSDL::Media); // noch ohne Funktion..
                     if ($MediaCapabilities) {
                         $Capabilities = $MediaCapabilities['Capabilities'];
-                        if (isset($Capabilities['StreamingCapabilities']['NoRTSPStreaming'])) {
-                            $this->WriteAttributeBoolean('HasRTSPStreaming', !$Capabilities['StreamingCapabilities']['NoRTSPStreaming']);
-                        } else {
-                            $this->WriteAttributeBoolean('HasRTSPStreaming', $Capabilities['StreamingCapabilities']['RTP_TCP'] || $Capabilities['StreamingCapabilities']['RTP_RTSP_TCP']);
-                        }
+                        //if (isset($Capabilities['StreamingCapabilities']['NoRTSPStreaming'])) {
+                        //    $this->WriteAttributeBoolean('HasRTSPStreaming', !$Capabilities['StreamingCapabilities']['NoRTSPStreaming']);
+                        //} else {
+                        $this->WriteAttributeBoolean('HasRTSPStreaming', $Capabilities['StreamingCapabilities']['RTP_TCP'] || $Capabilities['StreamingCapabilities']['RTP_RTSP_TCP']);
+                        //}
                         if (isset($Capabilities['SnapshotUri'])) {
                             $this->WriteAttributeBoolean('HasSnapshotUri', $Capabilities['SnapshotUri']);
                         } else {
@@ -887,21 +887,23 @@ class ONVIFIO extends IPSModule
             }
             return false;
         }
-        if (!is_object($PullMessagesResult)) {
+        /*if (!is_object($PullMessagesResult)) {
             //$this->SetTimerInterval('PullMessages', 0);
             $this->SendDebug('ERROR PullMessages', 'No Response', 0);
             $this->LogMessage($this->Translate('Error PullMessages with no Response'), KL_ERROR);
             $this->SetStatus(IS_EBASE + 3);
             $this->isSubscribed = false;
             return false;
-        }
+        }*/
         //$this->SetTimerInterval('PullMessages', 0);
         if ($this->isSubscribed) {
             // Continue PullMessages loop when subscribed
             IPS_RunScriptText('IPS_RequestAction(' . $this->InstanceID . ',"PullMessages",true);');
         }
-        if (property_exists($PullMessagesResult, 'NotificationMessage')) {
-            $this->DecodeNotificationMessage($Response);
+        if (is_object($PullMessagesResult)) {
+            if (property_exists($PullMessagesResult, 'NotificationMessage')) {
+                $this->DecodeNotificationMessage($Response);
+            }
         }
         return true;
     }
@@ -971,7 +973,7 @@ class ONVIFIO extends IPSModule
         }
         $this->Unsubscribe();
         $this->WaitForFirstEvent = false;
-        $this->SetStatus(IS_EBASE + 4);
+        //$this->SetStatus(IS_EBASE + 4);
         return false;
     }
     protected function SetSynchronizationPoint()
@@ -1368,6 +1370,7 @@ class ONVIFIO extends IPSModule
                 if (isset($CapabilitiesResult['Capabilities']['Media']['StreamingCapabilities']['RTP_RTSP_TCP'])) {
                     $HasRTSPStreaming = $HasRTSPStreaming || $CapabilitiesResult['Capabilities']['Media']['StreamingCapabilities']['RTP_RTSP_TCP'];
                 }
+                $this->WriteAttributeBoolean('HasSnapshotUri', true);
                 $this->WriteAttributeBoolean('HasRTSPStreaming', $HasRTSPStreaming);
             }
             if (isset($CapabilitiesResult['Capabilities']['PTZ']['XAddr'])) {

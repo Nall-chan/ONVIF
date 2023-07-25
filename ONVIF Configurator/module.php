@@ -49,6 +49,7 @@ class ONVIFConfigurator extends ONVIFModuleBase
             return json_encode($Form);
         }
         $this->SendDebug('VideoSources', $Capabilities['VideoSources'], 0);
+        $this->SendDebug('HasSnapshotUri', $Capabilities['HasSnapshotUri'], 0);
         $this->SendDebug('VideoSourcesJPEG', $Capabilities['VideoSourcesJPEG'], 0);
         $this->SendDebug('NbrOfInputs', $Capabilities['NbrOfInputs'], 0);
         $this->SendDebug('NbrOfOutputs', $Capabilities['NbrOfOutputs'], 0);
@@ -216,49 +217,51 @@ class ONVIFConfigurator extends ONVIFModuleBase
         ];
         $StreamJPEGValues = [];
         $IPSStreamJPEGInstances = $this->GetInstanceList(self::GUID_ONVIF_IMAGE_GRABBER, ['Profile', 'VideoSource']);
-        foreach ($Capabilities['VideoSourcesJPEG'] as $VideoSourceJPEG) {
-            foreach ($VideoSourceJPEG['Profile'] as $ProfileIndex =>$Profile) {
-                $InstanceID = array_search($Profile['token'] . ':' . $VideoSourceJPEG['VideoSourceToken'], $IPSStreamJPEGInstances);
-                if ($InstanceID !== false) {
-                    unset($IPSStreamJPEGInstances[$InstanceID]);
+        if ($Capabilities['HasSnapshotUri']) {
+            foreach ($Capabilities['VideoSourcesJPEG'] as $VideoSourceJPEG) {
+                foreach ($VideoSourceJPEG['Profile'] as $ProfileIndex =>$Profile) {
+                    $InstanceID = array_search($Profile['token'] . ':' . $VideoSourceJPEG['VideoSourceToken'], $IPSStreamJPEGInstances);
+                    if ($InstanceID !== false) {
+                        unset($IPSStreamJPEGInstances[$InstanceID]);
+                        $Device = [
+                            'instanceID'  => $InstanceID,
+                            'type'        => 'Image Grabber',
+                            'VideoSource' => $VideoSourceJPEG['VideoSourceToken'],
+                            'name'        => IPS_GetName($InstanceID),
+                            'Location'    => stristr(IPS_GetLocation($InstanceID), IPS_GetName($InstanceID), true),
+                            'create'      => $StreamJPEGCreateParams
+                        ];
+                        $Device['create']['configuration'] = [
+                            'VideoSource' => $VideoSourceJPEG['VideoSourceToken'],
+                            'Profile'     => $Profile['token']
+                        ];
+                        unset($VideoSourceJPEG['Profile'][$ProfileIndex]);
+                        $StreamJPEGValues[] = $Device;
+                    }
+                }
+                if (count($VideoSourceJPEG['Profile'])) { // weitere Profile vorhanden, dann nächste Instanz anbieten
                     $Device = [
-                        'instanceID'  => $InstanceID,
+                        'instanceID'  => 0,
                         'type'        => 'Image Grabber',
                         'VideoSource' => $VideoSourceJPEG['VideoSourceToken'],
-                        'name'        => IPS_GetName($InstanceID),
-                        'Location'    => stristr(IPS_GetLocation($InstanceID), IPS_GetName($InstanceID), true),
-                        'create'      => $StreamJPEGCreateParams
+                        'name'        => $VideoSourceJPEG['VideoSourceName'],
+                        'Location'    => ''
                     ];
-                    $Device['create']['configuration'] = [
-                        'VideoSource' => $VideoSourceJPEG['VideoSourceToken'],
-                        'Profile'     => $Profile['token']
-                    ];
-                    unset($VideoSourceJPEG['Profile'][$ProfileIndex]);
+                    $Create = [];
+                    foreach ($VideoSourceJPEG['Profile'] as $Profile) {
+                        $Create[$VideoSourceJPEG['VideoSourceName'] . ' (' . $Profile['Name'] . ')'] = $StreamJPEGCreateParams;
+                        $Create[$VideoSourceJPEG['VideoSourceName'] . ' (' . $Profile['Name'] . ')']['configuration'] = [
+                            'VideoSource' => $VideoSourceJPEG['VideoSourceToken'],
+                            'Profile'     => $Profile['token']
+                        ];
+                    }
+                    if (count($Create) == 1) {
+                        $Device['name'] = $VideoSourceJPEG['VideoSourceName'] . ' (' . $Profile['Name'] . ')';
+                        $Create = array_shift($Create);
+                    }
+                    $Device['create'] = $Create;
                     $StreamJPEGValues[] = $Device;
                 }
-            }
-            if (count($VideoSourceJPEG['Profile'])) { // weitere Profile vorhanden, dann nächste Instanz anbieten
-                $Device = [
-                    'instanceID'  => 0,
-                    'type'        => 'Image Grabber',
-                    'VideoSource' => $VideoSourceJPEG['VideoSourceToken'],
-                    'name'        => $VideoSourceJPEG['VideoSourceName'],
-                    'Location'    => ''
-                ];
-                $Create = [];
-                foreach ($VideoSourceJPEG['Profile'] as $Profile) {
-                    $Create[$VideoSourceJPEG['VideoSourceName'] . ' (' . $Profile['Name'] . ')'] = $StreamJPEGCreateParams;
-                    $Create[$VideoSourceJPEG['VideoSourceName'] . ' (' . $Profile['Name'] . ')']['configuration'] = [
-                        'VideoSource' => $VideoSourceJPEG['VideoSourceToken'],
-                        'Profile'     => $Profile['token']
-                    ];
-                }
-                if (count($Create) == 1) {
-                    $Device['name'] = $VideoSourceJPEG['VideoSourceName'] . ' (' . $Profile['Name'] . ')';
-                    $Create = array_shift($Create);
-                }
-                $Device['create'] = $Create;
-                $StreamJPEGValues[] = $Device;
             }
         }
         foreach ($IPSStreamJPEGInstances as $InstanceID => $VideoSourceJPEG) {

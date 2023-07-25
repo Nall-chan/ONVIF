@@ -8,7 +8,6 @@ require_once __DIR__ . '/wsdl.php';
 
 class ONVIFsoapClient extends \SoapClient
 {
-    //public $CurlInfo;
     private $User;
     private $Pass;
     private $Options;
@@ -28,7 +27,7 @@ class ONVIFsoapClient extends \SoapClient
         }
         $this->Options = $options;
     }
-    public function __doRequest($request, $location, $action, $version, $one_way = null)
+    public function __doRequest($request, $location, $action, $version, $one_way = false)
     {
         $headers = [
             'Method: POST',
@@ -67,8 +66,6 @@ class ONVIFsoapClient extends \SoapClient
         }
         if (!is_bool($response)) {
             $Parts = explode("\r\n\r\n<?xml", $response);
-            if (count($Parts) == 1) {
-            }
             $Headers = explode("\r\n\r\n", array_shift($Parts));
             $LastHeader = array_pop($Headers);
             if ($LastHeader == '') {
@@ -81,7 +78,7 @@ class ONVIFsoapClient extends \SoapClient
                 $response = '';
             }
         }
-        if (($http_code > 400) && ($response == '')) {
+        if ($http_code > 400) /*&& ($response == ''))*/ {
             throw new \SoapFault('http:' . $http_code, explode("\r\n", $this->__last_response_headers)[0]);
             return '';
         }
