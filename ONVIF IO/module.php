@@ -875,17 +875,19 @@ class ONVIFIO extends IPSModule
         ];
         $Response = '';
         $PullMessagesResult = $this->SendData($SubscriptionReference, \ONVIF\WSDL::Event, 'PullMessages', true, $Params, $Response, $Header, 15);
-        if (is_a($PullMessagesResult, 'SoapFault')) {
-            //$this->SetTimerInterval('PullMessages', 0);
-            //return $this->CreatePullPointSubscription();
-            if ($this->isSubscribed) {
-                /** @var SoapFault $PullMessagesResult */
-                $this->SendDebug('ERROR PullMessages', 'No Response', 0);
-                $this->LogMessage($this->Translate('Error PullMessages with:') . $PullMessagesResult->getMessage(), KL_ERROR);
-                $this->SetStatus(IS_EBASE + 3);
-                $this->isSubscribed = false;
+        if ($Response) {
+            if (is_a($PullMessagesResult, 'SoapFault')) {
+                //$this->SetTimerInterval('PullMessages', 0);
+                //return $this->CreatePullPointSubscription();
+                if ($this->isSubscribed) {
+                    /** @var SoapFault $PullMessagesResult */
+                    $this->SendDebug('ERROR PullMessages', 'No Response', 0);
+                    $this->LogMessage($this->Translate('Error PullMessages with:') . $PullMessagesResult->getMessage(), KL_ERROR);
+                    $this->SetStatus(IS_EBASE + 3);
+                    $this->isSubscribed = false;
+                }
+                return false;
             }
-            return false;
         }
         /*if (!is_object($PullMessagesResult)) {
             //$this->SetTimerInterval('PullMessages', 0);
