@@ -4,11 +4,13 @@ declare(strict_types=1);
 
 namespace ONVIF;
 
-require_once __DIR__ . '/wsdl.php';
-
+/**
+ * @property-write string __last_request_headers
+ * @property-write string __last_response_headers
+ *
+ */
 class ONVIFsoapClient extends \SoapClient
 {
-    //public $CurlInfo;
     private string $User;
     private string $Pass;
     private array $Options;
@@ -46,6 +48,7 @@ class ONVIFsoapClient extends \SoapClient
         curl_setopt($ch, CURLOPT_POST, true);
         curl_setopt($ch, CURLOPT_POSTFIELDS, $request);
         curl_setopt($ch, CURLOPT_HTTP_VERSION, CURL_HTTP_VERSION_1_1);
+        curl_setopt($ch, CURLOPT_HTTP09_ALLOWED, true);
         curl_setopt($ch, CURLOPT_HEADER, true);
         curl_setopt($ch, CURLINFO_HEADER_OUT, true);
         if (isset($this->Options['authentication'])) {
@@ -66,8 +69,6 @@ class ONVIFsoapClient extends \SoapClient
         }
         if (!is_bool($response)) {
             $Parts = explode("\r\n\r\n<?xml", $response);
-            if (count($Parts) == 1) {
-            }
             $Headers = explode("\r\n\r\n", array_shift($Parts));
             $LastHeader = array_pop($Headers);
             if ($LastHeader == '') {
@@ -80,7 +81,7 @@ class ONVIFsoapClient extends \SoapClient
                 $response = '';
             }
         }
-        if (($http_code > 400) && ($response == '')) {
+        if ($http_code > 400) { /*&& ($response == ''))*/
             throw new \SoapFault('http:' . $http_code, explode("\r\n", $this->__last_response_headers)[0]);
             return '';
         }
@@ -92,13 +93,13 @@ class ONVIF
 {
     public $client;
 
-    public function __construct(string $wsdl, string $service, ?string $username = null, ?string $password = null, array $Headers = [])
+    public function __construct(string $wsdl, string $service, ?string $username = null, ?string $password = null, array $Headers = [], int $Timeout = 5)
     {
         $Options = [
             'trace'              => true,
             'exceptions'         => true,
             'cache_wsdl'         => WSDL_CACHE_NONE,
-            'connection_timeout' => 5,
+            'connection_timeout' => $Timeout,
             'user_agent'         => 'Symcon ONVIF-Lib by Nall-chan',
             'keep_alive'         => false,
             'soap_version'       => SOAP_1_2,
@@ -113,7 +114,7 @@ class ONVIF
         }
         $this->client = new ONVIFsoapClient($wsdl, $Options);
         $this->client->__setSoapHeaders($Headers);
-        ini_set('default_socket_timeout', '5');
+        ini_set('default_socket_timeout', (string) $Timeout);
         return;
     }
 

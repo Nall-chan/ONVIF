@@ -866,11 +866,11 @@ class ONVIFMediaStream extends ONVIFModuleBase
             return;
         }
         if ($Ident == 'RefreshProfileForm') {
-            $this->RefreshProfileForm($Value);
+            $this->RefreshProfileForm((string) $Value);
             return;
         }
         if ($Ident == 'RefreshEnablePresetProfileForm') {
-            $this->RefreshPresetProfileForm($Value);
+            $this->RefreshPresetProfileForm((bool) $Value);
             return;
         }
         $Speed = 0;
@@ -884,16 +884,16 @@ class ONVIFMediaStream extends ONVIFModuleBase
         switch ($Ident) {
             case 'PRESET':
                 if ($this->GotoPreset($Value)) {
-                    $this->SetValue('PRESET', $Value);
+                    $this->SetValueInteger('PRESET', (int) $Value);
                 }
                 return;
             case 'TIME':
             case 'SPEED':
-                $this->SetValueFloat($Ident, $Value);
+                $this->SetValueFloat($Ident, (float) $Value);
                 return;
             case 'PT':
                 $Result = false;
-                switch ($Value) {
+                switch ((int) $Value) {
                     case 0:
                         $Result = $this->MoveLeftSpeedTime($Speed, $Time);
                         break;
@@ -921,7 +921,7 @@ class ONVIFMediaStream extends ONVIFModuleBase
                 return;
             case 'ZOOM':
                 $Result = false;
-                switch ($Value) {
+                switch ((int) $Value) {
                     case 0:
                         $Result = $this->ZoomFarSpeedTime($Speed, $Time);
                         break;
@@ -938,7 +938,7 @@ class ONVIFMediaStream extends ONVIFModuleBase
                         return;
                 }
                 if ($Result) {
-                    $this->SetValueInteger('ZOOM', $Value);
+                    $this->SetValueInteger('ZOOM', (int) $Value);
                 }
                 return;
         }

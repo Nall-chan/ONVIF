@@ -5,6 +5,7 @@ declare(strict_types=1);
 eval('declare(strict_types=1);namespace ONVIFDiscovery {?>' . file_get_contents(__DIR__ . '/../libs/helper/DebugHelper.php') . '}');
 eval('declare(strict_types=1);namespace ONVIFDiscovery {?>' . file_get_contents(__DIR__ . '/../libs/helper/BufferHelper.php') . '}');
 eval('declare(strict_types=1);namespace ONVIFDiscovery {?>' . file_get_contents(__DIR__ . '/../libs/helper/SemaphoreHelper.php') . '}');
+require_once dirname(__DIR__) . '/libs/wsdl.php';
 require_once dirname(__DIR__) . '/libs/ONVIF.inc.php';
 
 /**
@@ -132,7 +133,7 @@ class ONVIFDiscovery extends IPSModuleStrict
             $IO = IPS_GetInstance($InstanceIDConfigurator)['ConnectionID'];
             if ($IO > 0) {
                 $DevicesAddress[$InstanceIDConfigurator] = str_replace('/onvif/device_service', '', IPS_GetProperty($IO, 'Address'));
-                $DevicesAddress[$InstanceIDConfigurator] = str_replace(':80','',$DevicesAddress[$InstanceIDConfigurator]);
+                $DevicesAddress[$InstanceIDConfigurator] = str_replace(':80', '', $DevicesAddress[$InstanceIDConfigurator]);
             }
         }
         $Devices = $this->Devices;
