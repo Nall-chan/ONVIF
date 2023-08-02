@@ -29,7 +29,7 @@ Stellt die Verbindung zu einem ONVIF-Gerät her.
 
 ## 1. Funktionsumfang
 
-* Interface für die Kommunikation mit einem ONVIF Profil S kompatiblen Gerät.  
+* Interface für die Kommunikation mit einem ONVIF Profil S und/oder Profil T kompatiblen Gerät.  
 * Ereignisverwaltung für Geräte welche Events unterstützen.  
 
 ## 2. Voraussetzungen
