@@ -19,6 +19,7 @@ require_once dirname(__DIR__) . '/libs/ONVIF.inc.php';
  * @property bool $WaitForFirstEvent
  * @property \ONVIF\EventHandler $usedEventHandler
  * @property \ONVIF\Profile $Profile
+ * @property string $TerminationTime
  * @property array $Warnings
  * @method void RegisterAttributeArray(string $name, mixed $Value, int $Size = 0)
  * @method mixed ReadAttributeArray(string $name)
@@ -50,6 +51,11 @@ class ONVIFIO extends IPSModuleStrict
         $this->RegisterPropertyString('WebHookIP', '');
         $this->RegisterPropertyBoolean('WebHookHTTPS', false);
         $this->RegisterPropertyInteger('WebHookPort', 3777);
+        $this->RegisterPropertyInteger('SubscribeEventTimeout', 5);
+        $this->RegisterPropertyInteger('SubscribeInitialTerminationTime', 1);
+        $this->RegisterPropertyInteger('PullPointInitialTerminationTime', 1);
+        $this->RegisterPropertyInteger('PullPointTimeout', 10);
+        $this->RegisterPropertyInteger('MessageLimit', 32);
         $this->RegisterAttributeArray('VideoSources', []);
         $this->RegisterAttributeArray('AudioSources', []);
         $this->RegisterAttributeArray('VideoSourcesJPEG', []);
@@ -75,7 +81,6 @@ class ONVIFIO extends IPSModuleStrict
         $this->RegisterAttributeString('SubscriptionId', '');
         $this->RegisterAttributeInteger('CapabilitiesVersion', 0);
         $this->RegisterTimer('RenewSubscription', 0, 'IPS_RequestAction(' . $this->InstanceID . ',"Renew",true);');
-        //$this->RegisterTimer('PullMessages', 0, 'IPS_RequestAction(' . $this->InstanceID . ',"PullMessages",true);');
         $this->Host = '';
         $this->MyIP = '';
         $this->MyPort = 3777;
@@ -83,6 +88,7 @@ class ONVIFIO extends IPSModuleStrict
         $this->isSubscribed = false;
         $this->Profile = new \ONVIF\Profile();
         $this->usedEventHandler = new \ONVIF\EventHandler();
+        $this->TerminationTime = 'PT1M0S';
         $this->Warnings = [];
         $this->WaitForFirstEvent = false;
         if (IPS_GetKernelRunlevel() == KR_READY) {
@@ -129,7 +135,6 @@ class ONVIFIO extends IPSModuleStrict
     public function ApplyChanges(): void
     {
         $this->SetTimerInterval('RenewSubscription', 0);
-        //$this->SetTimerInterval('PullMessages', 0);
         if ($this->GetStatus() == IS_ACTIVE) { // block childs
             $this->SetStatus(IS_INACTIVE);
         }
@@ -593,14 +598,13 @@ class ONVIFIO extends IPSModuleStrict
                 // No break. Add additional comment above this line if intentional
             case 'CreatePullPointSubscription':
                 if ($this->CreatePullPointSubscription()) {
-                    $this->SetSynchronizationPoint();
                     $this->UpdateFormField('DeviceData', 'items', json_encode($this->GetDeviceDataForForm()));
                     $this->UpdateFormField('DeviceDataPanel', 'visible', true);
                     $this->UpdateFormField('DeviceDataPanel', 'expanded', true);
                     $this->UpdateFormField('Events', 'visible', true);
+                    // Start PullMessages loop
+                    IPS_RunScriptText('IPS_RequestAction(' . $this->InstanceID . ',"PullMessages",true);');
                 }
-                // Start PullMessages loop
-                IPS_RunScriptText('IPS_RequestAction(' . $this->InstanceID . ',"PullMessages",true);');
                 return;
             case 'PullMessages':
                 $this->PullMessages();
@@ -631,6 +635,26 @@ class ONVIFIO extends IPSModuleStrict
             case'KernelReady':
                 $this->KernelReady();
                 return;
+            case 'EventHandler':
+                switch ((int) $Value) {
+                    case \ONVIF\EventHandler::None:
+                        $this->UpdateFormField('SubscribeExpansionPanel', 'visible', false);
+                        $this->UpdateFormField('PullPointExpansionPanel', 'visible', false);
+                        break;
+                    case \ONVIF\EventHandler::Subscribe:
+                        $this->UpdateFormField('SubscribeExpansionPanel', 'visible', true);
+                        $this->UpdateFormField('PullPointExpansionPanel', 'visible', false);
+                        break;
+                    case \ONVIF\EventHandler::PullPoint:
+                        $this->UpdateFormField('SubscribeExpansionPanel', 'visible', false);
+                        $this->UpdateFormField('PullPointExpansionPanel', 'visible', true);
+                        break;
+                    case \ONVIF\EventHandler::Automatic:
+                        $this->UpdateFormField('SubscribeExpansionPanel', 'visible', true);
+                        $this->UpdateFormField('PullPointExpansionPanel', 'visible', true);
+                        break;
+                }
+                return;
         }
     }
     public function GetConfigurationForm(): string
@@ -639,14 +663,30 @@ class ONVIFIO extends IPSModuleStrict
         if ($this->GetStatus() == IS_CREATING) {
             return json_encode($Form);
         }
-        if ($this->GetStatus() == IS_ACTIVE) {
-            if ($this->Profile->Profile == \ONVIF\Profile::T) {
+        $EventHandler = $this->ReadPropertyInteger('EventHandler');
+        switch ($EventHandler) {
+            case \ONVIF\EventHandler::None:
                 $Form['elements'][4]['visible'] = false;
-            }
+                $Form['elements'][5]['visible'] = false;
+                break;
+            case \ONVIF\EventHandler::Subscribe:
+                $Form['elements'][4]['visible'] = true;
+                $Form['elements'][5]['visible'] = false;
+                break;
+            case \ONVIF\EventHandler::PullPoint:
+                $Form['elements'][4]['visible'] = false;
+                $Form['elements'][5]['visible'] = true;
+                break;
+            case \ONVIF\EventHandler::Automatic:
+                $Form['elements'][4]['visible'] = true;
+                $Form['elements'][5]['visible'] = true;
+                break;
+        }
+        if ($this->GetStatus() == IS_ACTIVE) {
             $Form['actions'][1]['items'][0]['items'] = $this->GetDeviceDataForForm();
             $SubscriptionReference = $this->ReadAttributeString('SubscriptionReference');
             if ($SubscriptionReference == '') {
-                $SubscriptionReference = $this->Translate('This device not support events.');
+                $SubscriptionReference = $this->Translate('This device not support events or they are disabled.');
                 $Form['actions'][4]['visible'] = false;
             }
             $Form['actions'][3]['items'][1]['caption'] = $SubscriptionReference;
@@ -837,26 +877,35 @@ class ONVIFIO extends IPSModuleStrict
         if ($XAddr[\ONVIF\NS::Event] == '') {
             return false;
         }
+        $PullPointInitialTerminationTime = $this->ReadPropertyInteger('PullPointInitialTerminationTime');
+        $AllowedEventHandler = $this->ReadPropertyInteger('EventHandler');
+        $this->lock('EventHandler');
         $Action = 'http://www.onvif.org/ver10/events/wsdl/EventPortType/CreatePullPointSubscriptionRequest';
-        $Header[] = new SoapHeader(\ONVIF\NS::Addressing, 'Action', new SoapVar($Action, XSD_ANYURI, '', \ONVIF\NS::Addressing), true);
-        $Header[] = new SoapHeader(\ONVIF\NS::Addressing, 'To', new SoapVar($this->Host . $XAddr[\ONVIF\NS::Event], XSD_ANYURI, '', \ONVIF\NS::Addressing), true);
-        $Address[] = new SoapVar(\ONVIF\NS::Addressing . '/anonymous', XSD_ANYURI, '', \ONVIF\NS::Addressing, 'Address', \ONVIF\NS::Addressing);
-        $Header[] = new SoapHeader(\ONVIF\NS::Addressing, 'ReplyTo', new SoapVar($Address, SOAP_ENC_OBJECT, '', \ONVIF\NS::Addressing));
-        $Header[] = new SoapHeader(\ONVIF\NS::Addressing, 'MessageID', new SoapVar(self::generateMessageID(), XSD_ANYURI, '', \ONVIF\NS::Addressing));
+        $Header = $this->GenerateSOAPHeader($Action, $this->Host . $XAddr[\ONVIF\NS::Event]);
         $empty = '';
         $Params = [
-            'InitialTerminationTime' => 'PT60S'
+            'InitialTerminationTime' => 'PT' . (string) $PullPointInitialTerminationTime . 'M'
         ];
         $CreatePullPointResult = $this->SendData($XAddr[\ONVIF\NS::Event], \ONVIF\WSDL::Event, 'CreatePullPointSubscription', true, $Params, $empty, $Header);
         if (is_a($CreatePullPointResult, 'SoapFault')) {
-            $this->SetStatus(IS_EBASE + 3);
+            $this->unlock('EventHandler');
+            if ($AllowedEventHandler == \ONVIF\EventHandler::Automatic) {
+                $this->SetStatus(IS_EBASE + 4);
+            } else {
+                $this->SetStatus(IS_EBASE + 3);
+            }
             $this->LogMessage($this->Translate('Connection lost'), KL_ERROR);
             /** @var SoapFault $CreatePullPointResult */
             $this->ShowLastError($CreatePullPointResult->getMessage());
             return false;
         }
         if (!is_object($CreatePullPointResult)) {
-            $this->SetStatus(IS_EBASE + 3);
+            $this->unlock('EventHandler');
+            if ($AllowedEventHandler == \ONVIF\EventHandler::Automatic) {
+                $this->SetStatus(IS_EBASE + 4);
+            } else {
+                $this->SetStatus(IS_EBASE + 3);
+            }
             $this->LogMessage($this->Translate('Connection lost'), KL_ERROR);
             $this->ShowLastError('No Response');
             return false;
@@ -884,42 +933,39 @@ class ONVIFIO extends IPSModuleStrict
         }
         $this->isSubscribed = true;
         $this->usedEventHandler = new \ONVIF\EventHandler(\ONVIF\EventHandler::PullPoint);
-        $this->SetTimerInterval('RenewSubscription', 55 * 1000);
-        //if ($this->GetStatus() != IS_ACTIVE) {
+        $this->SetRenewInterval($CreatePullPointResult);
+        $this->SetSynchronizationPoint();
+        $this->unlock('EventHandler');
         $this->LogMessage($this->Translate('Interface connected'), KL_MESSAGE);
         $this->SetStatus(IS_ACTIVE);
-        //}
         return true;
     }
-    protected function PullMessages(): bool
+    protected function PullMessages(): void
     {
-        //$this->SetTimerInterval('PullMessages', 0);
         if (!$this->isSubscribed) {
             // Exit PullMessages loop
-            return true;
+            return;
         }
         $SubscriptionReference = $this->ReadAttributeString('SubscriptionReference');
         if ($SubscriptionReference == '') {
             $this->SendDebug('ERROR PullMessages', 'No SubscriptionReference', 0);
             $this->LogMessage($this->Translate('Call PullMessages with no SubscriptionReference'), KL_ERROR);
-            return $this->CreatePullPointSubscription();
+            $this->SetStatus(IS_EBASE + 3);
+            $this->LogMessage($this->Translate('Connection lost'), KL_ERROR);
+            return;
         }
+        $Timeout = $this->ReadPropertyInteger('PullPointTimeout');
         $Action = 'http://www.onvif.org/ver10/events/wsdl/PullPointSubscription/PullMessagesRequest';
-        $Header[] = new SoapHeader(\ONVIF\NS::Addressing, 'Action', new SoapVar($Action, XSD_ANYURI, '', \ONVIF\NS::Addressing), true);
-        $Header[] = new SoapHeader(\ONVIF\NS::Addressing, 'To', new SoapVar($SubscriptionReference, XSD_ANYURI, '', \ONVIF\NS::Addressing), true);
-        $Address[] = new SoapVar(\ONVIF\NS::Addressing . '/anonymous', XSD_ANYURI, '', \ONVIF\NS::Addressing, 'Address', \ONVIF\NS::Addressing);
-        $Header[] = new SoapHeader(\ONVIF\NS::Addressing, 'ReplyTo', new SoapVar($Address, SOAP_ENC_OBJECT, '', \ONVIF\NS::Addressing));
-        $Header[] = new SoapHeader(\ONVIF\NS::Addressing, 'MessageID', new SoapVar(self::generateMessageID(), XSD_ANYURI, '', \ONVIF\NS::Addressing));
+        $Header = $this->GenerateSOAPHeader($Action, $SubscriptionReference);
         $Params = [
-            'Timeout'     => 'PT10S',
-            'MessageLimit'=> 32
+            'Timeout'     => 'PT' . (string) $Timeout . 'S',
+            'MessageLimit'=> $this->ReadPropertyInteger('MessageLimit')
         ];
         $Response = '';
+        $ResponseTime = time() + $Timeout;
         $PullMessagesResult = $this->SendData($SubscriptionReference, \ONVIF\WSDL::Event, 'PullMessages', true, $Params, $Response, $Header, 15);
         if ($Response) {
             if (is_a($PullMessagesResult, 'SoapFault')) {
-                //$this->SetTimerInterval('PullMessages', 0);
-                //return $this->CreatePullPointSubscription();
                 if ($this->isSubscribed) {
                     /** @var SoapFault $PullMessagesResult */
                     $this->SendDebug('ERROR PullMessages', 'No Response', 0);
@@ -927,19 +973,18 @@ class ONVIFIO extends IPSModuleStrict
                     $this->SetStatus(IS_EBASE + 3);
                     $this->isSubscribed = false;
                 }
-                return false;
+                return;
             }
         }
-        /*if (!is_object($PullMessagesResult)) {
-            //$this->SetTimerInterval('PullMessages', 0);
-            $this->SendDebug('ERROR PullMessages', 'No Response', 0);
-            $this->LogMessage($this->Translate('Error PullMessages with no Response'), KL_ERROR);
-            $this->SetStatus(IS_EBASE + 3);
-            $this->isSubscribed = false;
-            return false;
-        }*/
-        //$this->SetTimerInterval('PullMessages', 0);
         if ($this->isSubscribed) {
+            if (is_object($PullMessagesResult)) {
+                if (!property_exists($PullMessagesResult, 'NotificationMessage')) {
+                    if (time() < $ResponseTime) {
+                        $this->LogMessage($this->Translate("Device ignore timeout in PullMessagesRequest!\r\nThis can lead to increased network traffic, CPU load or a slow Symcon.\r\nIf possible, switch to subscribe to avoid this error from the device."), KL_WARNING);
+                        IPS_Sleep(($ResponseTime - time()) * 1000);
+                    }
+                }
+            }
             // Continue PullMessages loop when subscribed
             IPS_RunScriptText('IPS_RequestAction(' . $this->InstanceID . ',"PullMessages",true);');
         }
@@ -948,7 +993,7 @@ class ONVIFIO extends IPSModuleStrict
                 $this->DecodeNotificationMessage($Response);
             }
         }
-        return true;
+        return;
     }
     protected function Subscribe(): bool
     {
@@ -956,19 +1001,16 @@ class ONVIFIO extends IPSModuleStrict
         if ($XAddr[\ONVIF\NS::Event] == '') {
             return false;
         }
+        $SubscribeInitialTerminationTime = $this->ReadPropertyInteger('SubscribeInitialTerminationTime');
         $AllowedEventHandler = $this->ReadPropertyInteger('EventHandler');
         $this->lock('EventHandler');
         $Action = 'http://docs.oasis-open.org/wsn/bw-2/NotificationProducer/SubscribeRequest';
-        $Header[] = new SoapHeader(\ONVIF\NS::Addressing, 'Action', new SoapVar($Action, XSD_ANYURI, '', \ONVIF\NS::Addressing), true);
-        $Header[] = new SoapHeader(\ONVIF\NS::Addressing, 'To', new SoapVar($this->Host . $XAddr[\ONVIF\NS::Event], XSD_ANYURI, '', \ONVIF\NS::Addressing), true);
-        $Address[] = new SoapVar(\ONVIF\NS::Addressing . '/anonymous', XSD_ANYURI, '', \ONVIF\NS::Addressing, 'Address', \ONVIF\NS::Addressing);
-        $Header[] = new SoapHeader(\ONVIF\NS::Addressing, 'ReplyTo', new SoapVar($Address, SOAP_ENC_OBJECT, '', \ONVIF\NS::Addressing));
-        $Header[] = new SoapHeader(\ONVIF\NS::Addressing, 'MessageID', new SoapVar(self::generateMessageID(), XSD_ANYURI, '', \ONVIF\NS::Addressing));
+        $Header = $this->GenerateSOAPHeader($Action, $this->Host . $XAddr[\ONVIF\NS::Event]);
         $Params = [
             'ConsumerReference'      => [
                 'Address' => $this->ReadAttributeString('ConsumerAddress')
             ],
-            'InitialTerminationTime' => 'PT60S'
+            'InitialTerminationTime' => 'PT' . (string) $SubscribeInitialTerminationTime . 'M'
         ];
         $Response = '';
         $this->WaitForFirstEvent = true;
@@ -1007,20 +1049,32 @@ class ONVIFIO extends IPSModuleStrict
         }
         $this->isSubscribed = true;
         $this->usedEventHandler = new \ONVIF\EventHandler(\ONVIF\EventHandler::Subscribe);
-        $this->SetTimerInterval('RenewSubscription', 55 * 1000);
+        $this->SetRenewInterval($SubscribeResult);
         $this->SetSynchronizationPoint();
         $this->unlock('EventHandler');
-        for ($i = 0; $i < 500; $i++) {
-            if (!$this->WaitForFirstEvent) {
-                $this->UpdateFormField('DeviceData', 'items', json_encode($this->GetDeviceDataForForm()));
-                $this->UpdateFormField('DeviceDataPanel', 'visible', true);
-                $this->UpdateFormField('DeviceDataPanel', 'expanded', true);
-                $this->UpdateFormField('Events', 'visible', true);
-                $this->LogMessage($this->Translate('Interface connected'), KL_MESSAGE);
-                $this->SetStatus(IS_ACTIVE);
-                return true;
+        $EventTimeout = $this->ReadPropertyInteger('SubscribeEventTimeout') * 1000;
+        if ($EventTimeout) {
+            for ($i = 0; $i < $EventTimeout; $i = $i + 50) {
+                if (!$this->WaitForFirstEvent) {
+                    $this->UpdateFormField('DeviceData', 'items', json_encode($this->GetDeviceDataForForm()));
+                    $this->UpdateFormField('DeviceDataPanel', 'visible', true);
+                    $this->UpdateFormField('DeviceDataPanel', 'expanded', true);
+                    $this->UpdateFormField('Events', 'visible', true);
+                    $this->LogMessage($this->Translate('Interface connected'), KL_MESSAGE);
+                    $this->SetStatus(IS_ACTIVE);
+                    return true;
+                }
+                IPS_Sleep(50);
             }
-            IPS_Sleep(8);
+        } else {
+            $this->WaitForFirstEvent = false;
+            $this->UpdateFormField('DeviceData', 'items', json_encode($this->GetDeviceDataForForm()));
+            $this->UpdateFormField('DeviceDataPanel', 'visible', true);
+            $this->UpdateFormField('DeviceDataPanel', 'expanded', true);
+            $this->UpdateFormField('Events', 'visible', true);
+            $this->LogMessage($this->Translate('Interface connected'), KL_MESSAGE);
+            $this->SetStatus(IS_ACTIVE);
+            return true;
         }
         $this->Unsubscribe();
         $this->WaitForFirstEvent = false;
@@ -1039,11 +1093,7 @@ class ONVIFIO extends IPSModuleStrict
             return false;
         }
         $Action = 'http://www.onvif.org/ver10/events/wsdl/PullPointSubscription/SetSynchronizationPointRequest';
-        $Header[] = new SoapHeader(\ONVIF\NS::Addressing, 'Action', new SoapVar($Action, XSD_ANYURI, '', \ONVIF\NS::Addressing), true);
-        $Header[] = new SoapHeader(\ONVIF\NS::Addressing, 'To', new SoapVar($SubscriptionReference, XSD_ANYURI, '', \ONVIF\NS::Addressing), true);
-        $Address[] = new SoapVar(\ONVIF\NS::Addressing . '/anonymous', XSD_ANYURI, '', \ONVIF\NS::Addressing, 'Address', \ONVIF\NS::Addressing);
-        $Header[] = new SoapHeader(\ONVIF\NS::Addressing, 'ReplyTo', new SoapVar($Address, SOAP_ENC_OBJECT, '', \ONVIF\NS::Addressing));
-        $Header[] = new SoapHeader(\ONVIF\NS::Addressing, 'MessageID', new SoapVar(self::generateMessageID(), XSD_ANYURI, '', \ONVIF\NS::Addressing));
+        $Header = $this->GenerateSOAPHeader($Action, $SubscriptionReference);
         $SubscriptionId = $this->ReadAttributeString('SubscriptionId');
         if ($SubscriptionId != '') {
             $xml = new DOMDocument();
@@ -1063,6 +1113,7 @@ class ONVIFIO extends IPSModuleStrict
     }
     protected function Renew(): bool
     {
+        $this->SetTimerInterval('RenewSubscription', 0);
         if (!$this->isSubscribed) {
             return true;
         }
@@ -1075,11 +1126,7 @@ class ONVIFIO extends IPSModuleStrict
             return false;
         }
         $Action = 'http://docs.oasis-open.org/wsn/bw-2/SubscriptionManager/RenewRequest';
-        $Header[] = new SoapHeader(\ONVIF\NS::Addressing, 'Action', new SoapVar($Action, XSD_ANYURI, '', \ONVIF\NS::Addressing), true);
-        $Header[] = new SoapHeader(\ONVIF\NS::Addressing, 'To', new SoapVar($SubscriptionReference, XSD_ANYURI, '', \ONVIF\NS::Addressing), true);
-        $Address[] = new SoapVar(\ONVIF\NS::Addressing . '/anonymous', XSD_ANYURI, '', \ONVIF\NS::Addressing, 'Address', \ONVIF\NS::Addressing);
-        $Header[] = new SoapHeader(\ONVIF\NS::Addressing, 'ReplyTo', new SoapVar($Address, SOAP_ENC_OBJECT, '', \ONVIF\NS::Addressing));
-        $Header[] = new SoapHeader(\ONVIF\NS::Addressing, 'MessageID', new SoapVar(self::generateMessageID(), XSD_ANYURI, '', \ONVIF\NS::Addressing));
+        $Header = $this->GenerateSOAPHeader($Action, $SubscriptionReference);
         $SubscriptionId = $this->ReadAttributeString('SubscriptionId');
         if ($SubscriptionId != '') {
             $xml = new DOMDocument();
@@ -1089,7 +1136,7 @@ class ONVIFIO extends IPSModuleStrict
             $Header[] = new SoapHeader($ns, $name, new SoapVar($SubscriptionId, XSD_ANYXML), true);
         }
         $Params = [
-            'TerminationTime' => 'PT1M'
+            'TerminationTime' => $this->TerminationTime
         ];
         $empty = '';
         $RenewResult = $this->SendData($SubscriptionReference, \ONVIF\WSDL::Event, 'Renew', true, $Params, $empty, $Header);
@@ -1098,7 +1145,6 @@ class ONVIFIO extends IPSModuleStrict
             $this->LogMessage($this->Translate('Error Renew Subscription with:') . $RenewResult->getMessage(), KL_ERROR);
             $this->SetStatus(IS_EBASE + 3);
             $this->isSubscribed = false;
-            $this->SetTimerInterval('RenewSubscription', 0);
             $this->unlock('EventHandler');
             return false;
         }
@@ -1107,10 +1153,10 @@ class ONVIFIO extends IPSModuleStrict
             $this->LogMessage($this->Translate('Error Renew with no Response'), KL_ERROR);
             $this->SetStatus(IS_EBASE + 3);
             $this->isSubscribed = false;
-            $this->SetTimerInterval('RenewSubscription', 0);
             $this->unlock('EventHandler');
             return false;
         }
+        $this->SetRenewInterval($RenewResult);
         $this->unlock('EventHandler');
         return true;
     }
@@ -1122,7 +1168,6 @@ class ONVIFIO extends IPSModuleStrict
         }
         $this->lock('EventHandler');
         $this->SetTimerInterval('RenewSubscription', 0);
-        //$this->SetTimerInterval('PullMessages', 0);
         $this->isSubscribed = false;
         $this->UpdateFormField('SubscriptionReference', 'caption', '');
         $this->UpdateFormField('SubscriptionReferenceRow', 'visible', false);
@@ -1137,11 +1182,7 @@ class ONVIFIO extends IPSModuleStrict
             return false;
         }
         $Action = 'http://docs.oasis-open.org/wsn/bw-2/SubscriptionManager/UnsubscribeRequest';
-        $Header[] = new SoapHeader(\ONVIF\NS::Addressing, 'Action', new SoapVar($Action, XSD_ANYURI, '', \ONVIF\NS::Addressing), true);
-        $Header[] = new SoapHeader(\ONVIF\NS::Addressing, 'To', new SoapVar($SubscriptionReference, XSD_ANYURI, '', \ONVIF\NS::Addressing), true);
-        $Address[] = new SoapVar(\ONVIF\NS::Addressing . '/anonymous', XSD_ANYURI, '', \ONVIF\NS::Addressing, 'Address', \ONVIF\NS::Addressing);
-        $Header[] = new SoapHeader(\ONVIF\NS::Addressing, 'ReplyTo', new SoapVar($Address, SOAP_ENC_OBJECT, '', \ONVIF\NS::Addressing));
-        $Header[] = new SoapHeader(\ONVIF\NS::Addressing, 'MessageID', new SoapVar(self::generateMessageID(), XSD_ANYURI, '', \ONVIF\NS::Addressing));
+        $Header = $this->GenerateSOAPHeader($Action, $SubscriptionReference);
         if ($SubscriptionId != '') {
             $xml = new DOMDocument();
             $xml->loadXML($SubscriptionId);
@@ -1958,5 +1999,25 @@ class ONVIFIO extends IPSModuleStrict
             return $MyNS . ':' . $Parts[1];
         }
         return $Value;
+    }
+    private function GenerateSOAPHeader(string $Action, string $Url): array
+    {
+        $Header[] = new SoapHeader(\ONVIF\NS::Addressing, 'Action', new SoapVar($Action, XSD_ANYURI, '', \ONVIF\NS::Addressing), true);
+        $Header[] = new SoapHeader(\ONVIF\NS::Addressing, 'To', new SoapVar($Url, XSD_ANYURI, '', \ONVIF\NS::Addressing), true);
+        $Address[] = new SoapVar(\ONVIF\NS::Addressing . '/anonymous', XSD_ANYURI, '', \ONVIF\NS::Addressing, 'Address', \ONVIF\NS::Addressing);
+        $Header[] = new SoapHeader(\ONVIF\NS::Addressing, 'ReplyTo', new SoapVar($Address, SOAP_ENC_OBJECT, '', \ONVIF\NS::Addressing));
+        $Header[] = new SoapHeader(\ONVIF\NS::Addressing, 'MessageID', new SoapVar(self::generateMessageID(), XSD_ANYURI, '', \ONVIF\NS::Addressing));
+        return $Header;
+    }
+    private function SetRenewInterval(object $Result): void
+    {
+        $CurrentTime = DateTimeImmutable::createFromFormat(DATE_W3C, $Result->CurrentTime);
+        $TerminationTime = DateTimeImmutable::createFromFormat(DATE_W3C, $Result->TerminationTime);
+        $TimeDiff = $CurrentTime->diff($TerminationTime);
+        $this->TerminationTime = $TimeDiff->format('PT%iM%sS');
+        $this->SendDebug('TerminationTime', $this->TerminationTime, 0);
+        $Interval = $TerminationTime->getTimestamp() - $CurrentTime->getTimestamp() - 5;
+        $this->SendDebug('Renew Interval', $Interval, 0);
+        $this->SetTimerInterval('RenewSubscription', $Interval * 1000);
     }
 }

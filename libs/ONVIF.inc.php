@@ -4,16 +4,13 @@ declare(strict_types=1);
 
 namespace ONVIF;
 
-/**
- * @property-write string __last_request_headers
- * @property-write string __last_response_headers
- *
- */
 class ONVIFsoapClient extends \SoapClient
 {
     private string $User;
     private string $Pass;
     private array $Options;
+    private ?string $__last_request_headers;
+    private ?string $__last_response_headers;
 
     public function __construct(string $wsdl, array $options = [])
     {
@@ -30,6 +27,17 @@ class ONVIFsoapClient extends \SoapClient
         }
         $this->Options = $options;
     }
+
+    public function __getLastRequestHeaders(): ?string
+    {
+        return $this->__last_request_headers;
+    }
+
+    public function __getLastResponseHeaders(): ?string
+    {
+        return $this->__last_response_headers;
+    }
+
     public function __doRequest(string $request, string $location, string $action, int $version, bool $one_way = false): ?string
     {
         $headers = [
@@ -57,7 +65,6 @@ class ONVIFsoapClient extends \SoapClient
             curl_setopt($ch, CURLOPT_PASSWORD, $this->Pass);
         }
         $response = curl_exec($ch);
-        //$this->CurlInfo = curl_getinfo($ch);
         $http_code = curl_getinfo($ch)['http_code'];
         if ($http_code != 0) {
             $this->__last_request_headers = curl_getinfo($ch)['request_header'];

@@ -1,6 +1,6 @@
 [![SDK](https://img.shields.io/badge/Symcon-PHPModul-red.svg)](https://www.symcon.de/service/dokumentation/entwicklerbereich/sdk-tools/sdk-php/)
-[![Version](https://img.shields.io/badge/Modul%20Version-2.00-blue.svg)](https://community.symcon.de/t/modul-onvif-profil-s-fuer-ip-kameras-und-encoder/52036)
-[![Version](https://img.shields.io/badge/Symcon%20Version-6.1%20%3E-green.svg)](https://www.symcon.de/service/dokumentation/installation/migrationen/v60-v61-q1-2022/)  
+[![Version](https://img.shields.io/badge/Modul%20Version-2.10-blue.svg)](https://community.symcon.de/t/modul-onvif-profil-s-fuer-ip-kameras-und-encoder/52036)
+[![Version](https://img.shields.io/badge/Symcon%20Version-7.0%20%3E-green.svg)](https://www.symcon.de/service/dokumentation/installation/migrationen/v60-v61-q1-2022/)  
 [![License](https://img.shields.io/badge/License-CC%20BY--NC--SA%204.0-green.svg)](https://creativecommons.org/licenses/by-nc-sa/4.0/)
 [![Check Style](https://github.com/Nall-chan/ONVIF/workflows/Check%20Style/badge.svg)](https://github.com/Nall-chan/ONVIF/actions)
 [![Run Tests](https://github.com/Nall-chan/ONVIF/workflows/Run%20Tests/badge.svg)](https://github.com/Nall-chan/ONVIF/actions)  
@@ -34,8 +34,8 @@ Beschreibung des Moduls.
 
 ## 2. Voraussetzungen
 
-* IP-Symcon ab Version 6.1
-* Kameras oder Video-Encoder mit ONVIF Profil S Unterstützung.  
+* IP-Symcon ab Version 7.0
+* Kameras oder Video-Encoder mit ONVIF Profil S und/oder Profil T Unterstützung.  
 
 ## 3. Software-Installation
 
@@ -49,8 +49,10 @@ Beschreibung des Moduls.
 
  Der Konfigurator ermöglicht es folgende Instanzen einfach zu erstellen und fertig zu konfigurieren:
 
-- ONVIF Media Stream ([Dokumentation](../ONVIF%20Media%20Stream/README.md))
+- ONVIF Media Stream ([Dokumentation](../ONVIF%20Media%20Stream/README.md))  
+  - Pro Videoquelle wird erneut ein Stream zum erstellen angeboten, wie es noch ungenutzte Profile des Kanals gibt. (nach aktualisieren der Ansicht)  
 - ONVIF Image Grabber ([Dokumentation](../ONVIF%20Image%20Grabber/README.md))
+  - Pro Videoquelle wird erneut ein Stream zum erstellen angeboten, wie es noch ungenutzte Profile des Kanals gibt. (nach aktualisieren der Ansicht)  
 - ONVIF Digital Input ([Dokumentation](../ONVIF%20Digital%20Input/README.md))
 - ONVIF Digital Output ([Dokumentation](../ONVIF%20Digital%20Output/README.md))
 - ONVIF Events ([Dokumentation](../ONVIF%20Events/README.md))

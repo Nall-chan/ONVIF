@@ -49,6 +49,7 @@
             "type": "Select",
             "name": "EventHandler",
             "caption": "Event handling",
+            "onChange": "IPS_RequestAction($id,'EventHandler',$EventHandler);",
             "options": [
                 {
                     "caption": "never",
@@ -70,8 +71,8 @@
         },
         {
             "type": "ExpansionPanel",
-            "name": "WebHookExpansionPanel",
-            "caption": "Expert settings event hook",
+            "name": "SubscribeExpansionPanel",
+            "caption": "Expert settings (event subscribe)",
             "items": [
                 {
                     "type": "RowLayout",
@@ -95,6 +96,58 @@
                             "caption": "use https"
                         }
                     ]
+                },
+                {
+                    "type": "NumberSpinner",
+                    "name": "SubscribeInitialTerminationTime",
+                    "caption": "Initial Termination Time",
+                    "suffix": "minute(s)",
+                    "width": "250px",
+                    "minimum": 1,
+                    "maximum": 60
+                },
+                {
+                    "type": "NumberSpinner",
+                    "name": "SubscribeEventTimeout",
+                    "caption": "Timeout for first event",
+                    "suffix": "second(s)",
+                    "width": "250px",
+                    "minimum": 0,
+                    "maximum": 30
+                }
+            ]
+        },
+        {
+            "type": "ExpansionPanel",
+            "name": "PullPointExpansionPanel",
+            "caption": "Expert settings (event pull)",
+            "items": [
+                {
+                    "type": "NumberSpinner",
+                    "name": "PullPointInitialTerminationTime",
+                    "caption": "Initial Termination Time",
+                    "suffix": "minute(s)",
+                    "width": "250px",
+                    "minimum": 1,
+                    "maximum": 60
+                },
+                {
+                    "type": "NumberSpinner",
+                    "name": "PullPointTimeout",
+                    "caption": "Pull request wait time",
+                    "suffix": "second(s)",
+                    "width": "250px",
+                    "minimum": 5,
+                    "maximum": 30
+                },
+                {
+                    "type": "NumberSpinner",
+                    "name": "MessageLimit",
+                    "caption": "Message limit per request",
+                    "suffix": "Events",
+                    "width": "250px",
+                    "minimum": 8,
+                    "maximum": 256
                 }
             ]
         }
