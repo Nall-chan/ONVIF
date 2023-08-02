@@ -6,10 +6,27 @@
             "caption": "Open"
         },
         {
-            "name": "Address",
-            "type": "ValidationTextBox",
-            "caption": "Address",
-            "width": "500px"
+            "type": "RowLayout",
+            "items": [
+                {
+                    "name": "Address",
+                    "type": "ValidationTextBox",
+                    "caption": "Address",
+                    "width": "500px",
+                    "validate": "^((http:\\/\\/.*)?(https:\\/\\/.*)?)$"
+                },
+                {
+                    "type": "Label",
+                    "width": "50px",
+                    "caption": ""
+                },
+                {
+                    "type": "Button",
+                    "caption": "Open in browser",
+                    "width": "200px",
+                    "onClick": "if ($Address != '') {list($Protocol, $Host) = explode(':',$Address); echo $Protocol.':'.$Host;}"
+                }
+            ]
         },
         {
             "type": "RowLayout",
@@ -29,9 +46,33 @@
             ]
         },
         {
+            "type": "Select",
+            "name": "EventHandler",
+            "caption": "Event handling",
+            "onChange": "IPS_RequestAction($id,'EventHandler',$EventHandler);",
+            "options": [
+                {
+                    "caption": "never",
+                    "value": 0
+                },
+                {
+                    "caption": "only subscribe",
+                    "value": 1
+                },
+                {
+                    "caption": "only PullPoint",
+                    "value": 2
+                },
+                {
+                    "caption": "automatic",
+                    "value": 3
+                }
+            ]
+        },
+        {
             "type": "ExpansionPanel",
-            "name": "WebHookExpansionPanel",
-            "caption": "Expert settings event hook",
+            "name": "SubscribeExpansionPanel",
+            "caption": "Expert settings (event subscribe)",
             "items": [
                 {
                     "type": "RowLayout",
@@ -55,6 +96,58 @@
                             "caption": "use https"
                         }
                     ]
+                },
+                {
+                    "type": "NumberSpinner",
+                    "name": "SubscribeInitialTerminationTime",
+                    "caption": "Initial Termination Time",
+                    "suffix": "minute(s)",
+                    "width": "250px",
+                    "minimum": 1,
+                    "maximum": 60
+                },
+                {
+                    "type": "NumberSpinner",
+                    "name": "SubscribeEventTimeout",
+                    "caption": "Timeout for first event",
+                    "suffix": "second(s)",
+                    "width": "250px",
+                    "minimum": 0,
+                    "maximum": 30
+                }
+            ]
+        },
+        {
+            "type": "ExpansionPanel",
+            "name": "PullPointExpansionPanel",
+            "caption": "Expert settings (event pull)",
+            "items": [
+                {
+                    "type": "NumberSpinner",
+                    "name": "PullPointInitialTerminationTime",
+                    "caption": "Initial Termination Time",
+                    "suffix": "minute(s)",
+                    "width": "250px",
+                    "minimum": 1,
+                    "maximum": 60
+                },
+                {
+                    "type": "NumberSpinner",
+                    "name": "PullPointTimeout",
+                    "caption": "Pull request wait time",
+                    "suffix": "second(s)",
+                    "width": "250px",
+                    "minimum": 5,
+                    "maximum": 30
+                },
+                {
+                    "type": "NumberSpinner",
+                    "name": "MessageLimit",
+                    "caption": "Message limit per request",
+                    "suffix": "Events",
+                    "width": "250px",
+                    "minimum": 8,
+                    "maximum": 256
                 }
             ]
         }
@@ -286,6 +379,11 @@
             "code": 204,
             "icon": "error",
             "caption": "No events received (check firewall)"
+        },
+        {
+            "code": 205,
+            "icon": "error",
+            "caption": "Wrong event handling configured (Profil T only support PullPoint)"
         }
     ]
 }

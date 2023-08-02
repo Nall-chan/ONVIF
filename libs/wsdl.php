@@ -119,7 +119,7 @@ class EventHandler
     const Subscribe = 1;
     const PullPoint = 2;
     const Automatic = 3;
-    public int $Type;
+    public $Type;
     public function __construct(int $Type = 0)
     {
         $this->Type = $Type;
@@ -130,7 +130,7 @@ class EventHandler
     }
     public function toString(): string
     {
-        switch($this->Type) {
+        switch ($this->Type) {
             case self::Subscribe:
                 return 'Subscription';
             case self::PullPoint:
