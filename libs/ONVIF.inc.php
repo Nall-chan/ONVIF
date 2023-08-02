@@ -4,8 +4,6 @@ declare(strict_types=1);
 
 namespace ONVIF;
 
-require_once __DIR__ . '/wsdl.php';
-
 class ONVIFsoapClient extends \SoapClient
 {
     private $User;
@@ -54,7 +52,6 @@ class ONVIFsoapClient extends \SoapClient
             curl_setopt($ch, CURLOPT_PASSWORD, $this->Pass);
         }
         $response = curl_exec($ch);
-        //$this->CurlInfo = curl_getinfo($ch);
         $http_code = curl_getinfo($ch)['http_code'];
         if ($http_code != 0) {
             $this->__last_request_headers = curl_getinfo($ch)['request_header'];
@@ -78,7 +75,7 @@ class ONVIFsoapClient extends \SoapClient
                 $response = '';
             }
         }
-        if ($http_code > 400) /*&& ($response == ''))*/ {
+        if ($http_code > 400) { /*&& ($response == ''))*/
             throw new \SoapFault('http:' . $http_code, explode("\r\n", $this->__last_response_headers)[0]);
             return '';
         }

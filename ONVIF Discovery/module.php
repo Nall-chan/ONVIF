@@ -5,6 +5,7 @@ declare(strict_types=1);
 eval('declare(strict_types=1);namespace ONVIFDiscovery {?>' . file_get_contents(__DIR__ . '/../libs/helper/DebugHelper.php') . '}');
 eval('declare(strict_types=1);namespace ONVIFDiscovery {?>' . file_get_contents(__DIR__ . '/../libs/helper/BufferHelper.php') . '}');
 eval('declare(strict_types=1);namespace ONVIFDiscovery {?>' . file_get_contents(__DIR__ . '/../libs/helper/SemaphoreHelper.php') . '}');
+require_once dirname(__DIR__) . '/libs/wsdl.php';
 require_once dirname(__DIR__) . '/libs/ONVIF.inc.php';
 
 /**
@@ -14,6 +15,9 @@ require_once dirname(__DIR__) . '/libs/ONVIF.inc.php';
  * @property int $DevicesProcessed
  * @property bool $DiscoveryIsRunning
  * @property bool $EnableErrorPopup
+ * @method bool lock(string $ident)
+ * @method void unlock(string $ident)
+ * @method bool SendDebug(string $Message, mixed $Data, int $Format)
  */
 class ONVIFDiscovery extends IPSModule
 {
