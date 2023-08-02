@@ -133,7 +133,9 @@ class ONVIFDiscovery extends IPSModule
             $IO = IPS_GetInstance($InstanceIDConfigurator)['ConnectionID'];
             if ($IO > 0) {
                 $DevicesAddress[$InstanceIDConfigurator] = str_replace('/onvif/device_service', '', IPS_GetProperty($IO, 'Address'));
-                $DevicesAddress[$InstanceIDConfigurator] = str_replace(':80', '', $DevicesAddress[$InstanceIDConfigurator]);
+                if (strpos($DevicesAddress[$InstanceIDConfigurator], ':80', -3)) {
+                    $DevicesAddress[$InstanceIDConfigurator] = substr($DevicesAddress[$InstanceIDConfigurator], 0, -3);
+                }
             }
         }
         $Devices = $this->Devices;
@@ -452,7 +454,9 @@ class ONVIFDiscovery extends IPSModule
         array_walk($filtermatches, function (&$item)
         {
             $item = str_replace('/onvif/device_service', '', $item);
-            $item = str_replace(':80', '', $item);
+            if (strpos($item, ':80', -3)) {
+                $item = substr($item, 0, -3);
+            }
         });
         return $filtermatches;
     }
