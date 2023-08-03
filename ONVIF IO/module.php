@@ -51,7 +51,7 @@ class ONVIFIO extends IPSModuleStrict
         $this->RegisterPropertyString('WebHookIP', '');
         $this->RegisterPropertyBoolean('WebHookHTTPS', false);
         $this->RegisterPropertyInteger('WebHookPort', 3777);
-        $this->RegisterPropertyInteger('SubscribeEventTimeout', 5);
+        $this->RegisterPropertyInteger('SubscribeEventTimeout', 10);
         $this->RegisterPropertyInteger('SubscribeInitialTerminationTime', 1);
         $this->RegisterPropertyInteger('PullPointInitialTerminationTime', 1);
         $this->RegisterPropertyInteger('PullPointTimeout', 10);
