@@ -51,7 +51,7 @@ class ONVIFIO extends IPSModule
         $this->RegisterPropertyString('WebHookIP', '');
         $this->RegisterPropertyBoolean('WebHookHTTPS', false);
         $this->RegisterPropertyInteger('WebHookPort', 3777);
-        $this->RegisterPropertyInteger('SubscribeEventTimeout', 5);
+        $this->RegisterPropertyInteger('SubscribeEventTimeout', 10);
         $this->RegisterPropertyInteger('SubscribeInitialTerminationTime', 1);
         $this->RegisterPropertyInteger('PullPointInitialTerminationTime', 1);
         $this->RegisterPropertyInteger('PullPointTimeout', 10);
@@ -2014,10 +2014,17 @@ class ONVIFIO extends IPSModule
         $CurrentTime = DateTimeImmutable::createFromFormat(DATE_W3C, $Result->CurrentTime);
         $TerminationTime = DateTimeImmutable::createFromFormat(DATE_W3C, $Result->TerminationTime);
         $TimeDiff = $CurrentTime->diff($TerminationTime);
-        $this->TerminationTime = $TimeDiff->format('PT%iM%sS');
+        $Interval = $TerminationTime->getTimestamp() - $CurrentTime->getTimestamp();
+        if ($Interval < 10) { // Falls Gerät falsche Timestamps liefert ()
+            $this->TerminationTime = 'PT10S';
+            $Interval = 10;
+        } elseif ($Interval == 60) { // 1 Minute ist üblich, aber viele China Böller können kein XML-DateTime, sondern wollen immer PT60S.
+            $this->TerminationTime = 'PT60S';
+        } else {
+            $this->TerminationTime = $TimeDiff->format('PT%iM%sS');
+        }
         $this->SendDebug('TerminationTime', $this->TerminationTime, 0);
-        $Interval = $TerminationTime->getTimestamp() - $CurrentTime->getTimestamp() - 5;
-        $this->SendDebug('Renew Interval', $Interval, 0);
-        $this->SetTimerInterval('RenewSubscription', $Interval * 1000);
+        $this->SendDebug('Renew Interval', $Interval - 5, 0);
+        $this->SetTimerInterval('RenewSubscription', ($Interval - 5) * 1000);
     }
 }

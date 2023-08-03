@@ -141,6 +141,7 @@ Für das Discovery werden Pakete über die Multicast-Adresse `239.255.255.250` a
 ### 2. Changelog
 
 **Version 2.10:** <span style="color:red">**(Dies ist die letzte Version für IPS kleiner Version 7.0)**</span>
+- Discovery Instanz hat bei Geräten mit Port 80xx nicht mehr funktioniert.  
 - Änderungen an der IO-Instanz:
   - Möglichkeit die Geräte-URL im Browser zu öffnen.  
   - Die Art der Ereignisverarbeitung kann eingestellt werden.  
@@ -148,7 +149,6 @@ Für das Discovery werden Pakete über die Multicast-Adresse `239.255.255.250` a
   - Experteneinstellungen für Ereignisse abfragen (PullPoint) hinzugefügt.  
   - Geräteinformationen um Informationen zur Ereignisverarbeitung ergänzt.  
   - Das Intervall zum erneuern der Registrierung für Ereignisse ist nicht mehr fest auf 55 Sekunden eingestellt, sondern wird automatisch durch das Feld `TerminationTime` aus der Antwort der Geräte berechnet.  
-
 
 **Version 2.00:**  
 - Verbindungsaufbau des IO überarbeitet.
