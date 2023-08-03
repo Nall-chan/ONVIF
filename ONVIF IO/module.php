@@ -2014,9 +2014,16 @@ class ONVIFIO extends IPSModuleStrict
         $CurrentTime = DateTimeImmutable::createFromFormat(DATE_W3C, $Result->CurrentTime);
         $TerminationTime = DateTimeImmutable::createFromFormat(DATE_W3C, $Result->TerminationTime);
         $TimeDiff = $CurrentTime->diff($TerminationTime);
-        $this->TerminationTime = $TimeDiff->format('PT%iM%sS');
-        $this->SendDebug('TerminationTime', $this->TerminationTime, 0);
         $Interval = $TerminationTime->getTimestamp() - $CurrentTime->getTimestamp() - 5;
+        if ($Interval < 5) { // Falls Gerät falsche Timestamps liefert ()
+            $this->TerminationTime = 'PT10S';
+            $Interval = 10;
+        } elseif ($Interval == 60) { // 1 Minute ist üblich, aber viele China Böller können kein XML-DateTime, sondern wollen immer PT60S.
+            $this->TerminationTime = 'PT60S';
+        } else {
+            $this->TerminationTime = $TimeDiff->format('PT%iM%sS');
+        }
+        $this->SendDebug('TerminationTime', $this->TerminationTime, 0);
         $this->SendDebug('Renew Interval', $Interval, 0);
         $this->SetTimerInterval('RenewSubscription', $Interval * 1000);
     }

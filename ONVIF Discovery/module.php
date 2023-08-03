@@ -446,11 +446,13 @@ class ONVIFDiscovery extends IPSModuleStrict
                 $matches = array_merge($matches, explode(' ', $addrsNode->nodeValue));
             }
         }
-        $filtermatches = array_filter($matches, function (string $item) use ($ip) {
+        $filtermatches = array_filter($matches, function (string $item) use ($ip)
+        {
             return strpos($item, $ip);
         });
         $filtermatches = array_values($filtermatches);
-        array_walk($filtermatches, function (string &$item) {
+        array_walk($filtermatches, function (string &$item)
+        {
             $item = str_replace('/onvif/device_service', '', $item);
             if (strpos($item, ':80', -3)) {
                 $item = substr($item, 0, -3);
