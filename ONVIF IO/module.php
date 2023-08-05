@@ -221,206 +221,253 @@ class ONVIFIO extends IPSModuleStrict
         $this->unlock('Profile');
         if ($ReloadCapabilities) {
             $this->WriteAttributeInteger('CapabilitiesVersion', 1); // This is Version 1
+            // Variablen vorbelegen:
+            $NbrOfVideoSources = 0;
+            $NbrOfAudioSources = 0;
+            $NbrOfOutputs = 0;
+            $NbrOfInputs = 0;
+            $NbrOfSerialPorts = 0;
+            $RelayOutputs = [];
+            $DigitalInputs = [];
+            $AnalyticsModuleSupport = false;
+            $RuleSupport = false;
+            $WSSubscriptionPolicySupport = false;
+            $WSPullPointSupport = false;
+            $HasRTSPStreaming = false;
+            $HasSnapshotUri = false;
+            if ($this->GetCapabilities()) { // besorgt XAddr und einige Attribute Pflicht für Profil S.
+                $AnalyticsModuleSupport = $this->ReadAttributeBoolean('AnalyticsModuleSupport');
+                $RuleSupport = $this->ReadAttributeBoolean('RuleSupport');
+                $WSSubscriptionPolicySupport = $this->ReadAttributeBoolean('WSSubscriptionPolicySupport');
+                $WSPullPointSupport = $this->ReadAttributeBoolean('WSPullPointSupport');
+                $HasRTSPStreaming = $this->ReadAttributeBoolean('HasRTSPStreaming');
+                $NbrOfVideoSources = $this->ReadAttributeInteger('NbrOfVideoSources');
+                $NbrOfAudioSources = $this->ReadAttributeInteger('NbrOfAudioSources');
+                $NbrOfInputs = $this->ReadAttributeInteger('NbrOfInputs');
+                $NbrOfOutputs = $this->ReadAttributeInteger('NbrOfOutputs');
+            }
+            $XAddr = $this->ReadAttributeArray('XAddr');
+
             // 3.ONVIF Request GetServices
-            $XAddr = $this->GetServices(); // besorgt XAddr, Pflicht bei T, selten bei S unterstützt.
-            if (!$XAddr) {
-                $XAddr = $this->GetCapabilities(); // besorgt XAddr, Pflicht für Profil S.
-                if ($this->Profile->HasProfile(\ONVIF\Profile::T)) { //Profile T ist GetServices Pflicht
-                    $this->Warnings = array_merge($this->Warnings, [$this->Translate('Failed to get services. Device reported ONVIF T scope, but is not compliant!')]);
+            // GetServices besorgt XAddr, Pflicht bei T, selten bei S unterstützt.
+            if (!$this->GetServices() && $this->Profile->HasProfile(\ONVIF\Profile::T)) {
+                $this->Warnings = array_merge($this->Warnings, [$this->Translate('Failed to get services. Device reported ONVIF T scope, but is not compliant!')]);
+            }
+            $XAddr = $this->ReadAttributeArray('XAddr');
+
+            // 4. ONVIF Request GetServiceCapabilities an \ONVIF\WSDL::Management
+            //$this->GetServiceCapabilities($XAddr[\ONVIF\NS::Management], \ONVIF\WSDL::Management); // noch ohne Funktion..
+            // Wenn \ONVIF\WSDL::DeviceIO unterstützt
+            // 4b.ONVIF Request GetServiceCapabilities an \ONVIF\WSDL::DeviceIO
+            if ($XAddr[\ONVIF\NS::DeviceIO]) {
+                $DeviceCapabilities = $this->GetServiceCapabilities($XAddr[\ONVIF\NS::DeviceIO], \ONVIF\WSDL::DeviceIO);
+                if ($DeviceCapabilities) {
+                    $Capabilities = $DeviceCapabilities['Capabilities'];
+                    if ($Capabilities['VideoSources'] > 0) {
+                        $NbrOfVideoSources = $Capabilities['VideoSources'];
+                    }
+                    if ($Capabilities['AudioSources'] > 0) {
+                        $NbrOfAudioSources = $Capabilities['AudioSources'];
+                    }
+                    if ($Capabilities['RelayOutputs'] > 0) {
+                        $NbrOfOutputs = $Capabilities['RelayOutputs'];
+                    }
+                    if ($Capabilities['DigitalInputs'] > 0) {
+                        $NbrOfInputs = $Capabilities['DigitalInputs'];
+                    }
+                    if ($Capabilities['SerialPorts'] > 0) {
+                        $NbrOfSerialPorts = $Capabilities['SerialPorts'];
+                    }
+
+                    // Ergebnisse sagen aus ob wir Video, Audio, Relay und Input auslesen
+                    //Noch ohne Nutzung der Antworten
+
+                    /*if ($Capabilities['VideoSources'] > 0) {
+                        // 4b.ONVIF Request GetVideoSources an \ONVIF\WSDL::DeviceIO
+                         $this->GetVideoSources($XAddr[\ONVIF\NS::DeviceIO], \ONVIF\WSDL::DeviceIO); // array of Token
+                    }
+
+                    if ($Capabilities['AudioSources'] > 0) {
+                        // 4b.ONVIF Request GetAudioSources an \ONVIF\WSDL::DeviceIO
+                         $this->GetAudioSources($XAddr[\ONVIF\NS::DeviceIO], \ONVIF\WSDL::DeviceIO); // array of Token
+                    }
+                     */
+                        // 4b.ONVIF Request GetDigitalInputs an \ONVIF\WSDL::DeviceIO
+                    $DigitalInputs = $this->GetDigitalInputs($XAddr[\ONVIF\NS::DeviceIO], \ONVIF\WSDL::DeviceIO); //array of tt:DigitalInput
+                    if (!$DigitalInputs) {
+                        $DigitalInputs = $this->GetDigitalInputs($XAddr[\ONVIF\NS::Management], \ONVIF\WSDL::Management);
+                    }
+                    if (!$DigitalInputs) {
+                        $DigitalInputs = [];
+                    }
+                    // 4b.ONVIF Request GetRelayOutputs an \ONVIF\WSDL::DeviceIO
+                    $RelayOutputs = $this->GetRelayOutputs($XAddr[\ONVIF\NS::DeviceIO], \ONVIF\WSDL::DeviceIO);
+                    if (!$RelayOutputs) {
+                        $XAddr[\ONVIF\NS::DeviceIO] = '';
+                        $this->WriteAttributeArray('XAddr', $XAddr);
+                        $RelayOutputs = $this->GetRelayOutputs($XAddr[\ONVIF\NS::Management], \ONVIF\WSDL::Management);
+                    }
+                    if (!$RelayOutputs) {
+                        $RelayOutputs = [];
+                    }
+                    /*
+                    if ($Capabilities['SerialPorts'] > 0) {
+                        // 4b.ONVIF Request GetSerialPorts an \ONVIF\WSDL::DeviceIO
+                         $this->GetSerialPorts(); // array of tt:DeviceEntity
+                    }*/
+                }
+            } else {
+                if ($this->Profile->HasProfile(\ONVIF\Profile::T)) { //Profile T ist GetServiceCapabilities bei DeviceIO Pflicht
+                    $this->Warnings = array_merge($this->Warnings, [$this->Translate('Failed to get DeviceIO service capabilities. Device reported ONVIF T scope, but is not compliant!')]);
+                }
+                    //Fallback für reine Profile S Geräte
+                $VideoSources = $this->GetVideoSources($XAddr[\ONVIF\NS::Media], \ONVIF\WSDL::Media); // array of Token
+                if ($VideoSources) {
+                    $NbrOfVideoSources = count($VideoSources['VideoSources']);
+                }
+                $AudioSources = $this->GetAudioSources($XAddr[\ONVIF\NS::Media], \ONVIF\WSDL::Media); // array of Token
+                if ($AudioSources) {
+                    $NbrOfAudioSources = count($AudioSources['AudioSources']);
+                }
+                $DigitalInputs = $this->GetDigitalInputs($XAddr[\ONVIF\NS::Management], \ONVIF\WSDL::Management);
+                if (!$DigitalInputs) {
+                    $DigitalInputs = [];
+                }
+                $RelayOutputs = $this->GetRelayOutputs($XAddr[\ONVIF\NS::Management], \ONVIF\WSDL::Management);
+                if (!$RelayOutputs) {
+                    $RelayOutputs = [];
                 }
             }
-            if ($XAddr) {
-                // 4. ONVIF Request GetServiceCapabilities an \ONVIF\WSDL::Management
-                //$this->GetServiceCapabilities($XAddr[\ONVIF\NS::Management], \ONVIF\WSDL::Management); // noch ohne Funktion..
+            // Variablen in Attribute schreiben:
+            $this->WriteAttributeInteger('NbrOfVideoSources', $NbrOfVideoSources);
+            $this->WriteAttributeInteger('NbrOfAudioSources', $NbrOfAudioSources);
+            $this->WriteAttributeInteger('NbrOfOutputs', $NbrOfOutputs);
+            $this->WriteAttributeInteger('NbrOfInputs', $NbrOfInputs);
+            $this->WriteAttributeInteger('NbrOfSerialPorts', $NbrOfSerialPorts);
+            $this->WriteAttributeArray('RelayOutputs', $RelayOutputs);
+            $this->WriteAttributeArray('DigitalInputs', $DigitalInputs);
 
-                // Wenn \ONVIF\WSDL::DeviceIO unterstützt
-                // 4b.ONVIF Request GetServiceCapabilities an \ONVIF\WSDL::DeviceIO
-                if ($XAddr[\ONVIF\NS::DeviceIO]) {
-                    $DeviceCapabilities = $this->GetServiceCapabilities($XAddr[\ONVIF\NS::DeviceIO], \ONVIF\WSDL::DeviceIO);
-                    if ($DeviceCapabilities) {
-                        $Capabilities = $DeviceCapabilities['Capabilities'];
-                        if ($Capabilities['VideoSources'] > 0) {
-                            $this->WriteAttributeInteger('NbrOfVideoSources', $Capabilities['VideoSources']);
-                        }
-                        if ($Capabilities['AudioSources'] > 0) {
-                            $this->WriteAttributeInteger('NbrOfAudioSources', $Capabilities['AudioSources']);
-                        }
-                        if ($Capabilities['RelayOutputs'] > 0) {
-                            $this->WriteAttributeInteger('NbrOfOutputs', $Capabilities['RelayOutputs']);
-                        }
-                        if ($Capabilities['DigitalInputs'] > 0) {
-                            $this->WriteAttributeInteger('NbrOfInputs', $Capabilities['DigitalInputs']);
-                        }
-                        if ($Capabilities['SerialPorts'] > 0) {
-                            $this->WriteAttributeInteger('NbrOfSerialPorts', $Capabilities['SerialPorts']);
-                        }
-
-                        // Ergebnisse sagen aus ob wir Video, Audio, Relay und Input auslesen
-                        //Noch ohne Nutzung der Antworten
-
-                        /*if ($Capabilities['VideoSources'] > 0) {
-                            // 4b.ONVIF Request GetVideoSources an \ONVIF\WSDL::DeviceIO
-                             $this->GetVideoSources($XAddr[\ONVIF\NS::DeviceIO], \ONVIF\WSDL::DeviceIO); // array of Token
-                        }
-
-                        if ($Capabilities['AudioSources'] > 0) {
-                            // 4b.ONVIF Request GetAudioSources an \ONVIF\WSDL::DeviceIO
-                             $this->GetAudioSources($XAddr[\ONVIF\NS::DeviceIO], \ONVIF\WSDL::DeviceIO); // array of Token
-                        }
-                         */
-                        // 4b.ONVIF Request GetDigitalInputs an \ONVIF\WSDL::DeviceIO
-                        $this->GetDigitalInputs(); //array of tt:DigitalInput
-
-                        // 4b.ONVIF Request GetRelayOutputs an \ONVIF\WSDL::DeviceIO
-                        if (!$this->GetRelayOutputs($XAddr[\ONVIF\NS::DeviceIO], \ONVIF\WSDL::DeviceIO)) {
-                            $XAddr[\ONVIF\NS::DeviceIO] = '';
-                            $this->WriteAttributeArray('XAddr', $XAddr);
-                            $this->GetRelayOutputs($XAddr[\ONVIF\NS::Management], \ONVIF\WSDL::Management);
-                        }
-
-                        /*
-                        if ($Capabilities['SerialPorts'] > 0) {
-                            // 4b.ONVIF Request GetSerialPorts an \ONVIF\WSDL::DeviceIO
-                             $this->GetSerialPorts(); // array of tt:DeviceEntity
-                        }*/
-                    }
-                } else {
-                    if ($this->Profile->HasProfile(\ONVIF\Profile::T)) { //Profile T ist GetServiceCapabilities bei DeviceIO Pflicht
-                        $this->Warnings = array_merge($this->Warnings, [$this->Translate('Failed to get DeviceIO service capabilities. Device reported ONVIF T scope, but is not compliant!')]);
-                    }
-                    //Fallback für reine Profile S Geräte
-                    $VideoSources = $this->GetVideoSources($XAddr[\ONVIF\NS::Media], \ONVIF\WSDL::Media); // array of Token
-                    if ($VideoSources) {
-                        $this->WriteAttributeInteger('NbrOfVideoSources', count($VideoSources['VideoSources']));
-                    }
-                    $AudioSources = $this->GetAudioSources($XAddr[\ONVIF\NS::Media], \ONVIF\WSDL::Media); // array of Token
-                    if ($AudioSources) {
-                        $this->WriteAttributeInteger('NbrOfAudioSources', count($AudioSources['AudioSources']));
-                    }
-                    $this->GetRelayOutputs($XAddr[\ONVIF\NS::Management], \ONVIF\WSDL::Management);
-                }
-                if ($XAddr[\ONVIF\NS::Media2]) {
-                    // Wenn \ONVIF\WSDL::Media2 unterstützt
+            // Wenn \ONVIF\WSDL::Media2 unterstützt
+            if ($XAddr[\ONVIF\NS::Media2]) {
                     // 4c.ONVIF Request GetServiceCapabilities an \ONVIF\WSDL::Media2
-                    $MediaCapabilities = $this->GetServiceCapabilities($XAddr[\ONVIF\NS::Media2], \ONVIF\WSDL::Media2); // noch ohne Funktion..
-                    if ($MediaCapabilities) {
-                        $Capabilities = $MediaCapabilities['Capabilities'];
-                        $this->WriteAttributeBoolean('HasRTSPStreaming', $Capabilities['StreamingCapabilities']['RTSPStreaming'] || $Capabilities['StreamingCapabilities']['RTP_RTSP_TCP']);
-                        if (isset($Capabilities['SnapshotUri'])) {
-                            $this->WriteAttributeBoolean('HasSnapshotUri', $Capabilities['SnapshotUri']);
-                        } else {
-                            $this->WriteAttributeBoolean('HasSnapshotUri', true);
-                        }
-                    } else {
-                        if ($this->Profile->HasProfile(\ONVIF\Profile::T)) { //Profile T ist GetServiceCapabilities bei Media2 Pflicht
-                            $this->Warnings = array_merge($this->Warnings, [$this->Translate('Failed to get Media2 service capabilities. Device reported ONVIF T scope, but is not compliant!')]);
-                        }
-                    }
-                    // 4c.ONVIF Request GetProfiles an \ONVIF\WSDL::Media2
-                    if (!$this->GetProfiles2()) {
-                        $this->SetStatus(IS_EBASE + 2);
-                        return;
+                $MediaCapabilities = $this->GetServiceCapabilities($XAddr[\ONVIF\NS::Media2], \ONVIF\WSDL::Media2); // noch ohne Funktion..
+                if ($MediaCapabilities) {
+                    $Capabilities = $MediaCapabilities['Capabilities'];
+                    $HasRTSPStreaming = $HasRTSPStreaming || $Capabilities['StreamingCapabilities']['RTSPStreaming'] || $Capabilities['StreamingCapabilities']['RTP_RTSP_TCP'];
+                    if (isset($Capabilities['SnapshotUri'])) {
+                        $HasSnapshotUri = $Capabilities['SnapshotUri'];
                     }
                 } else {
+                    if ($this->Profile->HasProfile(\ONVIF\Profile::T)) { //Profile T ist GetServiceCapabilities bei Media2 Pflicht
+                        $this->Warnings = array_merge($this->Warnings, [$this->Translate('Failed to get Media2 service capabilities. Device reported ONVIF T scope, but is not compliant!')]);
+                    }
+                }
+                // 4c.ONVIF Request GetProfiles an \ONVIF\WSDL::Media2
+                if (!$this->GetProfiles2()) {
+                    $this->SetStatus(IS_EBASE + 2);
+                    return;
+                }
+            } else {
                     // Wenn \ONVIF\WSDL::Media2 NICHT unterstützt
                     // 4c.ONVIF Request GetServiceCapabilities an \ONVIF\WSDL::Media
-                    $MediaCapabilities = $this->GetServiceCapabilities($XAddr[\ONVIF\NS::Media], \ONVIF\WSDL::Media); // noch ohne Funktion..
-                    if ($MediaCapabilities) {
-                        $Capabilities = $MediaCapabilities['Capabilities'];
-                        //if (isset($Capabilities['StreamingCapabilities']['NoRTSPStreaming'])) {
-                        //    $this->WriteAttributeBoolean('HasRTSPStreaming', !$Capabilities['StreamingCapabilities']['NoRTSPStreaming']);
-                        //} else {
-                        $this->WriteAttributeBoolean('HasRTSPStreaming', $Capabilities['StreamingCapabilities']['RTP_TCP'] || $Capabilities['StreamingCapabilities']['RTP_RTSP_TCP']);
-                        //}
-                        if (isset($Capabilities['SnapshotUri'])) {
-                            $this->WriteAttributeBoolean('HasSnapshotUri', $Capabilities['SnapshotUri']);
-                        } else {
-                            $this->WriteAttributeBoolean('HasSnapshotUri', true);
-                        }
-                    } else {
-                        if ($this->Profile->HasProfile(\ONVIF\Profile::T)) { //Profile T ist GetServiceCapabilities bei Media Pflicht
-                            $this->Warnings = array_merge($this->Warnings, [$this->Translate('Failed to get Media service capabilities. Device reported ONVIF T scope, but is not compliant!')]);
-                        }
-                    }
-
-                    // 4c.ONVIF Request GetProfiles an \ONVIF\WSDL::Media
-                    if (!$this->GetProfiles()) {
-                        $this->SetStatus(IS_EBASE + 2);
-                        return;
-                    }
-                }
-
-                // Wenn \ONVIF\WSDL::PTZ unterstützt
-                // 4d.ONVIF Request GetNodes an \ONVIF\WSDL::PTZ
-                if ($XAddr[\ONVIF\NS::PTZ]) {
-                    $PTZCapabilities = $this->GetServiceCapabilities($XAddr[\ONVIF\NS::PTZ], \ONVIF\WSDL::PTZ); // noch ohne Funktion.. todo
-                    $this->GetNodes();
-                }
-
-                if ($XAddr[\ONVIF\NS::Imaging]) {
-                    $ImagingCapabilities = $this->GetServiceCapabilities($XAddr[\ONVIF\NS::Imaging], \ONVIF\WSDL::Imaging); // noch ohne Funktion.. todo
-                    if ($ImagingCapabilities) {
-                    } else {
-                        if ($this->Profile->HasProfile(\ONVIF\Profile::T)) { //Profile T ist GetServiceCapabilities bei Imaging Pflicht
-                            $this->Warnings = array_merge($this->Warnings, [$this->Translate('Failed to get Imaging service capabilities. Device reported ONVIF T scope, but is not compliant!')]);
-                        }
-                    }
-                }
-                $AllEventProperties = [];
-                if ($XAddr[\ONVIF\NS::Event]) {
-                    $EventCapabilities = $this->GetServiceCapabilities($XAddr[\ONVIF\NS::Event], \ONVIF\WSDL::Event); // noch ohne Funktion.. todo
-                    if ($EventCapabilities) {
-                        $Capabilities = $EventCapabilities['Capabilities'];
-                        $this->WriteAttributeBoolean('WSSubscriptionPolicySupport', isset($Capabilities['WSSubscriptionPolicySupport']) ? $Capabilities['WSSubscriptionPolicySupport'] : false);
-                        $this->WriteAttributeBoolean('WSPullPointSupport', isset($Capabilities['WSPullPointSupport']) ? $Capabilities['WSPullPointSupport'] : false);
-                    } else {
-                        $this->WriteAttributeBoolean('WSSubscriptionPolicySupport', false);
-                        $this->WriteAttributeBoolean('WSPullPointSupport', false);
-                        if ($this->Profile->HasProfile(\ONVIF\Profile::T)) { //Profile T ist GetServiceCapabilities bei Event Pflicht
-                            $this->Warnings = array_merge($this->Warnings, [$this->Translate('Failed to get Event service capabilities. Device reported ONVIF T scope, but is not compliant!')]);
-                        }
-                    }
-                    //Jetzt Events auslesen
-                    // 5.ONVIF Request GetEventProperties an \ONVIF\WSDL::Events
-                    $GetEventProperties = $this->GetEventProperties();
-                    if ($GetEventProperties) {
-                        $AllEventProperties = array_merge($AllEventProperties, $GetEventProperties);
-                    }
-                }
-                $AnalyticsTokens = $this->ReadAttributeArray('AnalyticsTokens');
-                if ($XAddr[\ONVIF\NS::Analytics]) {
-                    $AnalyticsCapabilities = $this->GetServiceCapabilities($XAddr[\ONVIF\NS::Analytics], \ONVIF\WSDL::Analytics);
-                    $this->WriteAttributeBoolean('AnalyticsModuleSupport', isset($AnalyticsCapabilities['Capabilities']['AnalyticsModuleSupport']) ? $AnalyticsCapabilities['Capabilities']['AnalyticsModuleSupport'] : false);
-                    $this->WriteAttributeBoolean('RuleSupport', isset($AnalyticsCapabilities['Capabilities']['RuleSupport']) ? $AnalyticsCapabilities['Capabilities']['RuleSupport'] : false);
-
-                    foreach (array_keys($AnalyticsTokens) as $AnalyticsToken) {
-//                        if ($this->ReadAttributeBoolean('AnalyticsModuleSupport')) {
-                        $AnalyticsModulesTopicData = $this->GetSupportedAnalyticsModules($AnalyticsToken);
-                        if ($AnalyticsModulesTopicData) {
-                            $AllEventProperties = array_merge($AllEventProperties, $AnalyticsModulesTopicData);
-                        }
-//                        }
-//                        if ($this->ReadAttributeBoolean('RuleSupport')) {
-                        $SupportedRuleTopicData = $this->GetSupportedRules($AnalyticsToken);
-                        if ($SupportedRuleTopicData) {
-                            $AllEventProperties = array_merge($AllEventProperties, $SupportedRuleTopicData);
-                        }
-//                        }
+                $MediaCapabilities = $this->GetServiceCapabilities($XAddr[\ONVIF\NS::Media], \ONVIF\WSDL::Media); // noch ohne Funktion..
+                if ($MediaCapabilities) {
+                    $Capabilities = $MediaCapabilities['Capabilities'];
+                    $HasRTSPStreaming = $HasRTSPStreaming || $Capabilities['StreamingCapabilities']['RTP_TCP'] || $Capabilities['StreamingCapabilities']['RTP_RTSP_TCP'];
+                    if (isset($Capabilities['SnapshotUri'])) {
+                        $HasSnapshotUri = $Capabilities['SnapshotUri'];
                     }
                 } else {
-                    if (count($AnalyticsTokens)) {
-                        $this->Warnings = array_merge($this->Warnings, [$this->Translate('Analytics events could not be retrieved. The device reported AnalyticsTokens, but the Analytics namespace and XAddr were not reported!')]);
+                    if ($this->Profile->HasProfile(\ONVIF\Profile::T)) { //Profile T ist GetServiceCapabilities bei Media Pflicht
+                        $this->Warnings = array_merge($this->Warnings, [$this->Translate('Failed to get Media service capabilities. Device reported ONVIF T scope, but is not compliant!')]);
                     }
                 }
-                $this->lock('EventProperties');
-                $this->WriteAttributeArray('EventProperties', $AllEventProperties);
-                $this->unlock('EventProperties');
-                $this->SendDebug('EventProperties', $AllEventProperties, 0);
-                $EventList = @$this->GetEventReceiverFormValues();
-                $this->SendDebug('Update form', json_encode($EventList), 0);
-                $this->UpdateFormField('Events', 'values', json_encode($EventList));
-                $this->UpdateFormField('Events', 'visible', true);
+
+                // 4c.ONVIF Request GetProfiles an \ONVIF\WSDL::Media
+                if (!$this->GetProfiles()) {
+                    $this->SetStatus(IS_EBASE + 2);
+                    return;
+                }
             }
+            // Variablen in Attribute schreiben:
+            $this->WriteAttributeBoolean('HasRTSPStreaming', $HasRTSPStreaming);
+            $this->WriteAttributeBoolean('HasSnapshotUri', $HasSnapshotUri);
+            // Wenn \ONVIF\WSDL::PTZ unterstützt
+            // 4d.ONVIF Request GetNodes an \ONVIF\WSDL::PTZ
+            if ($XAddr[\ONVIF\NS::PTZ]) {
+                $PTZCapabilities = $this->GetServiceCapabilities($XAddr[\ONVIF\NS::PTZ], \ONVIF\WSDL::PTZ); // noch ohne Funktion.. todo
+                $this->GetNodes();
+            }
+            if ($XAddr[\ONVIF\NS::Imaging]) {
+                $ImagingCapabilities = $this->GetServiceCapabilities($XAddr[\ONVIF\NS::Imaging], \ONVIF\WSDL::Imaging); // noch ohne Funktion.. todo
+                if ($ImagingCapabilities) {
+                } else {
+                    if ($this->Profile->HasProfile(\ONVIF\Profile::T)) { //Profile T ist GetServiceCapabilities bei Imaging Pflicht
+                        $this->Warnings = array_merge($this->Warnings, [$this->Translate('Failed to get Imaging service capabilities. Device reported ONVIF T scope, but is not compliant!')]);
+                    }
+                }
+            }
+            $AllEventProperties = [];
+            if ($XAddr[\ONVIF\NS::Event]) {
+                $EventCapabilities = $this->GetServiceCapabilities($XAddr[\ONVIF\NS::Event], \ONVIF\WSDL::Event); // noch ohne Funktion.. todo
+                if ($EventCapabilities) {
+                    $Capabilities = $EventCapabilities['Capabilities'];
+                    if (isset($Capabilities['WSSubscriptionPolicySupport'])) {
+                        $WSSubscriptionPolicySupport = $WSSubscriptionPolicySupport || $Capabilities['WSSubscriptionPolicySupport'];
+                    }
+                    if (isset($Capabilities['WSPullPointSupport'])) {
+                        $WSPullPointSupport = $WSPullPointSupport || $Capabilities['WSPullPointSupport'];
+                    }
+                } else {
+                    if ($this->Profile->HasProfile(\ONVIF\Profile::T)) { //Profile T ist GetServiceCapabilities bei Event Pflicht
+                        $this->Warnings = array_merge($this->Warnings, [$this->Translate('Failed to get Event service capabilities. Device reported ONVIF T scope, but is not compliant!')]);
+                    }
+                }
+                //Jetzt Events auslesen
+                // 5.ONVIF Request GetEventProperties an \ONVIF\WSDL::Events
+                $GetEventProperties = $this->GetEventProperties();
+                if ($GetEventProperties) {
+                    $AllEventProperties = array_merge($AllEventProperties, $GetEventProperties);
+                }
+            }
+            // Variablen in Attribute schreiben:
+            $this->WriteAttributeBoolean('WSSubscriptionPolicySupport', $WSSubscriptionPolicySupport);
+            $this->WriteAttributeBoolean('WSPullPointSupport', $WSPullPointSupport);
+            $AnalyticsTokens = $this->ReadAttributeArray('AnalyticsTokens');
+            if ($XAddr[\ONVIF\NS::Analytics]) {
+                $AnalyticsCapabilities = $this->GetServiceCapabilities($XAddr[\ONVIF\NS::Analytics], \ONVIF\WSDL::Analytics);
+                if (isset($AnalyticsCapabilities['Capabilities']['AnalyticsModuleSupport'])) {
+                    $AnalyticsModuleSupport = $AnalyticsModuleSupport || $AnalyticsCapabilities['Capabilities']['AnalyticsModuleSupport'];
+                }
+                if (isset($AnalyticsCapabilities['Capabilities']['RuleSupport'])) {
+                    $RuleSupport = $RuleSupport || $AnalyticsCapabilities['Capabilities']['RuleSupport'];
+                }
+                foreach (array_keys($AnalyticsTokens) as $AnalyticsToken) {
+                    $AnalyticsModulesTopicData = $this->GetSupportedAnalyticsModules($AnalyticsToken);
+                    if ($AnalyticsModulesTopicData) {
+                        $AllEventProperties = array_merge($AllEventProperties, $AnalyticsModulesTopicData);
+                    }
+                    $SupportedRuleTopicData = $this->GetSupportedRules($AnalyticsToken);
+                    if ($SupportedRuleTopicData) {
+                        $AllEventProperties = array_merge($AllEventProperties, $SupportedRuleTopicData);
+                    }
+                }
+            } else {
+                if (count($AnalyticsTokens)) {
+                    $this->Warnings = array_merge($this->Warnings, [$this->Translate('Analytics events could not be retrieved. The device reported AnalyticsTokens, but the Analytics namespace and XAddr were not reported!')]);
+                }
+            }
+            // Variablen in Attribute schreiben:
+            $this->WriteAttributeBoolean('AnalyticsModuleSupport', $AnalyticsModuleSupport);
+            $this->WriteAttributeBoolean('RuleSupport', $RuleSupport);
+            $this->lock('EventProperties');
+            $this->WriteAttributeArray('EventProperties', $AllEventProperties);
+            $this->unlock('EventProperties');
+            $this->SendDebug('EventProperties', $AllEventProperties, 0);
+            $EventList = @$this->GetEventReceiverFormValues();
+            $this->SendDebug('Update form', json_encode($EventList), 0);
+            $this->UpdateFormField('Events', 'values', json_encode($EventList));
+            $this->UpdateFormField('Events', 'visible', true);
         } else {
             $this->SendDebug('VideoSources H.26x', $this->ReadAttributeArray('VideoSources'), 0);
             $this->SendDebug('VideoSources JPEG', $this->ReadAttributeArray('VideoSourcesJPEG'), 0);
@@ -1214,7 +1261,7 @@ class ONVIFIO extends IPSModuleStrict
         $xml = new DOMDocument();
         $xml->loadXML($Response);
         $xpath = new DOMXPath($xml);
-        foreach (\ONVIF\NS::$Namespaces as $NSKey => $Namespace) {
+        foreach (\ONVIF\NS::Namespaces as $NSKey => $Namespace) {
             $EventNS[$NSKey] = $xml->lookupPrefix($Namespace);
             $xpath->registerNamespace($NSKey, $Namespace);
         }
@@ -1434,7 +1481,7 @@ class ONVIFIO extends IPSModuleStrict
         $this->WriteAttributeArray('AnalyticsTokens', $AnalyticsTokens);
         return true;
     }
-    protected function GetCapabilities(): array
+    protected function GetCapabilities(): bool
     {
         $XAddr = [
             \ONVIF\NS::Management => '/onvif/device_service',
@@ -1448,16 +1495,27 @@ class ONVIFIO extends IPSModuleStrict
             //            'Recording' => '',
             //            'Replay'    => ''
         ];
+        $HasRTSPStreaming = false;
+        $AnalyticsModuleSupport = false;
+        $WSSubscriptionPolicySupport = false;
+        $WSPullPointSupport = false;
+        $RuleSupport = false;
+        $NbrOfVideoSources = 0;
+        $NbrOfAudioSources = 0;
+        $NbrOfInputs = 0;
+        $NbrOfOutputs = 0;
         $Result = $this->SendData('', \ONVIF\WSDL::Management, 'GetCapabilities', true);
         if (!is_a($Result, 'SoapFault')) {
             $CapabilitiesResult = json_decode(json_encode($Result), true);
             if (isset($CapabilitiesResult['Capabilities']['Analytics']['XAddr'])) {
                 $XAddr[\ONVIF\NS::Analytics] = parse_url($CapabilitiesResult['Capabilities']['Analytics']['XAddr'], PHP_URL_PATH);
-                $this->WriteAttributeBoolean('AnalyticsModuleSupport', $CapabilitiesResult['Capabilities']['Analytics']['AnalyticsModuleSupport']);
-                $this->WriteAttributeBoolean('RuleSupport', $CapabilitiesResult['Capabilities']['Analytics']['RuleSupport']);
+                $AnalyticsModuleSupport = $CapabilitiesResult['Capabilities']['Analytics']['AnalyticsModuleSupport'];
+                $RuleSupport = $CapabilitiesResult['Capabilities']['Analytics']['RuleSupport'];
             }
             if (isset($CapabilitiesResult['Capabilities']['Events']['XAddr'])) {
                 $XAddr[\ONVIF\NS::Event] = parse_url($CapabilitiesResult['Capabilities']['Events']['XAddr'], PHP_URL_PATH);
+                $WSSubscriptionPolicySupport = $CapabilitiesResult['Capabilities']['Events']['WSSubscriptionPolicySupport'];
+                $WSPullPointSupport = $CapabilitiesResult['Capabilities']['Events']['WSPullPointSupport'];
             }
             if (isset($CapabilitiesResult['Capabilities']['Media']['XAddr'])) {
                 $MediaUrl = parse_url($CapabilitiesResult['Capabilities']['Media']['XAddr'], PHP_URL_PATH);
@@ -1466,15 +1524,12 @@ class ONVIFIO extends IPSModuleStrict
                 } else {
                     $XAddr[\ONVIF\NS::Media2] = $MediaUrl;
                 }
-                $HasRTSPStreaming = false;
                 if (isset($CapabilitiesResult['Capabilities']['Media']['StreamingCapabilities']['RTP_TCP'])) {
                     $HasRTSPStreaming = $CapabilitiesResult['Capabilities']['Media']['StreamingCapabilities']['RTP_TCP'];
                 }
                 if (isset($CapabilitiesResult['Capabilities']['Media']['StreamingCapabilities']['RTP_RTSP_TCP'])) {
                     $HasRTSPStreaming = $HasRTSPStreaming || $CapabilitiesResult['Capabilities']['Media']['StreamingCapabilities']['RTP_RTSP_TCP'];
                 }
-                $this->WriteAttributeBoolean('HasSnapshotUri', true);
-                $this->WriteAttributeBoolean('HasRTSPStreaming', $HasRTSPStreaming);
             }
             if (isset($CapabilitiesResult['Capabilities']['PTZ']['XAddr'])) {
                 $XAddr[\ONVIF\NS::PTZ] = parse_url($CapabilitiesResult['Capabilities']['PTZ']['XAddr'], PHP_URL_PATH);
@@ -1487,19 +1542,16 @@ class ONVIFIO extends IPSModuleStrict
             }
             if (isset($CapabilitiesResult['Capabilities']['Extension']['DeviceIO']['VideoSources'])) {
                 $NbrOfVideoSources = $CapabilitiesResult['Capabilities']['Extension']['DeviceIO']['VideoSources'];
-                $this->WriteAttributeInteger('NbrOfVideoSources', $NbrOfVideoSources);
             }
             if (isset($CapabilitiesResult['Capabilities']['Extension']['DeviceIO']['AudioSources'])) {
                 $NbrOfAudioSources = $CapabilitiesResult['Capabilities']['Extension']['DeviceIO']['AudioSources'];
-                $this->WriteAttributeInteger('NbrOfAudioSources', $NbrOfAudioSources);
             }
             if (isset($CapabilitiesResult['Capabilities']['Device']['IO']['InputConnectors'])) {
                 $NbrOfInputs = $CapabilitiesResult['Capabilities']['Device']['IO']['InputConnectors'];
-                $this->WriteAttributeInteger('NbrOfInputs', $NbrOfInputs);
             }
+
             if (isset($CapabilitiesResult['Capabilities']['Device']['IO']['RelayOutputs'])) {
                 $NbrOfOutputs = $CapabilitiesResult['Capabilities']['Device']['IO']['RelayOutputs'];
-                $this->WriteAttributeInteger('NbrOfOutputs', $NbrOfOutputs);
             }
 
             /*            if (isset($CapabilitiesResult['Capabilities']['Extension']['Recording']['XAddr'])) {
@@ -1516,7 +1568,17 @@ class ONVIFIO extends IPSModuleStrict
             }
         }
         $this->WriteAttributeArray('XAddr', $XAddr);
-        return $XAddr;
+        $this->WriteAttributeBoolean('AnalyticsModuleSupport', $AnalyticsModuleSupport);
+        $this->WriteAttributeBoolean('RuleSupport', $RuleSupport);
+        $this->WriteAttributeBoolean('WSSubscriptionPolicySupport', $WSSubscriptionPolicySupport);
+        $this->WriteAttributeBoolean('WSPullPointSupport', $WSPullPointSupport);
+        $this->WriteAttributeBoolean('HasSnapshotUri', false);
+        $this->WriteAttributeBoolean('HasRTSPStreaming', $HasRTSPStreaming);
+        $this->WriteAttributeInteger('NbrOfVideoSources', $NbrOfVideoSources);
+        $this->WriteAttributeInteger('NbrOfAudioSources', $NbrOfAudioSources);
+        $this->WriteAttributeInteger('NbrOfInputs', $NbrOfInputs);
+        $this->WriteAttributeInteger('NbrOfOutputs', $NbrOfOutputs);
+        return !is_a($Result, 'SoapFault');
     }
     protected function GetScopes(): false|array
     {
@@ -1594,7 +1656,7 @@ class ONVIFIO extends IPSModuleStrict
         $xml = new DOMDocument();
         $xml->loadXML($ResponseXML);
         $xpath = new DOMXPath($xml);
-        foreach (\ONVIF\NS::$Namespaces as $NSKey => $Namespace) {
+        foreach (\ONVIF\NS::Namespaces as $NSKey => $Namespace) {
             $EventNS[$NSKey] = $xml->lookupPrefix($Namespace);
             $xpath->registerNamespace($NSKey, $Namespace);
         }
@@ -1613,7 +1675,7 @@ class ONVIFIO extends IPSModuleStrict
         }
         return $TopicData;
     }
-    protected function GetServices(): false|array
+    protected function GetServices(): bool
     {
         $Params = [
             'IncludeCapability'=> true
@@ -1623,7 +1685,8 @@ class ONVIFIO extends IPSModuleStrict
             return false;
         }
         $ServicesResult = json_decode(json_encode($Services), true);
-        $XAddr = [
+        $XAddr = $this->ReadAttributeArray('XAddr');
+        /*$XAddr = [
             \ONVIF\NS::Management => '/onvif/device_service',
             \ONVIF\NS::Event      => '',
             \ONVIF\NS::Media      => '/onvif/media_service',
@@ -1634,12 +1697,12 @@ class ONVIFIO extends IPSModuleStrict
             \ONVIF\NS::Media2     => '',
             //                'Recording' => '',
             //                'Replay'    => ''
-        ];
+        ];*/
         foreach ($ServicesResult['Service'] as $Service) {
             $XAddr[$Service['Namespace']] = parse_url($Service['XAddr'], PHP_URL_PATH);
         }
         $this->WriteAttributeArray('XAddr', $XAddr);
-        return $XAddr;
+        return true;
     }
     protected function GetServiceCapabilities($Uri, $WSDL): false|array
     {
@@ -1659,15 +1722,12 @@ class ONVIFIO extends IPSModuleStrict
         $Result = json_decode(json_encode($DeviceInformation), true);
         return $Result;
     }
-    protected function GetDigitalInputs(): bool
+    protected function GetDigitalInputs($Uri, $WSDL): false|array
     {
-        $XAddr = $this->ReadAttributeArray('XAddr');
-        $DigitalInputResponse = $this->SendData($XAddr[\ONVIF\NS::DeviceIO], \ONVIF\WSDL::DeviceIO, 'GetDigitalInputs', true);
+        $DigitalInputs = [];
+        $DigitalInputResponse = $this->SendData($Uri, $WSDL, 'GetDigitalInputs', true);
         if (is_a($DigitalInputResponse, 'SoapFault')) {
-            $DigitalInputResponse = $this->SendData($XAddr[\ONVIF\NS::Management], \ONVIF\WSDL::DeviceIO, 'GetDigitalInputs', true);
-            if (is_a($DigitalInputResponse, 'SoapFault')) {
-                return false;
-            }
+            return false;
         }
         if (property_exists($DigitalInputResponse, 'DigitalInputs')) {
             $DigitalInputs = [];
@@ -1688,10 +1748,9 @@ class ONVIFIO extends IPSModuleStrict
                 }
                 $DigitalInputs[$DigitalInputResponse->DigitalInputs->token] = $DigitalInputProperties;
             }
-            $this->WriteAttributeInteger('NbrOfInputs', count($DigitalInputs));
-            $this->WriteAttributeArray('DigitalInputs', $DigitalInputs);
+            return $DigitalInputs;
         }
-        return true;
+        return false;
     }
     protected function GetDigitalInputConfigurationOptions(string $Token): array
     {
@@ -1721,7 +1780,7 @@ class ONVIFIO extends IPSModuleStrict
         return $Result;
     }*/
 
-    protected function GetRelayOutputs($Uri, $WSDL): bool
+    protected function GetRelayOutputs($Uri, $WSDL): false|array
     {
         $RelayOutputResponse = $this->SendData($Uri, $WSDL, 'GetRelayOutputs', true);
         if (is_a($RelayOutputResponse, 'SoapFault')) {
@@ -1736,10 +1795,9 @@ class ONVIFIO extends IPSModuleStrict
             } else {
                 $RelayOutputs[$RelayOutputResponse->RelayOutputs->token] = json_decode(json_encode($RelayOutputResponse->RelayOutputs), true)['Properties'];
             }
+            return $RelayOutputs;
         }
-        $this->WriteAttributeInteger('NbrOfOutputs', count($RelayOutputs));
-        $this->WriteAttributeArray('RelayOutputs', $RelayOutputs);
-        return true;
+        return false;
     }
     protected function GetSystemDateAndTime(): bool
     {
@@ -1904,7 +1962,7 @@ class ONVIFIO extends IPSModuleStrict
             return false;
         }
         $xpath = new DOMXPath($xml);
-        foreach (\ONVIF\NS::$Namespaces as $NSKey => $Namespace) {
+        foreach (\ONVIF\NS::Namespaces as $NSKey => $Namespace) {
             $xpath->registerNamespace($NSKey, $Namespace);
         }
         $query = '//wsnt:NotificationMessage';

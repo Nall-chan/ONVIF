@@ -26,6 +26,8 @@ class ONVIFsoapClient extends \SoapClient
             $this->User = '';
         }
         $this->Options = $options;
+        $this->__last_request_headers = null;
+        $this->__last_response_headers = null;
     }
 
     public function __getLastRequestHeaders(): ?string
