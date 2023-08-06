@@ -9,41 +9,31 @@ namespace ONVIF;
  */
 class WSDL
 {
-    const Management = 'ver10/device/wsdl/devicemgmt.wsdl';
-    const Media = 'ver10/media/wsdl/media.wsdl';
-    const Event = 'ver10/events/wsdl/event.wsdl';
-    const Media2 = 'ver20/media/wsdl/media.wsdl';
-    const PTZ = 'ver20/ptz/wsdl/ptz.wsdl';
-    const DeviceIO = 'ver10/deviceio.wsdl';
-    const Imaging = 'ver20/imaging/wsdl/imaging.wsdl';
-    const Analytics = 'ver20/analytics/wsdl/analytics.wsdl';
-    public static $getWSDL = [
-        self::Management => NS::Management,
-        self::Media      => NS::Media,
-        self::Media2     => NS::Media2,
-        self::Event      => NS::Event,
-        self::PTZ        => NS::PTZ,
-        self::DeviceIO   => NS::DeviceIO,
-        self::Imaging    => NS::Imaging,
-        self::Analytics  => NS::Analytics
-    ];
+    public const Management = 'ver10/device/wsdl/devicemgmt.wsdl';
+    public const Media = 'ver10/media/wsdl/media.wsdl';
+    public const Event = 'ver10/events/wsdl/event.wsdl';
+    public const Media2 = 'ver20/media/wsdl/media.wsdl';
+    public const PTZ = 'ver20/ptz/wsdl/ptz.wsdl';
+    public const DeviceIO = 'ver10/deviceio.wsdl';
+    public const Imaging = 'ver20/imaging/wsdl/imaging.wsdl';
+    public const Analytics = 'ver20/analytics/wsdl/analytics.wsdl';
 }
 /**
  * Namespaces ONVIF, SOAP & XML
  */
 class NS
 {
-    const Management = 'http://www.onvif.org/ver10/device/wsdl';
-    const Media = 'http://www.onvif.org/ver10/media/wsdl';
-    const Event = 'http://www.onvif.org/ver10/events/wsdl';
-    const Media2 = 'http://www.onvif.org/ver20/media/wsdl';
-    const PTZ = 'http://www.onvif.org/ver20/ptz/wsdl';
-    const DeviceIO = 'http://www.onvif.org/ver10/deviceIO/wsdl';
-    const Imaging = 'http://www.onvif.org/ver20/imaging/wsdl';
-    const Analytics = 'http://www.onvif.org/ver20/analytics/wsdl';
-    const Addressing = 'http://www.w3.org/2005/08/addressing';
+    public const Management = 'http://www.onvif.org/ver10/device/wsdl';
+    public const Media = 'http://www.onvif.org/ver10/media/wsdl';
+    public const Event = 'http://www.onvif.org/ver10/events/wsdl';
+    public const Media2 = 'http://www.onvif.org/ver20/media/wsdl';
+    public const PTZ = 'http://www.onvif.org/ver20/ptz/wsdl';
+    public const DeviceIO = 'http://www.onvif.org/ver10/deviceIO/wsdl';
+    public const Imaging = 'http://www.onvif.org/ver20/imaging/wsdl';
+    public const Analytics = 'http://www.onvif.org/ver20/analytics/wsdl';
+    public const Addressing = 'http://www.w3.org/2005/08/addressing';
     // all other NS
-    public static $Namespaces = [
+    public const Namespaces = [
         's'      => 'http://www.w3.org/2003/05/soap-envelope',
         'e'      => 'http://www.w3.org/2003/05/soap-encoding',
         'wsa'    => self::Addressing,
@@ -76,49 +66,36 @@ class NS
         'tmd'    => self::DeviceIO,
         'ter'    => 'http://www.onvif.org/ver10/error'
     ];
-    /**
-     * Namespaces to Files
-     */
-    public static $getWSDL = [
-        self::Management => WSDL::Management,
-        self::Media      => WSDL::Media,
-        self::Media2     => WSDL::Media2,
-        self::Event      => WSDL::Event,
-        self::PTZ        => WSDL::PTZ,
-        self::DeviceIO   => WSDL::DeviceIO,
-        self::Imaging    => WSDL::Imaging,
-        self::Analytics  => WSDL::Analytics
-    ];
 }
 
 class Media2Conf
 {
-    const All = 'All';
-    const VideoSource = 'VideoSource';
-    const VideoEncoder = 'VideoEncoder';
-    const AudioSource = 'AudioSource';
-    const AudioEncoder = 'AudioEncoder';
-    const AudioOutput = 'AudioOutput';
-    const AudioDecoder = 'AudioDecoder';
-    const Metadata = 'Metadata';
-    const Analytics = 'Analytics';
-    const PTZ = 'PTZ';
-    const Receiver = 'Receiver';
+    public const All = 'All';
+    public const VideoSource = 'VideoSource';
+    public const VideoEncoder = 'VideoEncoder';
+    public const AudioSource = 'AudioSource';
+    public const AudioEncoder = 'AudioEncoder';
+    public const AudioOutput = 'AudioOutput';
+    public const AudioDecoder = 'AudioDecoder';
+    public const Metadata = 'Metadata';
+    public const Analytics = 'Analytics';
+    public const PTZ = 'PTZ';
+    public const Receiver = 'Receiver';
 }
 
 class Scopes
 {
-    const ProfileT = 'onvif://www.onvif.org/Profile/T';
-    const ProfileG = 'onvif://www.onvif.org/Profile/G';
-    const ProfileS = 'onvif://www.onvif.org/Profile/Streaming';
+    public const ProfileT = 'onvif://www.onvif.org/Profile/T';
+    public const ProfileG = 'onvif://www.onvif.org/Profile/G';
+    public const ProfileS = 'onvif://www.onvif.org/Profile/Streaming';
 }
 
 class EventHandler
 {
-    const None = 0;
-    const Subscribe = 1;
-    const PullPoint = 2;
-    const Automatic = 3;
+    public const None = 0;
+    public const Subscribe = 1;
+    public const PullPoint = 2;
+    public const Automatic = 3;
     public $Type;
     public function __construct(int $Type = 0)
     {
@@ -141,45 +118,45 @@ class EventHandler
         return 'none';
     }
 }
-
 class Profile
 {
-    const S = 1; // Streaming und WS-Event
-    const G = 2; // Recording (ohne streaming!)
-    const T = 4; // Streaming und pull point Event, Image Settings
-
-    public static $ScopesToProfile = [
+    public const NONE = 1; // Fallback Profil S
+    public const S = 2; // Streaming und WS-Event
+    public const G = 4; // Recording (ohne streaming!)
+    public const T = 8; // Streaming und pull point Event, Image Settings
+    private const ScopesToProfile = [
         Scopes::ProfileS         => self::S,
         Scopes::ProfileG         => self::G,
         Scopes::ProfileT         => self::T
     ];
-    public static $ProfileBitToChar = [
-        self::S => 'S',
-        self::G => 'G',
-        self::T => 'T'
+    private const ProfileBitToChar = [
+        self::NONE => 'Fallback S',
+        self::S    => 'S',
+        self::G    => 'G',
+        self::T    => 'T'
     ];
     public $Profile;
     public function __construct(array $Scopes = [])
     {
         $this->Profile = 0;
         foreach ($Scopes as $Scope) {
-            if (array_key_exists($Scope, self::$ScopesToProfile)) {
-                $this->Profile |= self::$ScopesToProfile[$Scope];
+            if (array_key_exists($Scope, self::ScopesToProfile)) {
+                $this->Profile |= self::ScopesToProfile[$Scope];
             }
         }
     }
-    public function __sleep()
+    public function __sleep(): array
     {
         return ['Profile'];
     }
-    public function HasProfile(int $Profile)
+    public function HasProfile(int $Profile): bool
     {
         return ($this->Profile & $Profile) == $Profile;
     }
     public function toString(): string
     {
         $Profiles = [];
-        foreach (self::$ProfileBitToChar as $Bit => $Char) {
+        foreach (self::ProfileBitToChar as $Bit => $Char) {
             if ($this->HasProfile($Bit)) {
                 $Profiles[] = $Char;
             }
