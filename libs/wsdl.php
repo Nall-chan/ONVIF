@@ -172,5 +172,106 @@ namespace ONVIF\IO
     class Property
     {
         public const Active = 'Open';
+        public const Address = 'Address';
+        public const Username = 'Username';
+        public const Password = 'Password';
+        public const EventHandler = 'EventHandler';
+        public const WebHookIP = 'WebHookIP';
+        public const WebHookHTTPS = 'WebHookHTTPS';
+        public const WebHookPort = 'WebHookPort';
+        public const SubscribeEventTimeout = 'SubscribeEventTimeout';
+        public const SubscribeInitialTerminationTime = 'SubscribeInitialTerminationTime';
+        public const PullPointInitialTerminationTime = 'PullPointInitialTerminationTime';
+        public const PullPointTimeout = 'PullPointTimeout';
+        public const MessageLimit = 'MessageLimit';
+    }
+    class Attribute
+    {
+        public const VideoSources = 'VideoSources';
+        public const AudioSources = 'AudioSources';
+        public const VideoSourcesJPEG = 'VideoSourcesJPEG';
+        public const AnalyticsTokens = 'AnalyticsTokens';
+        public const RelayOutputs = 'RelayOutputs';
+        public const DigitalInputs = 'DigitalInputs';
+        public const Timestamp_Offset = 'Timestamp_Offset';
+        public const XAddr = 'XAddr';
+        public const EventProperties = 'EventProperties';
+        public const NbrOfInputs = 'NbrOfInputs';
+        public const NbrOfOutputs = 'NbrOfOutputs';
+        public const NbrOfVideoSources = 'NbrOfVideoSources';
+        public const NbrOfAudioSources = 'NbrOfAudioSources';
+        public const NbrOfSerialPorts = 'NbrOfSerialPorts';
+        public const HasSnapshotUri = 'HasSnapshotUri';
+        public const HasRTSPStreaming = 'HasRTSPStreaming';
+        public const RuleSupport = 'RuleSupport';
+        public const AnalyticsModuleSupport = 'AnalyticsModuleSupport';
+        public const WSSubscriptionPolicySupport = 'WSSubscriptionPolicySupport';
+        public const WSPullPointSupport = 'WSPullPointSupport';
+        public const ConsumerAddress = 'ConsumerAddress';
+        public const SubscriptionReference = 'SubscriptionReference';
+        public const SubscriptionId = 'SubscriptionId';
+        public const CapabilitiesVersion = 'CapabilitiesVersion';
+    }
+    class Timer
+    {
+        public const RenewSubscription = 'RenewSubscription';
+    }
+    class State
+    {
+        public const INACTIVE = 'Interface closed';
+        public const ACTIVE ='Interface connected';
+        public const CONNECTION_LOST = 'Connection lost';
+    }
+}
+
+namespace ONVIF\Device
+{
+    class Property
+    {
+        public const EventTopic = 'EventTopic';
+        /*        public const Address = 'Address';
+                public const Username = 'Username';
+                public const Password = 'Password';
+                public const EventHandler = 'EventHandler';
+                public const WebHookIP = 'WebHookIP';
+                public const WebHookHTTPS = 'WebHookHTTPS';
+                public const WebHookPort = 'WebHookPort';
+                public const SubscribeEventTimeout = 'SubscribeEventTimeout';
+                public const SubscribeInitialTerminationTime = 'SubscribeInitialTerminationTime';
+                public const PullPointInitialTerminationTime = 'PullPointInitialTerminationTime';
+                public const PullPointTimeout = 'PullPointTimeout';
+                public const MessageLimit = 'MessageLimit';
+                */
+
+    }
+    class Attribute
+    {
+        public const EventProperties = 'EventProperties';
+        /*        public const NbrOfInputs = 'NbrOfInputs';
+                public const NbrOfOutputs = 'NbrOfOutputs';
+                public const NbrOfVideoSources = 'NbrOfVideoSources';
+                public const NbrOfAudioSources = 'NbrOfAudioSources';
+                public const NbrOfSerialPorts = 'NbrOfSerialPorts';
+                public const HasSnapshotUri = 'HasSnapshotUri';
+                public const HasRTSPStreaming = 'HasRTSPStreaming';
+                public const RuleSupport = 'RuleSupport';
+                public const AnalyticsModuleSupport = 'AnalyticsModuleSupport';
+                public const WSSubscriptionPolicySupport = 'WSSubscriptionPolicySupport';
+                public const WSPullPointSupport = 'WSPullPointSupport';
+                public const ConsumerAddress = 'ConsumerAddress';
+                public const SubscriptionReference = 'SubscriptionReference';
+                public const SubscriptionId = 'SubscriptionId';
+                public const CapabilitiesVersion = 'CapabilitiesVersion';
+                */
+    }
+    class Timer
+    {
+        public const RenewSubscription = 'RenewSubscription';
+    }
+    class State
+    {
+        public const INACTIVE = 'Interface closed';
+        public const ACTIVE ='Interface connected';
+        public const CONNECTION_LOST = 'Connection lost';
     }
 }
