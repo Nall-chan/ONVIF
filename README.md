@@ -1,5 +1,5 @@
 [![SDK](https://img.shields.io/badge/Symcon-PHPModul-red.svg)](https://www.symcon.de/service/dokumentation/entwicklerbereich/sdk-tools/sdk-php/)
-[![Version](https://img.shields.io/badge/Modul%20Version-2.10-blue.svg)](https://community.symcon.de/t/modul-onvif-profil-s-fuer-ip-kameras-und-encoder/52036)
+[![Version](https://img.shields.io/badge/Modul%20Version-2.12-blue.svg)](https://community.symcon.de/t/modul-onvif-profil-s-fuer-ip-kameras-und-encoder/52036)
 [![Version](https://img.shields.io/badge/Symcon%20Version-7.0%20%3E-green.svg)](https://www.symcon.de/service/dokumentation/installation/migrationen/v60-v61-q1-2022/)  
 [![License](https://img.shields.io/badge/License-CC%20BY--NC--SA%204.0-green.svg)](https://creativecommons.org/licenses/by-nc-sa/4.0/)
 [![Check Style](https://github.com/Nall-chan/ONVIF/workflows/Check%20Style/badge.svg)](https://github.com/Nall-chan/ONVIF/actions)
@@ -140,7 +140,11 @@ Für das Discovery werden Pakete über die Multicast-Adresse `239.255.255.250` a
 ----------
 ### 2. Changelog
 
-**Version 2.10:** <span style="color:red">**(Dies ist die letzte Version für IPS kleiner Version 7.0)**</span>
+**Version 2.12:** <span style="color:red">**(Dies ist die letzte Version für IPS kleiner Version 7.0)**</span>  
+- Lesen der Fähigkeiten eines Gerätes in der IO Instanz verbessert.  
+- Falsche Zeitstempel in Antworten von Geräten (`TerminationTime`) konnten zu Fehlern führen.  
+
+**Version 2.10:**  
 - Discovery Instanz hat bei Geräten mit Port 80xx nicht mehr funktioniert.  
 - Änderungen an der IO-Instanz:
   - Möglichkeit die Geräte-URL im Browser zu öffnen.  
