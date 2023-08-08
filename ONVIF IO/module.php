@@ -1991,7 +1991,7 @@ class ONVIFIO extends IPSModuleStrict
     protected function SendEventDataArrayToChildren(array $EventDataArray): void
     {
         foreach ($EventDataArray as $EventData) {
-            $EventData['DataID'] = '{E23DD2CD-F098-268A-CE49-1CC04FE8060B}';
+            $EventData['DataID'] = \ONVIF\DataFlow\GUID::SendEvents;
             $this->SendDataToChildren(json_encode($EventData));
         }
     }

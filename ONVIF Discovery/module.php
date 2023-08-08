@@ -45,8 +45,8 @@ class ONVIFDiscovery extends IPSModuleStrict
     {
         //Never delete this line!
         parent::Create();
-        $this->RegisterAttributeString('Username', '');
-        $this->RegisterAttributeString('Password', '');
+        $this->RegisterAttributeString(\ONVIF\Discovery\Attribute::Username, '');
+        $this->RegisterAttributeString(\ONVIF\Discovery\Attribute::Password, '');
         $this->Devices = [];
         $this->DevicesError = [];
         $this->DevicesTotal = 0;
@@ -87,8 +87,8 @@ class ONVIFDiscovery extends IPSModuleStrict
             return json_encode($Form);
         }
 
-        $Form['actions'][0]['items'][0]['items'][0]['value'] = $this->ReadAttributeString('Username');
-        $Form['actions'][0]['items'][0]['items'][1]['value'] = $this->ReadAttributeString('Password');
+        $Form['actions'][0]['items'][0]['items'][0]['value'] = $this->ReadAttributeString(\ONVIF\Discovery\Attribute::Username);
+        $Form['actions'][0]['items'][0]['items'][1]['value'] = $this->ReadAttributeString(\ONVIF\Discovery\Attribute::Password);
         if (!$this->DiscoveryIsRunning) {
             $ScriptText = 'IPS_RequestAction(' . $this->InstanceID . ', \'StartDiscover\',true);';
             IPS_RunScriptText($ScriptText);
@@ -103,8 +103,8 @@ class ONVIFDiscovery extends IPSModuleStrict
         if ($Ident == 'Save') {
             $this->DiscoveryIsRunning = false;
             $Data = explode(':', $Value);
-            $this->WriteAttributeString('Username', urldecode($Data[0]));
-            $this->WriteAttributeString('Password', urldecode($Data[1]));
+            $this->WriteAttributeString(\ONVIF\Discovery\Attribute::Username, urldecode($Data[0]));
+            $this->WriteAttributeString(\ONVIF\Discovery\Attribute::Password, urldecode($Data[1]));
             $this->EnableErrorPopup = true;
             $this->UpdateFormField('NotFoundPopup', 'visible', false);
             $this->UpdateFormField('ProgressPopup', 'visible', true);
@@ -126,7 +126,7 @@ class ONVIFDiscovery extends IPSModuleStrict
     }
     protected function GetConfigurationValues(): array
     {
-        $InstanceIDListConfigurator = IPS_GetInstanceListByModuleID('{C6A79C49-19D5-8D45-FFE5-5D77165FAEE6}');
+        $InstanceIDListConfigurator = IPS_GetInstanceListByModuleID(\ONVIF\GUID::Configurator);
         $DevicesAddress = [];
         $DeviceValues = [];
         foreach ($InstanceIDListConfigurator as $InstanceIDConfigurator) {
@@ -160,16 +160,16 @@ class ONVIFDiscovery extends IPSModuleStrict
                     $AddDevice['instanceID'] = $InstanceIDConfigurator;
                     unset($DevicesAddress[$InstanceIDConfigurator]);
                 } else {
-                    $ConfigIo['Username'] = $this->ReadAttributeString('Username');
-                    $ConfigIo['Password'] = $this->ReadAttributeString('Password');
+                    $ConfigIo['Username'] = $this->ReadAttributeString(\ONVIF\Discovery\Attribute::Username);
+                    $ConfigIo['Password'] = $this->ReadAttributeString(\ONVIF\Discovery\Attribute::Password);
                 }
                 $AddDevice['create'][$Device['Name'] . ' (' . $Address . ')'] = [
                     [
-                        'moduleID'      => '{C6A79C49-19D5-8D45-FFE5-5D77165FAEE6}',
+                        'moduleID'      => \ONVIF\GUID::Configurator,
                         'configuration' => new stdClass()
                     ],
                     [
-                        'moduleID'      => '{F40CA9A7-3B4D-4B26-7214-3A94B6074DFB}',
+                        'moduleID'      => \ONVIF\GUID::IO,
                         'name'          => $Device['Name'],
                         'configuration' => $ConfigIo
                     ]
@@ -324,7 +324,7 @@ class ONVIFDiscovery extends IPSModuleStrict
     protected function ScanDevice(string $IP, array $IpValues): void
     {
         $UseLogin = false;
-        if (($this->ReadAttributeString('Username') != '') || ($this->ReadAttributeString('Password') != '')) {
+        if (($this->ReadAttributeString(\ONVIF\Discovery\Attribute::Username) != '') || ($this->ReadAttributeString(\ONVIF\Discovery\Attribute::Password) != '')) {
             $UseLogin = true;
         }
         $wsdl = dirname(__DIR__) . DIRECTORY_SEPARATOR . 'libs' . DIRECTORY_SEPARATOR . 'WSDL' . DIRECTORY_SEPARATOR . \ONVIF\WSDL::Management;
@@ -336,8 +336,8 @@ class ONVIFDiscovery extends IPSModuleStrict
             $this->SendDebug('Request', $IpValue, 0);
             if ($UseLogin) {
                 $offset = $this->GetTimeOffset($IpValue);
-                $Header[] = \ONVIF\ONVIF::soapClientWSSecurityHeader($this->ReadAttributeString('Username'), $this->ReadAttributeString('Password'), $offset);
-                $ONVIFClient = new \ONVIF\ONVIF($wsdl, $IpValue . '/onvif/device_service', $this->ReadAttributeString('Username'), $this->ReadAttributeString('Password'), $Header);
+                $Header[] = \ONVIF\ONVIF::soapClientWSSecurityHeader($this->ReadAttributeString(\ONVIF\Discovery\Attribute::Username), $this->ReadAttributeString(\ONVIF\Discovery\Attribute::Password), $offset);
+                $ONVIFClient = new \ONVIF\ONVIF($wsdl, $IpValue . '/onvif/device_service', $this->ReadAttributeString(\ONVIF\Discovery\Attribute::Username), $this->ReadAttributeString(\ONVIF\Discovery\Attribute::Password), $Header);
             } else {
                 $ONVIFClient = new \ONVIF\ONVIF($wsdl, $IpValue . '/onvif/device_service');
             }

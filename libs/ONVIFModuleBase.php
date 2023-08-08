@@ -47,9 +47,9 @@ class ONVIFModuleBase extends IPSModuleStrict
     {
         //Never delete this line!
         parent::Create();
-        $this->RegisterPropertyString('EventTopic', '');
+        $this->RegisterPropertyString(\ONVIF\Device\Property::EventTopic, '');
         $this->EventTopic = '';
-        $this->RegisterAttributeArray('EventProperties', []);
+        $this->RegisterAttributeArray(\ONVIF\Device\Attribute::EventProperties, []);
         if (IPS_GetKernelRunlevel() != KR_READY) {
             $this->RegisterMessage(0, IPS_KERNELSTARTED);
         }
@@ -63,8 +63,8 @@ class ONVIFModuleBase extends IPSModuleStrict
 
     public function ApplyChanges(): void
     {
-        $EventTopic = $this->ReadPropertyString('EventTopic');
-        $PullEvents = ($EventTopic != $this->EventTopic);
+        $EventTopic = $this->ReadPropertyString(\ONVIF\Device\Property::EventTopic);
+        $SyncEvents = ($EventTopic != $this->EventTopic);
         //Never delete this line!
         parent::ApplyChanges();
         $this->RegisterMessage($this->InstanceID, FM_CONNECT);
@@ -83,8 +83,8 @@ class ONVIFModuleBase extends IPSModuleStrict
         }
         $this->RegisterParent();
         $Events = $this->GetEvents($EventTopic);
-        $this->WriteAttributeArray('EventProperties', $Events);
-        if ($PullEvents && ($this->HasActiveParent())) {
+        $this->WriteAttributeArray(\ONVIF\Device\Attribute::EventProperties, $Events);
+        if ($SyncEvents && ($this->HasActiveParent())) {
             $this->$EventTopic = $EventTopic;
             IPS_RunScriptText('IPS_RequestAction(' . $this->InstanceID . ',"SetSynchronizationPoint",true);');
         }
@@ -135,7 +135,7 @@ class ONVIFModuleBase extends IPSModuleStrict
     protected function IOChangeState(int $State): void
     {
         if ($State == IS_ACTIVE) {
-            $this->EventTopic = $this->ReadPropertyString('EventTopic');
+            $this->EventTopic = $this->ReadPropertyString(\ONVIF\Device\Property::EventTopic);
             $this->ApplyChanges();
             $this->ReloadForm();
         }
@@ -155,7 +155,7 @@ class ONVIFModuleBase extends IPSModuleStrict
         }
         $this->SendDebug('GetEvents Pattern', $Pattern, 0);
         $this->SendDebug('GetEvents SkippedTopics', $SkippedTopics, 0);
-        $Data = json_encode(['DataID' => '{9B9C8DA6-BC89-21BC-3E8C-BA6E534ABC37}', 'Function' => 'GetEvents', 'Pattern' => $Pattern, 'Instance' => $InstanceID, 'SkippedTopics' => $SkippedTopics]);
+        $Data = json_encode(['DataID' => \ONVIF\DataFlow\GUID::SendFunction, 'Function' => 'GetEvents', 'Pattern' => $Pattern, 'Instance' => $InstanceID, 'SkippedTopics' => $SkippedTopics]);
         $answer = $this->SendDataToParent($Data);
         if ($answer !== false) {
             $answer = unserialize($answer);
@@ -169,7 +169,7 @@ class ONVIFModuleBase extends IPSModuleStrict
         if ($this->ParentID > 0) {
             if ($this->HasActiveParent()) {
                 $this->SendDebug('SetSynchronizationPoint', '', 0);
-                $Data = json_encode(['DataID' => '{9B9C8DA6-BC89-21BC-3E8C-BA6E534ABC37}', 'Function' => 'SetSynchronizationPoint']);
+                $Data = json_encode(['DataID' => \ONVIF\DataFlow\GUID::SendFunction, 'Function' => 'SetSynchronizationPoint']);
                 $this->SendDataToParent($Data);
             }
         }
@@ -179,7 +179,7 @@ class ONVIFModuleBase extends IPSModuleStrict
         if ($this->ParentID > 0) {
             if ($this->HasActiveParent()) {
                 $this->SendDebug('GetCapabilities', '', 0);
-                $Data = json_encode(['DataID' => '{9B9C8DA6-BC89-21BC-3E8C-BA6E534ABC37}', 'Function' => 'GetCapabilities']);
+                $Data = json_encode(['DataID' => \ONVIF\DataFlow\GUID::SendFunction, 'Function' => 'GetCapabilities']);
                 $answer = $this->SendDataToParent($Data);
                 if ($answer !== false) {
                     $Result = unserialize($answer);
@@ -224,7 +224,7 @@ class ONVIFModuleBase extends IPSModuleStrict
     {
         if ($this->ParentID > 0) {
             if ($this->HasActiveParent()) {
-                $Data = json_encode(['DataID' => '{9B9C8DA6-BC89-21BC-3E8C-BA6E534ABC37}', 'Function' => 'GetCredentials']);
+                $Data = json_encode(['DataID' => \ONVIF\DataFlow\GUID::SendFunction, 'Function' => 'GetCredentials']);
                 $answer = $this->SendDataToParent($Data);
                 if ($answer === false) {
                     $this->SendDebug('GetCredentials', 'No valid answer', 0);
@@ -239,7 +239,7 @@ class ONVIFModuleBase extends IPSModuleStrict
     {
         if ($this->ParentID > 0) {
             if ($this->HasActiveParent()) {
-                $Data = json_encode(['DataID' => '{9B9C8DA6-BC89-21BC-3E8C-BA6E534ABC37}', 'Function' => 'GetUrl']);
+                $Data = json_encode(['DataID' => \ONVIF\DataFlow\GUID::SendFunction, 'Function' => 'GetUrl']);
                 $answer = $this->SendDataToParent($Data);
                 if ($answer === false) {
                     $this->SendDebug('GetUrl', 'No valid answer', 0);
@@ -266,7 +266,7 @@ class ONVIFModuleBase extends IPSModuleStrict
         $this->SendDebug('Send Function', $Function, 0);
         $this->SendDebug('Send Params', $Params, 0);
         $this->SendDebug('Send useLogin', $UseLogin, 0);
-        $Ret = $this->SendDataToParent(json_encode(['DataID' => '{9B9C8DA6-BC89-21BC-3E8C-BA6E534ABC37}', 'URI' => $URI, 'Function' => $Function, 'Params' => $Params, 'useLogin' => $UseLogin, 'wsdl' => $wsdl]));
+        $Ret = $this->SendDataToParent(json_encode(['DataID' => \ONVIF\DataFlow\GUID::SendFunction, 'URI' => $URI, 'Function' => $Function, 'Params' => $Params, 'useLogin' => $UseLogin, 'wsdl' => $wsdl]));
         if ($Ret === false) {
             $this->SendDebug('Result', false, 0);
             return false;
@@ -343,7 +343,7 @@ class ONVIFModuleBase extends IPSModuleStrict
             }
             $Form['options'] = $SelectTopic;
             $Form['enabled'] = (count($Events) > 1);
-            if ($this->ReadPropertyString('EventTopic') == '') {
+            if ($this->ReadPropertyString(\ONVIF\Device\Property::EventTopic) == '') {
                 $Form['enabled'] = true;
             }
         }

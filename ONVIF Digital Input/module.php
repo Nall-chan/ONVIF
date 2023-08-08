@@ -12,7 +12,7 @@ class ONVIFDigitalInput extends ONVIFModuleBase
     {
         //Never delete this line!
         parent::Create();
-        $this->RegisterAttributeArray('DigitalInputs', []);
+        $this->RegisterAttributeArray(\ONVIF\Input\Attribute::DigitalInputs, []);
     }
     public function ApplyChanges(): void
     {
@@ -21,7 +21,7 @@ class ONVIFDigitalInput extends ONVIFModuleBase
         if (IPS_GetKernelRunlevel() != KR_READY) {
             return;
         }
-        if ($this->ReadPropertyString('EventTopic') == '') {
+        if ($this->ReadPropertyString(\ONVIF\Device\Property::EventTopic) == '') {
             $this->SetStatus(IS_INACTIVE);
             return;
         }
@@ -31,14 +31,14 @@ class ONVIFDigitalInput extends ONVIFModuleBase
                 $this->SetStatus(IS_EBASE + 1);
                 return;
             }
-            $this->WriteAttributeArray('DigitalInputs', $Capabilities['DigitalInputs']);
+            $this->WriteAttributeArray(\ONVIF\Input\Attribute::DigitalInputs, $Capabilities['DigitalInputs']);
             foreach ($Capabilities['DigitalInputs'] as $Name => $DigitalInput) {
                 $Ident = str_replace([' - ', ':'], ['_', ''], (string) $Name);
                 $Ident = preg_replace('/[^a-zA-Z\d]/u', '_', $Ident);
                 $this->RegisterVariableBoolean($Ident, $Name, '~Switch', 0);
             }
 
-            $Events = $this->GetEvents($this->ReadPropertyString('EventTopic'));
+            $Events = $this->GetEvents($this->ReadPropertyString(\ONVIF\Device\Property::EventTopic));
             $this->SendDebug('EventConfig', $Events, 0);
             if (count($Events) != 1) {
                 $this->SetStatus(IS_EBASE + 1);
@@ -53,7 +53,7 @@ class ONVIFDigitalInput extends ONVIFModuleBase
         $Data = json_decode($JSONString, true);
         unset($Data['DataID']);
         $this->SendDebug('ReceiveEvent', $Data, 0);
-        $EventProperties = $this->ReadAttributeArray('EventProperties');
+        $EventProperties = $this->ReadAttributeArray(\ONVIF\Device\Attribute::EventProperties);
         if (!array_key_exists($Data['Topic'], $EventProperties)) {
             return '';
         }
@@ -87,7 +87,7 @@ class ONVIFDigitalInput extends ONVIFModuleBase
         }
         $Form['elements'][0] = $this->GetConfigurationFormEventTopic($Form['elements'][0]);
         $Actions = [['type' => 'TestCenter']];
-        $DigitalInputs = $this->ReadAttributeArray('DigitalInputs');
+        $DigitalInputs = $this->ReadAttributeArray(\ONVIF\Input\Attribute::DigitalInputs);
         foreach ($DigitalInputs as $Token => $DigitalInput) {
             $Expansion = [
                 'type'     => 'ExpansionPanel',

@@ -165,6 +165,25 @@ namespace ONVIF
             return implode(', ', $Profiles);
         }
     }
+    class GUID
+    {
+        public const Configurator = '{C6A79C49-19D5-8D45-FFE5-5D77165FAEE6}';
+        public const IO = '{F40CA9A7-3B4D-4B26-7214-3A94B6074DFB}';
+        public const Input = '{73097230-1ECC-FEEB-5969-C85148DFA76E}';
+        public const Output = '{A44B3114-1F72-1FD1-96FB-D7E970BD8614}';
+        public const Stream = '{FA889450-38B6-7E20-D4DC-F2C6D0B074FB}';
+        public const ImageGrabber = '{18EA97C1-3CEC-80B7-4CAA-D91F8A2A0599}';
+        public const Event = '{62584C2E-4542-4EBF-1E92-299F4CF364E4}';
+    }
+}
+
+namespace ONVIF\Discovery
+{
+    class Attribute
+    {
+        public const Username = 'Username';
+        public const Password = 'Password';
+    }
 }
 
 namespace ONVIF\IO
@@ -219,8 +238,16 @@ namespace ONVIF\IO
     class State
     {
         public const INACTIVE = 'Interface closed';
-        public const ACTIVE ='Interface connected';
+        public const ACTIVE = 'Interface connected';
         public const CONNECTION_LOST = 'Connection lost';
+    }
+}
+
+namespace ONVIF\DataFlow{
+    class GUID
+    {
+        public const SendEvents = '{E23DD2CD-F098-268A-CE49-1CC04FE8060B}';
+        public const SendFunction = '{9B9C8DA6-BC89-21BC-3E8C-BA6E534ABC37}';
     }
 }
 
@@ -229,49 +256,74 @@ namespace ONVIF\Device
     class Property
     {
         public const EventTopic = 'EventTopic';
-        /*        public const Address = 'Address';
-                public const Username = 'Username';
-                public const Password = 'Password';
-                public const EventHandler = 'EventHandler';
-                public const WebHookIP = 'WebHookIP';
-                public const WebHookHTTPS = 'WebHookHTTPS';
-                public const WebHookPort = 'WebHookPort';
-                public const SubscribeEventTimeout = 'SubscribeEventTimeout';
-                public const SubscribeInitialTerminationTime = 'SubscribeInitialTerminationTime';
-                public const PullPointInitialTerminationTime = 'PullPointInitialTerminationTime';
-                public const PullPointTimeout = 'PullPointTimeout';
-                public const MessageLimit = 'MessageLimit';
-                */
-
     }
     class Attribute
     {
         public const EventProperties = 'EventProperties';
-        /*        public const NbrOfInputs = 'NbrOfInputs';
-                public const NbrOfOutputs = 'NbrOfOutputs';
-                public const NbrOfVideoSources = 'NbrOfVideoSources';
-                public const NbrOfAudioSources = 'NbrOfAudioSources';
-                public const NbrOfSerialPorts = 'NbrOfSerialPorts';
-                public const HasSnapshotUri = 'HasSnapshotUri';
-                public const HasRTSPStreaming = 'HasRTSPStreaming';
-                public const RuleSupport = 'RuleSupport';
-                public const AnalyticsModuleSupport = 'AnalyticsModuleSupport';
-                public const WSSubscriptionPolicySupport = 'WSSubscriptionPolicySupport';
-                public const WSPullPointSupport = 'WSPullPointSupport';
-                public const ConsumerAddress = 'ConsumerAddress';
-                public const SubscriptionReference = 'SubscriptionReference';
-                public const SubscriptionId = 'SubscriptionId';
-                public const CapabilitiesVersion = 'CapabilitiesVersion';
-                */
+    }
+}
+
+namespace ONVIF\Stream
+{
+    class Property
+    {
+        public const VideoSource = 'VideoSource';
+        public const Profile = 'Profile';
+        public const InvertPanControl = 'InvertPanControl';
+        public const InvertTiltControl = 'InvertTiltControl';
+        public const InvertZoomControl = 'InvertZoomControl';
+        public const EnablePanTiltVariable = 'EnablePanTiltVariable';
+        public const EnableZoomVariable = 'EnableZoomVariable';
+        public const EnableSpeedVariable = 'EnableSpeedVariable';
+        public const EnableTimeVariable = 'EnableTimeVariable';
+        public const EnablePanTiltHTML = 'EnablePanTiltHTML';
+        public const EnableZoomHTML = 'EnableZoomHTML';
+        public const PanTiltControlWidth = 'PanTiltControlWidth';
+        public const PanTiltControlHeight = 'PanTiltControlHeight';
+        public const PanTiltControlOpacity = 'PanTiltControlOpacity';
+        public const ZoomControlWidth = 'ZoomControlWidth';
+        public const ZoomControlHeight = 'ZoomControlHeight';
+        public const ZoomControlOpacity = 'ZoomControlOpacity';
+        public const PanDefaultSpeed = 'PanDefaultSpeed';
+        public const TiltDefaultSpeed = 'TiltDefaultSpeed';
+        public const ZoomDefaultSpeed = 'ZoomDefaultSpeed';
+        public const EnablePresetVariable = 'EnablePresetVariable';
+        public const EnablePresetProfile = 'EnablePresetProfile';
+        public const PresetProfile = 'PresetProfile';
+    }
+}
+
+namespace ONVIF\ImageGrabber
+{
+    class Property
+    {
+        public const VideoSource = 'VideoSource';
+        public const Profile = 'Profile';
+        public const Interval = 'Interval';
+        public const UseCaching = 'UseCaching';
     }
     class Timer
     {
-        public const RenewSubscription = 'RenewSubscription';
+        public const UpdateImage = 'UpdateImage';
     }
-    class State
+}
+
+namespace ONVIF\Input
+{
+    class Attribute
     {
-        public const INACTIVE = 'Interface closed';
-        public const ACTIVE ='Interface connected';
-        public const CONNECTION_LOST = 'Connection lost';
+        public const DigitalInputs = 'DigitalInputs';
+    }
+}
+
+namespace ONVIF\Output
+{
+    class Property
+    {
+        public const EmulateStatus = 'EmulateStatus';
+    }
+    class Attribute
+    {
+        public const RelayOutputs = 'RelayOutputs';
     }
 }

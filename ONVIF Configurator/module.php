@@ -7,11 +7,6 @@ require_once dirname(__DIR__) . '/libs/ONVIFModuleBase.php';
 class ONVIFConfigurator extends ONVIFModuleBase
 {
     public const wsdl = \ONVIF\WSDL::Management;
-    public const GUID_ONVIF_DIGITAL_INPUT = '{73097230-1ECC-FEEB-5969-C85148DFA76E}';
-    public const GUID_ONVIF_DIGITAL_OUTPUT = '{A44B3114-1F72-1FD1-96FB-D7E970BD8614}';
-    public const GUID_ONVIF_MEDIA_STREAM = '{FA889450-38B6-7E20-D4DC-F2C6D0B074FB}';
-    public const GUID_ONVIF_IMAGE_GRABBER = '{18EA97C1-3CEC-80B7-4CAA-D91F8A2A0599}';
-    public const GUID_ONVIF_EVENT = '{62584C2E-4542-4EBF-1E92-299F4CF364E4}';
 
     public function GetConfigurationForm(): string
     {
@@ -70,7 +65,7 @@ class ONVIFConfigurator extends ONVIFModuleBase
             }
         }
         $EventValues = [];
-        $IPSEventInstances = $this->GetInstanceList(self::GUID_ONVIF_EVENT, ['EventTopic']);
+        $IPSEventInstances = $this->GetInstanceList(\ONVIF\GUID::Event, ['EventTopic']);
 
         foreach ($Events as $Topic) {
             $Device = [
@@ -89,7 +84,7 @@ class ONVIFConfigurator extends ONVIFModuleBase
             }
 
             $Device['create'] = [
-                'moduleID'      => self::GUID_ONVIF_EVENT,
+                'moduleID'      => \ONVIF\GUID::Event,
                 'configuration' => [
                     'EventTopic' => $Topic
                 ],
@@ -114,7 +109,7 @@ class ONVIFConfigurator extends ONVIFModuleBase
         $InputTopics = [];
         foreach (array_keys($InputEvents) as $Topic) {
             $InputTopics[$Topic] = [
-                'moduleID'      => self::GUID_ONVIF_DIGITAL_INPUT,
+                'moduleID'      => \ONVIF\GUID::Input,
                 'configuration' => [
                     'EventTopic' => $Topic
                 ],
@@ -124,7 +119,7 @@ class ONVIFConfigurator extends ONVIFModuleBase
         if (count($InputTopics) == 1) {
             $InputTopics = array_shift($InputTopics);
         }
-        $InputValues = $this->GetConfigurationArray(self::GUID_ONVIF_DIGITAL_INPUT, $Capabilities['NbrOfInputs'] > 0, $InputTopics);
+        $InputValues = $this->GetConfigurationArray(\ONVIF\GUID::Input, $Capabilities['NbrOfInputs'] > 0, $InputTopics);
 
         // Outputs
         $OutputEvents = $this->GetEvents('relay', 0);
@@ -134,7 +129,7 @@ class ONVIFConfigurator extends ONVIFModuleBase
         $OutputTopics = [];
         foreach (array_keys($OutputEvents) as $Topic) {
             $OutputTopics[$Topic] = [
-                'moduleID'      => self::GUID_ONVIF_DIGITAL_OUTPUT,
+                'moduleID'      => \ONVIF\GUID::Output,
                 'configuration' => [
                     'EventTopic' => $Topic
                 ],
@@ -144,16 +139,16 @@ class ONVIFConfigurator extends ONVIFModuleBase
         if (count($OutputTopics) == 1) {
             $OutputTopics = array_shift($OutputTopics);
         }
-        $OutputValues = $this->GetConfigurationArray(self::GUID_ONVIF_DIGITAL_OUTPUT, $Capabilities['NbrOfOutputs'] > 0, $OutputTopics);
+        $OutputValues = $this->GetConfigurationArray(\ONVIF\GUID::Output, $Capabilities['NbrOfOutputs'] > 0, $OutputTopics);
 
         // Stream H264
         $StreamCreateParams = [
-            'moduleID'      => self::GUID_ONVIF_MEDIA_STREAM,
+            'moduleID'      => \ONVIF\GUID::Stream,
             'configuration' => [],
             'location'      => [$this->Translate('ONVIF Devices'), IPS_GetName($this->InstanceID)]
         ];
         $StreamValues = [];
-        $IPSStreamInstances = $this->GetInstanceList(self::GUID_ONVIF_MEDIA_STREAM, ['Profile', 'VideoSource']);
+        $IPSStreamInstances = $this->GetInstanceList(\ONVIF\GUID::Stream, ['Profile', 'VideoSource']);
         foreach ($Capabilities['VideoSources'] as $VideoSource) {
             foreach ($VideoSource['Profile'] as $ProfileIndex => $Profile) {
                 $InstanceID = array_search($Profile['token'] . ':' . $VideoSource['VideoSourceToken'], $IPSStreamInstances);
@@ -211,12 +206,12 @@ class ONVIFConfigurator extends ONVIFModuleBase
         }
         // Stream JPEG
         $StreamJPEGCreateParams = [
-            'moduleID'      => self::GUID_ONVIF_IMAGE_GRABBER,
+            'moduleID'      => \ONVIF\GUID::ImageGrabber,
             'configuration' => [],
             'location'      => [$this->Translate('ONVIF Devices'), IPS_GetName($this->InstanceID)]
         ];
         $StreamJPEGValues = [];
-        $IPSStreamJPEGInstances = $this->GetInstanceList(self::GUID_ONVIF_IMAGE_GRABBER, ['Profile', 'VideoSource']);
+        $IPSStreamJPEGInstances = $this->GetInstanceList(\ONVIF\GUID::ImageGrabber, ['Profile', 'VideoSource']);
         if ($Capabilities['HasSnapshotUri']) {
             foreach ($Capabilities['VideoSourcesJPEG'] as $VideoSourceJPEG) {
                 foreach ($VideoSourceJPEG['Profile'] as $ProfileIndex =>$Profile) {
