@@ -43,12 +43,13 @@ class ONVIFConfigurator extends ONVIFModuleBase
             $this->SendDebug('FORM', json_last_error_msg(), 0);
             return json_encode($Form);
         }
-        $this->SendDebug('VideoSources', $Capabilities['VideoSources'], 0);
-        $this->SendDebug('HasSnapshotUri', $Capabilities['HasSnapshotUri'], 0);
-        $this->SendDebug('VideoSourcesJPEG', $Capabilities['VideoSourcesJPEG'], 0);
-        $this->SendDebug('NbrOfInputs', $Capabilities['NbrOfInputs'], 0);
-        $this->SendDebug('NbrOfOutputs', $Capabilities['NbrOfOutputs'], 0);
-        $this->SendDebug('AnalyticsTokens', $Capabilities['AnalyticsTokens'], 0);
+        $this->SendDebug(\ONVIF\IO\Attribute::HasRTSPStreaming, $Capabilities[\ONVIF\IO\Attribute::HasRTSPStreaming], 0);
+        $this->SendDebug(\ONVIF\IO\Attribute::VideoSources, $Capabilities[\ONVIF\IO\Attribute::VideoSources], 0);
+        $this->SendDebug(\ONVIF\IO\Attribute::HasSnapshotUri, $Capabilities[\ONVIF\IO\Attribute::HasSnapshotUri], 0);
+        $this->SendDebug(\ONVIF\IO\Attribute::VideoSourcesJPEG, $Capabilities[\ONVIF\IO\Attribute::VideoSourcesJPEG], 0);
+        $this->SendDebug(\ONVIF\IO\Attribute::NbrOfInputs, $Capabilities[\ONVIF\IO\Attribute::NbrOfInputs], 0);
+        $this->SendDebug(\ONVIF\IO\Attribute::NbrOfOutputs, $Capabilities[\ONVIF\IO\Attribute::NbrOfOutputs], 0);
+        $this->SendDebug(\ONVIF\IO\Attribute::AnalyticsTokens, $Capabilities[\ONVIF\IO\Attribute::AnalyticsTokens], 0);
 
         //Events
         $OtherEvents = array_keys($this->GetEvents('', 0, [':VideoSource', ':PTZ', '/Relay', '/DigitalInput']));
@@ -119,7 +120,7 @@ class ONVIFConfigurator extends ONVIFModuleBase
         if (count($InputTopics) == 1) {
             $InputTopics = array_shift($InputTopics);
         }
-        $InputValues = $this->GetConfigurationArray(\ONVIF\GUID::Input, $Capabilities['NbrOfInputs'] > 0, $InputTopics);
+        $InputValues = $this->GetConfigurationArray(\ONVIF\GUID::Input, $Capabilities[\ONVIF\IO\Attribute::NbrOfInputs] > 0, $InputTopics);
 
         // Outputs
         $OutputEvents = $this->GetEvents('relay', 0);
@@ -139,7 +140,7 @@ class ONVIFConfigurator extends ONVIFModuleBase
         if (count($OutputTopics) == 1) {
             $OutputTopics = array_shift($OutputTopics);
         }
-        $OutputValues = $this->GetConfigurationArray(\ONVIF\GUID::Output, $Capabilities['NbrOfOutputs'] > 0, $OutputTopics);
+        $OutputValues = $this->GetConfigurationArray(\ONVIF\GUID::Output, $Capabilities[\ONVIF\IO\Attribute::NbrOfOutputs] > 0, $OutputTopics);
 
         // Stream H264
         $StreamCreateParams = [
@@ -149,7 +150,8 @@ class ONVIFConfigurator extends ONVIFModuleBase
         ];
         $StreamValues = [];
         $IPSStreamInstances = $this->GetInstanceList(\ONVIF\GUID::Stream, ['Profile', 'VideoSource']);
-        foreach ($Capabilities['VideoSources'] as $VideoSource) {
+        if ($Capabilities[\ONVIF\IO\Attribute::HasRTSPStreaming]) {
+        foreach ($Capabilities[\ONVIF\IO\Attribute::VideoSources] as $VideoSource) {
             foreach ($VideoSource['Profile'] as $ProfileIndex => $Profile) {
                 $InstanceID = array_search($Profile['token'] . ':' . $VideoSource['VideoSourceToken'], $IPSStreamInstances);
                 if ($InstanceID !== false) {
@@ -194,6 +196,7 @@ class ONVIFConfigurator extends ONVIFModuleBase
                 $StreamValues[] = $Device;
             }
         }
+        }
         foreach ($IPSStreamInstances as $InstanceID => $VideoSource) {
             $Device = [
                 'instanceID'  => $InstanceID,
@@ -212,8 +215,8 @@ class ONVIFConfigurator extends ONVIFModuleBase
         ];
         $StreamJPEGValues = [];
         $IPSStreamJPEGInstances = $this->GetInstanceList(\ONVIF\GUID::ImageGrabber, ['Profile', 'VideoSource']);
-        if ($Capabilities['HasSnapshotUri']) {
-            foreach ($Capabilities['VideoSourcesJPEG'] as $VideoSourceJPEG) {
+        if ($Capabilities[\ONVIF\IO\Attribute::HasSnapshotUri]) {
+            foreach ($Capabilities[\ONVIF\IO\Attribute::VideoSourcesJPEG] as $VideoSourceJPEG) {
                 foreach ($VideoSourceJPEG['Profile'] as $ProfileIndex =>$Profile) {
                     $InstanceID = array_search($Profile['token'] . ':' . $VideoSourceJPEG['VideoSourceToken'], $IPSStreamJPEGInstances);
                     if ($InstanceID !== false) {
