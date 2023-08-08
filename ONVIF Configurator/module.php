@@ -151,51 +151,51 @@ class ONVIFConfigurator extends ONVIFModuleBase
         $StreamValues = [];
         $IPSStreamInstances = $this->GetInstanceList(\ONVIF\GUID::Stream, ['Profile', 'VideoSource']);
         if ($Capabilities[\ONVIF\IO\Attribute::HasRTSPStreaming]) {
-        foreach ($Capabilities[\ONVIF\IO\Attribute::VideoSources] as $VideoSource) {
-            foreach ($VideoSource['Profile'] as $ProfileIndex => $Profile) {
-                $InstanceID = array_search($Profile['token'] . ':' . $VideoSource['VideoSourceToken'], $IPSStreamInstances);
-                if ($InstanceID !== false) {
-                    unset($IPSStreamInstances[$InstanceID]);
+            foreach ($Capabilities[\ONVIF\IO\Attribute::VideoSources] as $VideoSource) {
+                foreach ($VideoSource['Profile'] as $ProfileIndex => $Profile) {
+                    $InstanceID = array_search($Profile['token'] . ':' . $VideoSource['VideoSourceToken'], $IPSStreamInstances);
+                    if ($InstanceID !== false) {
+                        unset($IPSStreamInstances[$InstanceID]);
+                        $Device = [
+                            'instanceID'  => $InstanceID,
+                            'type'        => 'Media Stream',
+                            'VideoSource' => $VideoSource['VideoSourceToken'],
+                            'name'        => IPS_GetName($InstanceID),
+                            'Location'    => stristr(IPS_GetLocation($InstanceID), IPS_GetName($InstanceID), true),
+                            'create'      => $StreamCreateParams,
+                        ];
+                        $Device['create']['configuration'] = [
+                            'VideoSource' => $VideoSource['VideoSourceToken'],
+                            'Profile'     => $Profile['token']
+                        ];
+                        unset($VideoSource['Profile'][$ProfileIndex]);
+                        $StreamValues[] = $Device;
+                    }
+                }
+                if (count($VideoSource['Profile'])) { // weitere Profile vorhanden, dann nächste Instanz anbieten
                     $Device = [
-                        'instanceID'  => $InstanceID,
+                        'instanceID'  => 0,
                         'type'        => 'Media Stream',
                         'VideoSource' => $VideoSource['VideoSourceToken'],
-                        'name'        => IPS_GetName($InstanceID),
-                        'Location'    => stristr(IPS_GetLocation($InstanceID), IPS_GetName($InstanceID), true),
-                        'create'      => $StreamCreateParams,
+                        'name'        => $VideoSource['VideoSourceName'],
+                        'Location'    => ''
                     ];
-                    $Device['create']['configuration'] = [
-                        'VideoSource' => $VideoSource['VideoSourceToken'],
-                        'Profile'     => $Profile['token']
-                    ];
-                    unset($VideoSource['Profile'][$ProfileIndex]);
+                    $Create = [];
+                    foreach ($VideoSource['Profile'] as $ProfileIndex => $Profile) {
+                        $Create[$VideoSource['VideoSourceName'] . ' (' . $Profile['Name'] . ')'] = $StreamCreateParams;
+                        $Create[$VideoSource['VideoSourceName'] . ' (' . $Profile['Name'] . ')']['configuration'] = [
+                            'VideoSource' => $VideoSource['VideoSourceToken'],
+                            'Profile'     => $Profile['token']
+                        ];
+                    }
+                    if (count($Create) == 1) {
+                        $Device['name'] = $VideoSource['VideoSourceName'] . ' (' . $Profile['Name'] . ')';
+                        $Create = array_shift($Create);
+                    }
+                    $Device['create'] = $Create;
                     $StreamValues[] = $Device;
                 }
             }
-            if (count($VideoSource['Profile'])) { // weitere Profile vorhanden, dann nächste Instanz anbieten
-                $Device = [
-                    'instanceID'  => 0,
-                    'type'        => 'Media Stream',
-                    'VideoSource' => $VideoSource['VideoSourceToken'],
-                    'name'        => $VideoSource['VideoSourceName'],
-                    'Location'    => ''
-                ];
-                $Create = [];
-                foreach ($VideoSource['Profile'] as $ProfileIndex => $Profile) {
-                    $Create[$VideoSource['VideoSourceName'] . ' (' . $Profile['Name'] . ')'] = $StreamCreateParams;
-                    $Create[$VideoSource['VideoSourceName'] . ' (' . $Profile['Name'] . ')']['configuration'] = [
-                        'VideoSource' => $VideoSource['VideoSourceToken'],
-                        'Profile'     => $Profile['token']
-                    ];
-                }
-                if (count($Create) == 1) {
-                    $Device['name'] = $VideoSource['VideoSourceName'] . ' (' . $Profile['Name'] . ')';
-                    $Create = array_shift($Create);
-                }
-                $Device['create'] = $Create;
-                $StreamValues[] = $Device;
-            }
-        }
         }
         foreach ($IPSStreamInstances as $InstanceID => $VideoSource) {
             $Device = [
