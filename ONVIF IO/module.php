@@ -208,6 +208,7 @@ class ONVIFIO extends IPSModuleStrict
         if (!$Scopes) {
             $Scopes = [\ONVIF\Scopes::ProfileS];
             $this->Warnings = array_merge($this->Warnings, [$this->Translate('Failed to get scopes, device not ONVIF compliant!')]);
+            $this->LogMessage($this->Translate('Failed to get scopes, device not ONVIF compliant!'), KL_WARNING);
         }
         $Profile = new \ONVIF\Profile($Scopes);
         $this->SendDebug('ProfileBitMask', $Profile->toString(), 0);
@@ -215,6 +216,7 @@ class ONVIFIO extends IPSModuleStrict
             $Profile->Profile = \ONVIF\Profile::S;
             $this->SendDebug('Fallback ProfileBitMask', $Profile->toString(), 0);
             $this->Warnings = array_merge($this->Warnings, [$this->Translate('No profile in scopes, device not ONVIF compliant!')]);
+            $this->LogMessage($this->Translate('No profile in scopes, device not ONVIF compliant!'), KL_WARNING);
         }
         $this->lock('Profile');
         $this->Profile = $Profile;
@@ -252,6 +254,7 @@ class ONVIFIO extends IPSModuleStrict
             // GetServices besorgt XAddr, Pflicht bei T, selten bei S unterstützt.
             if (!$this->GetServices() && $this->Profile->HasProfile(\ONVIF\Profile::T)) {
                 $this->Warnings = array_merge($this->Warnings, [$this->Translate('Failed to get services. Device reported ONVIF T scope, but is not compliant!')]);
+                $this->LogMessage($this->Translate('Failed to get services. Device reported ONVIF T scope, but is not compliant!'), KL_WARNING);
             }
             $XAddr = $this->ReadAttributeArray(\ONVIF\IO\Attribute::XAddr);
 
@@ -319,6 +322,7 @@ class ONVIFIO extends IPSModuleStrict
             } else {
                 if ($this->Profile->HasProfile(\ONVIF\Profile::T)) { //Profile T ist GetServiceCapabilities bei DeviceIO Pflicht
                     $this->Warnings = array_merge($this->Warnings, [$this->Translate('Failed to get DeviceIO service capabilities. Device reported ONVIF T scope, but is not compliant!')]);
+                    $this->LogMessage($this->Translate('Failed to get DeviceIO service capabilities. Device reported ONVIF T scope, but is not compliant!'), KL_WARNING);
                 }
                     //Fallback für reine Profile S Geräte
                 $VideoSources = $this->GetVideoSources($XAddr[\ONVIF\NS::Media], \ONVIF\WSDL::Media); // array of Token
@@ -360,6 +364,7 @@ class ONVIFIO extends IPSModuleStrict
                 } else {
                     if ($this->Profile->HasProfile(\ONVIF\Profile::T)) { //Profile T ist GetServiceCapabilities bei Media2 Pflicht
                         $this->Warnings = array_merge($this->Warnings, [$this->Translate('Failed to get Media2 service capabilities. Device reported ONVIF T scope, but is not compliant!')]);
+                        $this->LogMessage($this->Translate('Failed to get Media2 service capabilities. Device reported ONVIF T scope, but is not compliant!'), KL_WARNING);
                     }
                 }
                 // 4c.ONVIF Request GetProfiles an \ONVIF\WSDL::Media2
@@ -380,6 +385,7 @@ class ONVIFIO extends IPSModuleStrict
                 } else {
                     if ($this->Profile->HasProfile(\ONVIF\Profile::T)) { //Profile T ist GetServiceCapabilities bei Media Pflicht
                         $this->Warnings = array_merge($this->Warnings, [$this->Translate('Failed to get Media service capabilities. Device reported ONVIF T scope, but is not compliant!')]);
+                        $this->LogMessage($this->Translate('Failed to get Media service capabilities. Device reported ONVIF T scope, but is not compliant!'), KL_WARNING);
                     }
                 }
 
@@ -404,6 +410,7 @@ class ONVIFIO extends IPSModuleStrict
                 } else {
                     if ($this->Profile->HasProfile(\ONVIF\Profile::T)) { //Profile T ist GetServiceCapabilities bei Imaging Pflicht
                         $this->Warnings = array_merge($this->Warnings, [$this->Translate('Failed to get Imaging service capabilities. Device reported ONVIF T scope, but is not compliant!')]);
+                        $this->LogMessage($this->Translate('Failed to get Imaging service capabilities. Device reported ONVIF T scope, but is not compliant!'), KL_WARNING);
                     }
                 }
             }
@@ -421,6 +428,7 @@ class ONVIFIO extends IPSModuleStrict
                 } else {
                     if ($this->Profile->HasProfile(\ONVIF\Profile::T)) { //Profile T ist GetServiceCapabilities bei Event Pflicht
                         $this->Warnings = array_merge($this->Warnings, [$this->Translate('Failed to get Event service capabilities. Device reported ONVIF T scope, but is not compliant!')]);
+                        $this->LogMessage($this->Translate('Failed to get Event service capabilities. Device reported ONVIF T scope, but is not compliant!'), KL_WARNING);
                     }
                 }
                 //Jetzt Events auslesen
@@ -455,6 +463,7 @@ class ONVIFIO extends IPSModuleStrict
             } else {
                 if (count($AnalyticsTokens)) {
                     $this->Warnings = array_merge($this->Warnings, [$this->Translate('Analytics events could not be retrieved. The device reported AnalyticsTokens, but the Analytics namespace and XAddr were not reported!')]);
+                    $this->LogMessage($this->Translate('Analytics events could not be retrieved. The device reported AnalyticsTokens, but the Analytics namespace and XAddr were not reported!'), KL_WARNING);
                 }
             }
             // Variablen in Attribute schreiben:
@@ -506,6 +515,7 @@ class ONVIFIO extends IPSModuleStrict
             }
         } else {
             $this->Warnings = array_merge($this->Warnings, [$this->Translate('This device does not support ONVIF events, but it is mandatory.')]);
+            $this->LogMessage($this->Translate('This device does not support ONVIF events, but it is mandatory.'), KL_WARNING);
             $this->LogMessage($this->Translate(\ONVIF\IO\State::ACTIVE), KL_MESSAGE);
             $this->SetStatus(IS_ACTIVE);
         }
@@ -1888,7 +1898,7 @@ class ONVIFIO extends IPSModuleStrict
             $this->SendDebug('Soap Response Headers Error', $ONVIFClient->client->__getLastResponseHeaders(), 0);
             $this->SendDebug('Soap Response Error', $Response, 0);
             $this->SendDebug('Soap Response Error (' . $e->getCode() . ')', $e->getMessage(), 0);
-            $this->lastSOAPError = $e->getMessage();
+            $this->lastSOAPError = $Function . ': ' . $e->getMessage();
             unset($ONVIFClient);
             return $e;
         }
