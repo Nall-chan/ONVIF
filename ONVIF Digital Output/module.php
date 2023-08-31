@@ -9,15 +9,15 @@ require_once __DIR__ . '/../libs/ONVIFModuleBase.php';
  */
 class ONVIFDigitalOutput extends ONVIFModuleBase
 {
-    const wsdl = \ONVIF\WSDL::Management; // default, wenn DeviceIO nicht genutzt
-    const TopicFilter = 'relay';
+    public const wsdl = \ONVIF\WSDL::Management; // default, wenn DeviceIO nicht genutzt
+    public const TopicFilter = 'relay';
 
     public function Create()
     {
         //Never delete this line!
         parent::Create();
-        $this->RegisterAttributeArray('RelayOutputs', []);
-        $this->RegisterPropertyBoolean('EmulateStatus', false);
+        $this->RegisterPropertyBoolean(\ONVIF\Output\Property::EmulateStatus, false);
+        $this->RegisterAttributeArray(\ONVIF\Output\Attribute::RelayOutputs, []);
     }
 
     public function ApplyChanges()
@@ -27,7 +27,7 @@ class ONVIFDigitalOutput extends ONVIFModuleBase
         if (IPS_GetKernelRunlevel() != KR_READY) {
             return;
         }
-        if ($this->ReadPropertyString('EventTopic') == '') {
+        if ($this->ReadPropertyString(\ONVIF\Device\Property::EventTopic) == '') {
             $this->SetStatus(IS_INACTIVE);
             return;
         }
@@ -44,14 +44,14 @@ class ONVIFDigitalOutput extends ONVIFModuleBase
                 $this->xAddr = $Capabilities['XAddr'][\ONVIF\NS::Management];
                 $this->wsdl = \ONVIF\WSDL::Management;
             }
-            $this->WriteAttributeArray('RelayOutputs', $Capabilities['RelayOutputs']);
+            $this->WriteAttributeArray(\ONVIF\Output\Attribute::RelayOutputs, $Capabilities['RelayOutputs']);
             foreach ($Capabilities['RelayOutputs'] as $Name => $RelayOutput) {
                 $Ident = str_replace([' - ', ':'], ['_', ''], (string) $Name);
                 $Ident = preg_replace('/[^a-zA-Z\d]/u', '_', $Ident);
                 $this->RegisterVariableBoolean($Ident, $Name, '~Switch', 0);
                 $this->EnableAction($Ident);
             }
-            $Events = $this->ReadAttributeArray('EventProperties');
+            $Events = $this->ReadAttributeArray(\ONVIF\Device\Attribute::EventProperties);
             if (count($Events) != 1) {
                 $this->SetStatus(IS_EBASE + 1);
             } else {
@@ -64,7 +64,7 @@ class ONVIFDigitalOutput extends ONVIFModuleBase
 
     public function SetRelayOutputState(string $Ident, bool $Value)
     {
-        if (!array_key_exists($Ident, $this->ReadAttributeArray('RelayOutputs'))) {
+        if (!array_key_exists($Ident, $this->ReadAttributeArray(\ONVIF\Output\Attribute::RelayOutputs))) {
             set_error_handler([$this, 'ModulErrorHandler']);
             trigger_error($this->Translate('Invalid Ident'), E_USER_NOTICE);
             restore_error_handler();
@@ -79,7 +79,7 @@ class ONVIFDigitalOutput extends ONVIFModuleBase
         if ($Result == false) {
             return false;
         }
-        if ($this->ReadPropertyBoolean('EmulateStatus')) {
+        if ($this->ReadPropertyBoolean(\ONVIF\Output\Property::EmulateStatus)) {
             $this->SetValueBoolean($Ident, $Value);
         }
         return true;
@@ -98,7 +98,7 @@ class ONVIFDigitalOutput extends ONVIFModuleBase
         $Data = json_decode($JSONString, true);
         unset($Data['DataID']);
         $this->SendDebug('ReceiveEvent', $Data, 0);
-        $Events = $this->ReadAttributeArray('EventProperties');
+        $Events = $this->ReadAttributeArray(\ONVIF\Device\Attribute::EventProperties);
         $EventProperty = array_pop($Events);
         $SourceIndex = array_search('tt:ReferenceToken', array_column($EventProperty['Sources'], 'Type'));
         if ($SourceIndex === false) {
@@ -132,7 +132,7 @@ class ONVIFDigitalOutput extends ONVIFModuleBase
         }
         $Form['elements'][0] = $this->GetConfigurationFormEventTopic($Form['elements'][0]);
         $Actions = [['type' => 'TestCenter']];
-        $RelayOutputs = $this->ReadAttributeArray('RelayOutputs');
+        $RelayOutputs = $this->ReadAttributeArray(\ONVIF\Output\Attribute::RelayOutputs);
         foreach ($RelayOutputs as $Token => $RelayOutput) {
             $Expansion = [
                 'type'     => 'ExpansionPanel',

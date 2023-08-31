@@ -6,12 +6,7 @@ require_once dirname(__DIR__) . '/libs/ONVIFModuleBase.php';
 
 class ONVIFConfigurator extends ONVIFModuleBase
 {
-    const wsdl = \ONVIF\WSDL::Management;
-    const GUID_ONVIF_DIGITAL_INPUT = '{73097230-1ECC-FEEB-5969-C85148DFA76E}';
-    const GUID_ONVIF_DIGITAL_OUTPUT = '{A44B3114-1F72-1FD1-96FB-D7E970BD8614}';
-    const GUID_ONVIF_MEDIA_STREAM = '{FA889450-38B6-7E20-D4DC-F2C6D0B074FB}';
-    const GUID_ONVIF_IMAGE_GRABBER = '{18EA97C1-3CEC-80B7-4CAA-D91F8A2A0599}';
-    const GUID_ONVIF_EVENT = '{62584C2E-4542-4EBF-1E92-299F4CF364E4}';
+    public const wsdl = \ONVIF\WSDL::Management;
 
     public function GetConfigurationForm()
     {
@@ -48,12 +43,13 @@ class ONVIFConfigurator extends ONVIFModuleBase
             $this->SendDebug('FORM', json_last_error_msg(), 0);
             return json_encode($Form);
         }
-        $this->SendDebug('VideoSources', $Capabilities['VideoSources'], 0);
-        $this->SendDebug('HasSnapshotUri', $Capabilities['HasSnapshotUri'], 0);
-        $this->SendDebug('VideoSourcesJPEG', $Capabilities['VideoSourcesJPEG'], 0);
-        $this->SendDebug('NbrOfInputs', $Capabilities['NbrOfInputs'], 0);
-        $this->SendDebug('NbrOfOutputs', $Capabilities['NbrOfOutputs'], 0);
-        $this->SendDebug('AnalyticsTokens', $Capabilities['AnalyticsTokens'], 0);
+        $this->SendDebug(\ONVIF\IO\Attribute::HasRTSPStreaming, $Capabilities[\ONVIF\IO\Attribute::HasRTSPStreaming], 0);
+        $this->SendDebug(\ONVIF\IO\Attribute::VideoSources, $Capabilities[\ONVIF\IO\Attribute::VideoSources], 0);
+        $this->SendDebug(\ONVIF\IO\Attribute::HasSnapshotUri, $Capabilities[\ONVIF\IO\Attribute::HasSnapshotUri], 0);
+        $this->SendDebug(\ONVIF\IO\Attribute::VideoSourcesJPEG, $Capabilities[\ONVIF\IO\Attribute::VideoSourcesJPEG], 0);
+        $this->SendDebug(\ONVIF\IO\Attribute::NbrOfInputs, $Capabilities[\ONVIF\IO\Attribute::NbrOfInputs], 0);
+        $this->SendDebug(\ONVIF\IO\Attribute::NbrOfOutputs, $Capabilities[\ONVIF\IO\Attribute::NbrOfOutputs], 0);
+        $this->SendDebug(\ONVIF\IO\Attribute::AnalyticsTokens, $Capabilities[\ONVIF\IO\Attribute::AnalyticsTokens], 0);
 
         //Events
         $OtherEvents = array_keys($this->GetEvents('', 0, [':VideoSource', ':PTZ', '/Relay', '/DigitalInput']));
@@ -70,7 +66,7 @@ class ONVIFConfigurator extends ONVIFModuleBase
             }
         }
         $EventValues = [];
-        $IPSEventInstances = $this->GetInstanceList(self::GUID_ONVIF_EVENT, ['EventTopic']);
+        $IPSEventInstances = $this->GetInstanceList(\ONVIF\GUID::Event, ['EventTopic']);
 
         foreach ($Events as $Topic) {
             $Device = [
@@ -89,7 +85,7 @@ class ONVIFConfigurator extends ONVIFModuleBase
             }
 
             $Device['create'] = [
-                'moduleID'      => self::GUID_ONVIF_EVENT,
+                'moduleID'      => \ONVIF\GUID::Event,
                 'configuration' => [
                     'EventTopic' => $Topic
                 ],
@@ -114,7 +110,7 @@ class ONVIFConfigurator extends ONVIFModuleBase
         $InputTopics = [];
         foreach (array_keys($InputEvents) as $Topic) {
             $InputTopics[$Topic] = [
-                'moduleID'      => self::GUID_ONVIF_DIGITAL_INPUT,
+                'moduleID'      => \ONVIF\GUID::Input,
                 'configuration' => [
                     'EventTopic' => $Topic
                 ],
@@ -124,7 +120,7 @@ class ONVIFConfigurator extends ONVIFModuleBase
         if (count($InputTopics) == 1) {
             $InputTopics = array_shift($InputTopics);
         }
-        $InputValues = $this->GetConfigurationArray(self::GUID_ONVIF_DIGITAL_INPUT, $Capabilities['NbrOfInputs'] > 0, $InputTopics);
+        $InputValues = $this->GetConfigurationArray(\ONVIF\GUID::Input, $Capabilities[\ONVIF\IO\Attribute::NbrOfInputs] > 0, $InputTopics);
 
         // Outputs
         $OutputEvents = $this->GetEvents('relay', 0);
@@ -134,7 +130,7 @@ class ONVIFConfigurator extends ONVIFModuleBase
         $OutputTopics = [];
         foreach (array_keys($OutputEvents) as $Topic) {
             $OutputTopics[$Topic] = [
-                'moduleID'      => self::GUID_ONVIF_DIGITAL_OUTPUT,
+                'moduleID'      => \ONVIF\GUID::Output,
                 'configuration' => [
                     'EventTopic' => $Topic
                 ],
@@ -144,59 +140,61 @@ class ONVIFConfigurator extends ONVIFModuleBase
         if (count($OutputTopics) == 1) {
             $OutputTopics = array_shift($OutputTopics);
         }
-        $OutputValues = $this->GetConfigurationArray(self::GUID_ONVIF_DIGITAL_OUTPUT, $Capabilities['NbrOfOutputs'] > 0, $OutputTopics);
+        $OutputValues = $this->GetConfigurationArray(\ONVIF\GUID::Output, $Capabilities[\ONVIF\IO\Attribute::NbrOfOutputs] > 0, $OutputTopics);
 
         // Stream H264
         $StreamCreateParams = [
-            'moduleID'      => self::GUID_ONVIF_MEDIA_STREAM,
+            'moduleID'      => \ONVIF\GUID::Stream,
             'configuration' => [],
             'location'      => [$this->Translate('ONVIF Devices'), IPS_GetName($this->InstanceID)]
         ];
         $StreamValues = [];
-        $IPSStreamInstances = $this->GetInstanceList(self::GUID_ONVIF_MEDIA_STREAM, ['Profile', 'VideoSource']);
-        foreach ($Capabilities['VideoSources'] as $VideoSource) {
-            foreach ($VideoSource['Profile'] as $ProfileIndex => $Profile) {
-                $InstanceID = array_search($Profile['token'] . ':' . $VideoSource['VideoSourceToken'], $IPSStreamInstances);
-                if ($InstanceID !== false) {
-                    unset($IPSStreamInstances[$InstanceID]);
+        $IPSStreamInstances = $this->GetInstanceList(\ONVIF\GUID::Stream, ['Profile', 'VideoSource']);
+        if ($Capabilities[\ONVIF\IO\Attribute::HasRTSPStreaming]) {
+            foreach ($Capabilities[\ONVIF\IO\Attribute::VideoSources] as $VideoSource) {
+                foreach ($VideoSource['Profile'] as $ProfileIndex => $Profile) {
+                    $InstanceID = array_search($Profile['token'] . ':' . $VideoSource['VideoSourceToken'], $IPSStreamInstances);
+                    if ($InstanceID !== false) {
+                        unset($IPSStreamInstances[$InstanceID]);
+                        $Device = [
+                            'instanceID'  => $InstanceID,
+                            'type'        => 'Media Stream',
+                            'VideoSource' => $VideoSource['VideoSourceToken'],
+                            'name'        => IPS_GetName($InstanceID),
+                            'Location'    => stristr(IPS_GetLocation($InstanceID), IPS_GetName($InstanceID), true),
+                            'create'      => $StreamCreateParams,
+                        ];
+                        $Device['create']['configuration'] = [
+                            'VideoSource' => $VideoSource['VideoSourceToken'],
+                            'Profile'     => $Profile['token']
+                        ];
+                        unset($VideoSource['Profile'][$ProfileIndex]);
+                        $StreamValues[] = $Device;
+                    }
+                }
+                if (count($VideoSource['Profile'])) { // weitere Profile vorhanden, dann nächste Instanz anbieten
                     $Device = [
-                        'instanceID'  => $InstanceID,
+                        'instanceID'  => 0,
                         'type'        => 'Media Stream',
                         'VideoSource' => $VideoSource['VideoSourceToken'],
-                        'name'        => IPS_GetName($InstanceID),
-                        'Location'    => stristr(IPS_GetLocation($InstanceID), IPS_GetName($InstanceID), true),
-                        'create'      => $StreamCreateParams,
+                        'name'        => $VideoSource['VideoSourceName'],
+                        'Location'    => ''
                     ];
-                    $Device['create']['configuration'] = [
-                        'VideoSource' => $VideoSource['VideoSourceToken'],
-                        'Profile'     => $Profile['token']
-                    ];
-                    unset($VideoSource['Profile'][$ProfileIndex]);
+                    $Create = [];
+                    foreach ($VideoSource['Profile'] as $ProfileIndex => $Profile) {
+                        $Create[$VideoSource['VideoSourceName'] . ' (' . $Profile['Name'] . ')'] = $StreamCreateParams;
+                        $Create[$VideoSource['VideoSourceName'] . ' (' . $Profile['Name'] . ')']['configuration'] = [
+                            'VideoSource' => $VideoSource['VideoSourceToken'],
+                            'Profile'     => $Profile['token']
+                        ];
+                    }
+                    if (count($Create) == 1) {
+                        $Device['name'] = $VideoSource['VideoSourceName'] . ' (' . $Profile['Name'] . ')';
+                        $Create = array_shift($Create);
+                    }
+                    $Device['create'] = $Create;
                     $StreamValues[] = $Device;
                 }
-            }
-            if (count($VideoSource['Profile'])) { // weitere Profile vorhanden, dann nächste Instanz anbieten
-                $Device = [
-                    'instanceID'  => 0,
-                    'type'        => 'Media Stream',
-                    'VideoSource' => $VideoSource['VideoSourceToken'],
-                    'name'        => $VideoSource['VideoSourceName'],
-                    'Location'    => ''
-                ];
-                $Create = [];
-                foreach ($VideoSource['Profile'] as $ProfileIndex => $Profile) {
-                    $Create[$VideoSource['VideoSourceName'] . ' (' . $Profile['Name'] . ')'] = $StreamCreateParams;
-                    $Create[$VideoSource['VideoSourceName'] . ' (' . $Profile['Name'] . ')']['configuration'] = [
-                        'VideoSource' => $VideoSource['VideoSourceToken'],
-                        'Profile'     => $Profile['token']
-                    ];
-                }
-                if (count($Create) == 1) {
-                    $Device['name'] = $VideoSource['VideoSourceName'] . ' (' . $Profile['Name'] . ')';
-                    $Create = array_shift($Create);
-                }
-                $Device['create'] = $Create;
-                $StreamValues[] = $Device;
             }
         }
         foreach ($IPSStreamInstances as $InstanceID => $VideoSource) {
@@ -211,14 +209,14 @@ class ONVIFConfigurator extends ONVIFModuleBase
         }
         // Stream JPEG
         $StreamJPEGCreateParams = [
-            'moduleID'      => self::GUID_ONVIF_IMAGE_GRABBER,
+            'moduleID'      => \ONVIF\GUID::ImageGrabber,
             'configuration' => [],
             'location'      => [$this->Translate('ONVIF Devices'), IPS_GetName($this->InstanceID)]
         ];
         $StreamJPEGValues = [];
-        $IPSStreamJPEGInstances = $this->GetInstanceList(self::GUID_ONVIF_IMAGE_GRABBER, ['Profile', 'VideoSource']);
-        if ($Capabilities['HasSnapshotUri']) {
-            foreach ($Capabilities['VideoSourcesJPEG'] as $VideoSourceJPEG) {
+        $IPSStreamJPEGInstances = $this->GetInstanceList(\ONVIF\GUID::ImageGrabber, ['Profile', 'VideoSource']);
+        if ($Capabilities[\ONVIF\IO\Attribute::HasSnapshotUri]) {
+            foreach ($Capabilities[\ONVIF\IO\Attribute::VideoSourcesJPEG] as $VideoSourceJPEG) {
                 foreach ($VideoSourceJPEG['Profile'] as $ProfileIndex =>$Profile) {
                     $InstanceID = array_search($Profile['token'] . ':' . $VideoSourceJPEG['VideoSourceToken'], $IPSStreamJPEGInstances);
                     if ($InstanceID !== false) {

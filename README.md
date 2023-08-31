@@ -142,6 +142,8 @@ Für das Discovery werden Pakete über die Multicast-Adresse `239.255.255.250` a
 
 **Version 2.12:** <span style="color:red">**(Dies ist die letzte Version für IPS kleiner Version 7.0)**</span>  
 - Lesen der Fähigkeiten eines Gerätes in der IO Instanz verbessert.  
+- IO Instanz schreibt Warnungen in das Meldungslog.  
+- Vorhandene Fehlermeldungen bei der Kommunikation enthalten jetzt den Funktionsnamen bei welchem er Fehler aufgetreten ist.  
 - Falsche Zeitstempel in Antworten von Geräten (`TerminationTime`) konnten zu Fehlern führen.  
 
 **Version 2.10:**  

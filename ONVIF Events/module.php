@@ -6,7 +6,7 @@ require_once __DIR__ . '/../libs/ONVIFModuleBase.php';
 
 class ONVIFEvents extends ONVIFModuleBase
 {
-    const wsdl = '';
+    public const wsdl = '';
     public function Create()
     {
         parent::Create();
@@ -18,10 +18,10 @@ class ONVIFEvents extends ONVIFModuleBase
         if (IPS_GetKernelRunlevel() != KR_READY) {
             return;
         }
-        if ($this->ReadPropertyString('EventTopic') == '') {
+        if ($this->ReadPropertyString(\ONVIF\Device\Property::EventTopic) == '') {
             $this->SetStatus(IS_INACTIVE);
         } else {
-            $Events = $this->GetEvents($this->ReadPropertyString('EventTopic'));
+            $Events = $this->GetEvents($this->ReadPropertyString(\ONVIF\Device\Property::EventTopic));
             $this->SendDebug('EventConfig', $Events, 0);
             if (count($Events) == 0) {
                 $this->SetStatus(IS_INACTIVE);
@@ -36,11 +36,11 @@ class ONVIFEvents extends ONVIFModuleBase
         $Data = json_decode($JSONString, true);
         unset($Data['DataID']);
         $this->SendDebug('ReceiveEvent', $Data, 0);
-        $EventProperties = $this->ReadAttributeArray('EventProperties');
+        $EventProperties = $this->ReadAttributeArray(\ONVIF\Device\Attribute::EventProperties);
         if (!array_key_exists($Data['Topic'], $EventProperties)) {
             return false;
         }
-        $PreName = str_replace($this->ReadPropertyString('EventTopic'), '', $Data['Topic']);
+        $PreName = str_replace($this->ReadPropertyString(\ONVIF\Device\Property::EventTopic), '', $Data['Topic']);
         return $this->SetEventStatusVariable($PreName, $EventProperties[$Data['Topic']], $Data);
     }
 

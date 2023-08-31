@@ -17,44 +17,44 @@ eval('declare(strict_types=1);namespace ONVIFMediaStream {?>' . file_get_content
 class ONVIFMediaStream extends ONVIFModuleBase
 {
     use \ONVIFMediaStream\WebhookHelper;
-    const wsdl = \ONVIF\WSDL::Media; // default für Media1
-    const PTZwsdl = \ONVIF\WSDL::PTZ; // statisch
-    const TopicFilter = 'videosource';
+    public const wsdl = \ONVIF\WSDL::Media; // default für Media1
+    public const PTZwsdl = \ONVIF\WSDL::PTZ; // statisch
+    public const TopicFilter = 'videosource';
 
     public function Create()
     {
         //Never delete this line!
         parent::Create();
         //Stream
-        $this->RegisterPropertyString('VideoSource', '');
-        $this->RegisterPropertyString('Profile', '');
+        $this->RegisterPropertyString(\ONVIF\Stream\Property::VideoSource, '');
+        $this->RegisterPropertyString(\ONVIF\Stream\Property::Profile, '');
         // Invert Controls
-        $this->RegisterPropertyBoolean('InvertPanControl', false);
-        $this->RegisterPropertyBoolean('InvertTiltControl', false);
-        $this->RegisterPropertyBoolean('InvertZoomControl', false);
+        $this->RegisterPropertyBoolean(\ONVIF\Stream\Property::InvertPanControl, false);
+        $this->RegisterPropertyBoolean(\ONVIF\Stream\Property::InvertTiltControl, false);
+        $this->RegisterPropertyBoolean(\ONVIF\Stream\Property::InvertZoomControl, false);
         //IPS Variables
-        $this->RegisterPropertyBoolean('EnablePanTiltVariable', false);
-        $this->RegisterPropertyBoolean('EnableZoomVariable', false);
-        $this->RegisterPropertyBoolean('EnableSpeedVariable', false);
-        $this->RegisterPropertyBoolean('EnableTimeVariable', false);
+        $this->RegisterPropertyBoolean(\ONVIF\Stream\Property::EnablePanTiltVariable, false);
+        $this->RegisterPropertyBoolean(\ONVIF\Stream\Property::EnableZoomVariable, false);
+        $this->RegisterPropertyBoolean(\ONVIF\Stream\Property::EnableSpeedVariable, false);
+        $this->RegisterPropertyBoolean(\ONVIF\Stream\Property::EnableTimeVariable, false);
         //HTML-Box
-        $this->RegisterPropertyBoolean('EnablePanTiltHTML', false);
-        $this->RegisterPropertyBoolean('EnableZoomHTML', false);
+        $this->RegisterPropertyBoolean(\ONVIF\Stream\Property::EnablePanTiltHTML, false);
+        $this->RegisterPropertyBoolean(\ONVIF\Stream\Property::EnableZoomHTML, false);
         //SVG-Design in HTML-Box
-        $this->RegisterPropertyInteger('PanTiltControlWidth', 100);
-        $this->RegisterPropertyInteger('PanTiltControlHeight', 100);
-        $this->RegisterPropertyInteger('PanTiltControlOpacity', 60);
-        $this->RegisterPropertyInteger('ZoomControlWidth', 50);
-        $this->RegisterPropertyInteger('ZoomControlHeight', 100);
-        $this->RegisterPropertyInteger('ZoomControlOpacity', 60);
+        $this->RegisterPropertyInteger(\ONVIF\Stream\Property::PanTiltControlWidth, 100);
+        $this->RegisterPropertyInteger(\ONVIF\Stream\Property::PanTiltControlHeight, 100);
+        $this->RegisterPropertyInteger(\ONVIF\Stream\Property::PanTiltControlOpacity, 60);
+        $this->RegisterPropertyInteger(\ONVIF\Stream\Property::ZoomControlWidth, 50);
+        $this->RegisterPropertyInteger(\ONVIF\Stream\Property::ZoomControlHeight, 100);
+        $this->RegisterPropertyInteger(\ONVIF\Stream\Property::ZoomControlOpacity, 60);
         //Default Speed
-        $this->RegisterPropertyFloat('PanDefaultSpeed', 1);
-        $this->RegisterPropertyFloat('TiltDefaultSpeed', 1);
-        $this->RegisterPropertyFloat('ZoomDefaultSpeed', 1);
+        $this->RegisterPropertyFloat(\ONVIF\Stream\Property::PanDefaultSpeed, 1);
+        $this->RegisterPropertyFloat(\ONVIF\Stream\Property::TiltDefaultSpeed, 1);
+        $this->RegisterPropertyFloat(\ONVIF\Stream\Property::ZoomDefaultSpeed, 1);
         // Presets
-        $this->RegisterPropertyBoolean('EnablePresetVariable', false);
-        $this->RegisterPropertyBoolean('EnablePresetProfile', false);
-        $this->RegisterPropertyString('PresetProfile', json_encode([]));
+        $this->RegisterPropertyBoolean(\ONVIF\Stream\Property::EnablePresetVariable, false);
+        $this->RegisterPropertyBoolean(\ONVIF\Stream\Property::EnablePresetProfile, false);
+        $this->RegisterPropertyString(\ONVIF\Stream\Property::PresetProfile, json_encode([]));
         // Buffer
         $this->PTZ_token = '';
         $this->PTZ_xAddr = '';
@@ -140,12 +140,12 @@ class ONVIFMediaStream extends ONVIFModuleBase
         $this->PresetTokenList = [];
         $this->AuthorizationKey = '';
 
-        if ($this->ReadPropertyString('VideoSource') == '') {
+        if ($this->ReadPropertyString(\ONVIF\Stream\Property::VideoSource) == '') {
             $this->SetStatus(IS_INACTIVE);
             $this->SetMedia('');
             return;
         }
-        if ($this->ReadPropertyString('Profile') == '') {
+        if ($this->ReadPropertyString(\ONVIF\Stream\Property::Profile) == '') {
             $this->SetStatus(IS_INACTIVE);
             $this->SetMedia('');
             return;
@@ -163,35 +163,35 @@ class ONVIFMediaStream extends ONVIFModuleBase
             $this->SetStatus(IS_EBASE + 1);
         }
 
-        if ($this->ReadPropertyBoolean('EnablePanTiltHTML') || $this->ReadPropertyBoolean('EnableZoomHTML')) {
+        if ($this->ReadPropertyBoolean(\ONVIF\Stream\Property::EnablePanTiltHTML) || $this->ReadPropertyBoolean(\ONVIF\Stream\Property::EnableZoomHTML)) {
             $this->RegisterHook('/hook/ONVIF/PTZ/' . $this->InstanceID);
             $this->WritePTZInHTMLBox();
         } else {
             $this->UnregisterHook('/hook/ONVIF/PTZ/' . $this->InstanceID);
             $this->UnregisterVariable('PTZControlHtml');
         }
-        if ($this->ReadPropertyBoolean('EnablePanTiltVariable')) {
+        if ($this->ReadPropertyBoolean(\ONVIF\Stream\Property::EnablePanTiltVariable)) {
             $this->RegisterVariableInteger('PT', $this->Translate('Move'), 'ONVIF.PanTilt', 3);
             $this->SetValueInteger('PT', 2);
             $this->EnableAction('PT');
         } else {
             $this->UnregisterVariable('PT');
         }
-        if ($this->ReadPropertyBoolean('EnableZoomVariable')) {
+        if ($this->ReadPropertyBoolean(\ONVIF\Stream\Property::EnableZoomVariable)) {
             $this->RegisterVariableInteger('ZOOM', $this->Translate('Zoom'), 'ONVIF.Zoom', 4);
             $this->SetValueInteger('ZOOM', 1);
             $this->EnableAction('ZOOM');
         } else {
             $this->UnregisterVariable('ZOOM');
         }
-        if ($this->ReadPropertyBoolean('EnableSpeedVariable')) {
+        if ($this->ReadPropertyBoolean(\ONVIF\Stream\Property::EnableSpeedVariable)) {
             $this->RegisterVariableFloat('SPEED', $this->Translate('Speed'), 'ONVIF.Speed', 1);
             $this->SetValueFloat('SPEED', 0);
             $this->EnableAction('SPEED');
         } else {
             $this->UnregisterVariable('SPEED');
         }
-        if ($this->ReadPropertyBoolean('EnableTimeVariable')) {
+        if ($this->ReadPropertyBoolean(\ONVIF\Stream\Property::EnableTimeVariable)) {
             $this->RegisterVariableFloat('TIME', $this->Translate('Time'), 'ONVIF.Time', 2);
             $this->SetValueFloat('TIME', 0);
             $this->EnableAction('TIME');
@@ -199,9 +199,9 @@ class ONVIFMediaStream extends ONVIFModuleBase
             $this->UnregisterVariable('TIME');
         }
         $PresetProfileName = 'ONVIF.Preset.' . $this->InstanceID;
-        if ($this->ReadPropertyBoolean('EnablePresetVariable')) {
-            $UsePresetName = $this->ReadPropertyBoolean('EnablePresetProfile');
-            $Presets = json_decode($this->ReadPropertyString('PresetProfile'));
+        if ($this->ReadPropertyBoolean(\ONVIF\Stream\Property::EnablePresetVariable)) {
+            $UsePresetName = $this->ReadPropertyBoolean(\ONVIF\Stream\Property::EnablePresetProfile);
+            $Presets = json_decode($this->ReadPropertyString(\ONVIF\Stream\Property::PresetProfile));
             $PresetTokenList = [];
             $PresetAssociations = [];
             foreach ($Presets as $Preset) {
@@ -274,14 +274,14 @@ class ONVIFMediaStream extends ONVIFModuleBase
                 'caption' => $VideoSource['VideoSourceName'],
                 'value'   => $VideoSource['VideoSourceToken']
             ];
-            if ($this->ReadPropertyString('VideoSource') == $VideoSource['VideoSourceToken']) {
+            if ($this->ReadPropertyString(\ONVIF\Stream\Property::VideoSource) == $VideoSource['VideoSourceToken']) {
                 $ActualSources = $VideoSource;
                 foreach ($VideoSource['Profile'] as $Profile) {
                     $ProfileOptions[] = [
                         'caption' => $Profile['Name'],
                         'value'   => $Profile['token']
                     ];
-                    if ($this->ReadPropertyString('Profile') == $Profile['token']) {
+                    if ($this->ReadPropertyString(\ONVIF\Stream\Property::Profile) == $Profile['token']) {
                         $ActualProfile = $Profile;
                     }
                 }
@@ -564,8 +564,8 @@ class ONVIFMediaStream extends ONVIFModuleBase
             ];
             $Form['actions'] = array_merge($Actions, $Form['actions']);
         }
-        $Form['elements'][4]['popup']['items'][1]['visible'] = $this->ReadPropertyBoolean('EnablePresetVariable');
-        $PresetProfile = json_decode($this->ReadPropertyString('PresetProfile'), true);
+        $Form['elements'][4]['popup']['items'][1]['visible'] = $this->ReadPropertyBoolean(\ONVIF\Stream\Property::EnablePresetVariable);
+        $PresetProfile = json_decode($this->ReadPropertyString(\ONVIF\Stream\Property::PresetProfile), true);
         $ValidTokens = array_column($PTZValues, 'PresetToken');
         foreach ($PresetProfile as &$Profile) {
             $KnownToken = array_search($Profile['PresetToken'], $ValidTokens);
@@ -614,13 +614,13 @@ class ONVIFMediaStream extends ONVIFModuleBase
             return false;
         }
         if ($Speed == 0) {
-            $Speed = $this->ReadPropertyFloat('PanDefaultSpeed');
+            $Speed = $this->ReadPropertyFloat(\ONVIF\Stream\Property::PanDefaultSpeed);
         }
         $Params = [
-            'ProfileToken' => $this->ReadPropertyString('Profile'),
+            'ProfileToken' => $this->ReadPropertyString(\ONVIF\Stream\Property::Profile),
             'Velocity'     => [
                 'PanTilt' => [
-                    'x' => (!$this->ReadPropertyBoolean('InvertPanControl') ? $Speed : -$Speed),
+                    'x' => (!$this->ReadPropertyBoolean(\ONVIF\Stream\Property::InvertPanControl) ? $Speed : -$Speed),
                     'y' => 0
                 ]
             ]
@@ -648,13 +648,13 @@ class ONVIFMediaStream extends ONVIFModuleBase
             return false;
         }
         if ($Speed == 0) {
-            $Speed = $this->ReadPropertyFloat('PanDefaultSpeed');
+            $Speed = $this->ReadPropertyFloat(\ONVIF\Stream\Property::PanDefaultSpeed);
         }
         $Params = [
-            'ProfileToken' => $this->ReadPropertyString('Profile'),
+            'ProfileToken' => $this->ReadPropertyString(\ONVIF\Stream\Property::Profile),
             'Velocity'     => [
                 'PanTilt' => [
-                    'x' => (!$this->ReadPropertyBoolean('InvertPanControl') ? -$Speed : $Speed),
+                    'x' => (!$this->ReadPropertyBoolean(\ONVIF\Stream\Property::InvertPanControl) ? -$Speed : $Speed),
                     'y' => 0
                 ]
             ]
@@ -683,14 +683,14 @@ class ONVIFMediaStream extends ONVIFModuleBase
             return false;
         }
         if ($Speed == 0) {
-            $Speed = $this->ReadPropertyFloat('TiltDefaultSpeed');
+            $Speed = $this->ReadPropertyFloat(\ONVIF\Stream\Property::TiltDefaultSpeed);
         }
         $Params = [
-            'ProfileToken' => $this->ReadPropertyString('Profile'),
+            'ProfileToken' => $this->ReadPropertyString(\ONVIF\Stream\Property::Profile),
             'Velocity'     => [
                 'PanTilt' => [
                     'x' => 0,
-                    'y' => (!$this->ReadPropertyBoolean('InvertTiltControl') ? $Speed : -$Speed)
+                    'y' => (!$this->ReadPropertyBoolean(\ONVIF\Stream\Property::InvertTiltControl) ? $Speed : -$Speed)
                 ]
             ]
         ];
@@ -719,14 +719,14 @@ class ONVIFMediaStream extends ONVIFModuleBase
             return false;
         }
         if ($Speed == 0) {
-            $Speed = $this->ReadPropertyFloat('TiltDefaultSpeed');
+            $Speed = $this->ReadPropertyFloat(\ONVIF\Stream\Property::TiltDefaultSpeed);
         }
         $Params = [
-            'ProfileToken' => $this->ReadPropertyString('Profile'),
+            'ProfileToken' => $this->ReadPropertyString(\ONVIF\Stream\Property::Profile),
             'Velocity'     => [
                 'PanTilt' => [
                     'x' => 0,
-                    'y' => (!$this->ReadPropertyBoolean('InvertTiltControl') ? -$Speed : $Speed)
+                    'y' => (!$this->ReadPropertyBoolean(\ONVIF\Stream\Property::InvertTiltControl) ? -$Speed : $Speed)
                 ]
             ]
         ];
@@ -753,13 +753,13 @@ class ONVIFMediaStream extends ONVIFModuleBase
             return false;
         }
         if ($Speed == 0) {
-            $Speed = $this->ReadPropertyFloat('ZoomDefaultSpeed');
+            $Speed = $this->ReadPropertyFloat(\ONVIF\Stream\Property::ZoomDefaultSpeed);
         }
         $Params = [
-            'ProfileToken' => $this->ReadPropertyString('Profile'),
+            'ProfileToken' => $this->ReadPropertyString(\ONVIF\Stream\Property::Profile),
             'Velocity'     => [
                 'Zoom' => [
-                    'x' => (!$this->ReadPropertyBoolean('InvertZoomControl') ? $Speed : -$Speed)
+                    'x' => (!$this->ReadPropertyBoolean(\ONVIF\Stream\Property::InvertZoomControl) ? $Speed : -$Speed)
                 ]
             ]
         ];
@@ -786,13 +786,13 @@ class ONVIFMediaStream extends ONVIFModuleBase
             return false;
         }
         if ($Speed == 0) {
-            $Speed = $this->ReadPropertyFloat('ZoomDefaultSpeed');
+            $Speed = $this->ReadPropertyFloat(\ONVIF\Stream\Property::ZoomDefaultSpeed);
         }
         $Params = [
-            'ProfileToken' => $this->ReadPropertyString('Profile'),
+            'ProfileToken' => $this->ReadPropertyString(\ONVIF\Stream\Property::Profile),
             'Velocity'     => [
                 'Zoom' => [
-                    'x' => (!$this->ReadPropertyBoolean('InvertZoomControl') ? -$Speed : $Speed)
+                    'x' => (!$this->ReadPropertyBoolean(\ONVIF\Stream\Property::InvertZoomControl) ? -$Speed : $Speed)
                 ]
             ]
         ];
@@ -806,7 +806,7 @@ class ONVIFMediaStream extends ONVIFModuleBase
         if ($this->PTZ_token == '') {
             return false;
         }
-        $Params = ['ProfileToken' => $this->ReadPropertyString('Profile'), 'PanTilt' => true, 'Zoom' => true];
+        $Params = ['ProfileToken' => $this->ReadPropertyString(\ONVIF\Stream\Property::Profile), 'PanTilt' => true, 'Zoom' => true];
         return $this->SendData($this->PTZ_xAddr, 'Stop', true, $Params, self::PTZwsdl);
     }
 
@@ -815,7 +815,7 @@ class ONVIFMediaStream extends ONVIFModuleBase
         if ($this->PTZ_token == '') {
             return false;
         }
-        $Params = ['ProfileToken' => $this->ReadPropertyString('Profile'), 'PanTilt' => true];
+        $Params = ['ProfileToken' => $this->ReadPropertyString(\ONVIF\Stream\Property::Profile), 'PanTilt' => true];
         return $this->SendData($this->PTZ_xAddr, 'Stop', true, $Params, self::PTZwsdl);
     }
 
@@ -824,7 +824,7 @@ class ONVIFMediaStream extends ONVIFModuleBase
         if ($this->PTZ_token == '') {
             return false;
         }
-        $Params = ['ProfileToken' => $this->ReadPropertyString('Profile'), 'Zoom' => true];
+        $Params = ['ProfileToken' => $this->ReadPropertyString(\ONVIF\Stream\Property::Profile), 'Zoom' => true];
         return $this->SendData($this->PTZ_xAddr, 'Stop', true, $Params, self::PTZwsdl);
     }
 
@@ -846,7 +846,7 @@ class ONVIFMediaStream extends ONVIFModuleBase
         if ($this->PTZ_token == '') {
             return false;
         }
-        $Params = ['ProfileToken' => $this->ReadPropertyString('Profile'), 'PresetToken' => $PresetToken];
+        $Params = ['ProfileToken' => $this->ReadPropertyString(\ONVIF\Stream\Property::Profile), 'PresetToken' => $PresetToken];
         return $this->SendData($this->PTZ_xAddr, 'GotoPreset', true, $Params, self::PTZwsdl);
     }
 
@@ -855,7 +855,7 @@ class ONVIFMediaStream extends ONVIFModuleBase
         if ($this->PTZ_token == '') {
             return false;
         }
-        $Params = ['ProfileToken' => $this->ReadPropertyString('Profile')];
+        $Params = ['ProfileToken' => $this->ReadPropertyString(\ONVIF\Stream\Property::Profile)];
         return $this->SendData($this->PTZ_xAddr, 'GotoHomePosition', true, $Params, self::PTZwsdl);
     }
 
@@ -881,69 +881,67 @@ class ONVIFMediaStream extends ONVIFModuleBase
             $Time = $this->GetValue('TIME');
         }
         switch ($Ident) {
-        case 'PRESET':
-            if ($this->GotoPreset($Value)) {
-                $this->SetValue('PRESET', $Value);
+            case 'PRESET':
+                if ($this->GotoPreset($Value)) {
+                    $this->SetValue('PRESET', $Value);
+                    return true;
+                }
+                return false;
+            case 'TIME':
+            case 'SPEED':
+                $this->SetValueFloat($Ident, $Value);
                 return true;
-            }
-            return false;
-        case 'TIME':
-        case 'SPEED':
-            $this->SetValueFloat($Ident, $Value);
-        return true;
-        case 'PT':
-            $Result = false;
-            switch ($Value) {
-                case 0:
-                    $Result = $this->MoveLeftSpeedTime($Speed, $Time);
-                break;
-                case 1:
-                    $Result = $this->MoveUpSpeedTime($Speed, $Time);
-                break;
-                case 2:
-                    $Result = $this->MoveStop();
-                break;
-                case 3:
-                    $Result = $this->MoveDownSpeedTime($Speed, $Time);
-                break;
-                case 4:
-                    $Result = $this->MoveRightSpeedTime($Speed, $Time);
-                break;
-                default:
-                    set_error_handler([$this, 'ModulErrorHandler']);
-                    trigger_error($this->Translate('Invalid Value.'), E_USER_NOTICE);
-                    restore_error_handler();
-                    return false;
-
-            }
-            if ($Result) {
-                $this->SetValueInteger('PT', $Value);
-            }
-            return $Result;
-        case 'ZOOM':
-            $Result = false;
-            switch ($Value) {
-                case 0:
-                    $Result = $this->ZoomFarSpeedTime($Speed, $Time);
-                break;
-                case 1:
-                    $Result = $this->ZoomStop();
-                break;
-                case 2:
-                    $Result = $this->ZoomNearSpeedTime($Speed, $Time);
-                break;
+            case 'PT':
+                $Result = false;
+                switch ($Value) {
+                    case 0:
+                        $Result = $this->MoveLeftSpeedTime($Speed, $Time);
+                        break;
+                    case 1:
+                        $Result = $this->MoveUpSpeedTime($Speed, $Time);
+                        break;
+                    case 2:
+                        $Result = $this->MoveStop();
+                        break;
+                    case 3:
+                        $Result = $this->MoveDownSpeedTime($Speed, $Time);
+                        break;
+                    case 4:
+                        $Result = $this->MoveRightSpeedTime($Speed, $Time);
+                        break;
                     default:
-                    set_error_handler([$this, 'ModulErrorHandler']);
-                    trigger_error($this->Translate('Invalid Value.'), E_USER_NOTICE);
-                    restore_error_handler();
-                    return false;
-
-            }
-            if ($Result) {
-                $this->SetValueInteger('ZOOM', $Value);
-            }
-            return $Result;
-    }
+                        set_error_handler([$this, 'ModulErrorHandler']);
+                        trigger_error($this->Translate('Invalid Value.'), E_USER_NOTICE);
+                        restore_error_handler();
+                        return false;
+                }
+                if ($Result) {
+                    $this->SetValueInteger('PT', $Value);
+                }
+                return $Result;
+            case 'ZOOM':
+                $Result = false;
+                switch ($Value) {
+                    case 0:
+                        $Result = $this->ZoomFarSpeedTime($Speed, $Time);
+                        break;
+                    case 1:
+                        $Result = $this->ZoomStop();
+                        break;
+                    case 2:
+                        $Result = $this->ZoomNearSpeedTime($Speed, $Time);
+                        break;
+                    default:
+                        set_error_handler([$this, 'ModulErrorHandler']);
+                        trigger_error($this->Translate('Invalid Value.'), E_USER_NOTICE);
+                        restore_error_handler();
+                        return false;
+                }
+                if ($Result) {
+                    $this->SetValueInteger('ZOOM', $Value);
+                }
+                return $Result;
+        }
         set_error_handler([$this, 'ModulErrorHandler']);
         trigger_error($this->Translate('Invalid Ident.'), E_USER_NOTICE);
         restore_error_handler();
@@ -955,7 +953,7 @@ class ONVIFMediaStream extends ONVIFModuleBase
         $Data = json_decode($JSONString, true);
         unset($Data['DataID']);
         $this->SendDebug('ReceiveEvent', $Data, 0);
-        $EventProperties = $this->ReadAttributeArray('EventProperties');
+        $EventProperties = $this->ReadAttributeArray(\ONVIF\Device\Attribute::EventProperties);
         if (!array_key_exists($Data['Topic'], $EventProperties)) {
             return false;
         }
@@ -973,7 +971,7 @@ class ONVIFMediaStream extends ONVIFModuleBase
             if ($EventProperty['Sources'][$SourceIndex]['Type'] != 'tt:ReferenceToken') {
                 continue;
             }
-            if ($Source['Value'] != $this->ReadPropertyString('VideoSource')) {
+            if ($Source['Value'] != $this->ReadPropertyString(\ONVIF\Stream\Property::VideoSource)) {
                 continue;
             }
             $FoundEventIndex = $SourceIndex;
@@ -982,7 +980,7 @@ class ONVIFMediaStream extends ONVIFModuleBase
         if ($FoundEventIndex !== false) {
             unset($Data['Sources'][$FoundEventIndex]);
         }
-        $PreName = str_replace($this->ReadPropertyString('EventTopic'), '', $Data['Topic']);
+        $PreName = str_replace($this->ReadPropertyString(\ONVIF\Device\Property::EventTopic), '', $Data['Topic']);
         return $this->SetEventStatusVariable($PreName, $EventProperties[$Data['Topic']], $Data);
     }
 
@@ -1052,7 +1050,7 @@ class ONVIFMediaStream extends ONVIFModuleBase
             }
         }
         // Presets
-        $ProfileToken = ['ProfileToken' => $this->ReadPropertyString('Profile')];
+        $ProfileToken = ['ProfileToken' => $this->ReadPropertyString(\ONVIF\Stream\Property::Profile)];
         $PresetResult = @$this->SendData($this->PTZ_xAddr, 'GetPresets', true, $ProfileToken, self::PTZwsdl);
         ob_clean();
         if (is_bool($PresetResult)) {
@@ -1082,9 +1080,9 @@ class ONVIFMediaStream extends ONVIFModuleBase
         }
         $this->PTZ_xAddr = $Capabilities['XAddr'][\ONVIF\NS::PTZ];
         foreach ($Capabilities['VideoSources'] as $VideoSource) {
-            if ($this->ReadPropertyString('VideoSource') == $VideoSource['VideoSourceToken']) {
+            if ($this->ReadPropertyString(\ONVIF\Stream\Property::VideoSource) == $VideoSource['VideoSourceToken']) {
                 foreach ($VideoSource['Profile'] as $Profile) {
-                    if ($Profile['token'] == $this->ReadPropertyString('Profile')) {
+                    if ($Profile['token'] == $this->ReadPropertyString(\ONVIF\Stream\Property::Profile)) {
                         $this->PTZ_token = $Profile['ptztoken'];
                         break;
                     }
@@ -1096,7 +1094,7 @@ class ONVIFMediaStream extends ONVIFModuleBase
         if (($Capabilities['XAddr'][\ONVIF\NS::Media2]) != '') {
             $Params = [
                 'Protocol'     => 'RtspUnicast',
-                'ProfileToken' => $this->ReadPropertyString('Profile')
+                'ProfileToken' => $this->ReadPropertyString(\ONVIF\Stream\Property::Profile)
             ];
             $Result = $this->SendData($Capabilities['XAddr'][\ONVIF\NS::Media2], 'GetStreamUri', true, $Params, \ONVIF\WSDL::Media2);
             if ($Result == false) {
@@ -1115,7 +1113,7 @@ class ONVIFMediaStream extends ONVIFModuleBase
                         'Protocol' => 'RTSP',
                     ],
                 ],
-                'ProfileToken' => $this->ReadPropertyString('Profile')
+                'ProfileToken' => $this->ReadPropertyString(\ONVIF\Stream\Property::Profile)
             ];
             $Result = $this->SendData($Capabilities['XAddr'][\ONVIF\NS::Media], 'GetStreamUri', true, $Params);
             if ($Result == false) {
@@ -1166,7 +1164,7 @@ class ONVIFMediaStream extends ONVIFModuleBase
         $Key = urlencode($Key);
         $ImgSrc = '<img class="stream" src="proxy/' . $mId . '?authorization=' . $Key . '">';
         $PanTiltSVG = '';
-        if ($this->ReadPropertyBoolean('EnablePanTiltHTML')) {
+        if ($this->ReadPropertyBoolean(\ONVIF\Stream\Property::EnablePanTiltHTML)) {
             $PanTiltSVG = str_replace(
                 [
                     '%%InstanceId%%',
@@ -1176,15 +1174,15 @@ class ONVIFMediaStream extends ONVIFModuleBase
                 ],
                 [
                     $this->InstanceID,
-                    $this->ReadPropertyInteger('PanTiltControlWidth'),
-                    $this->ReadPropertyInteger('PanTiltControlHeight'),
-                    sprintf('%F', $this->ReadPropertyInteger('PanTiltControlOpacity') / 100)
+                    $this->ReadPropertyInteger(\ONVIF\Stream\Property::PanTiltControlWidth),
+                    $this->ReadPropertyInteger(\ONVIF\Stream\Property::PanTiltControlHeight),
+                    sprintf('%F', $this->ReadPropertyInteger(\ONVIF\Stream\Property::PanTiltControlOpacity) / 100)
                 ],
                 file_get_contents(__DIR__ . '/../libs/PanTiltControl.svg')
             );
         }
         $ZoomSVG = '';
-        if ($this->ReadPropertyBoolean('EnableZoomHTML')) {
+        if ($this->ReadPropertyBoolean(\ONVIF\Stream\Property::EnableZoomHTML)) {
             $ZoomSVG = str_replace(
                 [
                     '%%InstanceId%%',
@@ -1194,9 +1192,9 @@ class ONVIFMediaStream extends ONVIFModuleBase
                 ],
                 [
                     $this->InstanceID,
-                    $this->ReadPropertyInteger('ZoomControlWidth'),
-                    $this->ReadPropertyInteger('ZoomControlHeight'),
-                    sprintf('%F', $this->ReadPropertyInteger('ZoomControlOpacity') / 100)
+                    $this->ReadPropertyInteger(\ONVIF\Stream\Property::ZoomControlWidth),
+                    $this->ReadPropertyInteger(\ONVIF\Stream\Property::ZoomControlHeight),
+                    sprintf('%F', $this->ReadPropertyInteger(\ONVIF\Stream\Property::ZoomControlOpacity) / 100)
                 ],
                 file_get_contents(__DIR__ . '/../libs/ZoomControl.svg')
             );
@@ -1257,48 +1255,48 @@ class ONVIFMediaStream extends ONVIFModuleBase
             return;
         }
         switch ($_GET['action']) {
-        case 'StopPTZ':
-            $this->StopPTZ();
-            echo 'OK';
-            return;
-        case 'StartPTZ':
-            switch ($_GET['value']) {
-                case 'left':
-                    if ($this->MoveLeft()) {
-                        echo 'OK';
-                    }
-                    return;
-                case 'right':
-                    if ($this->MoveRight()) {
-                        echo 'OK';
-                    }
-                    return;
-                case 'up':
-                    if ($this->MoveUp()) {
-                        echo 'OK';
-                    }
-                    return;
-                case 'down':
-                    if ($this->MoveDown()) {
-                        echo 'OK';
-                    }
-                    return;
-                case 'near':
-                    if ($this->ZoomNear()) {
-                        echo 'OK';
-                    }
-                    return;
-                case 'far':
-                    if ($this->ZoomFar()) {
-                        echo 'OK';
-                    }
-                    return;
-                default:
-                    echo $this->Translate('Invalid parameters.');
-                    return;
-            }
-            break;
-    }
+            case 'StopPTZ':
+                $this->StopPTZ();
+                echo 'OK';
+                return;
+            case 'StartPTZ':
+                switch ($_GET['value']) {
+                    case 'left':
+                        if ($this->MoveLeft()) {
+                            echo 'OK';
+                        }
+                        return;
+                    case 'right':
+                        if ($this->MoveRight()) {
+                            echo 'OK';
+                        }
+                        return;
+                    case 'up':
+                        if ($this->MoveUp()) {
+                            echo 'OK';
+                        }
+                        return;
+                    case 'down':
+                        if ($this->MoveDown()) {
+                            echo 'OK';
+                        }
+                        return;
+                    case 'near':
+                        if ($this->ZoomNear()) {
+                            echo 'OK';
+                        }
+                        return;
+                    case 'far':
+                        if ($this->ZoomFar()) {
+                            echo 'OK';
+                        }
+                        return;
+                    default:
+                        echo $this->Translate('Invalid parameters.');
+                        return;
+                }
+                break;
+        }
         echo $this->Translate('Invalid parameters.');
         return;
     }

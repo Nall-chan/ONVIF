@@ -8,18 +8,18 @@ require_once __DIR__ . '/../libs/ONVIFModuleBase.php';
  */
 class ONVIFImageGrabber extends ONVIFModuleBase
 {
-    const wsdl = \ONVIF\WSDL::Media; //'media-mod';
-    const TopicFilter = 'videosource';
+    public const wsdl = \ONVIF\WSDL::Media; //'media-mod';
+    public const TopicFilter = 'videosource';
 
     public function Create()
     {
         //Never delete this line!
         parent::Create();
-        $this->RegisterPropertyString('VideoSource', '');
-        $this->RegisterPropertyString('Profile', '');
-        $this->RegisterPropertyInteger('Interval', 0);
-        $this->RegisterPropertyBoolean('UseCaching', true);
-        $this->RegisterTimer('UpdateImage', 0, 'ONVIF_UpdateImage(' . $this->InstanceID . ');');
+        $this->RegisterPropertyString(\ONVIF\ImageGrabber\Property::VideoSource, '');
+        $this->RegisterPropertyString(\ONVIF\ImageGrabber\Property::Profile, '');
+        $this->RegisterPropertyInteger(\ONVIF\ImageGrabber\Property::Interval, 0);
+        $this->RegisterPropertyBoolean(\ONVIF\ImageGrabber\Property::UseCaching, true);
+        $this->RegisterTimer(\ONVIF\ImageGrabber\Timer::UpdateImage, 0, 'ONVIF_UpdateImage(' . $this->InstanceID . ');');
         $this->ImageURL = false;
     }
     public function ApplyChanges()
@@ -27,16 +27,16 @@ class ONVIFImageGrabber extends ONVIFModuleBase
         //Never delete this line!
         parent::ApplyChanges();
         $MediaId = $this->GetMediaId();
-        IPS_SetMediaCached($MediaId, $this->ReadPropertyBoolean('UseCaching'));
+        IPS_SetMediaCached($MediaId, $this->ReadPropertyBoolean(\ONVIF\ImageGrabber\Property::UseCaching));
 
-        if ($this->ReadPropertyString('VideoSource') == '') {
+        if ($this->ReadPropertyString(\ONVIF\ImageGrabber\Property::VideoSource) == '') {
             $this->SetStatus(IS_INACTIVE);
-            $this->SetTimerInterval('UpdateImage', 0);
+            $this->SetTimerInterval(\ONVIF\ImageGrabber\Timer::UpdateImage, 0);
             return;
         }
-        if ($this->ReadPropertyString('Profile') == '') {
+        if ($this->ReadPropertyString(\ONVIF\ImageGrabber\Property::Profile) == '') {
             $this->SetStatus(IS_INACTIVE);
-            $this->SetTimerInterval('UpdateImage', 0);
+            $this->SetTimerInterval(\ONVIF\ImageGrabber\Timer::UpdateImage, 0);
             return;
         }
         if (IPS_GetKernelRunlevel() != KR_READY) {
@@ -47,9 +47,9 @@ class ONVIFImageGrabber extends ONVIFModuleBase
         if ($SnapshotURL) {
             $this->SetStatus(IS_ACTIVE);
             $this->UpdateImage();
-            $this->SetTimerInterval('UpdateImage', $this->ReadPropertyInteger('Interval') * 1000);
+            $this->SetTimerInterval(\ONVIF\ImageGrabber\Timer::UpdateImage, $this->ReadPropertyInteger(\ONVIF\ImageGrabber\Property::Interval) * 1000);
         } else {
-            $this->SetTimerInterval('UpdateImage', 0);
+            $this->SetTimerInterval(\ONVIF\ImageGrabber\Timer::UpdateImage, 0);
             $this->SetStatus(IS_EBASE + 1);
         }
     }
@@ -92,7 +92,7 @@ class ONVIFImageGrabber extends ONVIFModuleBase
         $Data = json_decode($JSONString, true);
         unset($Data['DataID']);
         $this->SendDebug('ReceiveEvent', $Data, 0);
-        $EventProperties = $this->ReadAttributeArray('EventProperties');
+        $EventProperties = $this->ReadAttributeArray(\ONVIF\Device\Attribute::EventProperties);
         if (!array_key_exists($Data['Topic'], $EventProperties)) {
             return false;
         }
@@ -111,7 +111,7 @@ class ONVIFImageGrabber extends ONVIFModuleBase
             if ($EventProperty['Sources'][$SourceIndex]['Type'] != 'tt:ReferenceToken') {
                 continue;
             }
-            if ($Source['Value'] != $this->ReadPropertyString('VideoSource')) {
+            if ($Source['Value'] != $this->ReadPropertyString(\ONVIF\ImageGrabber\Property::VideoSource)) {
                 $SkipEvent = true;
                 continue;
             }
@@ -124,7 +124,7 @@ class ONVIFImageGrabber extends ONVIFModuleBase
         if ($SkipEvent) {
             return false;
         }
-        $PreName = str_replace($this->ReadPropertyString('EventTopic'), '', $Data['Topic']);
+        $PreName = str_replace($this->ReadPropertyString(\ONVIF\Device\Property::EventTopic), '', $Data['Topic']);
         return $this->SetEventStatusVariable($PreName, $EventProperties[$Data['Topic']], $Data);
     }
 
@@ -176,14 +176,14 @@ class ONVIFImageGrabber extends ONVIFModuleBase
                 'caption' => $VideoSource['VideoSourceName'],
                 'value'   => $VideoSource['VideoSourceToken']
             ];
-            if ($this->ReadPropertyString('VideoSource') == $VideoSource['VideoSourceToken']) {
+            if ($this->ReadPropertyString(\ONVIF\ImageGrabber\Property::VideoSource) == $VideoSource['VideoSourceToken']) {
                 $ActualSources = $VideoSource;
                 foreach ($VideoSource['Profile'] as $Profile) {
                     $ProfileOptions[] = [
                         'caption' => $Profile['Name'],
                         'value'   => $Profile['token']
                     ];
-                    if ($this->ReadPropertyString('Profile') == $Profile['token']) {
+                    if ($this->ReadPropertyString(\ONVIF\ImageGrabber\Property::Profile) == $Profile['token']) {
                         $ActualProfile = $Profile;
                     }
                 }
@@ -334,7 +334,7 @@ class ONVIFImageGrabber extends ONVIFModuleBase
             case 'RefreshProfileForm':
                 $this->RefreshProfileForm($Value);
                 return true;
-            case 'UpdateImage':
+            case \ONVIF\ImageGrabber\Timer::UpdateImage:
                 $this->UpdateImage();
                 if ((bool) $Value) {
                     $this->ReloadForm();
@@ -347,7 +347,7 @@ class ONVIFImageGrabber extends ONVIFModuleBase
         parent::IOChangeState($State);
 
         if ($State == IS_INACTIVE) {
-            $this->SetTimerInterval('UpdateImage', 0);
+            $this->SetTimerInterval(\ONVIF\ImageGrabber\Timer::UpdateImage, 0);
         }
     }
     protected function RefreshProfileForm($NewVideoSource)
@@ -381,9 +381,9 @@ class ONVIFImageGrabber extends ONVIFModuleBase
             return false;
         }
         foreach ($Capabilities['VideoSourcesJPEG'] as $VideoSource) {
-            if ($this->ReadPropertyString('VideoSource') == $VideoSource['VideoSourceToken']) {
+            if ($this->ReadPropertyString(\ONVIF\ImageGrabber\Property::VideoSource) == $VideoSource['VideoSourceToken']) {
                 foreach ($VideoSource['Profile'] as $Profile) {
-                    if ($Profile['token'] == $this->ReadPropertyString('Profile')) {
+                    if ($Profile['token'] == $this->ReadPropertyString(\ONVIF\ImageGrabber\Property::Profile)) {
                         break;
                     }
                 }
@@ -391,7 +391,7 @@ class ONVIFImageGrabber extends ONVIFModuleBase
             }
         }
         $Params = [
-            'ProfileToken' => $this->ReadPropertyString('Profile')
+            'ProfileToken' => $this->ReadPropertyString(\ONVIF\ImageGrabber\Property::Profile)
         ];
 
         if (($Capabilities['XAddr'][\ONVIF\NS::Media2]) != '') {

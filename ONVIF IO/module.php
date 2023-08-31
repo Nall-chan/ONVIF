@@ -43,44 +43,44 @@ class ONVIFIO extends IPSModule
     {
         //Never delete this line!
         parent::Create();
-        $this->RegisterPropertyBoolean('Open', false);
-        $this->RegisterPropertyString('Address', '');
-        $this->RegisterPropertyString('Username', '');
-        $this->RegisterPropertyString('Password', '');
-        $this->RegisterPropertyInteger('EventHandler', \ONVIF\EventHandler::Automatic);
-        $this->RegisterPropertyString('WebHookIP', '');
-        $this->RegisterPropertyBoolean('WebHookHTTPS', false);
-        $this->RegisterPropertyInteger('WebHookPort', 3777);
-        $this->RegisterPropertyInteger('SubscribeEventTimeout', 10);
-        $this->RegisterPropertyInteger('SubscribeInitialTerminationTime', 1);
-        $this->RegisterPropertyInteger('PullPointInitialTerminationTime', 1);
-        $this->RegisterPropertyInteger('PullPointTimeout', 10);
-        $this->RegisterPropertyInteger('MessageLimit', 32);
-        $this->RegisterAttributeArray('VideoSources', []);
-        $this->RegisterAttributeArray('AudioSources', []);
-        $this->RegisterAttributeArray('VideoSourcesJPEG', []);
-        $this->RegisterAttributeArray('AnalyticsTokens', []);
-        $this->RegisterAttributeArray('RelayOutputs', []);
-        $this->RegisterAttributeArray('DigitalInputs', []);
-        $this->RegisterAttributeInteger('Timestamp_Offset', 0);
-        $this->RegisterAttributeArray('XAddr', []);
-        $this->RegisterAttributeArray('EventProperties', []);
-        $this->RegisterAttributeInteger('NbrOfInputs', 0);
-        $this->RegisterAttributeInteger('NbrOfOutputs', 0);
-        $this->RegisterAttributeInteger('NbrOfVideoSources', 0);
-        $this->RegisterAttributeInteger('NbrOfAudioSources', 0);
-        $this->RegisterAttributeInteger('NbrOfSerialPorts', 0);
-        $this->RegisterAttributeBoolean('HasSnapshotUri', false);
-        $this->RegisterAttributeBoolean('HasRTSPStreaming', false);
-        $this->RegisterAttributeBoolean('RuleSupport', false);
-        $this->RegisterAttributeBoolean('AnalyticsModuleSupport', false);
-        $this->RegisterAttributeBoolean('WSSubscriptionPolicySupport', false);
-        $this->RegisterAttributeBoolean('WSPullPointSupport', false);
-        $this->RegisterAttributeString('ConsumerAddress', '');
-        $this->RegisterAttributeString('SubscriptionReference', '');
-        $this->RegisterAttributeString('SubscriptionId', '');
-        $this->RegisterAttributeInteger('CapabilitiesVersion', 0);
-        $this->RegisterTimer('RenewSubscription', 0, 'IPS_RequestAction(' . $this->InstanceID . ',"Renew",true);');
+        $this->RegisterPropertyBoolean(\ONVIF\IO\Property::Active, false);
+        $this->RegisterPropertyString(\ONVIF\IO\Property::Address, '');
+        $this->RegisterPropertyString(\ONVIF\IO\Property::Username, '');
+        $this->RegisterPropertyString(\ONVIF\IO\Property::Password, '');
+        $this->RegisterPropertyInteger(\ONVIF\IO\Property::EventHandler, \ONVIF\EventHandler::Automatic);
+        $this->RegisterPropertyString(\ONVIF\IO\Property::WebHookIP, '');
+        $this->RegisterPropertyBoolean(\ONVIF\IO\Property::WebHookHTTPS, false);
+        $this->RegisterPropertyInteger(\ONVIF\IO\Property::WebHookPort, 3777);
+        $this->RegisterPropertyInteger(\ONVIF\IO\Property::SubscribeEventTimeout, 10);
+        $this->RegisterPropertyInteger(\ONVIF\IO\Property::SubscribeInitialTerminationTime, 1);
+        $this->RegisterPropertyInteger(\ONVIF\IO\Property::PullPointInitialTerminationTime, 1);
+        $this->RegisterPropertyInteger(\ONVIF\IO\Property::PullPointTimeout, 10);
+        $this->RegisterPropertyInteger(\ONVIF\IO\Property::MessageLimit, 32);
+        $this->RegisterAttributeArray(\ONVIF\IO\Attribute::VideoSources, []);
+        $this->RegisterAttributeArray(\ONVIF\IO\Attribute::AudioSources, []);
+        $this->RegisterAttributeArray(\ONVIF\IO\Attribute::VideoSourcesJPEG, []);
+        $this->RegisterAttributeArray(\ONVIF\IO\Attribute::AnalyticsTokens, []);
+        $this->RegisterAttributeArray(\ONVIF\IO\Attribute::RelayOutputs, []);
+        $this->RegisterAttributeArray(\ONVIF\IO\Attribute::DigitalInputs, []);
+        $this->RegisterAttributeInteger(\ONVIF\IO\Attribute::Timestamp_Offset, 0);
+        $this->RegisterAttributeArray(\ONVIF\IO\Attribute::XAddr, []);
+        $this->RegisterAttributeArray(\ONVIF\IO\Attribute::EventProperties, []);
+        $this->RegisterAttributeInteger(\ONVIF\IO\Attribute::NbrOfInputs, 0);
+        $this->RegisterAttributeInteger(\ONVIF\IO\Attribute::NbrOfOutputs, 0);
+        $this->RegisterAttributeInteger(\ONVIF\IO\Attribute::NbrOfVideoSources, 0);
+        $this->RegisterAttributeInteger(\ONVIF\IO\Attribute::NbrOfAudioSources, 0);
+        $this->RegisterAttributeInteger(\ONVIF\IO\Attribute::NbrOfSerialPorts, 0);
+        $this->RegisterAttributeBoolean(\ONVIF\IO\Attribute::HasSnapshotUri, false);
+        $this->RegisterAttributeBoolean(\ONVIF\IO\Attribute::HasRTSPStreaming, false);
+        $this->RegisterAttributeBoolean(\ONVIF\IO\Attribute::RuleSupport, false);
+        $this->RegisterAttributeBoolean(\ONVIF\IO\Attribute::AnalyticsModuleSupport, false);
+        $this->RegisterAttributeBoolean(\ONVIF\IO\Attribute::WSSubscriptionPolicySupport, false);
+        $this->RegisterAttributeBoolean(\ONVIF\IO\Attribute::WSPullPointSupport, false);
+        $this->RegisterAttributeString(\ONVIF\IO\Attribute::ConsumerAddress, '');
+        $this->RegisterAttributeString(\ONVIF\IO\Attribute::SubscriptionReference, '');
+        $this->RegisterAttributeString(\ONVIF\IO\Attribute::SubscriptionId, '');
+        $this->RegisterAttributeInteger(\ONVIF\IO\Attribute::CapabilitiesVersion, 0);
+        $this->RegisterTimer(\ONVIF\IO\Timer::RenewSubscription, 0, 'IPS_RequestAction(' . $this->InstanceID . ',"Renew",true);');
         $this->Host = '';
         $this->MyIP = '';
         $this->MyPort = 3777;
@@ -113,20 +113,20 @@ class ONVIFIO extends IPSModule
     {
         switch ($Message) {
             case IPS_KERNELSTARTED:
-                    $this->UnregisterMessage(0, IPS_KERNELSTARTED);
-                    IPS_RequestAction($this->InstanceID, 'KernelReady', true);
+                $this->UnregisterMessage(0, IPS_KERNELSTARTED);
+                IPS_RequestAction($this->InstanceID, 'KernelReady', true);
                 break;
             case FM_CHILDREMOVED:
-                $this->lock('EventProperties');
-                $Events = $this->ReadAttributeArray('EventProperties');
+                $this->lock(\ONVIF\IO\Attribute::EventProperties);
+                $Events = $this->ReadAttributeArray(\ONVIF\IO\Attribute::EventProperties);
                 foreach ($Events as &$Event) {
                     $Index = array_search($Data[0], $Event['Receivers']);
                     if ($Index !== false) {
                         unset($Event['Receivers'][$Index]);
                     }
                 }
-                $this->WriteAttributeArray('EventProperties', $Events);
-                $this->unlock('EventProperties');
+                $this->WriteAttributeArray(\ONVIF\IO\Attribute::EventProperties, $Events);
+                $this->unlock(\ONVIF\IO\Attribute::EventProperties);
                 $this->ReloadForm();
                 break;
         }
@@ -134,7 +134,7 @@ class ONVIFIO extends IPSModule
 
     public function ApplyChanges()
     {
-        $this->SetTimerInterval('RenewSubscription', 0);
+        $this->SetTimerInterval(\ONVIF\IO\Timer::RenewSubscription, 0);
         if ($this->GetStatus() == IS_ACTIVE) { // block childs
             $this->SetStatus(IS_INACTIVE);
         }
@@ -146,32 +146,32 @@ class ONVIFIO extends IPSModule
         if (IPS_GetKernelRunlevel() != KR_READY) {
             return;
         }
-        if (!$this->ReadPropertyBoolean('Open')) {
+        if (!$this->ReadPropertyBoolean(\ONVIF\IO\Property::Active)) {
             $this->SetStatus(IS_INACTIVE);
-            $this->LogMessage($this->Translate('Interface closed'), KL_MESSAGE);
+            $this->LogMessage($this->Translate(\ONVIF\IO\State::INACTIVE), KL_MESSAGE);
             return;
         }
 
-        $Url = parse_url($this->ReadPropertyString('Address'));
+        $Url = parse_url($this->ReadPropertyString(\ONVIF\IO\Property::Address));
         $Url['port'] = (isset($Url['port']) ? ':' . $Url['port'] : '');
         if (!isset($Url['scheme']) && !isset($Url['host'])) {
             $this->Host = '';
             $this->SetStatus(IS_EBASE + 1);
             $this->SetSummary('');
-            $this->WriteAttributeString('ConsumerAddress', '');
+            $this->WriteAttributeString(\ONVIF\IO\Attribute::ConsumerAddress, '');
             $this->LogMessage($this->Translate('Address is invalid'), KL_ERROR);
             return;
         }
-        $MyIP = $this->ReadPropertyString('WebHookIP');
-        $MyPort = $this->ReadPropertyInteger('WebHookPort');
-        $MyHTTPS = $this->ReadPropertyBoolean('WebHookHTTPS');
+        $MyIP = $this->ReadPropertyString(\ONVIF\IO\Property::WebHookIP);
+        $MyPort = $this->ReadPropertyInteger(\ONVIF\IO\Property::WebHookPort);
+        $MyHTTPS = $this->ReadPropertyBoolean(\ONVIF\IO\Property::WebHookHTTPS);
         $Host = $Url['scheme'] . '://' . $Url['host'] . $Url['port'];
         $ReloadCapabilities = ($this->Host != $Host);
         $ReloadCapabilities = $ReloadCapabilities || ($this->MyIP != $MyIP);
         $ReloadCapabilities = $ReloadCapabilities || ($this->MyPort != $MyPort);
         $ReloadCapabilities = $ReloadCapabilities || ($this->MyHTTPS != $MyHTTPS);
         $ReloadCapabilities = $ReloadCapabilities || ($this->GetStatus() == 202);
-        $ReloadCapabilities = $ReloadCapabilities || ($this->ReadAttributeInteger('CapabilitiesVersion') == 0); //Force on initial update, Version 0
+        $ReloadCapabilities = $ReloadCapabilities || ($this->ReadAttributeInteger(\ONVIF\IO\Attribute::CapabilitiesVersion) == 0); //Force on initial update, Version 0
         $this->SendDebug('ReloadCapabilities', $ReloadCapabilities, 0);
         $this->SetSummary($Host);
         $this->Host = $Host;
@@ -184,9 +184,9 @@ class ONVIFIO extends IPSModule
         // 2.ONVIF Request GetScopes
         $Scopes = $this->GetScopes(); // die sagen aus ob G, S oder und T
         if (!$Scopes && !$Reachable) { // not reachable
-            $this->UpdateFormField('EventHook', 'caption', $this->ReadAttributeString('ConsumerAddress'));
-            $this->WriteAttributeString('SubscriptionReference', '');
-            $this->WriteAttributeString('SubscriptionId', '');
+            $this->UpdateFormField('EventHook', 'caption', $this->ReadAttributeString(\ONVIF\IO\Attribute::ConsumerAddress));
+            $this->WriteAttributeString(\ONVIF\IO\Attribute::SubscriptionReference, '');
+            $this->WriteAttributeString(\ONVIF\IO\Attribute::SubscriptionId, '');
             $this->UpdateFormField('SubscriptionReferenceRow', 'visible', false);
             $this->UpdateFormField('EventHookRow', 'visible', false);
             $EventList = @$this->GetEventReceiverFormValues();
@@ -208,6 +208,7 @@ class ONVIFIO extends IPSModule
         if (!$Scopes) {
             $Scopes = [\ONVIF\Scopes::ProfileS];
             $this->Warnings = array_merge($this->Warnings, [$this->Translate('Failed to get scopes, device not ONVIF compliant!')]);
+            $this->LogMessage($this->Translate('Failed to get scopes, device not ONVIF compliant!'), KL_WARNING);
         }
         $Profile = new \ONVIF\Profile($Scopes);
         $this->SendDebug('ProfileBitMask', $Profile->toString(), 0);
@@ -215,12 +216,13 @@ class ONVIFIO extends IPSModule
             $Profile->Profile = \ONVIF\Profile::S;
             $this->SendDebug('Fallback ProfileBitMask', $Profile->toString(), 0);
             $this->Warnings = array_merge($this->Warnings, [$this->Translate('No profile in scopes, device not ONVIF compliant!')]);
+            $this->LogMessage($this->Translate('No profile in scopes, device not ONVIF compliant!'), KL_WARNING);
         }
         $this->lock('Profile');
         $this->Profile = $Profile;
         $this->unlock('Profile');
         if ($ReloadCapabilities) {
-            $this->WriteAttributeInteger('CapabilitiesVersion', 1); // This is Version 1
+            $this->WriteAttributeInteger(\ONVIF\IO\Attribute::CapabilitiesVersion, 1); // This is Version 1
             // Variablen vorbelegen:
             $NbrOfVideoSources = 0;
             $NbrOfAudioSources = 0;
@@ -236,24 +238,25 @@ class ONVIFIO extends IPSModule
             $HasRTSPStreaming = false;
             $HasSnapshotUri = false;
             if ($this->GetCapabilities()) { // besorgt XAddr und einige Attribute Pflicht für Profil S.
-                $AnalyticsModuleSupport = $this->ReadAttributeBoolean('AnalyticsModuleSupport');
-                $RuleSupport = $this->ReadAttributeBoolean('RuleSupport');
-                $WSSubscriptionPolicySupport = $this->ReadAttributeBoolean('WSSubscriptionPolicySupport');
-                $WSPullPointSupport = $this->ReadAttributeBoolean('WSPullPointSupport');
-                $HasRTSPStreaming = $this->ReadAttributeBoolean('HasRTSPStreaming');
-                $NbrOfVideoSources = $this->ReadAttributeInteger('NbrOfVideoSources');
-                $NbrOfAudioSources = $this->ReadAttributeInteger('NbrOfAudioSources');
-                $NbrOfInputs = $this->ReadAttributeInteger('NbrOfInputs');
-                $NbrOfOutputs = $this->ReadAttributeInteger('NbrOfOutputs');
+                $AnalyticsModuleSupport = $this->ReadAttributeBoolean(\ONVIF\IO\Attribute::AnalyticsModuleSupport);
+                $RuleSupport = $this->ReadAttributeBoolean(\ONVIF\IO\Attribute::RuleSupport);
+                $WSSubscriptionPolicySupport = $this->ReadAttributeBoolean(\ONVIF\IO\Attribute::WSSubscriptionPolicySupport);
+                $WSPullPointSupport = $this->ReadAttributeBoolean(\ONVIF\IO\Attribute::WSPullPointSupport);
+                $HasRTSPStreaming = $this->ReadAttributeBoolean(\ONVIF\IO\Attribute::HasRTSPStreaming);
+                $NbrOfVideoSources = $this->ReadAttributeInteger(\ONVIF\IO\Attribute::NbrOfVideoSources);
+                $NbrOfAudioSources = $this->ReadAttributeInteger(\ONVIF\IO\Attribute::NbrOfAudioSources);
+                $NbrOfInputs = $this->ReadAttributeInteger(\ONVIF\IO\Attribute::NbrOfInputs);
+                $NbrOfOutputs = $this->ReadAttributeInteger(\ONVIF\IO\Attribute::NbrOfOutputs);
             }
-            $XAddr = $this->ReadAttributeArray('XAddr');
+            $XAddr = $this->ReadAttributeArray(\ONVIF\IO\Attribute::XAddr);
 
             // 3.ONVIF Request GetServices
             // GetServices besorgt XAddr, Pflicht bei T, selten bei S unterstützt.
             if (!$this->GetServices() && $this->Profile->HasProfile(\ONVIF\Profile::T)) {
                 $this->Warnings = array_merge($this->Warnings, [$this->Translate('Failed to get services. Device reported ONVIF T scope, but is not compliant!')]);
+                $this->LogMessage($this->Translate('Failed to get services. Device reported ONVIF T scope, but is not compliant!'), KL_WARNING);
             }
-            $XAddr = $this->ReadAttributeArray('XAddr');
+            $XAddr = $this->ReadAttributeArray(\ONVIF\IO\Attribute::XAddr);
 
             // 4. ONVIF Request GetServiceCapabilities an \ONVIF\WSDL::Management
             //$this->GetServiceCapabilities($XAddr[\ONVIF\NS::Management], \ONVIF\WSDL::Management); // noch ohne Funktion..
@@ -304,7 +307,7 @@ class ONVIFIO extends IPSModule
                     $RelayOutputs = $this->GetRelayOutputs($XAddr[\ONVIF\NS::DeviceIO], \ONVIF\WSDL::DeviceIO);
                     if (!$RelayOutputs) {
                         $XAddr[\ONVIF\NS::DeviceIO] = '';
-                        $this->WriteAttributeArray('XAddr', $XAddr);
+                        $this->WriteAttributeArray(\ONVIF\IO\Attribute::XAddr, $XAddr);
                         $RelayOutputs = $this->GetRelayOutputs($XAddr[\ONVIF\NS::Management], \ONVIF\WSDL::Management);
                     }
                     if (!$RelayOutputs) {
@@ -319,12 +322,13 @@ class ONVIFIO extends IPSModule
             } else {
                 if ($this->Profile->HasProfile(\ONVIF\Profile::T)) { //Profile T ist GetServiceCapabilities bei DeviceIO Pflicht
                     $this->Warnings = array_merge($this->Warnings, [$this->Translate('Failed to get DeviceIO service capabilities. Device reported ONVIF T scope, but is not compliant!')]);
+                    $this->LogMessage($this->Translate('Failed to get DeviceIO service capabilities. Device reported ONVIF T scope, but is not compliant!'), KL_WARNING);
                 }
                 //Fallback für reine Profile S Geräte
-                    $VideoSources = $this->GetVideoSources($XAddr[\ONVIF\NS::Media], \ONVIF\WSDL::Media); // array of Token
-                    if ($VideoSources) {
-                        $NbrOfVideoSources = count($VideoSources['VideoSources']);
-                    }
+                $VideoSources = $this->GetVideoSources($XAddr[\ONVIF\NS::Media], \ONVIF\WSDL::Media); // array of Token
+                if ($VideoSources) {
+                    $NbrOfVideoSources = count($VideoSources['VideoSources']);
+                }
                 $AudioSources = $this->GetAudioSources($XAddr[\ONVIF\NS::Media], \ONVIF\WSDL::Media); // array of Token
                 if ($AudioSources) {
                     $NbrOfAudioSources = count($AudioSources['AudioSources']);
@@ -339,29 +343,30 @@ class ONVIFIO extends IPSModule
                 }
             }
             // Variablen in Attribute schreiben:
-            $this->WriteAttributeInteger('NbrOfVideoSources', $NbrOfVideoSources);
-            $this->WriteAttributeInteger('NbrOfAudioSources', $NbrOfAudioSources);
-            $this->WriteAttributeInteger('NbrOfOutputs', $NbrOfOutputs);
-            $this->WriteAttributeInteger('NbrOfInputs', $NbrOfInputs);
-            $this->WriteAttributeInteger('NbrOfSerialPorts', $NbrOfSerialPorts);
-            $this->WriteAttributeArray('RelayOutputs', $RelayOutputs);
-            $this->WriteAttributeArray('DigitalInputs', $DigitalInputs);
+            $this->WriteAttributeInteger(\ONVIF\IO\Attribute::NbrOfVideoSources, $NbrOfVideoSources);
+            $this->WriteAttributeInteger(\ONVIF\IO\Attribute::NbrOfAudioSources, $NbrOfAudioSources);
+            $this->WriteAttributeInteger(\ONVIF\IO\Attribute::NbrOfOutputs, $NbrOfOutputs);
+            $this->WriteAttributeInteger(\ONVIF\IO\Attribute::NbrOfInputs, $NbrOfInputs);
+            $this->WriteAttributeInteger(\ONVIF\IO\Attribute::NbrOfSerialPorts, $NbrOfSerialPorts);
+            $this->WriteAttributeArray(\ONVIF\IO\Attribute::RelayOutputs, $RelayOutputs);
+            $this->WriteAttributeArray(\ONVIF\IO\Attribute::DigitalInputs, $DigitalInputs);
 
             // Wenn \ONVIF\WSDL::Media2 unterstützt
             if ($XAddr[\ONVIF\NS::Media2]) {
                 // 4c.ONVIF Request GetServiceCapabilities an \ONVIF\WSDL::Media2
-                    $MediaCapabilities = $this->GetServiceCapabilities($XAddr[\ONVIF\NS::Media2], \ONVIF\WSDL::Media2); // noch ohne Funktion..
-                    if ($MediaCapabilities) {
-                        $Capabilities = $MediaCapabilities['Capabilities'];
-                        $HasRTSPStreaming = $HasRTSPStreaming || $Capabilities['StreamingCapabilities']['RTSPStreaming'] || $Capabilities['StreamingCapabilities']['RTP_RTSP_TCP'];
-                        if (isset($Capabilities['SnapshotUri'])) {
-                            $HasSnapshotUri = $Capabilities['SnapshotUri'];
-                        }
-                    } else {
-                        if ($this->Profile->HasProfile(\ONVIF\Profile::T)) { //Profile T ist GetServiceCapabilities bei Media2 Pflicht
-                            $this->Warnings = array_merge($this->Warnings, [$this->Translate('Failed to get Media2 service capabilities. Device reported ONVIF T scope, but is not compliant!')]);
-                        }
+                $MediaCapabilities = $this->GetServiceCapabilities($XAddr[\ONVIF\NS::Media2], \ONVIF\WSDL::Media2); // noch ohne Funktion..
+                if ($MediaCapabilities) {
+                    $Capabilities = $MediaCapabilities['Capabilities'];
+                    $HasRTSPStreaming = $HasRTSPStreaming || $Capabilities['StreamingCapabilities']['RTSPStreaming'] || $Capabilities['StreamingCapabilities']['RTP_RTSP_TCP'];
+                    if (isset($Capabilities['SnapshotUri'])) {
+                        $HasSnapshotUri = $Capabilities['SnapshotUri'];
                     }
+                } else {
+                    if ($this->Profile->HasProfile(\ONVIF\Profile::T)) { //Profile T ist GetServiceCapabilities bei Media2 Pflicht
+                        $this->Warnings = array_merge($this->Warnings, [$this->Translate('Failed to get Media2 service capabilities. Device reported ONVIF T scope, but is not compliant!')]);
+                        $this->LogMessage($this->Translate('Failed to get Media2 service capabilities. Device reported ONVIF T scope, but is not compliant!'), KL_WARNING);
+                    }
+                }
                 // 4c.ONVIF Request GetProfiles an \ONVIF\WSDL::Media2
                 if (!$this->GetProfiles2()) {
                     $this->SetStatus(IS_EBASE + 2);
@@ -370,18 +375,19 @@ class ONVIFIO extends IPSModule
             } else {
                 // Wenn \ONVIF\WSDL::Media2 NICHT unterstützt
                     // 4c.ONVIF Request GetServiceCapabilities an \ONVIF\WSDL::Media
-                    $MediaCapabilities = $this->GetServiceCapabilities($XAddr[\ONVIF\NS::Media], \ONVIF\WSDL::Media); // noch ohne Funktion..
-                    if ($MediaCapabilities) {
-                        $Capabilities = $MediaCapabilities['Capabilities'];
-                        $HasRTSPStreaming = $HasRTSPStreaming || $Capabilities['StreamingCapabilities']['RTP_TCP'] || $Capabilities['StreamingCapabilities']['RTP_RTSP_TCP'];
-                        if (isset($Capabilities['SnapshotUri'])) {
-                            $HasSnapshotUri = $Capabilities['SnapshotUri'];
-                        }
-                    } else {
-                        if ($this->Profile->HasProfile(\ONVIF\Profile::T)) { //Profile T ist GetServiceCapabilities bei Media Pflicht
-                            $this->Warnings = array_merge($this->Warnings, [$this->Translate('Failed to get Media service capabilities. Device reported ONVIF T scope, but is not compliant!')]);
-                        }
+                $MediaCapabilities = $this->GetServiceCapabilities($XAddr[\ONVIF\NS::Media], \ONVIF\WSDL::Media); // noch ohne Funktion..
+                if ($MediaCapabilities) {
+                    $Capabilities = $MediaCapabilities['Capabilities'];
+                    $HasRTSPStreaming = $HasRTSPStreaming || $Capabilities['StreamingCapabilities']['RTP_TCP'] || $Capabilities['StreamingCapabilities']['RTP_RTSP_TCP'];
+                    if (isset($Capabilities['SnapshotUri'])) {
+                        $HasSnapshotUri = $Capabilities['SnapshotUri'];
                     }
+                } else {
+                    if ($this->Profile->HasProfile(\ONVIF\Profile::T)) { //Profile T ist GetServiceCapabilities bei Media Pflicht
+                        $this->Warnings = array_merge($this->Warnings, [$this->Translate('Failed to get Media service capabilities. Device reported ONVIF T scope, but is not compliant!')]);
+                        $this->LogMessage($this->Translate('Failed to get Media service capabilities. Device reported ONVIF T scope, but is not compliant!'), KL_WARNING);
+                    }
+                }
 
                 // 4c.ONVIF Request GetProfiles an \ONVIF\WSDL::Media
                 if (!$this->GetProfiles()) {
@@ -390,8 +396,8 @@ class ONVIFIO extends IPSModule
                 }
             }
             // Variablen in Attribute schreiben:
-            $this->WriteAttributeBoolean('HasRTSPStreaming', $HasRTSPStreaming);
-            $this->WriteAttributeBoolean('HasSnapshotUri', $HasSnapshotUri);
+            $this->WriteAttributeBoolean(\ONVIF\IO\Attribute::HasRTSPStreaming, $HasRTSPStreaming);
+            $this->WriteAttributeBoolean(\ONVIF\IO\Attribute::HasSnapshotUri, $HasSnapshotUri);
             // Wenn \ONVIF\WSDL::PTZ unterstützt
             // 4d.ONVIF Request GetNodes an \ONVIF\WSDL::PTZ
             if ($XAddr[\ONVIF\NS::PTZ]) {
@@ -404,6 +410,7 @@ class ONVIFIO extends IPSModule
                 } else {
                     if ($this->Profile->HasProfile(\ONVIF\Profile::T)) { //Profile T ist GetServiceCapabilities bei Imaging Pflicht
                         $this->Warnings = array_merge($this->Warnings, [$this->Translate('Failed to get Imaging service capabilities. Device reported ONVIF T scope, but is not compliant!')]);
+                        $this->LogMessage($this->Translate('Failed to get Imaging service capabilities. Device reported ONVIF T scope, but is not compliant!'), KL_WARNING);
                     }
                 }
             }
@@ -421,6 +428,7 @@ class ONVIFIO extends IPSModule
                 } else {
                     if ($this->Profile->HasProfile(\ONVIF\Profile::T)) { //Profile T ist GetServiceCapabilities bei Event Pflicht
                         $this->Warnings = array_merge($this->Warnings, [$this->Translate('Failed to get Event service capabilities. Device reported ONVIF T scope, but is not compliant!')]);
+                        $this->LogMessage($this->Translate('Failed to get Event service capabilities. Device reported ONVIF T scope, but is not compliant!'), KL_WARNING);
                     }
                 }
                 //Jetzt Events auslesen
@@ -431,9 +439,9 @@ class ONVIFIO extends IPSModule
                 }
             }
             // Variablen in Attribute schreiben:
-            $this->WriteAttributeBoolean('WSSubscriptionPolicySupport', $WSSubscriptionPolicySupport);
-            $this->WriteAttributeBoolean('WSPullPointSupport', $WSPullPointSupport);
-            $AnalyticsTokens = $this->ReadAttributeArray('AnalyticsTokens');
+            $this->WriteAttributeBoolean(\ONVIF\IO\Attribute::WSSubscriptionPolicySupport, $WSSubscriptionPolicySupport);
+            $this->WriteAttributeBoolean(\ONVIF\IO\Attribute::WSPullPointSupport, $WSPullPointSupport);
+            $AnalyticsTokens = $this->ReadAttributeArray(\ONVIF\IO\Attribute::AnalyticsTokens);
             if ($XAddr[\ONVIF\NS::Analytics]) {
                 $AnalyticsCapabilities = $this->GetServiceCapabilities($XAddr[\ONVIF\NS::Analytics], \ONVIF\WSDL::Analytics);
                 if (isset($AnalyticsCapabilities['Capabilities']['AnalyticsModuleSupport'])) {
@@ -455,29 +463,30 @@ class ONVIFIO extends IPSModule
             } else {
                 if (count($AnalyticsTokens)) {
                     $this->Warnings = array_merge($this->Warnings, [$this->Translate('Analytics events could not be retrieved. The device reported AnalyticsTokens, but the Analytics namespace and XAddr were not reported!')]);
+                    $this->LogMessage($this->Translate('Analytics events could not be retrieved. The device reported AnalyticsTokens, but the Analytics namespace and XAddr were not reported!'), KL_WARNING);
                 }
             }
             // Variablen in Attribute schreiben:
-            $this->WriteAttributeBoolean('AnalyticsModuleSupport', $AnalyticsModuleSupport);
-            $this->WriteAttributeBoolean('RuleSupport', $RuleSupport);
-            $this->lock('EventProperties');
-            $this->WriteAttributeArray('EventProperties', $AllEventProperties);
-            $this->unlock('EventProperties');
-            $this->SendDebug('EventProperties', $AllEventProperties, 0);
+            $this->WriteAttributeBoolean(\ONVIF\IO\Attribute::AnalyticsModuleSupport, $AnalyticsModuleSupport);
+            $this->WriteAttributeBoolean(\ONVIF\IO\Attribute::RuleSupport, $RuleSupport);
+            $this->lock(\ONVIF\IO\Attribute::EventProperties);
+            $this->WriteAttributeArray(\ONVIF\IO\Attribute::EventProperties, $AllEventProperties);
+            $this->unlock(\ONVIF\IO\Attribute::EventProperties);
+            $this->SendDebug(\ONVIF\IO\Attribute::EventProperties, $AllEventProperties, 0);
             $EventList = @$this->GetEventReceiverFormValues();
             $this->SendDebug('Update form', json_encode($EventList), 0);
             $this->UpdateFormField('Events', 'values', json_encode($EventList));
             $this->UpdateFormField('Events', 'visible', true);
         } else {
-            $this->SendDebug('VideoSources H.26x', $this->ReadAttributeArray('VideoSources'), 0);
-            $this->SendDebug('VideoSources JPEG', $this->ReadAttributeArray('VideoSourcesJPEG'), 0);
-            $XAddr = $this->ReadAttributeArray('XAddr');
+            $this->SendDebug('VideoSources H.26x', $this->ReadAttributeArray(\ONVIF\IO\Attribute::VideoSources), 0);
+            $this->SendDebug('VideoSources JPEG', $this->ReadAttributeArray(\ONVIF\IO\Attribute::VideoSourcesJPEG), 0);
+            $XAddr = $this->ReadAttributeArray(\ONVIF\IO\Attribute::XAddr);
         }
         // Start Event Handler
         if ($XAddr[\ONVIF\NS::Event]) {
-            $AllowedEventHandler = $this->ReadPropertyInteger('EventHandler');
+            $AllowedEventHandler = $this->ReadPropertyInteger(\ONVIF\IO\Property::EventHandler);
             if ($AllowedEventHandler == \ONVIF\EventHandler::None) {
-                $this->LogMessage($this->Translate('Interface connected'), KL_MESSAGE);
+                $this->LogMessage($this->Translate(\ONVIF\IO\State::ACTIVE), KL_MESSAGE);
                 $this->SetStatus(IS_ACTIVE);
             } else {
                 if ($this->Profile->Profile == \ONVIF\Profile::T) { // Wenn NUR Profile T unterstützt wird, dann PullPoint
@@ -496,8 +505,8 @@ class ONVIFIO extends IPSModule
                         if ($this->GetConsumerAddress()) { // yeah, we can receive events
                             IPS_RunScriptText('IPS_Sleep(1000);IPS_RequestAction(' . $this->InstanceID . ',"Subscribe",true);');
                         } else { // we cannot receive events :(
-                            $this->WriteAttributeString('SubscriptionReference', '');
-                            $this->WriteAttributeString('SubscriptionId', '');
+                            $this->WriteAttributeString(\ONVIF\IO\Attribute::SubscriptionReference, '');
+                            $this->WriteAttributeString(\ONVIF\IO\Attribute::SubscriptionId, '');
                             $this->UpdateFormField('SubscriptionReference', 'caption', $this->Translate('This device not support events.'));
                             $this->UpdateFormField('SubscriptionReferenceRow', 'visible', true);
                         }
@@ -506,7 +515,8 @@ class ONVIFIO extends IPSModule
             }
         } else {
             $this->Warnings = array_merge($this->Warnings, [$this->Translate('This device does not support ONVIF events, but it is mandatory.')]);
-            $this->LogMessage($this->Translate('Interface connected'), KL_MESSAGE);
+            $this->LogMessage($this->Translate('This device does not support ONVIF events, but it is mandatory.'), KL_WARNING);
+            $this->LogMessage($this->Translate(\ONVIF\IO\State::ACTIVE), KL_MESSAGE);
             $this->SetStatus(IS_ACTIVE);
         }
     }
@@ -516,21 +526,22 @@ class ONVIFIO extends IPSModule
         $Data = json_decode($JSONString, true);
         unset($Data['DataID']);
         if ($Data['Function'] == 'GetCapabilities') {
-            $Capabilities['VideoSources'] = $this->ReadAttributeArray('VideoSources');
-            $Capabilities['VideoSourcesJPEG'] = $this->ReadAttributeArray('VideoSourcesJPEG');
-            $Capabilities['RelayOutputs'] = $this->ReadAttributeArray('RelayOutputs');
-            $Capabilities['DigitalInputs'] = $this->ReadAttributeArray('DigitalInputs');
-            $Capabilities['NbrOfVideoSources'] = $this->ReadAttributeInteger('NbrOfVideoSources');
-            $Capabilities['NbrOfAudioSources'] = $this->ReadAttributeInteger('NbrOfAudioSources');
-            $Capabilities['NbrOfOutputs'] = $this->ReadAttributeInteger('NbrOfOutputs');
-            $Capabilities['NbrOfInputs'] = $this->ReadAttributeInteger('NbrOfInputs');
-            $Capabilities['NbrOfSerialPorts'] = $this->ReadAttributeInteger('NbrOfSerialPorts');
-            $Capabilities['HasSnapshotUri'] = $this->ReadAttributeBoolean('HasSnapshotUri');
-            $Capabilities['HasRTSPStreaming'] = $this->ReadAttributeBoolean('HasRTSPStreaming');
-            $Capabilities['AnalyticsModuleSupport'] = $this->ReadAttributeBoolean('AnalyticsModuleSupport');
-            $Capabilities['AnalyticsTokens'] = $this->ReadAttributeArray('AnalyticsTokens');
-            $Capabilities['RuleSupport'] = $this->ReadAttributeBoolean('RuleSupport');
-            $Capabilities['XAddr'] = $this->ReadAttributeArray('XAddr');
+            $Capabilities[\ONVIF\IO\Attribute::VideoSources] = $this->ReadAttributeArray(\ONVIF\IO\Attribute::VideoSources);
+            $Capabilities[\ONVIF\IO\Attribute::AudioSources] = $this->ReadAttributeArray(\ONVIF\IO\Attribute::AudioSources);
+            $Capabilities[\ONVIF\IO\Attribute::VideoSourcesJPEG] = $this->ReadAttributeArray(\ONVIF\IO\Attribute::VideoSourcesJPEG);
+            $Capabilities[\ONVIF\IO\Attribute::RelayOutputs] = $this->ReadAttributeArray(\ONVIF\IO\Attribute::RelayOutputs);
+            $Capabilities[\ONVIF\IO\Attribute::DigitalInputs] = $this->ReadAttributeArray(\ONVIF\IO\Attribute::DigitalInputs);
+            $Capabilities[\ONVIF\IO\Attribute::NbrOfVideoSources] = $this->ReadAttributeInteger(\ONVIF\IO\Attribute::NbrOfVideoSources);
+            $Capabilities[\ONVIF\IO\Attribute::NbrOfAudioSources] = $this->ReadAttributeInteger(\ONVIF\IO\Attribute::NbrOfAudioSources);
+            $Capabilities[\ONVIF\IO\Attribute::NbrOfOutputs] = $this->ReadAttributeInteger(\ONVIF\IO\Attribute::NbrOfOutputs);
+            $Capabilities[\ONVIF\IO\Attribute::NbrOfInputs] = $this->ReadAttributeInteger(\ONVIF\IO\Attribute::NbrOfInputs);
+            $Capabilities[\ONVIF\IO\Attribute::NbrOfSerialPorts] = $this->ReadAttributeInteger(\ONVIF\IO\Attribute::NbrOfSerialPorts);
+            $Capabilities[\ONVIF\IO\Attribute::HasSnapshotUri] = $this->ReadAttributeBoolean(\ONVIF\IO\Attribute::HasSnapshotUri);
+            $Capabilities[\ONVIF\IO\Attribute::HasRTSPStreaming] = $this->ReadAttributeBoolean(\ONVIF\IO\Attribute::HasRTSPStreaming);
+            $Capabilities[\ONVIF\IO\Attribute::AnalyticsModuleSupport] = $this->ReadAttributeBoolean(\ONVIF\IO\Attribute::AnalyticsModuleSupport);
+            $Capabilities[\ONVIF\IO\Attribute::AnalyticsTokens] = $this->ReadAttributeArray(\ONVIF\IO\Attribute::AnalyticsTokens);
+            $Capabilities[\ONVIF\IO\Attribute::RuleSupport] = $this->ReadAttributeBoolean(\ONVIF\IO\Attribute::RuleSupport);
+            $Capabilities[\ONVIF\IO\Attribute::XAddr] = $this->ReadAttributeArray(\ONVIF\IO\Attribute::XAddr);
             return serialize($Capabilities);
         }
         if ($Data['Function'] == 'SetSynchronizationPoint') {
@@ -543,15 +554,15 @@ class ONVIFIO extends IPSModule
             return serialize($this->Host);
         }
         if ($Data['Function'] == 'GetCredentials') {
-            $Credentials['Username'] = $this->ReadPropertyString('Username');
-            $Credentials['Password'] = $this->ReadPropertyString('Password');
+            $Credentials[\ONVIF\IO\Property::Username] = $this->ReadPropertyString(\ONVIF\IO\Property::Username);
+            $Credentials[\ONVIF\IO\Property::Password] = $this->ReadPropertyString(\ONVIF\IO\Property::Password);
             return serialize($Credentials);
         }
         if ($Data['Function'] == 'GetEvents') {
             if ($Data['Instance'] != 0) {
-                $this->lock('EventProperties');
+                $this->lock(\ONVIF\IO\Attribute::EventProperties);
             }
-            $Events = $this->ReadAttributeArray('EventProperties');
+            $Events = $this->ReadAttributeArray(\ONVIF\IO\Attribute::EventProperties);
             $SkippedTopics = $Data['SkippedTopics'];
 
             $FoundEvents = [];
@@ -607,8 +618,8 @@ class ONVIFIO extends IPSModule
                 }
             }
             if ($Data['Instance'] != 0) {
-                $this->WriteAttributeArray('EventProperties', $Events);
-                $this->unlock('EventProperties');
+                $this->WriteAttributeArray(\ONVIF\IO\Attribute::EventProperties, $Events);
+                $this->unlock(\ONVIF\IO\Attribute::EventProperties);
                 $EventList = $this->GetEventReceiverFormValues();
                 $this->UpdateFormField('Events', 'values', json_encode($EventList));
             }
@@ -630,17 +641,17 @@ class ONVIFIO extends IPSModule
     {
         switch ($Ident) {
             case 'Subscribe':
-                $AllowedEventHandler = $this->ReadPropertyInteger('EventHandler');
+                $AllowedEventHandler = $this->ReadPropertyInteger(\ONVIF\IO\Property::EventHandler);
                 if (($AllowedEventHandler & \ONVIF\EventHandler::Subscribe) == \ONVIF\EventHandler::Subscribe) {
                     if ($this->Subscribe()) {
                         return;
                     }
-                    $this->WriteAttributeString('ConsumerAddress', '');
+                    $this->WriteAttributeString(\ONVIF\IO\Attribute::ConsumerAddress, '');
                     $this->UpdateFormField('EventHookRow', 'visible', false);
                 }
-            if ($AllowedEventHandler != \ONVIF\EventHandler::Automatic) {
-                break;
-            }
+                if ($AllowedEventHandler != \ONVIF\EventHandler::Automatic) {
+                    break;
+                }
                 // WSSubscription failed, try PullPointSubscription
                 // No break. Add additional comment above this line if intentional
             case 'CreatePullPointSubscription':
@@ -662,14 +673,14 @@ class ONVIFIO extends IPSModule
             case  'Reload':
                 $this->Unsubscribe();
                 if ($this->GetStatus() == IS_INACTIVE) {
-                    $this->WriteAttributeString('ConsumerAddress', '');
+                    $this->WriteAttributeString(\ONVIF\IO\Attribute::ConsumerAddress, '');
                     return;
                 }
                 $this->UpdateFormField('ErrorTitle', 'caption', $this->Translate('Please wait!'));
                 $this->UpdateFormField('ErrorText', 'caption', $this->Translate('Determine abilities of this device'));
                 $this->UpdateFormField('ErrorPopup', 'visible', true);
-                $this->WriteAttributeString('ConsumerAddress', '');
-                $this->WriteAttributeInteger('CapabilitiesVersion', 0);
+                $this->WriteAttributeString(\ONVIF\IO\Attribute::ConsumerAddress, '');
+                $this->WriteAttributeInteger(\ONVIF\IO\Attribute::CapabilitiesVersion, 0);
                 $this->ApplyChanges();
                 $this->ReloadForm();
                 return;
@@ -682,7 +693,7 @@ class ONVIFIO extends IPSModule
             case'KernelReady':
                 $this->KernelReady();
                 return;
-            case 'EventHandler':
+            case \ONVIF\IO\Property::EventHandler:
                 switch ((int) $Value) {
                     case \ONVIF\EventHandler::None:
                         $this->UpdateFormField('SubscribeExpansionPanel', 'visible', false);
@@ -700,9 +711,9 @@ class ONVIFIO extends IPSModule
                         $this->UpdateFormField('SubscribeExpansionPanel', 'visible', true);
                         $this->UpdateFormField('PullPointExpansionPanel', 'visible', true);
                         break;
-        }
+                }
                 return;
-    }
+        }
     }
     public function GetConfigurationForm()
     {
@@ -710,7 +721,7 @@ class ONVIFIO extends IPSModule
         if ($this->GetStatus() == IS_CREATING) {
             return json_encode($Form);
         }
-        $EventHandler = $this->ReadPropertyInteger('EventHandler');
+        $EventHandler = $this->ReadPropertyInteger(\ONVIF\IO\Property::EventHandler);
         switch ($EventHandler) {
             case \ONVIF\EventHandler::None:
                 $Form['elements'][4]['visible'] = false;
@@ -731,7 +742,7 @@ class ONVIFIO extends IPSModule
         }
         if ($this->GetStatus() == IS_ACTIVE) {
             $Form['actions'][1]['items'][0]['items'] = $this->GetDeviceDataForForm();
-            $SubscriptionReference = $this->ReadAttributeString('SubscriptionReference');
+            $SubscriptionReference = $this->ReadAttributeString(\ONVIF\IO\Attribute::SubscriptionReference);
             if ($SubscriptionReference == '') {
                 $SubscriptionReference = $this->Translate('This device not support events or they are disabled.');
                 $Form['actions'][4]['visible'] = false;
@@ -742,7 +753,7 @@ class ONVIFIO extends IPSModule
             $Form['actions'][1]['visible'] = false;
             $Form['actions'][3]['visible'] = false;
         }
-        $ConsumerAddress = $this->ReadAttributeString('ConsumerAddress');
+        $ConsumerAddress = $this->ReadAttributeString(\ONVIF\IO\Attribute::ConsumerAddress);
         if ($ConsumerAddress != '') {
             $Form['actions'][2]['visible'] = true;
         }
@@ -753,7 +764,7 @@ class ONVIFIO extends IPSModule
             $Form['actions'][4]['values'] = $EventList;
         }
         $Warnings = $this->Warnings;
-        if (count($Warnings) && $this->ReadPropertyBoolean('Open')) {
+        if (count($Warnings) && $this->ReadPropertyBoolean(\ONVIF\IO\Property::Active)) {
             $WarningText = implode("\r\n", $Warnings);
             $Form['actions'][5]['visible'] = true;
             $Form['actions'][5]['popup']['items'][0]['caption'] = $this->Translate('Some features will not work properly');
@@ -796,11 +807,11 @@ class ONVIFIO extends IPSModule
 
         $InfoItems[] = [
             'type'      => 'Label',
-            'caption'   => $this->Translate('Event subscription: ') . ($this->ReadAttributeBoolean('WSSubscriptionPolicySupport') ? $this->Translate('supported') : $this->Translate('not supported'))
+            'caption'   => $this->Translate('Event subscription: ') . ($this->ReadAttributeBoolean(\ONVIF\IO\Attribute::WSSubscriptionPolicySupport) ? $this->Translate('supported') : $this->Translate('not supported'))
         ];
         $InfoItems[] = [
             'type'      => 'Label',
-            'caption'   => $this->Translate('Event PullPoint: ') . ($this->ReadAttributeBoolean('WSPullPointSupport') ? $this->Translate('supported') : $this->Translate('not supported'))
+            'caption'   => $this->Translate('Event PullPoint: ') . ($this->ReadAttributeBoolean(\ONVIF\IO\Attribute::WSPullPointSupport) ? $this->Translate('supported') : $this->Translate('not supported'))
         ];
         $InfoItems[] = [
             'type'      => 'Label',
@@ -812,39 +823,39 @@ class ONVIFIO extends IPSModule
             [
                 'width'     => '200px',
                 'type'      => 'Label',
-                'caption'   => $this->Translate('Videosources: ') . $this->ReadAttributeInteger('NbrOfVideoSources')
+                'caption'   => $this->Translate('Videosources: ') . $this->ReadAttributeInteger(\ONVIF\IO\Attribute::NbrOfVideoSources)
             ],
             [
                 'type'      => 'Label',
-                'caption'   => $this->Translate('Audiosources: ') . $this->ReadAttributeInteger('NbrOfAudioSources')
+                'caption'   => $this->Translate('Audiosources: ') . $this->ReadAttributeInteger(\ONVIF\IO\Attribute::NbrOfAudioSources)
             ],
             [
                 'type'      => 'Label',
-                'caption'   => $this->Translate('Inputs: ') . $this->ReadAttributeInteger('NbrOfInputs')
+                'caption'   => $this->Translate('Inputs: ') . $this->ReadAttributeInteger(\ONVIF\IO\Attribute::NbrOfInputs)
             ],
             [
                 'type'      => 'Label',
-                'caption'   => $this->Translate('Outputs: ') . $this->ReadAttributeInteger('NbrOfOutputs')
+                'caption'   => $this->Translate('Outputs: ') . $this->ReadAttributeInteger(\ONVIF\IO\Attribute::NbrOfOutputs)
             ],
             [
                 'type'      => 'Label',
-                'caption'   => $this->Translate('Serial ports: ') . $this->ReadAttributeInteger('NbrOfSerialPorts')
+                'caption'   => $this->Translate('Serial ports: ') . $this->ReadAttributeInteger(\ONVIF\IO\Attribute::NbrOfSerialPorts)
             ],
             [
                 'type'      => 'Label',
-                'caption'   => 'RTSP Streaming: ' . ($this->ReadAttributeBoolean('HasRTSPStreaming') ? $this->Translate('supported') : $this->Translate('not supported'))
+                'caption'   => 'RTSP Streaming: ' . ($this->ReadAttributeBoolean(\ONVIF\IO\Attribute::HasRTSPStreaming) ? $this->Translate('supported') : $this->Translate('not supported'))
             ],
             [
                 'type'      => 'Label',
-                'caption'   => 'Snapshots: ' . ($this->ReadAttributeBoolean('HasSnapshotUri') ? $this->Translate('supported') : $this->Translate('not supported'))
+                'caption'   => 'Snapshots: ' . ($this->ReadAttributeBoolean(\ONVIF\IO\Attribute::HasSnapshotUri) ? $this->Translate('supported') : $this->Translate('not supported'))
             ],
             [
                 'type'      => 'Label',
-                'caption'   => 'Analytics: ' . ($this->ReadAttributeBoolean('AnalyticsModuleSupport') ? $this->Translate('supported') : $this->Translate('not supported'))
+                'caption'   => 'Analytics: ' . ($this->ReadAttributeBoolean(\ONVIF\IO\Attribute::AnalyticsModuleSupport) ? $this->Translate('supported') : $this->Translate('not supported'))
             ],
             [
                 'type'      => 'Label',
-                'caption'   => 'Rules: ' . ($this->ReadAttributeBoolean('RuleSupport') ? $this->Translate('supported') : $this->Translate('not supported'))
+                'caption'   => 'Rules: ' . ($this->ReadAttributeBoolean(\ONVIF\IO\Attribute::RuleSupport) ? $this->Translate('supported') : $this->Translate('not supported'))
             ]
 
         ];
@@ -884,7 +895,7 @@ class ONVIFIO extends IPSModule
                 if ($ip == '') {
                     $this->SendDebug('NAT enabled ConsumerAddress', 'Invalid', 0);
                     $this->UpdateFormField('EventHook', 'caption', $this->Translate('NATPublicIP is missing in special switches!'));
-                    $this->WriteAttributeString('ConsumerAddress', 'Invalid');
+                    $this->WriteAttributeString(\ONVIF\IO\Attribute::ConsumerAddress, 'Invalid');
                     $this->ShowLastError('Error', $this->Translate('NAT support is active, but no public address is set.'));
                     return false;
                 }
@@ -905,7 +916,7 @@ class ONVIFIO extends IPSModule
                     $this->UpdateFormField('EventHookRow', 'visible', true);
                     $this->SendDebug('ConsumerAddress', 'Invalid', 0);
                     $this->UpdateFormField('EventHook', 'caption', $this->Translate('Invalid'));
-                    $this->WriteAttributeString('ConsumerAddress', 'Invalid');
+                    $this->WriteAttributeString(\ONVIF\IO\Attribute::ConsumerAddress, 'Invalid');
                     return false;
                 }
             }
@@ -915,18 +926,18 @@ class ONVIFIO extends IPSModule
         $this->SendDebug($Debug, $Url, 0);
         $this->UpdateFormField('EventHookRow', 'visible', true);
         $this->UpdateFormField('EventHook', 'caption', $Url);
-        $this->WriteAttributeString('ConsumerAddress', $Url);
+        $this->WriteAttributeString(\ONVIF\IO\Attribute::ConsumerAddress, $Url);
         return true;
     }
     protected function CreatePullPointSubscription(): bool
     {
-        $XAddr = $this->ReadAttributeArray('XAddr');
+        $XAddr = $this->ReadAttributeArray(\ONVIF\IO\Attribute::XAddr);
         if ($XAddr[\ONVIF\NS::Event] == '') {
             return false;
         }
-        $PullPointInitialTerminationTime = $this->ReadPropertyInteger('PullPointInitialTerminationTime');
-        $AllowedEventHandler = $this->ReadPropertyInteger('EventHandler');
-        $this->lock('EventHandler');
+        $PullPointInitialTerminationTime = $this->ReadPropertyInteger(\ONVIF\IO\Property::PullPointInitialTerminationTime);
+        $AllowedEventHandler = $this->ReadPropertyInteger(\ONVIF\IO\Property::EventHandler);
+        $this->lock(\ONVIF\IO\Property::EventHandler);
         $Action = 'http://www.onvif.org/ver10/events/wsdl/EventPortType/CreatePullPointSubscriptionRequest';
         $Header = $this->GenerateSOAPHeader($Action, $this->Host . $XAddr[\ONVIF\NS::Event]);
         $empty = '';
@@ -935,25 +946,25 @@ class ONVIFIO extends IPSModule
         ];
         $CreatePullPointResult = $this->SendData($XAddr[\ONVIF\NS::Event], \ONVIF\WSDL::Event, 'CreatePullPointSubscription', true, $Params, $empty, $Header);
         if (is_a($CreatePullPointResult, 'SoapFault')) {
-            $this->unlock('EventHandler');
+            $this->unlock(\ONVIF\IO\Property::EventHandler);
             if ($AllowedEventHandler == \ONVIF\EventHandler::Automatic) {
                 $this->SetStatus(IS_EBASE + 4);
             } else {
                 $this->SetStatus(IS_EBASE + 3);
             }
-            $this->LogMessage($this->Translate('Connection lost'), KL_ERROR);
+            $this->LogMessage($this->Translate(\ONVIF\IO\State::CONNECTION_LOST), KL_ERROR);
             /** @var SoapFault $CreatePullPointResult */
             $this->ShowLastError($CreatePullPointResult->getMessage());
             return false;
         }
         if (!is_object($CreatePullPointResult)) {
-            $this->unlock('EventHandler');
+            $this->unlock(\ONVIF\IO\Property::EventHandler);
             if ($AllowedEventHandler == \ONVIF\EventHandler::Automatic) {
                 $this->SetStatus(IS_EBASE + 4);
             } else {
                 $this->SetStatus(IS_EBASE + 3);
             }
-            $this->LogMessage($this->Translate('Connection lost'), KL_ERROR);
+            $this->LogMessage($this->Translate(\ONVIF\IO\State::CONNECTION_LOST), KL_ERROR);
             $this->ShowLastError('No Response');
             return false;
         }
@@ -961,29 +972,29 @@ class ONVIFIO extends IPSModule
         $this->SendDebug('SubscriptionReference', $SubscriptionReference, 0);
         $ReferenceUrl = parse_url($SubscriptionReference, PHP_URL_HOST);
         $ReferenceUrl = $ReferenceUrl !== null ? $ReferenceUrl : 'INVALID';
-        if (strpos($this->ReadPropertyString('Address'), $ReferenceUrl) === false) {
+        if (strpos($this->ReadPropertyString(\ONVIF\IO\Property::Address), $ReferenceUrl) === false) {
             $this->SendDebug('Warning', 'invalid Subscription-Reference, try to fix it', 0);
             $Url = parse_url($SubscriptionReference);
-            $Url['host'] = parse_url($this->ReadPropertyString('Address'), PHP_URL_HOST);
-            $Url['port'] = parse_url($this->ReadPropertyString('Address'), PHP_URL_PORT);
+            $Url['host'] = parse_url($this->ReadPropertyString(\ONVIF\IO\Property::Address), PHP_URL_HOST);
+            $Url['port'] = parse_url($this->ReadPropertyString(\ONVIF\IO\Property::Address), PHP_URL_PORT);
             $SubscriptionReference = self::unparse_url($Url);
         }
-        $this->WriteAttributeString('SubscriptionReference', $SubscriptionReference);
+        $this->WriteAttributeString(\ONVIF\IO\Attribute::SubscriptionReference, $SubscriptionReference);
         $this->UpdateFormField('SubscriptionReference', 'caption', $SubscriptionReference);
         $this->UpdateFormField('SubscriptionReferenceRow', 'visible', true);
         if (property_exists($CreatePullPointResult->SubscriptionReference, 'ReferenceParameters')) {
             $SubscriptionId = property_exists($CreatePullPointResult->SubscriptionReference->ReferenceParameters, 'any') ? $CreatePullPointResult->SubscriptionReference->ReferenceParameters->any : '';
             $this->SendDebug('SubscriptionId', $SubscriptionId, 0);
-            $this->WriteAttributeString('SubscriptionId', $SubscriptionId);
+            $this->WriteAttributeString(\ONVIF\IO\Attribute::SubscriptionId, $SubscriptionId);
         } else {
-            $this->WriteAttributeString('SubscriptionId', '');
+            $this->WriteAttributeString(\ONVIF\IO\Attribute::SubscriptionId, '');
         }
         $this->isSubscribed = true;
         $this->usedEventHandler = new \ONVIF\EventHandler(\ONVIF\EventHandler::PullPoint);
         $this->SetRenewInterval($CreatePullPointResult);
         $this->SetSynchronizationPoint();
-        $this->unlock('EventHandler');
-        $this->LogMessage($this->Translate('Interface connected'), KL_MESSAGE);
+        $this->unlock(\ONVIF\IO\Property::EventHandler);
+        $this->LogMessage($this->Translate(\ONVIF\IO\State::ACTIVE), KL_MESSAGE);
         $this->SetStatus(IS_ACTIVE);
         return true;
     }
@@ -993,20 +1004,20 @@ class ONVIFIO extends IPSModule
             // Exit PullMessages loop
             return;
         }
-        $SubscriptionReference = $this->ReadAttributeString('SubscriptionReference');
+        $SubscriptionReference = $this->ReadAttributeString(\ONVIF\IO\Attribute::SubscriptionReference);
         if ($SubscriptionReference == '') {
             $this->SendDebug('ERROR PullMessages', 'No SubscriptionReference', 0);
             $this->LogMessage($this->Translate('Call PullMessages with no SubscriptionReference'), KL_ERROR);
             $this->SetStatus(IS_EBASE + 3);
-            $this->LogMessage($this->Translate('Connection lost'), KL_ERROR);
+            $this->LogMessage($this->Translate(\ONVIF\IO\State::CONNECTION_LOST), KL_ERROR);
             return;
         }
-        $Timeout = $this->ReadPropertyInteger('PullPointTimeout');
+        $Timeout = $this->ReadPropertyInteger(\ONVIF\IO\Property::PullPointTimeout);
         $Action = 'http://www.onvif.org/ver10/events/wsdl/PullPointSubscription/PullMessagesRequest';
         $Header = $this->GenerateSOAPHeader($Action, $SubscriptionReference);
         $Params = [
             'Timeout'     => 'PT' . (string) $Timeout . 'S',
-            'MessageLimit'=> $this->ReadPropertyInteger('MessageLimit')
+            'MessageLimit'=> $this->ReadPropertyInteger(\ONVIF\IO\Property::MessageLimit)
         ];
         $Response = '';
         $ResponseTime = time() + $Timeout;
@@ -1044,18 +1055,18 @@ class ONVIFIO extends IPSModule
     }
     protected function Subscribe(): bool
     {
-        $XAddr = $this->ReadAttributeArray('XAddr');
+        $XAddr = $this->ReadAttributeArray(\ONVIF\IO\Attribute::XAddr);
         if ($XAddr[\ONVIF\NS::Event] == '') {
             return false;
         }
-        $SubscribeInitialTerminationTime = $this->ReadPropertyInteger('SubscribeInitialTerminationTime');
-        $AllowedEventHandler = $this->ReadPropertyInteger('EventHandler');
-        $this->lock('EventHandler');
+        $SubscribeInitialTerminationTime = $this->ReadPropertyInteger(\ONVIF\IO\Property::SubscribeInitialTerminationTime);
+        $AllowedEventHandler = $this->ReadPropertyInteger(\ONVIF\IO\Property::EventHandler);
+        $this->lock(\ONVIF\IO\Property::EventHandler);
         $Action = 'http://docs.oasis-open.org/wsn/bw-2/NotificationProducer/SubscribeRequest';
         $Header = $this->GenerateSOAPHeader($Action, $this->Host . $XAddr[\ONVIF\NS::Event]);
         $Params = [
             'ConsumerReference'      => [
-                'Address' => $this->ReadAttributeString('ConsumerAddress')
+                'Address' => $this->ReadAttributeString(\ONVIF\IO\Attribute::ConsumerAddress)
             ],
             'InitialTerminationTime' => 'PT' . (string) $SubscribeInitialTerminationTime . 'M'
         ];
@@ -1064,10 +1075,10 @@ class ONVIFIO extends IPSModule
         $SubscribeResult = $this->SendData($XAddr[\ONVIF\NS::Event], \ONVIF\WSDL::Event, 'Subscribe', true, $Params, $Response, $Header);
         if (is_a($SubscribeResult, 'SoapFault') || (!is_object($SubscribeResult))) {
             $this->WaitForFirstEvent = false;
-            $this->unlock('EventHandler');
+            $this->unlock(\ONVIF\IO\Property::EventHandler);
             if ($AllowedEventHandler == \ONVIF\EventHandler::Subscribe) { // nur Subscribe erlaubt
                 $this->SetStatus(IS_EBASE + 3);
-                $this->LogMessage($this->Translate('Connection lost'), KL_ERROR);
+                $this->LogMessage($this->Translate(\ONVIF\IO\State::CONNECTION_LOST), KL_ERROR);
                 $this->ShowLastError($SubscribeResult->getMessage());
             }
             return false;
@@ -1077,29 +1088,29 @@ class ONVIFIO extends IPSModule
 
         $ReferenceUrl = parse_url($SubscriptionReference, PHP_URL_HOST);
         $ReferenceUrl = $ReferenceUrl !== null ? $ReferenceUrl : 'INVALID';
-        if (strpos($this->ReadPropertyString('Address'), $ReferenceUrl) === false) {
+        if (strpos($this->ReadPropertyString(\ONVIF\IO\Property::Address), $ReferenceUrl) === false) {
             $this->SendDebug('Warning', 'invalid Subscription-Reference, try to fix it', 0);
             $Url = parse_url($SubscriptionReference);
-            $Url['host'] = parse_url($this->ReadPropertyString('Address'), PHP_URL_HOST);
-            $Url['port'] = parse_url($this->ReadPropertyString('Address'), PHP_URL_PORT);
+            $Url['host'] = parse_url($this->ReadPropertyString(\ONVIF\IO\Property::Address), PHP_URL_HOST);
+            $Url['port'] = parse_url($this->ReadPropertyString(\ONVIF\IO\Property::Address), PHP_URL_PORT);
             $SubscriptionReference = self::unparse_url($Url);
         }
-        $this->WriteAttributeString('SubscriptionReference', $SubscriptionReference);
+        $this->WriteAttributeString(\ONVIF\IO\Attribute::SubscriptionReference, $SubscriptionReference);
         $this->UpdateFormField('SubscriptionReference', 'caption', $SubscriptionReference);
         $this->UpdateFormField('SubscriptionReferenceRow', 'visible', true);
         if (property_exists($SubscribeResult->SubscriptionReference, 'ReferenceParameters')) {
             $SubscriptionId = property_exists($SubscribeResult->SubscriptionReference->ReferenceParameters, 'any') ? $SubscribeResult->SubscriptionReference->ReferenceParameters->any : '';
             $this->SendDebug('SubscriptionId', $SubscriptionId, 0);
-            $this->WriteAttributeString('SubscriptionId', $SubscriptionId);
+            $this->WriteAttributeString(\ONVIF\IO\Attribute::SubscriptionId, $SubscriptionId);
         } else {
-            $this->WriteAttributeString('SubscriptionId', '');
+            $this->WriteAttributeString(\ONVIF\IO\Attribute::SubscriptionId, '');
         }
         $this->isSubscribed = true;
         $this->usedEventHandler = new \ONVIF\EventHandler(\ONVIF\EventHandler::Subscribe);
         $this->SetRenewInterval($SubscribeResult);
         $this->SetSynchronizationPoint();
-        $this->unlock('EventHandler');
-        $EventTimeout = $this->ReadPropertyInteger('SubscribeEventTimeout') * 1000;
+        $this->unlock(\ONVIF\IO\Property::EventHandler);
+        $EventTimeout = $this->ReadPropertyInteger(\ONVIF\IO\Property::SubscribeEventTimeout) * 1000;
         if ($EventTimeout) {
             for ($i = 0; $i < $EventTimeout; $i = $i + 50) {
                 if (!$this->WaitForFirstEvent) {
@@ -1107,7 +1118,7 @@ class ONVIFIO extends IPSModule
                     $this->UpdateFormField('DeviceDataPanel', 'visible', true);
                     $this->UpdateFormField('DeviceDataPanel', 'expanded', true);
                     $this->UpdateFormField('Events', 'visible', true);
-                    $this->LogMessage($this->Translate('Interface connected'), KL_MESSAGE);
+                    $this->LogMessage($this->Translate(\ONVIF\IO\State::ACTIVE), KL_MESSAGE);
                     $this->SetStatus(IS_ACTIVE);
                     return true;
                 }
@@ -1119,7 +1130,7 @@ class ONVIFIO extends IPSModule
             $this->UpdateFormField('DeviceDataPanel', 'visible', true);
             $this->UpdateFormField('DeviceDataPanel', 'expanded', true);
             $this->UpdateFormField('Events', 'visible', true);
-            $this->LogMessage($this->Translate('Interface connected'), KL_MESSAGE);
+            $this->LogMessage($this->Translate(\ONVIF\IO\State::ACTIVE), KL_MESSAGE);
             $this->SetStatus(IS_ACTIVE);
             return true;
         }
@@ -1127,13 +1138,13 @@ class ONVIFIO extends IPSModule
         $this->WaitForFirstEvent = false;
         if ($AllowedEventHandler == \ONVIF\EventHandler::Subscribe) { // nur Subscribe erlaubt
             $this->SetStatus(IS_EBASE + 4);
-            $this->LogMessage($this->Translate('Connection lost'), KL_ERROR);
+            $this->LogMessage($this->Translate(\ONVIF\IO\State::CONNECTION_LOST), KL_ERROR);
         }
         return false;
     }
     protected function SetSynchronizationPoint(): bool
     {
-        $SubscriptionReference = $this->ReadAttributeString('SubscriptionReference');
+        $SubscriptionReference = $this->ReadAttributeString(\ONVIF\IO\Attribute::SubscriptionReference);
         if ($SubscriptionReference == '') {
             $this->SendDebug('ERROR SetSynchronizationPoint', 'No SubscriptionReference', 0);
             $this->LogMessage($this->Translate('Call SetSynchronizationPoint with no SubscriptionReference'), KL_ERROR);
@@ -1141,7 +1152,7 @@ class ONVIFIO extends IPSModule
         }
         $Action = 'http://www.onvif.org/ver10/events/wsdl/PullPointSubscription/SetSynchronizationPointRequest';
         $Header = $this->GenerateSOAPHeader($Action, $SubscriptionReference);
-        $SubscriptionId = $this->ReadAttributeString('SubscriptionId');
+        $SubscriptionId = $this->ReadAttributeString(\ONVIF\IO\Attribute::SubscriptionId);
         if ($SubscriptionId != '') {
             $xml = new DOMDocument();
             $xml->loadXML($SubscriptionId);
@@ -1160,21 +1171,21 @@ class ONVIFIO extends IPSModule
     }
     protected function Renew(): bool
     {
-        $this->SetTimerInterval('RenewSubscription', 0);
+        $this->SetTimerInterval(\ONVIF\IO\Timer::RenewSubscription, 0);
         if (!$this->isSubscribed) {
             return true;
         }
-        $this->lock('EventHandler');
-        $SubscriptionReference = $this->ReadAttributeString('SubscriptionReference');
+        $this->lock(\ONVIF\IO\Property::EventHandler);
+        $SubscriptionReference = $this->ReadAttributeString(\ONVIF\IO\Attribute::SubscriptionReference);
         if ($SubscriptionReference == '') {
             $this->SendDebug('ERROR Renew', 'No SubscriptionReference', 0);
             $this->LogMessage($this->Translate('Call Renew with no SubscriptionReference'), KL_ERROR);
-            $this->unlock('EventHandler');
+            $this->unlock(\ONVIF\IO\Property::EventHandler);
             return false;
         }
         $Action = 'http://docs.oasis-open.org/wsn/bw-2/SubscriptionManager/RenewRequest';
         $Header = $this->GenerateSOAPHeader($Action, $SubscriptionReference);
-        $SubscriptionId = $this->ReadAttributeString('SubscriptionId');
+        $SubscriptionId = $this->ReadAttributeString(\ONVIF\IO\Attribute::SubscriptionId);
         if ($SubscriptionId != '') {
             $xml = new DOMDocument();
             $xml->loadXML($SubscriptionId);
@@ -1192,7 +1203,7 @@ class ONVIFIO extends IPSModule
             $this->LogMessage($this->Translate('Error Renew Subscription with:') . $RenewResult->getMessage(), KL_ERROR);
             $this->SetStatus(IS_EBASE + 3);
             $this->isSubscribed = false;
-            $this->unlock('EventHandler');
+            $this->unlock(\ONVIF\IO\Property::EventHandler);
             return false;
         }
         if (!is_object($RenewResult)) {
@@ -1200,11 +1211,11 @@ class ONVIFIO extends IPSModule
             $this->LogMessage($this->Translate('Error Renew with no Response'), KL_ERROR);
             $this->SetStatus(IS_EBASE + 3);
             $this->isSubscribed = false;
-            $this->unlock('EventHandler');
+            $this->unlock(\ONVIF\IO\Property::EventHandler);
             return false;
         }
         $this->SetRenewInterval($RenewResult);
-        $this->unlock('EventHandler');
+        $this->unlock(\ONVIF\IO\Property::EventHandler);
         return true;
     }
     protected function Unsubscribe(): bool
@@ -1213,19 +1224,19 @@ class ONVIFIO extends IPSModule
         if (!$this->isSubscribed) {
             return true;
         }
-        $this->lock('EventHandler');
-        $this->SetTimerInterval('RenewSubscription', 0);
+        $this->lock(\ONVIF\IO\Property::EventHandler);
+        $this->SetTimerInterval(\ONVIF\IO\Timer::RenewSubscription, 0);
         $this->isSubscribed = false;
         $this->UpdateFormField('SubscriptionReference', 'caption', '');
         $this->UpdateFormField('SubscriptionReferenceRow', 'visible', false);
-        $SubscriptionReference = $this->ReadAttributeString('SubscriptionReference');
-        $this->WriteAttributeString('SubscriptionReference', '');
-        $SubscriptionId = $this->ReadAttributeString('SubscriptionId');
-        $this->WriteAttributeString('SubscriptionId', '');
+        $SubscriptionReference = $this->ReadAttributeString(\ONVIF\IO\Attribute::SubscriptionReference);
+        $this->WriteAttributeString(\ONVIF\IO\Attribute::SubscriptionReference, '');
+        $SubscriptionId = $this->ReadAttributeString(\ONVIF\IO\Attribute::SubscriptionId);
+        $this->WriteAttributeString(\ONVIF\IO\Attribute::SubscriptionId, '');
         if ($SubscriptionReference == '') {
             $this->SendDebug('ERROR Unsubscribe', 'No SubscriptionReference', 0);
             $this->LogMessage($this->Translate('Call Unsubscribe with no SubscriptionReference'), KL_ERROR);
-            $this->unlock('EventHandler');
+            $this->unlock(\ONVIF\IO\Property::EventHandler);
             return false;
         }
         $Action = 'http://docs.oasis-open.org/wsn/bw-2/SubscriptionManager/UnsubscribeRequest';
@@ -1243,12 +1254,12 @@ class ONVIFIO extends IPSModule
             /** @var SoapFault $UnsubscribeResult */
             trigger_error($UnsubscribeResult->getMessage(), E_USER_NOTICE);
         }
-        $this->unlock('EventHandler');
+        $this->unlock(\ONVIF\IO\Property::EventHandler);
         return true;
     }
     protected function GetEventProperties()
     {
-        $XAddr = $this->ReadAttributeArray('XAddr');
+        $XAddr = $this->ReadAttributeArray(\ONVIF\IO\Attribute::XAddr);
         if ($XAddr[\ONVIF\NS::Event] == '') {
             return false;
         }
@@ -1286,7 +1297,7 @@ class ONVIFIO extends IPSModule
 
     protected function GetProfiles2(string $Token = null, string $ConfigurationEnumeration = \ONVIF\Media2Conf::All): bool
     {
-        $XAddr = $this->ReadAttributeArray('XAddr');
+        $XAddr = $this->ReadAttributeArray(\ONVIF\IO\Attribute::XAddr);
         $Params['Type'] = $ConfigurationEnumeration;
         if ($Token) {
             $Params['Token'] = $Token;
@@ -1335,8 +1346,8 @@ class ONVIFIO extends IPSModule
         }
         $H264VideoSources = array_values($H264VideoSourcesItems);
         $this->SendDebug('VideoSources H.26x', $H264VideoSources, 0);
-        $this->WriteAttributeArray('VideoSources', $H264VideoSources);
-        $JPEGProfiles = array_filter($Profiles, function ($Profile)
+        $this->WriteAttributeArray(\ONVIF\IO\Attribute::VideoSources, $H264VideoSources);
+        $JPEGProfiles = array_filter($Profiles, function (array $Profile)
         {
             if (isset($Profile['Configurations']['VideoEncoder']['Encoding'])) {
                 if (strtoupper($Profile['Configurations']['VideoEncoder']['Encoding']) == 'JPEG') {
@@ -1369,7 +1380,7 @@ class ONVIFIO extends IPSModule
         }
         $JPEGVideoSources = array_values($JPEGVideoSourcesItems);
         $this->SendDebug('VideoSources JPEG', $JPEGVideoSources, 0);
-        $this->WriteAttributeArray('VideoSourcesJPEG', $JPEGVideoSources);
+        $this->WriteAttributeArray(\ONVIF\IO\Attribute::VideoSourcesJPEG, $JPEGVideoSources);
         $AnalyticsTokens = [];
         $AnalyticsProfiles = array_filter($Profiles, function ($Profile)
         {
@@ -1383,12 +1394,12 @@ class ONVIFIO extends IPSModule
             $AnalyticsTokens[$Token] = $Name;
         }
         $this->SendDebug('AnalyticsTokens', $AnalyticsTokens, 0);
-        $this->WriteAttributeArray('AnalyticsTokens', $AnalyticsTokens);
+        $this->WriteAttributeArray(\ONVIF\IO\Attribute::AnalyticsTokens, $AnalyticsTokens);
         return true;
     }
     protected function GetProfiles(): bool
     {
-        $XAddr = $this->ReadAttributeArray('XAddr');
+        $XAddr = $this->ReadAttributeArray(\ONVIF\IO\Attribute::XAddr);
         $ProfileResult = $this->SendData($XAddr[\ONVIF\NS::Media], \ONVIF\WSDL::Media, 'GetProfiles', true);
         if (is_a($ProfileResult, 'SoapFault')) {
             $this->LogMessage($this->lastSOAPError, KL_ERROR);
@@ -1433,7 +1444,7 @@ class ONVIFIO extends IPSModule
         }
         $H264VideoSources = array_values($H264VideoSourcesItems);
         $this->SendDebug('VideoSources H.26x', $H264VideoSources, 0);
-        $this->WriteAttributeArray('VideoSources', $H264VideoSources);
+        $this->WriteAttributeArray(\ONVIF\IO\Attribute::VideoSources, $H264VideoSources);
 
         $JPEGProfiles = array_filter($Profiles, function ($Profile)
         {
@@ -1464,7 +1475,7 @@ class ONVIFIO extends IPSModule
         }
         $JPEGVideoSources = array_values($JPEGVideoSourcesItems);
         $this->SendDebug('VideoSources JPEG', $JPEGVideoSources, 0);
-        $this->WriteAttributeArray('VideoSourcesJPEG', $JPEGVideoSources);
+        $this->WriteAttributeArray(\ONVIF\IO\Attribute::VideoSourcesJPEG, $JPEGVideoSources);
         $AnalyticsTokens = [];
         $AnalyticsProfiles = array_filter($Profiles, function ($Profile)
         {
@@ -1478,7 +1489,7 @@ class ONVIFIO extends IPSModule
             $AnalyticsTokens[$Token] = $Name;
         }
         $this->SendDebug('AnalyticsTokens', $AnalyticsTokens, 0);
-        $this->WriteAttributeArray('AnalyticsTokens', $AnalyticsTokens);
+        $this->WriteAttributeArray(\ONVIF\IO\Attribute::AnalyticsTokens, $AnalyticsTokens);
         return true;
     }
     protected function GetCapabilities(): bool
@@ -1567,17 +1578,17 @@ class ONVIFIO extends IPSModule
                 }
             }
         }
-        $this->WriteAttributeArray('XAddr', $XAddr);
-        $this->WriteAttributeBoolean('AnalyticsModuleSupport', $AnalyticsModuleSupport);
-        $this->WriteAttributeBoolean('RuleSupport', $RuleSupport);
-        $this->WriteAttributeBoolean('WSSubscriptionPolicySupport', $WSSubscriptionPolicySupport);
-        $this->WriteAttributeBoolean('WSPullPointSupport', $WSPullPointSupport);
-        $this->WriteAttributeBoolean('HasSnapshotUri', false);
-        $this->WriteAttributeBoolean('HasRTSPStreaming', $HasRTSPStreaming);
-        $this->WriteAttributeInteger('NbrOfVideoSources', $NbrOfVideoSources);
-        $this->WriteAttributeInteger('NbrOfAudioSources', $NbrOfAudioSources);
-        $this->WriteAttributeInteger('NbrOfInputs', $NbrOfInputs);
-        $this->WriteAttributeInteger('NbrOfOutputs', $NbrOfOutputs);
+        $this->WriteAttributeArray(\ONVIF\IO\Attribute::XAddr, $XAddr);
+        $this->WriteAttributeBoolean(\ONVIF\IO\Attribute::AnalyticsModuleSupport, $AnalyticsModuleSupport);
+        $this->WriteAttributeBoolean(\ONVIF\IO\Attribute::RuleSupport, $RuleSupport);
+        $this->WriteAttributeBoolean(\ONVIF\IO\Attribute::WSSubscriptionPolicySupport, $WSSubscriptionPolicySupport);
+        $this->WriteAttributeBoolean(\ONVIF\IO\Attribute::WSPullPointSupport, $WSPullPointSupport);
+        $this->WriteAttributeBoolean(\ONVIF\IO\Attribute::HasSnapshotUri, false);
+        $this->WriteAttributeBoolean(\ONVIF\IO\Attribute::HasRTSPStreaming, $HasRTSPStreaming);
+        $this->WriteAttributeInteger(\ONVIF\IO\Attribute::NbrOfVideoSources, $NbrOfVideoSources);
+        $this->WriteAttributeInteger(\ONVIF\IO\Attribute::NbrOfAudioSources, $NbrOfAudioSources);
+        $this->WriteAttributeInteger(\ONVIF\IO\Attribute::NbrOfInputs, $NbrOfInputs);
+        $this->WriteAttributeInteger(\ONVIF\IO\Attribute::NbrOfOutputs, $NbrOfOutputs);
         return !is_a($Result, 'SoapFault');
     }
     protected function GetScopes()
@@ -1598,7 +1609,7 @@ class ONVIFIO extends IPSModule
     }
     protected function GetNodes()
     {
-        $XAddr = $this->ReadAttributeArray('XAddr');
+        $XAddr = $this->ReadAttributeArray(\ONVIF\IO\Attribute::XAddr);
         $Nodes = $this->SendData($XAddr[\ONVIF\NS::PTZ], \ONVIF\WSDL::PTZ, 'GetNodes', true);
         if (is_a($Nodes, 'SoapFault')) {
             return false;
@@ -1627,7 +1638,7 @@ class ONVIFIO extends IPSModule
 
     protected function GetSupportedAnalyticsModules(string $AnalyticsToken)
     {
-        $XAddr = $this->ReadAttributeArray('XAddr');
+        $XAddr = $this->ReadAttributeArray(\ONVIF\IO\Attribute::XAddr);
         $Params = [
             'ConfigurationToken' => $AnalyticsToken
         ];
@@ -1640,7 +1651,7 @@ class ONVIFIO extends IPSModule
     }
     protected function GetSupportedRules(string $AnalyticsToken)
     {
-        $XAddr = $this->ReadAttributeArray('XAddr');
+        $XAddr = $this->ReadAttributeArray(\ONVIF\IO\Attribute::XAddr);
         $Params = [
             'ConfigurationToken' => $AnalyticsToken
         ];
@@ -1685,7 +1696,7 @@ class ONVIFIO extends IPSModule
             return false;
         }
         $ServicesResult = json_decode(json_encode($Services), true);
-        $XAddr = $this->ReadAttributeArray('XAddr');
+        $XAddr = $this->ReadAttributeArray(\ONVIF\IO\Attribute::XAddr);
         /*$XAddr = [
             \ONVIF\NS::Management => '/onvif/device_service',
             \ONVIF\NS::Event      => '',
@@ -1701,7 +1712,7 @@ class ONVIFIO extends IPSModule
         foreach ($ServicesResult['Service'] as $Service) {
             $XAddr[$Service['Namespace']] = parse_url($Service['XAddr'], PHP_URL_PATH);
         }
-        $this->WriteAttributeArray('XAddr', $XAddr);
+        $this->WriteAttributeArray(\ONVIF\IO\Attribute::XAddr, $XAddr);
         return true;
     }
     protected function GetServiceCapabilities($Uri, $WSDL)
@@ -1754,7 +1765,7 @@ class ONVIFIO extends IPSModule
     }
     protected function GetDigitalInputConfigurationOptions(string $Token): array
     {
-        $XAddr = $this->ReadAttributeArray('XAddr');
+        $XAddr = $this->ReadAttributeArray(\ONVIF\IO\Attribute::XAddr);
         $Params['Token'] = $Token;
         $DigitalInputConfigurationOptionsResponse = $this->SendData($XAddr[\ONVIF\NS::DeviceIO], \ONVIF\WSDL::DeviceIO, 'GetDigitalInputConfigurationOptions', true, $Params);
         if (is_a($DigitalInputConfigurationOptionsResponse, 'SoapFault')) {
@@ -1803,7 +1814,7 @@ class ONVIFIO extends IPSModule
     {
         $camera_datetime = $this->SendData('', \ONVIF\WSDL::Management, 'GetSystemDateAndTime');
         if (is_a($camera_datetime, 'SoapFault')) {
-            $this->WriteAttributeInteger('Timestamp_Offset', 0);
+            $this->WriteAttributeInteger(\ONVIF\IO\Attribute::Timestamp_Offset, 0);
             return false;
         }
         if (property_exists($camera_datetime->SystemDateAndTime, 'UTCDateTime')) {
@@ -1815,7 +1826,7 @@ class ONVIFIO extends IPSModule
                 $camera_datetime->SystemDateAndTime->UTCDateTime->Date->Day,
                 $camera_datetime->SystemDateAndTime->UTCDateTime->Date->Year
             );
-            $this->WriteAttributeInteger('Timestamp_Offset', time() - $camera_ts);
+            $this->WriteAttributeInteger(\ONVIF\IO\Attribute::Timestamp_Offset, time() - $camera_ts);
             $this->SendDebug('TimeDiff', time() - $camera_ts, 0);
             return true;
         }
@@ -1828,7 +1839,7 @@ class ONVIFIO extends IPSModule
                 $camera_datetime->SystemDateAndTime->LocalDateTime->Date->Day,
                 $camera_datetime->SystemDateAndTime->LocalDateTime->Date->Year
             );
-            $this->WriteAttributeInteger('Timestamp_Offset', time() - $camera_ts);
+            $this->WriteAttributeInteger(\ONVIF\IO\Attribute::Timestamp_Offset, time() - $camera_ts);
             $this->SendDebug('TimeDiff', time() - $camera_ts, 0);
             return true;
         }
@@ -1859,11 +1870,11 @@ class ONVIFIO extends IPSModule
         $wsdl = dirname(__DIR__) . '/libs/WSDL/' . $wsdl;
         if ($UseLogin) {
             if ($this->Profile->HasProfile(\ONVIF\Profile::S) || ($Function == 'GetScopes')) { // Nur Profile S Geräte können WSSecurity
-                if ($this->ReadPropertyString('Password') != '') {
-                    $Header[] = \ONVIF\ONVIF::soapClientWSSecurityHeader($this->ReadPropertyString('Username'), $this->ReadPropertyString('Password'), $this->ReadAttributeInteger('Timestamp_Offset'));
+                if ($this->ReadPropertyString(\ONVIF\IO\Property::Password) != '') {
+                    $Header[] = \ONVIF\ONVIF::soapClientWSSecurityHeader($this->ReadPropertyString(\ONVIF\IO\Property::Username), $this->ReadPropertyString(\ONVIF\IO\Property::Password), $this->ReadAttributeInteger(\ONVIF\IO\Attribute::Timestamp_Offset));
                 }
             }
-            $ONVIFClient = new \ONVIF\ONVIF($wsdl, $URI, $this->ReadPropertyString('Username'), $this->ReadPropertyString('Password'), $Header, $Timeout);
+            $ONVIFClient = new \ONVIF\ONVIF($wsdl, $URI, $this->ReadPropertyString(\ONVIF\IO\Property::Username), $this->ReadPropertyString(\ONVIF\IO\Property::Password), $Header, $Timeout);
         } else {
             $ONVIFClient = new \ONVIF\ONVIF($wsdl, $URI, null, null, $Header, $Timeout);
         }
@@ -1887,7 +1898,7 @@ class ONVIFIO extends IPSModule
             $this->SendDebug('Soap Response Headers Error', $ONVIFClient->client->__getLastResponseHeaders(), 0);
             $this->SendDebug('Soap Response Error', $Response, 0);
             $this->SendDebug('Soap Response Error (' . $e->getCode() . ')', $e->getMessage(), 0);
-            $this->lastSOAPError = $e->getMessage();
+            $this->lastSOAPError = $Function . ': ' . $e->getMessage();
             unset($ONVIFClient);
             return $e;
         }
@@ -1897,7 +1908,7 @@ class ONVIFIO extends IPSModule
     protected function GetEventReceiverFormValues(): array
     {
         $EventList = [];
-        $Events = $this->ReadAttributeArray('EventProperties');
+        $Events = $this->ReadAttributeArray(\ONVIF\IO\Attribute::EventProperties);
         foreach ($Events as $Topic => $MessageDescription) {
             $Receivers = [];
             foreach ($MessageDescription['Receivers'] as $Receiver) {
@@ -1922,7 +1933,7 @@ class ONVIFIO extends IPSModule
     }
     protected function ProcessHookData()
     {
-        if (($this->ReadPropertyBoolean('Open') == false) || ($this->GetTimerInterval('RenewSubscription') == 0)) {
+        if (($this->ReadPropertyBoolean(\ONVIF\IO\Property::Active) == false) || ($this->GetTimerInterval(\ONVIF\IO\Timer::RenewSubscription) == 0)) {
             http_response_code(404);
             header('Connection: close');
             header('Server: Symcon ' . IPS_GetKernelVersion());
@@ -1990,14 +2001,14 @@ class ONVIFIO extends IPSModule
     protected function SendEventDataArrayToChildren(array $EventDataArray): void
     {
         foreach ($EventDataArray as $EventData) {
-            $EventData['DataID'] = '{E23DD2CD-F098-268A-CE49-1CC04FE8060B}';
+            $EventData['DataID'] = \ONVIF\DataFlow\GUID::SendEvents;
             $this->SendDataToChildren(json_encode($EventData));
         }
     }
     protected function KernelReady(): void
     {
         $this->RegisterMessage($this->InstanceID, FM_CHILDREMOVED);
-        $Url = parse_url($this->ReadPropertyString('Address'));
+        $Url = parse_url($this->ReadPropertyString(\ONVIF\IO\Property::Address));
         $Url['port'] = (isset($Url['port']) ? ':' . $Url['port'] : '');
         if (isset($Url['scheme']) && isset($Url['host'])) {
             $this->Host = $Url['scheme'] . '://' . $Url['host'] . $Url['port'];
@@ -2083,6 +2094,6 @@ class ONVIFIO extends IPSModule
         }
         $this->SendDebug('TerminationTime', $this->TerminationTime, 0);
         $this->SendDebug('Renew Interval', $Interval - 5, 0);
-        $this->SetTimerInterval('RenewSubscription', ($Interval - 5) * 1000);
+        $this->SetTimerInterval(\ONVIF\IO\Timer::RenewSubscription, ($Interval - 5) * 1000);
     }
 }

@@ -36,20 +36,20 @@ class ONVIFModuleBase extends IPSModule
         \ONVIFModuleBase\DebugHelper,
         \ONVIFModuleBase\AttributeArrayHelper,
         \ONVIFModuleBase\InstanceStatus {
-        \ONVIFModuleBase\InstanceStatus::MessageSink as IOMessageSink; // MessageSink gibt es sowohl hier in der Klasse, als auch im Trait InstanceStatus. Hier wird für die Methode im Trait ein Alias benannt.
-        \ONVIFModuleBase\InstanceStatus::RegisterParent as IORegisterParent;
-        \ONVIFModuleBase\InstanceStatus::RequestAction as IORequestAction;
-    }
-    const wsdl = '';
-    const TopicFilter = '';
+            \ONVIFModuleBase\InstanceStatus::MessageSink as IOMessageSink; // MessageSink gibt es sowohl hier in der Klasse, als auch im Trait InstanceStatus. Hier wird für die Methode im Trait ein Alias benannt.
+            \ONVIFModuleBase\InstanceStatus::RegisterParent as IORegisterParent;
+            \ONVIFModuleBase\InstanceStatus::RequestAction as IORequestAction;
+        }
+    public const wsdl = '';
+    public const TopicFilter = '';
 
     public function Create()
     {
         //Never delete this line!
         parent::Create();
-        $this->RegisterPropertyString('EventTopic', '');
+        $this->RegisterPropertyString(\ONVIF\Device\Property::EventTopic, '');
         $this->EventTopic = '';
-        $this->RegisterAttributeArray('EventProperties', []);
+        $this->RegisterAttributeArray(\ONVIF\Device\Attribute::EventProperties, []);
         if (IPS_GetKernelRunlevel() != KR_READY) {
             $this->RegisterMessage(0, IPS_KERNELSTARTED);
         }
@@ -63,8 +63,8 @@ class ONVIFModuleBase extends IPSModule
 
     public function ApplyChanges()
     {
-        $EventTopic = $this->ReadPropertyString('EventTopic');
-        $PullEvents = ($EventTopic != $this->EventTopic);
+        $EventTopic = $this->ReadPropertyString(\ONVIF\Device\Property::EventTopic);
+        $SyncEvents = ($EventTopic != $this->EventTopic);
         //Never delete this line!
         parent::ApplyChanges();
         $this->RegisterMessage($this->InstanceID, FM_CONNECT);
@@ -83,8 +83,8 @@ class ONVIFModuleBase extends IPSModule
         }
         $this->RegisterParent();
         $Events = $this->GetEvents($EventTopic);
-        $this->WriteAttributeArray('EventProperties', $Events);
-        if ($PullEvents && ($this->HasActiveParent())) {
+        $this->WriteAttributeArray(\ONVIF\Device\Attribute::EventProperties, $Events);
+        if ($SyncEvents && ($this->HasActiveParent())) {
             $this->$EventTopic = $EventTopic;
             IPS_RunScriptText('IPS_RequestAction(' . $this->InstanceID . ',"SetSynchronizationPoint",true);');
         }
@@ -133,7 +133,7 @@ class ONVIFModuleBase extends IPSModule
     protected function IOChangeState($State)
     {
         if ($State == IS_ACTIVE) {
-            $this->EventTopic = $this->ReadPropertyString('EventTopic');
+            $this->EventTopic = $this->ReadPropertyString(\ONVIF\Device\Property::EventTopic);
             $this->ApplyChanges();
             $this->ReloadForm();
         }
@@ -153,7 +153,7 @@ class ONVIFModuleBase extends IPSModule
         }
         $this->SendDebug('GetEvents Pattern', $Pattern, 0);
         $this->SendDebug('GetEvents SkippedTopics', $SkippedTopics, 0);
-        $Data = json_encode(['DataID' => '{9B9C8DA6-BC89-21BC-3E8C-BA6E534ABC37}', 'Function' => 'GetEvents', 'Pattern' => $Pattern, 'Instance' => $InstanceID, 'SkippedTopics' => $SkippedTopics]);
+        $Data = json_encode(['DataID' => \ONVIF\DataFlow\GUID::SendFunction, 'Function' => 'GetEvents', 'Pattern' => $Pattern, 'Instance' => $InstanceID, 'SkippedTopics' => $SkippedTopics]);
         $answer = $this->SendDataToParent($Data);
         if ($answer !== false) {
             $answer = unserialize($answer);
@@ -167,7 +167,7 @@ class ONVIFModuleBase extends IPSModule
         if ($this->ParentID > 0) {
             if ($this->HasActiveParent()) {
                 $this->SendDebug('SetSynchronizationPoint', '', 0);
-                $Data = json_encode(['DataID' => '{9B9C8DA6-BC89-21BC-3E8C-BA6E534ABC37}', 'Function' => 'SetSynchronizationPoint']);
+                $Data = json_encode(['DataID' => \ONVIF\DataFlow\GUID::SendFunction, 'Function' => 'SetSynchronizationPoint']);
                 $this->SendDataToParent($Data);
             }
         }
@@ -177,7 +177,7 @@ class ONVIFModuleBase extends IPSModule
         if ($this->ParentID > 0) {
             if ($this->HasActiveParent()) {
                 $this->SendDebug('GetCapabilities', '', 0);
-                $Data = json_encode(['DataID' => '{9B9C8DA6-BC89-21BC-3E8C-BA6E534ABC37}', 'Function' => 'GetCapabilities']);
+                $Data = json_encode(['DataID' => \ONVIF\DataFlow\GUID::SendFunction, 'Function' => 'GetCapabilities']);
                 $answer = $this->SendDataToParent($Data);
                 if ($answer !== false) {
                     $Result = unserialize($answer);
@@ -222,7 +222,7 @@ class ONVIFModuleBase extends IPSModule
     {
         if ($this->ParentID > 0) {
             if ($this->HasActiveParent()) {
-                $Data = json_encode(['DataID' => '{9B9C8DA6-BC89-21BC-3E8C-BA6E534ABC37}', 'Function' => 'GetCredentials']);
+                $Data = json_encode(['DataID' => \ONVIF\DataFlow\GUID::SendFunction, 'Function' => 'GetCredentials']);
                 $answer = $this->SendDataToParent($Data);
                 if ($answer === false) {
                     $this->SendDebug('GetCredentials', 'No valid answer', 0);
@@ -237,7 +237,7 @@ class ONVIFModuleBase extends IPSModule
     {
         if ($this->ParentID > 0) {
             if ($this->HasActiveParent()) {
-                $Data = json_encode(['DataID' => '{9B9C8DA6-BC89-21BC-3E8C-BA6E534ABC37}', 'Function' => 'GetUrl']);
+                $Data = json_encode(['DataID' => \ONVIF\DataFlow\GUID::SendFunction, 'Function' => 'GetUrl']);
                 $answer = $this->SendDataToParent($Data);
                 if ($answer === false) {
                     $this->SendDebug('GetUrl', 'No valid answer', 0);
@@ -264,7 +264,7 @@ class ONVIFModuleBase extends IPSModule
         $this->SendDebug('Send Function', $Function, 0);
         $this->SendDebug('Send Params', $Params, 0);
         $this->SendDebug('Send useLogin', $UseLogin, 0);
-        $Ret = $this->SendDataToParent(json_encode(['DataID' => '{9B9C8DA6-BC89-21BC-3E8C-BA6E534ABC37}', 'URI' => $URI, 'Function' => $Function, 'Params' => $Params, 'useLogin' => $UseLogin, 'wsdl' => $wsdl]));
+        $Ret = $this->SendDataToParent(json_encode(['DataID' => \ONVIF\DataFlow\GUID::SendFunction, 'URI' => $URI, 'Function' => $Function, 'Params' => $Params, 'useLogin' => $UseLogin, 'wsdl' => $wsdl]));
         if ($Ret === false) {
             $this->SendDebug('Result', false, 0);
             return false;
@@ -341,7 +341,7 @@ class ONVIFModuleBase extends IPSModule
             }
             $Form['options'] = $SelectTopic;
             $Form['enabled'] = (count($Events) > 1);
-            if ($this->ReadPropertyString('EventTopic') == '') {
+            if ($this->ReadPropertyString(\ONVIF\Device\Property::EventTopic) == '') {
                 $Form['enabled'] = true;
             }
         }
@@ -393,54 +393,54 @@ class ONVIFModuleBase extends IPSModule
             $Ident = str_replace([' - ', ':'], ['_', ''], $Name);
             $Ident = preg_replace('/[^a-zA-Z\d]/u', '_', $Ident);
             switch ($DataType) {
-            case 'xs:boolean':
-            case 'tt:boolean':
-                $VariableValue = false;
-                if (strtolower($DataValue['Value']) === 'true') {
-                    $VariableValue = true;
-                }
-                if (intval($DataValue['Value']) === 1) {
-                    $VariableValue = true;
-                }
-                $this->RegisterVariableBoolean($Ident, $Name, '', 0);
-                $this->SetValueBoolean($Ident, $VariableValue);
-            break;
-            case 'tt:RelayLogicalState':
-                $this->RegisterVariableBoolean($Ident, $Name, '', 0);
-                $this->SetValueBoolean($Ident, (strtolower($DataValue['Value']) === 'active'));
-                break;
-            case 'xs:float':
-            case 'xs:double':
-            case 'xs:long':
-            case 'tt:float':
-            case 'tt:double':
-            case 'tt:long':
-                        $this->RegisterVariableFloat($Ident, $Name, '', 0);
-                $this->SetValueFloat($Ident, (float) $DataValue['Value']);
-                break;
-            case 'xs:integer':
-            case 'xs:int':
-            case 'xs:decimal':
-            case 'xs:short':
-            case 'xs:unsignedLong':
-            case 'xs:unsignedInt':
-            case 'xs:unsignedShort':
-            case 'xs:unsignedByte':
-            case 'tt:integer':
-            case 'tt:int':
-            case 'tt:decimal':
-            case 'tt:short':
-            case 'tt:unsignedLong':
-            case 'tt:unsignedInt':
-            case 'tt:unsignedShort':
-            case 'tt:unsignedByte':
-                        $this->RegisterVariableInteger($Ident, $Name, '', 0);
-                $this->SetValueInteger($Ident, (int) $DataValue['Value']);
-                break;
-            default:
-                $this->RegisterVariableString($Ident, $Name, '', 0);
-                $this->SetValueString($Ident, $DataValue['Value']);
-                break;
+                case 'xs:boolean':
+                case 'tt:boolean':
+                    $VariableValue = false;
+                    if (strtolower($DataValue['Value']) === 'true') {
+                        $VariableValue = true;
+                    }
+                    if (intval($DataValue['Value']) === 1) {
+                        $VariableValue = true;
+                    }
+                    $this->RegisterVariableBoolean($Ident, $Name, '', 0);
+                    $this->SetValueBoolean($Ident, $VariableValue);
+                    break;
+                case 'tt:RelayLogicalState':
+                    $this->RegisterVariableBoolean($Ident, $Name, '', 0);
+                    $this->SetValueBoolean($Ident, (strtolower($DataValue['Value']) === 'active'));
+                    break;
+                case 'xs:float':
+                case 'xs:double':
+                case 'xs:long':
+                case 'tt:float':
+                case 'tt:double':
+                case 'tt:long':
+                    $this->RegisterVariableFloat($Ident, $Name, '', 0);
+                    $this->SetValueFloat($Ident, (float) $DataValue['Value']);
+                    break;
+                case 'xs:integer':
+                case 'xs:int':
+                case 'xs:decimal':
+                case 'xs:short':
+                case 'xs:unsignedLong':
+                case 'xs:unsignedInt':
+                case 'xs:unsignedShort':
+                case 'xs:unsignedByte':
+                case 'tt:integer':
+                case 'tt:int':
+                case 'tt:decimal':
+                case 'tt:short':
+                case 'tt:unsignedLong':
+                case 'tt:unsignedInt':
+                case 'tt:unsignedShort':
+                case 'tt:unsignedByte':
+                    $this->RegisterVariableInteger($Ident, $Name, '', 0);
+                    $this->SetValueInteger($Ident, (int) $DataValue['Value']);
+                    break;
+                default:
+                    $this->RegisterVariableString($Ident, $Name, '', 0);
+                    $this->SetValueString($Ident, $DataValue['Value']);
+                    break;
             }
         }
         return true;
