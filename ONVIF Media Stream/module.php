@@ -1224,7 +1224,7 @@ class ONVIFMediaStream extends ONVIFModuleBase
 
         $this->SetValueString('PTZControlHtml', $HTMLData);
     }
-    protected function ProcessHookData()
+    protected function ProcessHookData(): void
     {
         if (!isset($_GET['authorization']) || ($_GET['authorization'] != $this->AuthorizationKey)) {
             http_response_code(401);

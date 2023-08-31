@@ -1931,7 +1931,7 @@ class ONVIFIO extends IPSModuleStrict
         }
         return $EventList;
     }
-    protected function ProcessHookData()
+    protected function ProcessHookData(): void
     {
         if (($this->ReadPropertyBoolean(\ONVIF\IO\Property::Active) == false) || ($this->GetTimerInterval(\ONVIF\IO\Timer::RenewSubscription) == 0)) {
             http_response_code(404);
