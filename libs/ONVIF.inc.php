@@ -9,6 +9,8 @@ class ONVIFsoapClient extends \SoapClient
     private $User;
     private $Pass;
     private $Options;
+    private $__last_request_headers;
+    private $__last_response_headers;
 
     public function __construct(string $wsdl, array $options = [])
     {
@@ -24,7 +26,20 @@ class ONVIFsoapClient extends \SoapClient
             $this->User = '';
         }
         $this->Options = $options;
+        $this->__last_request_headers = null;
+        $this->__last_response_headers = null;
     }
+
+    public function __getLastRequestHeaders()
+    {
+        return $this->__last_request_headers;
+    }
+
+    public function __getLastResponseHeaders()
+    {
+        return $this->__last_response_headers;
+    }
+
     public function __doRequest($request, $location, $action, $version, $one_way = false)
     {
         $headers = [
