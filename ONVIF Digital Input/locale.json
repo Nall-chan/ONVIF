@@ -7,6 +7,7 @@
             "Event not valid": "Ereignis ist nicht gültig",
             "Digital input: ": "Digitaler Eingang: ",
             "IdleState: ": "Ruhelage: ",
+            "Device has no xAddr for this service.": "Gerät hat keine xAddr für diesen Dienst.",
             "Instance has no active parent.": "Instanz hat kein aktives übergeordnetes Element.",
             "Unknown error.": "Unbekannter Fehler.",
             "No valid answer.": "Keine gültige Antwort.",

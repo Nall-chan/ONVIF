@@ -124,7 +124,6 @@ namespace ONVIF
         public const S = 2; // Streaming und WS-Event
         public const G = 4; // Recording (ohne streaming!)
         public const T = 8; // Streaming und pull point Event, Image Settings
-
         private const ScopesToProfile = [
             Scopes::ProfileS         => self::S,
             Scopes::ProfileG         => self::G,
