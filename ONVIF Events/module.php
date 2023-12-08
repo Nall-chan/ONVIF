@@ -38,10 +38,11 @@ class ONVIFEvents extends ONVIFModuleBase
         $this->SendDebug('ReceiveEvent', $Data, 0);
         $EventProperties = $this->ReadAttributeArray(\ONVIF\Device\Attribute::EventProperties);
         if (!array_key_exists($Data['Topic'], $EventProperties)) {
-            return false;
+            return '';
         }
         $PreName = str_replace($this->ReadPropertyString(\ONVIF\Device\Property::EventTopic), '', $Data['Topic']);
-        return $this->SetEventStatusVariable($PreName, $EventProperties[$Data['Topic']], $Data);
+        $this->SetEventStatusVariable($PreName, $EventProperties[$Data['Topic']], $Data);
+        return '';
     }
 
     public function GetConfigurationForm()

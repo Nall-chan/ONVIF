@@ -865,12 +865,12 @@ class ONVIFMediaStream extends ONVIFModuleBase
             return true;
         }
         if ($Ident == 'RefreshProfileForm') {
-            $this->RefreshProfileForm($Value);
-            return true;
+            $this->RefreshProfileForm((string) $Value);
+            return;
         }
         if ($Ident == 'RefreshEnablePresetProfileForm') {
-            $this->RefreshPresetProfileForm($Value);
-            return true;
+            $this->RefreshPresetProfileForm((bool) $Value);
+            return;
         }
         $Speed = 0;
         if (@$this->GetIDForIdent('SPEED')) {
@@ -882,18 +882,17 @@ class ONVIFMediaStream extends ONVIFModuleBase
         }
         switch ($Ident) {
             case 'PRESET':
-                if ($this->GotoPreset((int) $Value)) {
-                    $this->SetValue('PRESET', $Value);
-                    return true;
+                if ($this->GotoPreset($Value)) {
+                    $this->SetValueInteger('PRESET', (int) $Value);
                 }
-                return false;
+                return;
             case 'TIME':
             case 'SPEED':
-                $this->SetValueFloat($Ident, $Value);
-                return true;
+                $this->SetValueFloat($Ident, (float) $Value);
+                return;
             case 'PT':
                 $Result = false;
-                switch ($Value) {
+                switch ((int) $Value) {
                     case 0:
                         $Result = $this->MoveLeftSpeedTime($Speed, $Time);
                         break;
@@ -913,15 +912,15 @@ class ONVIFMediaStream extends ONVIFModuleBase
                         set_error_handler([$this, 'ModulErrorHandler']);
                         trigger_error($this->Translate('Invalid Value.'), E_USER_NOTICE);
                         restore_error_handler();
-                        return false;
+                        return;
                 }
                 if ($Result) {
                     $this->SetValueInteger('PT', $Value);
                 }
-                return $Result;
+                return;
             case 'ZOOM':
                 $Result = false;
-                switch ($Value) {
+                switch ((int) $Value) {
                     case 0:
                         $Result = $this->ZoomFarSpeedTime($Speed, $Time);
                         break;
@@ -935,17 +934,17 @@ class ONVIFMediaStream extends ONVIFModuleBase
                         set_error_handler([$this, 'ModulErrorHandler']);
                         trigger_error($this->Translate('Invalid Value.'), E_USER_NOTICE);
                         restore_error_handler();
-                        return false;
+                        return;
                 }
                 if ($Result) {
-                    $this->SetValueInteger('ZOOM', $Value);
+                    $this->SetValueInteger('ZOOM', (int) $Value);
                 }
-                return $Result;
+                return;
         }
         set_error_handler([$this, 'ModulErrorHandler']);
         trigger_error($this->Translate('Invalid Ident.'), E_USER_NOTICE);
         restore_error_handler();
-        return false;
+        return;
     }
 
     public function ReceiveData($JSONString)
@@ -1003,7 +1002,7 @@ class ONVIFMediaStream extends ONVIFModuleBase
     {
         $Capabilities = @$this->GetCapabilities();
         if ($Capabilities == false) {
-            return false;
+            return;
         }
         $ProfileOptions = [];
         $ProfileOptions[] = [

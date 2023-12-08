@@ -317,7 +317,7 @@ class ONVIFModuleBase extends IPSModule
 
     protected function ModulErrorHandler($errno, $errstr)
     {
-        $this->SendDebug('ERROR', utf8_decode($errstr), 0);
+        $this->SendDebug('ERROR', $errstr, 0);
         echo $errstr . "\r\n";
         //return true;
     }

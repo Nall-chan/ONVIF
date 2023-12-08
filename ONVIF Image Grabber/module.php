@@ -8,7 +8,7 @@ require_once __DIR__ . '/../libs/ONVIFModuleBase.php';
  */
 class ONVIFImageGrabber extends ONVIFModuleBase
 {
-    public const wsdl = \ONVIF\WSDL::Media; //'media-mod';
+    public const wsdl = \ONVIF\WSDL::Media;
     public const TopicFilter = 'videosource';
 
     public function Create()
@@ -94,7 +94,7 @@ class ONVIFImageGrabber extends ONVIFModuleBase
         $this->SendDebug('ReceiveEvent', $Data, 0);
         $EventProperties = $this->ReadAttributeArray(\ONVIF\Device\Attribute::EventProperties);
         if (!array_key_exists($Data['Topic'], $EventProperties)) {
-            return false;
+            return '';
         }
         $EventProperty = $EventProperties[$Data['Topic']];
         $FoundEventIndex = false;
@@ -122,10 +122,11 @@ class ONVIFImageGrabber extends ONVIFModuleBase
             unset($Data['Sources'][$FoundEventIndex]);
         }
         if ($SkipEvent) {
-            return false;
+            return '';
         }
         $PreName = str_replace($this->ReadPropertyString(\ONVIF\Device\Property::EventTopic), '', $Data['Topic']);
-        return $this->SetEventStatusVariable($PreName, $EventProperties[$Data['Topic']], $Data);
+        $this->SetEventStatusVariable($PreName, $EventProperties[$Data['Topic']], $Data);
+        return '';
     }
 
     public function GetConfigurationForm()
@@ -333,13 +334,13 @@ class ONVIFImageGrabber extends ONVIFModuleBase
         switch ($Ident) {
             case 'RefreshProfileForm':
                 $this->RefreshProfileForm($Value);
-                return true;
+                return;
             case \ONVIF\ImageGrabber\Timer::UpdateImage:
                 $this->UpdateImage();
                 if ((bool) $Value) {
                     $this->ReloadForm();
                 }
-                return true;
+                return;
         }
     }
     protected function IOChangeState($State)
@@ -354,7 +355,7 @@ class ONVIFImageGrabber extends ONVIFModuleBase
     {
         $Capabilities = @$this->GetCapabilities();
         if ($Capabilities == false) {
-            return false;
+            return;
         }
         $ProfileOptions = [];
         $ProfileOptions[] = [

@@ -55,10 +55,10 @@ class ONVIFDigitalInput extends ONVIFModuleBase
         $this->SendDebug('ReceiveEvent', $Data, 0);
         $EventProperties = $this->ReadAttributeArray(\ONVIF\Device\Attribute::EventProperties);
         if (!array_key_exists($Data['Topic'], $EventProperties)) {
-            return false;
+            return '';
         }
         if ((count($Data['Sources']) != 1) || (count($Data['DataValues']) != 1)) {
-            return false;
+            return '';
         }
 
         $Name = $Data['Sources'][0]['Value'];
@@ -76,7 +76,7 @@ class ONVIFDigitalInput extends ONVIFModuleBase
 
         $this->RegisterVariableBoolean($Ident, $Name, '', 0);
         $this->SetValueBoolean($Ident, $VariableValue);
-        return true;
+        return '';
     }
 
     public function GetConfigurationForm()

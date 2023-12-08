@@ -102,26 +102,27 @@ class ONVIFDigitalOutput extends ONVIFModuleBase
         $EventProperty = array_pop($Events);
         $SourceIndex = array_search('tt:ReferenceToken', array_column($EventProperty['Sources'], 'Type'));
         if ($SourceIndex === false) {
-            return;
+            return '';
         }
         $SourceName = $EventProperty['Sources'][$SourceIndex]['Name'];
         $EventSourceIndex = array_search($SourceName, array_column($Data['Sources'], 'Name'));
         if ($EventSourceIndex === false) {
-            return;
+            return '';
         }
         $Ident = $Data['Sources'][$EventSourceIndex]['Value'];
         $DataIndex = array_search('tt:RelayLogicalState', array_column($EventProperty['Data'], 'Type'));
         if ($DataIndex === false) {
-            return;
+            return '';
         }
         $DataName = $EventProperty['Data'][$SourceIndex]['Name'];
         $EventDataIndex = array_search($DataName, array_column($Data['DataValues'], 'Name'));
         if ($EventDataIndex === false) {
-            return;
+            return '';
         }
         $Value = $Data['DataValues'][$EventDataIndex]['Value'];
         $this->RegisterVariableBoolean($Ident, $Ident, '~Switch', 0);
         $this->SetValueBoolean($Ident, ($Value == 'active'));
+        return '';
     }
 
     public function GetConfigurationForm()
