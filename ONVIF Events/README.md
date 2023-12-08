@@ -4,7 +4,7 @@
 [![License](https://img.shields.io/badge/License-CC%20BY--NC--SA%204.0-green.svg)](https://creativecommons.org/licenses/by-nc-sa/4.0/)
 [![Check Style](https://github.com/Nall-chan/ONVIF/workflows/Check%20Style/badge.svg)](https://github.com/Nall-chan/ONVIF/actions)
 [![Run Tests](https://github.com/Nall-chan/ONVIF/workflows/Run%20Tests/badge.svg)](https://github.com/Nall-chan/ONVIF/actions)  
-[![Spenden](https://www.paypalobjects.com/de_DE/DE/i/btn/btn_donate_SM.gif)](#2-spenden)  
+[![Spenden](https://www.paypalobjects.com/de_DE/DE/i/btn/btn_donate_SM.gif)](#2-spenden)[![Wunschliste](https://img.shields.io/badge/Wunschliste-Amazon-ff69fb.svg)](#2-spenden)  
 
 # ONVIF Events <!-- omit in toc -->
 Bildet verschiedene Ereignisse (Events) als Statusvariablen in Symcon ab.
@@ -23,7 +23,7 @@ Bildet verschiedene Ereignisse (Events) als Statusvariablen in Symcon ab.
   - [Beispiel 2: Ein einzelnes Ereignis, mehrere Quellen](#beispiel-2-ein-einzelnes-ereignis-mehrere-quellen)
   - [Beispiel 3: Ein Ordner](#beispiel-3-ein-ordner)
   - [Beispiel 4: Ein Teilbaum](#beispiel-4-ein-teilbaum)
-  - [Tips & Tricks](#tips--tricks)
+  - [Tips \& Tricks](#tips--tricks)
 - [6. WebFront](#6-webfront)
 - [7. PHP-Funktionsreferenz](#7-php-funktionsreferenz)
 - [8. Aktionen](#8-aktionen)
@@ -158,14 +158,11 @@ Keine Aktionen verfügbar.
 
 ### 2. Spenden
 
-Die Library ist für die nicht kommerzielle Nutzung kostenlos, Schenkungen als Unterstützung für den Autor werden hier akzeptiert:  
+  Die Library ist für die nicht kommerzielle Nutzung kostenlos, Schenkungen als Unterstützung für den Autor werden hier akzeptiert:  
 
-  PayPal:  
 <a href="https://www.paypal.com/donate?hosted_button_id=G2SLW2MEMQZH2" target="_blank"><img src="https://www.paypalobjects.com/de_DE/DE/i/btn/btn_donate_LG.gif" border="0" /></a>  
 
-  Wunschliste:  
-<a href="https://www.amazon.de/hz/wishlist/ls/YU4AI9AQT9F?ref_=wl_share" target="_blank"><img src="https://upload.wikimedia.org/wikipedia/commons/4/4a/Amazon_icon.svg" border="0" width="100"/></a>  
-
+[![Wunschliste](https://img.shields.io/badge/Wunschliste-Amazon-ff69fb.svg)](https://www.amazon.de/hz/wishlist/ls/YU4AI9AQT9F?ref_=wl_share) 
 ## 10. Lizenz
 
   IPS-Modul:  
