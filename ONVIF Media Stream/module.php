@@ -882,7 +882,7 @@ class ONVIFMediaStream extends ONVIFModuleBase
         }
         switch ($Ident) {
             case 'PRESET':
-                if ($this->GotoPreset($Value)) {
+                if ($this->GotoPreset((int) $Value)) {
                     $this->SetValue('PRESET', $Value);
                     return true;
                 }

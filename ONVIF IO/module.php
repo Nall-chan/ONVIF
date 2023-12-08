@@ -1498,7 +1498,7 @@ class ONVIFIO extends IPSModule
             \ONVIF\NS::Management => '/onvif/device_service',
             \ONVIF\NS::Event      => '',
             \ONVIF\NS::Media      => '/onvif/media_service',
-            \ONVIF\NS::PTZ        => '',
+            \ONVIF\NS::PTZ        => '/onvif/ptz_service',
             \ONVIF\NS::Imaging    => '',
             \ONVIF\NS::Analytics  => '',
             \ONVIF\NS::DeviceIO   => '',

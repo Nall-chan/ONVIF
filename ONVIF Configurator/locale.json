@@ -5,6 +5,7 @@
             "VideoSource": "Video-Quelle",
             "Location": "Lokation",
             "Error on read of capabilities.": "Fehler beim Lesen der Funktionen.",
+            "Device has no xAddr for this service.": "Gerät hat keine xAddr für diesen Dienst.",
             "Instance has no active parent.": "Instanz hat kein aktives übergeordnetes Element.",
             "Unknown error.": "Unbekannter Fehler.",
             "No valid answer.": "Keine gültige Antwort.",

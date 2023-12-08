@@ -260,6 +260,11 @@ class ONVIFModuleBase extends IPSModule
         if (!$this->HasActiveParent()) {
             return false;
         }
+        if ($URI === '') {
+            set_error_handler([$this, 'ModulErrorHandler']);
+            trigger_error($this->Translate('Device has no xAddr for this service.'), E_USER_NOTICE);
+            restore_error_handler();
+        }
         $this->SendDebug('Send WSDL', $wsdl, 0);
         $this->SendDebug('Send Function', $Function, 0);
         $this->SendDebug('Send Params', $Params, 0);
