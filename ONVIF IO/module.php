@@ -1817,31 +1817,33 @@ class ONVIFIO extends IPSModule
             $this->WriteAttributeInteger(\ONVIF\IO\Attribute::Timestamp_Offset, 0);
             return false;
         }
-        if (property_exists($camera_datetime->SystemDateAndTime, 'UTCDateTime')) {
-            $camera_ts = gmmktime(
-                $camera_datetime->SystemDateAndTime->UTCDateTime->Time->Hour,
-                $camera_datetime->SystemDateAndTime->UTCDateTime->Time->Minute,
-                $camera_datetime->SystemDateAndTime->UTCDateTime->Time->Second,
-                $camera_datetime->SystemDateAndTime->UTCDateTime->Date->Month,
-                $camera_datetime->SystemDateAndTime->UTCDateTime->Date->Day,
-                $camera_datetime->SystemDateAndTime->UTCDateTime->Date->Year
-            );
-            $this->WriteAttributeInteger(\ONVIF\IO\Attribute::Timestamp_Offset, time() - $camera_ts);
-            $this->SendDebug('TimeDiff', time() - $camera_ts, 0);
-            return true;
-        }
-        if (property_exists($camera_datetime->SystemDateAndTime, 'LocalDateTime')) {
-            $camera_ts = mktime(
-                $camera_datetime->SystemDateAndTime->LocalDateTime->Time->Hour,
-                $camera_datetime->SystemDateAndTime->LocalDateTime->Time->Minute,
-                $camera_datetime->SystemDateAndTime->LocalDateTime->Time->Second,
-                $camera_datetime->SystemDateAndTime->LocalDateTime->Date->Month,
-                $camera_datetime->SystemDateAndTime->LocalDateTime->Date->Day,
-                $camera_datetime->SystemDateAndTime->LocalDateTime->Date->Year
-            );
-            $this->WriteAttributeInteger(\ONVIF\IO\Attribute::Timestamp_Offset, time() - $camera_ts);
-            $this->SendDebug('TimeDiff', time() - $camera_ts, 0);
-            return true;
+        if (property_exists($camera_datetime, 'SystemDateAndTime')) {
+            if (property_exists($camera_datetime->SystemDateAndTime, 'UTCDateTime')) {
+                $camera_ts = gmmktime(
+                    $camera_datetime->SystemDateAndTime->UTCDateTime->Time->Hour,
+                    $camera_datetime->SystemDateAndTime->UTCDateTime->Time->Minute,
+                    $camera_datetime->SystemDateAndTime->UTCDateTime->Time->Second,
+                    $camera_datetime->SystemDateAndTime->UTCDateTime->Date->Month,
+                    $camera_datetime->SystemDateAndTime->UTCDateTime->Date->Day,
+                    $camera_datetime->SystemDateAndTime->UTCDateTime->Date->Year
+                );
+                $this->WriteAttributeInteger(\ONVIF\IO\Attribute::Timestamp_Offset, time() - $camera_ts);
+                $this->SendDebug('TimeDiff', time() - $camera_ts, 0);
+                return true;
+            }
+            if (property_exists($camera_datetime->SystemDateAndTime, 'LocalDateTime')) {
+                $camera_ts = mktime(
+                    $camera_datetime->SystemDateAndTime->LocalDateTime->Time->Hour,
+                    $camera_datetime->SystemDateAndTime->LocalDateTime->Time->Minute,
+                    $camera_datetime->SystemDateAndTime->LocalDateTime->Time->Second,
+                    $camera_datetime->SystemDateAndTime->LocalDateTime->Date->Month,
+                    $camera_datetime->SystemDateAndTime->LocalDateTime->Date->Day,
+                    $camera_datetime->SystemDateAndTime->LocalDateTime->Date->Year
+                );
+                $this->WriteAttributeInteger(\ONVIF\IO\Attribute::Timestamp_Offset, time() - $camera_ts);
+                $this->SendDebug('TimeDiff', time() - $camera_ts, 0);
+                return true;
+            }
         }
         return false;
     }
