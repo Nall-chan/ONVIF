@@ -107,7 +107,7 @@ namespace ONVIF
         }
         public function toString(): string
         {
-            switch($this->Type) {
+            switch ($this->Type) {
                 case self::Subscribe:
                     return 'Subscription';
                 case self::PullPoint:

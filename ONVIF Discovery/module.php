@@ -223,8 +223,6 @@ class ONVIFDiscovery extends IPSModuleStrict
     }
     protected function DiscoverDevices(): array
     {
-        //IPS_Sleep(5000);
-        //return []; // testing
         $Interfaces = $this->getIPAdresses();
         $uuid = self::uuidV4();
         $discoveryMessage = str_replace('[UUID]', $uuid, self::WS_DISCOVERY_MESSAGE);
@@ -527,6 +525,8 @@ class ONVIFDiscovery extends IPSModuleStrict
         $InterfaceDescriptions = array_column($Interfaces, 'Description', 'InterfaceIndex');
         $Networks = net_get_interfaces();
         $Addresses = [];
+        $Addresses['ipv6'] = [];
+        $Addresses['ipv4'] = [];
         foreach ($Networks as $InterfaceDescription => $Interface) {
             if (!$Interface['up']) {
                 continue;

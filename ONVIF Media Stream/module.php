@@ -1212,7 +1212,7 @@ class ONVIFMediaStream extends ONVIFModuleBase
             file_get_contents(__DIR__ . '/../libs/PTZControl.js')
         );
 
-        $JSCode = '<script>' . $JS . /*'initPTZ(' . $this->InstanceID . ');*/'</script>';
+        $JSCode = '<script>' . $JS . /*'initPTZ(' . $this->InstanceID . ');*/ '</script>';
         $HTMLData = '<div class="extended"><div class="ipsContainer media">' .
         $ImgSrc .
         '<div style="position:absolute; right:0px; bottom:0px; margin:10px">' .

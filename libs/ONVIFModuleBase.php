@@ -63,33 +63,13 @@ class ONVIFModuleBase extends IPSModuleStrict
 
     public function ApplyChanges(): void
     {
-        $EventTopic = $this->ReadPropertyString(\ONVIF\Device\Property::EventTopic);
-        $SyncEvents = ($EventTopic != $this->EventTopic);
         //Never delete this line!
         parent::ApplyChanges();
+
         $this->RegisterMessage($this->InstanceID, FM_CONNECT);
         $this->RegisterMessage($this->InstanceID, FM_DISCONNECT);
-
-        if ($EventTopic == '') {
-            $TopicFilter = '.*"Topic":"NOTHING".*';
-        } else {
-            $TopicFilter = '.*"Topic":"' . preg_quote(substr(json_encode($EventTopic), 1, -1)) . '.*';
-        }
-        $this->SetReceiveDataFilter($TopicFilter);
-        $this->SendDebug('SetReceiveDataFilter', $TopicFilter, 0);
-
-        if (IPS_GetKernelRunlevel() != KR_READY) {
-            return;
-        }
-        $this->RegisterParent();
-        $Events = $this->GetEvents($EventTopic);
-        $this->WriteAttributeArray(\ONVIF\Device\Attribute::EventProperties, $Events);
-        if ($SyncEvents && ($this->HasActiveParent())) {
-            $this->$EventTopic = $EventTopic;
-            IPS_RunScriptText('IPS_RequestAction(' . $this->InstanceID . ',"SetSynchronizationPoint",true);');
-        }
+        $this->InitFilterAndEvents();
     }
-
     public function RequestAction(string $Ident, mixed $Value, bool &$done = false): void
     {
         $done = false;
@@ -115,12 +95,35 @@ class ONVIFModuleBase extends IPSModuleStrict
                 break;
         }
     }
+    protected function InitFilterAndEvents()
+    {
+        $EventTopic = $this->ReadPropertyString(\ONVIF\Device\Property::EventTopic);
+        $SyncEvents = ($EventTopic != $this->EventTopic);
+        if ($EventTopic == '') {
+            $TopicFilter = '.*"Topic":"NOTHING".*';
+        } else {
+            $TopicFilter = '.*"Topic":"' . preg_quote(substr(json_encode($EventTopic), 1, -1)) . '.*';
+        }
+        $this->SetReceiveDataFilter($TopicFilter);
+        $this->SendDebug('SetReceiveDataFilter', $TopicFilter, 0);
+
+        if (IPS_GetKernelRunlevel() != KR_READY) {
+            return;
+        }
+        $this->RegisterParent();
+        $Events = $this->GetEvents($EventTopic);
+        $this->WriteAttributeArray(\ONVIF\Device\Attribute::EventProperties, $Events);
+        if ($SyncEvents && ($this->HasActiveParent())) {
+            $this->$EventTopic = $EventTopic;
+            IPS_RunScriptText('IPS_RequestAction(' . $this->InstanceID . ',"SetSynchronizationPoint",true);');
+        }
+    }
 
     protected function KernelReady(): void
     {
         $this->RegisterParent();
         if ($this->HasActiveParent()) {
-            $this->ApplyChanges();
+            $this->InitFilterAndEvents();
         }
     }
 
@@ -136,7 +139,7 @@ class ONVIFModuleBase extends IPSModuleStrict
     {
         if ($State == IS_ACTIVE) {
             $this->EventTopic = $this->ReadPropertyString(\ONVIF\Device\Property::EventTopic);
-            $this->ApplyChanges();
+            $this->InitFilterAndEvents();
             $this->ReloadForm();
         }
     }
