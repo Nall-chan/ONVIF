@@ -134,10 +134,10 @@ class ONVIFIO extends IPSModule
 
     public function ApplyChanges()
     {
-        $this->SetTimerInterval(\ONVIF\IO\Timer::RenewSubscription, 0);
         if ($this->GetStatus() == IS_ACTIVE) { // block childs
             $this->SetStatus(IS_INACTIVE);
         }
+        $this->SetTimerInterval(\ONVIF\IO\Timer::RenewSubscription, 0);
         if ($this->isSubscribed) {
             $this->Unsubscribe();
         }
@@ -146,6 +146,263 @@ class ONVIFIO extends IPSModule
         if (IPS_GetKernelRunlevel() != KR_READY) {
             return;
         }
+        $this->StartConnection();
+    }
+    public function ForwardData($JSONString)
+    {
+        $Data = json_decode($JSONString, true);
+        unset($Data['DataID']);
+        if ($Data['Function'] == 'GetCapabilities') {
+            $Capabilities[\ONVIF\IO\Attribute::VideoSources] = $this->ReadAttributeArray(\ONVIF\IO\Attribute::VideoSources);
+            $Capabilities[\ONVIF\IO\Attribute::AudioSources] = $this->ReadAttributeArray(\ONVIF\IO\Attribute::AudioSources);
+            $Capabilities[\ONVIF\IO\Attribute::VideoSourcesJPEG] = $this->ReadAttributeArray(\ONVIF\IO\Attribute::VideoSourcesJPEG);
+            $Capabilities[\ONVIF\IO\Attribute::RelayOutputs] = $this->ReadAttributeArray(\ONVIF\IO\Attribute::RelayOutputs);
+            $Capabilities[\ONVIF\IO\Attribute::DigitalInputs] = $this->ReadAttributeArray(\ONVIF\IO\Attribute::DigitalInputs);
+            $Capabilities[\ONVIF\IO\Attribute::NbrOfVideoSources] = $this->ReadAttributeInteger(\ONVIF\IO\Attribute::NbrOfVideoSources);
+            $Capabilities[\ONVIF\IO\Attribute::NbrOfAudioSources] = $this->ReadAttributeInteger(\ONVIF\IO\Attribute::NbrOfAudioSources);
+            $Capabilities[\ONVIF\IO\Attribute::NbrOfOutputs] = $this->ReadAttributeInteger(\ONVIF\IO\Attribute::NbrOfOutputs);
+            $Capabilities[\ONVIF\IO\Attribute::NbrOfInputs] = $this->ReadAttributeInteger(\ONVIF\IO\Attribute::NbrOfInputs);
+            $Capabilities[\ONVIF\IO\Attribute::NbrOfSerialPorts] = $this->ReadAttributeInteger(\ONVIF\IO\Attribute::NbrOfSerialPorts);
+            $Capabilities[\ONVIF\IO\Attribute::HasSnapshotUri] = $this->ReadAttributeBoolean(\ONVIF\IO\Attribute::HasSnapshotUri);
+            $Capabilities[\ONVIF\IO\Attribute::HasRTSPStreaming] = $this->ReadAttributeBoolean(\ONVIF\IO\Attribute::HasRTSPStreaming);
+            $Capabilities[\ONVIF\IO\Attribute::AnalyticsModuleSupport] = $this->ReadAttributeBoolean(\ONVIF\IO\Attribute::AnalyticsModuleSupport);
+            $Capabilities[\ONVIF\IO\Attribute::AnalyticsTokens] = $this->ReadAttributeArray(\ONVIF\IO\Attribute::AnalyticsTokens);
+            $Capabilities[\ONVIF\IO\Attribute::RuleSupport] = $this->ReadAttributeBoolean(\ONVIF\IO\Attribute::RuleSupport);
+            $Capabilities[\ONVIF\IO\Attribute::XAddr] = $this->ReadAttributeArray(\ONVIF\IO\Attribute::XAddr);
+            return serialize($Capabilities);
+        }
+        if ($Data['Function'] == 'SetSynchronizationPoint') {
+            if (!$this->isSubscribed) {
+                return serialize(true);
+            }
+            return serialize($this->SetSynchronizationPoint());
+        }
+        if ($Data['Function'] == 'GetUrl') {
+            return serialize($this->Host);
+        }
+        if ($Data['Function'] == 'GetCredentials') {
+            $Credentials[\ONVIF\IO\Property::Username] = $this->ReadPropertyString(\ONVIF\IO\Property::Username);
+            $Credentials[\ONVIF\IO\Property::Password] = $this->ReadPropertyString(\ONVIF\IO\Property::Password);
+            return serialize($Credentials);
+        }
+        if ($Data['Function'] == 'GetEvents') {
+            if ($Data['Instance'] != 0) {
+                $this->lock(\ONVIF\IO\Attribute::EventProperties);
+            }
+            $Events = $this->ReadAttributeArray(\ONVIF\IO\Attribute::EventProperties);
+            $SkippedTopics = $Data['SkippedTopics'];
+
+            $FoundEvents = [];
+            if ($Data['Pattern'] == '') {
+                if ($Data['Instance'] == 0) {
+                    foreach ($SkippedTopics as $SkippedTopic) {
+                        foreach (array_keys($Events) as $Topic) {
+                            if (strpos($Topic, $SkippedTopic) !== false) {
+                                unset($Events[$Topic]);
+                            }
+                        }
+                    }
+                    foreach (array_keys($Events) as $FullTopic) {
+                        $TopicParts = explode('/', $FullTopic);
+                        array_pop($TopicParts);
+                        $Topic = '';
+                        foreach ($TopicParts as $TopicPart) {
+                            $Topic .= $TopicPart . '/';
+                            $FoundEvents[$Topic] = [];
+                        }
+                        $FoundEvents[$FullTopic] = [];
+                    }
+                }
+            } else {
+                if (array_key_exists($Data['Pattern'], $Events)) {
+                    $FoundEvents[$Data['Pattern']] = $Events[$Data['Pattern']];
+                    if (($Data['Instance'] != 0) && (!in_array($Data['Instance'], $Events[$Data['Pattern']]['Receivers']))) {
+                        $Events[$Data['Pattern']]['Receivers'][] = $Data['Instance'];
+                    }
+                } else {
+                    foreach (array_keys($Events) as $FullTopic) {
+                        if (stripos($FullTopic, $Data['Pattern']) !== false) {
+                            $TopicParts = explode('/', $FullTopic);
+                            foreach ($TopicParts as $TopicPart) {
+                                if (stripos($TopicPart, $Data['Pattern']) === false) {
+                                    array_pop($TopicParts);
+                                } else {
+                                    break;
+                                }
+                            }
+                            array_pop($TopicParts);
+                            $Topic = '';
+                            foreach ($TopicParts as $TopicPart) {
+                                $Topic .= $TopicPart . '/';
+                                $FoundEvents[$Topic] = [];
+                            }
+                            $FoundEvents[$FullTopic] = $Events[$FullTopic];
+                            if (($Data['Instance'] != 0) && (!in_array($Data['Instance'], $Events[$FullTopic]['Receivers']))) {
+                                $Events[$FullTopic]['Receivers'][] = $Data['Instance'];
+                            }
+                        }
+                    }
+                }
+            }
+            if ($Data['Instance'] != 0) {
+                $this->WriteAttributeArray(\ONVIF\IO\Attribute::EventProperties, $Events);
+                $this->unlock(\ONVIF\IO\Attribute::EventProperties);
+                $EventList = $this->GetEventReceiverFormValues();
+                $this->UpdateFormField('Events', 'values', json_encode($EventList));
+            }
+            return serialize($FoundEvents);
+        }
+        if ($this->GetStatus() != IS_ACTIVE) {
+            return serialize(false);
+        }
+        $this->SendDebug('Forward URI', $Data['URI'], 0);
+        $this->SendDebug('Forward wsdl', $Data['wsdl'], 0);
+        $this->SendDebug('Forward Function', $Data['Function'], 0);
+        $this->SendDebug('Forward Params', $Data['Params'], 0);
+        $this->SendDebug('Forward useLogin', $Data['useLogin'], 0);
+        $Result = $this->SendData($Data['URI'], $Data['wsdl'], $Data['Function'], $Data['useLogin'], $Data['Params']);
+        return serialize($Result);
+    }
+
+    public function RequestAction($Ident, $Value)
+    {
+        switch ($Ident) {
+            case 'Subscribe':
+                $AllowedEventHandler = $this->ReadPropertyInteger(\ONVIF\IO\Property::EventHandler);
+                if (($AllowedEventHandler & \ONVIF\EventHandler::Subscribe) == \ONVIF\EventHandler::Subscribe) {
+                    if ($this->Subscribe()) {
+                        return;
+                    }
+                    $this->WriteAttributeString(\ONVIF\IO\Attribute::ConsumerAddress, '');
+                    $this->UpdateFormField('EventHookRow', 'visible', false);
+                }
+                if ($AllowedEventHandler != \ONVIF\EventHandler::Automatic) {
+                    break;
+                }
+                // WSSubscription failed, try PullPointSubscription
+                // No break. Add additional comment above this line if intentional
+            case 'CreatePullPointSubscription':
+                if ($this->CreatePullPointSubscription()) {
+                    $this->UpdateFormField('DeviceData', 'items', json_encode($this->GetDeviceDataForForm()));
+                    $this->UpdateFormField('DeviceDataPanel', 'visible', true);
+                    $this->UpdateFormField('DeviceDataPanel', 'expanded', true);
+                    $this->UpdateFormField('Events', 'visible', true);
+                    // Start PullMessages loop
+                    IPS_RunScriptText('IPS_RequestAction(' . $this->InstanceID . ',"PullMessages",true);');
+                }
+                return;
+            case 'PullMessages':
+                $this->PullMessages();
+                return;
+            case 'Renew':
+                $this->Renew();
+                return;
+            case 'Reload':
+                $this->Unsubscribe();
+                if ($this->GetStatus() == IS_INACTIVE) {
+                    $this->WriteAttributeString(\ONVIF\IO\Attribute::ConsumerAddress, '');
+                    return;
+                }
+                $this->UpdateFormField('ErrorTitle', 'caption', $this->Translate('Please wait!'));
+                $this->UpdateFormField('ErrorText', 'caption', $this->Translate('Determine abilities of this device'));
+                $this->UpdateFormField('ErrorPopup', 'visible', true);
+                $this->WriteAttributeString(\ONVIF\IO\Attribute::ConsumerAddress, '');
+                $this->WriteAttributeInteger(\ONVIF\IO\Attribute::CapabilitiesVersion, 0);
+                $this->StartConnection();
+                $this->ReloadForm();
+                return;
+            case 'ShowLastError':
+                $Data = json_decode($Value, true);
+                $this->UpdateFormField('ErrorTitle', 'caption', $Data['Title']);
+                $this->UpdateFormField('ErrorText', 'caption', $Data['Message']);
+                $this->UpdateFormField('ErrorPopup', 'visible', true);
+                return;
+            case 'KernelReady':
+                $this->KernelReady();
+                return;
+            case \ONVIF\IO\Property::EventHandler:
+                switch ((int) $Value) {
+                    case \ONVIF\EventHandler::None:
+                        $this->UpdateFormField('SubscribeExpansionPanel', 'visible', false);
+                        $this->UpdateFormField('PullPointExpansionPanel', 'visible', false);
+                        break;
+                    case \ONVIF\EventHandler::Subscribe:
+                        $this->UpdateFormField('SubscribeExpansionPanel', 'visible', true);
+                        $this->UpdateFormField('PullPointExpansionPanel', 'visible', false);
+                        break;
+                    case \ONVIF\EventHandler::PullPoint:
+                        $this->UpdateFormField('SubscribeExpansionPanel', 'visible', false);
+                        $this->UpdateFormField('PullPointExpansionPanel', 'visible', true);
+                        break;
+                    case \ONVIF\EventHandler::Automatic:
+                        $this->UpdateFormField('SubscribeExpansionPanel', 'visible', true);
+                        $this->UpdateFormField('PullPointExpansionPanel', 'visible', true);
+                        break;
+                }
+                return;
+        }
+    }
+    public function GetConfigurationForm()
+    {
+        $Form = json_decode(file_get_contents(__DIR__ . '/form.json'), true);
+        if ($this->GetStatus() == IS_CREATING) {
+            return json_encode($Form);
+        }
+        $EventHandler = $this->ReadPropertyInteger(\ONVIF\IO\Property::EventHandler);
+        switch ($EventHandler) {
+            case \ONVIF\EventHandler::None:
+                $Form['elements'][4]['visible'] = false;
+                $Form['elements'][5]['visible'] = false;
+                break;
+            case \ONVIF\EventHandler::Subscribe:
+                $Form['elements'][4]['visible'] = true;
+                $Form['elements'][5]['visible'] = false;
+                break;
+            case \ONVIF\EventHandler::PullPoint:
+                $Form['elements'][4]['visible'] = false;
+                $Form['elements'][5]['visible'] = true;
+                break;
+            case \ONVIF\EventHandler::Automatic:
+                $Form['elements'][4]['visible'] = true;
+                $Form['elements'][5]['visible'] = true;
+                break;
+        }
+        if ($this->GetStatus() == IS_ACTIVE) {
+            $Form['actions'][1]['items'][0]['items'] = $this->GetDeviceDataForForm();
+            $SubscriptionReference = $this->ReadAttributeString(\ONVIF\IO\Attribute::SubscriptionReference);
+            if ($SubscriptionReference == '') {
+                $SubscriptionReference = $this->Translate('This device not support events or they are disabled.');
+                $Form['actions'][4]['visible'] = false;
+            }
+            $Form['actions'][3]['items'][1]['caption'] = $SubscriptionReference;
+        }
+        if ($this->GetStatus() == IS_INACTIVE) {
+            $Form['actions'][1]['visible'] = false;
+            $Form['actions'][3]['visible'] = false;
+        }
+        $ConsumerAddress = $this->ReadAttributeString(\ONVIF\IO\Attribute::ConsumerAddress);
+        if ($ConsumerAddress != '') {
+            $Form['actions'][2]['visible'] = true;
+        }
+        $Form['actions'][2]['items'][1]['caption'] = $ConsumerAddress;
+
+        $EventList = @$this->GetEventReceiverFormValues();
+        if ($EventList) {
+            $Form['actions'][4]['values'] = $EventList;
+        }
+        $Warnings = $this->Warnings;
+        if (count($Warnings) && $this->ReadPropertyBoolean(\ONVIF\IO\Property::Active)) {
+            $WarningText = implode("\r\n", $Warnings);
+            $Form['actions'][5]['visible'] = true;
+            $Form['actions'][5]['popup']['items'][0]['caption'] = $this->Translate('Some features will not work properly');
+            $Form['actions'][5]['popup']['items'][1]['caption'] = $WarningText;
+        }
+        $this->SendDebug('FORM', json_encode($Form), 0);
+        $this->SendDebug('FORM', json_last_error_msg(), 0);
+        return json_encode($Form);
+    }
+    protected function StartConnection()
+    {
         if (!$this->ReadPropertyBoolean(\ONVIF\IO\Property::Active)) {
             $this->SetStatus(IS_INACTIVE);
             $this->LogMessage($this->Translate(\ONVIF\IO\State::INACTIVE), KL_MESSAGE);
@@ -374,7 +631,7 @@ class ONVIFIO extends IPSModule
                 }
             } else {
                 // Wenn \ONVIF\WSDL::Media2 NICHT unterstützt
-                    // 4c.ONVIF Request GetServiceCapabilities an \ONVIF\WSDL::Media
+                // 4c.ONVIF Request GetServiceCapabilities an \ONVIF\WSDL::Media
                 $MediaCapabilities = $this->GetServiceCapabilities($XAddr[\ONVIF\NS::Media], \ONVIF\WSDL::Media); // noch ohne Funktion..
                 if ($MediaCapabilities) {
                     $Capabilities = $MediaCapabilities['Capabilities'];
@@ -520,260 +777,6 @@ class ONVIFIO extends IPSModule
             $this->SetStatus(IS_ACTIVE);
         }
     }
-
-    public function ForwardData($JSONString)
-    {
-        $Data = json_decode($JSONString, true);
-        unset($Data['DataID']);
-        if ($Data['Function'] == 'GetCapabilities') {
-            $Capabilities[\ONVIF\IO\Attribute::VideoSources] = $this->ReadAttributeArray(\ONVIF\IO\Attribute::VideoSources);
-            $Capabilities[\ONVIF\IO\Attribute::AudioSources] = $this->ReadAttributeArray(\ONVIF\IO\Attribute::AudioSources);
-            $Capabilities[\ONVIF\IO\Attribute::VideoSourcesJPEG] = $this->ReadAttributeArray(\ONVIF\IO\Attribute::VideoSourcesJPEG);
-            $Capabilities[\ONVIF\IO\Attribute::RelayOutputs] = $this->ReadAttributeArray(\ONVIF\IO\Attribute::RelayOutputs);
-            $Capabilities[\ONVIF\IO\Attribute::DigitalInputs] = $this->ReadAttributeArray(\ONVIF\IO\Attribute::DigitalInputs);
-            $Capabilities[\ONVIF\IO\Attribute::NbrOfVideoSources] = $this->ReadAttributeInteger(\ONVIF\IO\Attribute::NbrOfVideoSources);
-            $Capabilities[\ONVIF\IO\Attribute::NbrOfAudioSources] = $this->ReadAttributeInteger(\ONVIF\IO\Attribute::NbrOfAudioSources);
-            $Capabilities[\ONVIF\IO\Attribute::NbrOfOutputs] = $this->ReadAttributeInteger(\ONVIF\IO\Attribute::NbrOfOutputs);
-            $Capabilities[\ONVIF\IO\Attribute::NbrOfInputs] = $this->ReadAttributeInteger(\ONVIF\IO\Attribute::NbrOfInputs);
-            $Capabilities[\ONVIF\IO\Attribute::NbrOfSerialPorts] = $this->ReadAttributeInteger(\ONVIF\IO\Attribute::NbrOfSerialPorts);
-            $Capabilities[\ONVIF\IO\Attribute::HasSnapshotUri] = $this->ReadAttributeBoolean(\ONVIF\IO\Attribute::HasSnapshotUri);
-            $Capabilities[\ONVIF\IO\Attribute::HasRTSPStreaming] = $this->ReadAttributeBoolean(\ONVIF\IO\Attribute::HasRTSPStreaming);
-            $Capabilities[\ONVIF\IO\Attribute::AnalyticsModuleSupport] = $this->ReadAttributeBoolean(\ONVIF\IO\Attribute::AnalyticsModuleSupport);
-            $Capabilities[\ONVIF\IO\Attribute::AnalyticsTokens] = $this->ReadAttributeArray(\ONVIF\IO\Attribute::AnalyticsTokens);
-            $Capabilities[\ONVIF\IO\Attribute::RuleSupport] = $this->ReadAttributeBoolean(\ONVIF\IO\Attribute::RuleSupport);
-            $Capabilities[\ONVIF\IO\Attribute::XAddr] = $this->ReadAttributeArray(\ONVIF\IO\Attribute::XAddr);
-            return serialize($Capabilities);
-        }
-        if ($Data['Function'] == 'SetSynchronizationPoint') {
-            if (!$this->isSubscribed) {
-                return serialize(true);
-            }
-            return serialize($this->SetSynchronizationPoint());
-        }
-        if ($Data['Function'] == 'GetUrl') {
-            return serialize($this->Host);
-        }
-        if ($Data['Function'] == 'GetCredentials') {
-            $Credentials[\ONVIF\IO\Property::Username] = $this->ReadPropertyString(\ONVIF\IO\Property::Username);
-            $Credentials[\ONVIF\IO\Property::Password] = $this->ReadPropertyString(\ONVIF\IO\Property::Password);
-            return serialize($Credentials);
-        }
-        if ($Data['Function'] == 'GetEvents') {
-            if ($Data['Instance'] != 0) {
-                $this->lock(\ONVIF\IO\Attribute::EventProperties);
-            }
-            $Events = $this->ReadAttributeArray(\ONVIF\IO\Attribute::EventProperties);
-            $SkippedTopics = $Data['SkippedTopics'];
-
-            $FoundEvents = [];
-            if ($Data['Pattern'] == '') {
-                if ($Data['Instance'] == 0) {
-                    foreach ($SkippedTopics as $SkippedTopic) {
-                        foreach (array_keys($Events) as $Topic) {
-                            if (strpos($Topic, $SkippedTopic) !== false) {
-                                unset($Events[$Topic]);
-                            }
-                        }
-                    }
-                    foreach (array_keys($Events) as $FullTopic) {
-                        $TopicParts = explode('/', $FullTopic);
-                        array_pop($TopicParts);
-                        $Topic = '';
-                        foreach ($TopicParts as $TopicPart) {
-                            $Topic .= $TopicPart . '/';
-                            $FoundEvents[$Topic] = [];
-                        }
-                        $FoundEvents[$FullTopic] = [];
-                    }
-                }
-            } else {
-                if (array_key_exists($Data['Pattern'], $Events)) {
-                    $FoundEvents[$Data['Pattern']] = $Events[$Data['Pattern']];
-                    if (($Data['Instance'] != 0) && (!in_array($Data['Instance'], $Events[$Data['Pattern']]['Receivers']))) {
-                        $Events[$Data['Pattern']]['Receivers'][] = $Data['Instance'];
-                    }
-                } else {
-                    foreach (array_keys($Events) as $FullTopic) {
-                        if (stripos($FullTopic, $Data['Pattern']) !== false) {
-                            $TopicParts = explode('/', $FullTopic);
-                            foreach ($TopicParts as $TopicPart) {
-                                if (stripos($TopicPart, $Data['Pattern']) === false) {
-                                    array_pop($TopicParts);
-                                } else {
-                                    break;
-                                }
-                            }
-                            array_pop($TopicParts);
-                            $Topic = '';
-                            foreach ($TopicParts as $TopicPart) {
-                                $Topic .= $TopicPart . '/';
-                                $FoundEvents[$Topic] = [];
-                            }
-                            $FoundEvents[$FullTopic] = $Events[$FullTopic];
-                            if (($Data['Instance'] != 0) && (!in_array($Data['Instance'], $Events[$FullTopic]['Receivers']))) {
-                                $Events[$FullTopic]['Receivers'][] = $Data['Instance'];
-                            }
-                        }
-                    }
-                }
-            }
-            if ($Data['Instance'] != 0) {
-                $this->WriteAttributeArray(\ONVIF\IO\Attribute::EventProperties, $Events);
-                $this->unlock(\ONVIF\IO\Attribute::EventProperties);
-                $EventList = $this->GetEventReceiverFormValues();
-                $this->UpdateFormField('Events', 'values', json_encode($EventList));
-            }
-            return serialize($FoundEvents);
-        }
-        if ($this->GetStatus() != IS_ACTIVE) {
-            return serialize(false);
-        }
-        $this->SendDebug('Forward URI', $Data['URI'], 0);
-        $this->SendDebug('Forward wsdl', $Data['wsdl'], 0);
-        $this->SendDebug('Forward Function', $Data['Function'], 0);
-        $this->SendDebug('Forward Params', $Data['Params'], 0);
-        $this->SendDebug('Forward useLogin', $Data['useLogin'], 0);
-        $Result = $this->SendData($Data['URI'], $Data['wsdl'], $Data['Function'], $Data['useLogin'], $Data['Params']);
-        return serialize($Result);
-    }
-
-    public function RequestAction($Ident, $Value)
-    {
-        switch ($Ident) {
-            case 'Subscribe':
-                $AllowedEventHandler = $this->ReadPropertyInteger(\ONVIF\IO\Property::EventHandler);
-                if (($AllowedEventHandler & \ONVIF\EventHandler::Subscribe) == \ONVIF\EventHandler::Subscribe) {
-                    if ($this->Subscribe()) {
-                        return;
-                    }
-                    $this->WriteAttributeString(\ONVIF\IO\Attribute::ConsumerAddress, '');
-                    $this->UpdateFormField('EventHookRow', 'visible', false);
-                }
-                if ($AllowedEventHandler != \ONVIF\EventHandler::Automatic) {
-                    break;
-                }
-                // WSSubscription failed, try PullPointSubscription
-                // No break. Add additional comment above this line if intentional
-            case 'CreatePullPointSubscription':
-                if ($this->CreatePullPointSubscription()) {
-                    $this->UpdateFormField('DeviceData', 'items', json_encode($this->GetDeviceDataForForm()));
-                    $this->UpdateFormField('DeviceDataPanel', 'visible', true);
-                    $this->UpdateFormField('DeviceDataPanel', 'expanded', true);
-                    $this->UpdateFormField('Events', 'visible', true);
-                    // Start PullMessages loop
-                    IPS_RunScriptText('IPS_RequestAction(' . $this->InstanceID . ',"PullMessages",true);');
-                }
-                return;
-            case 'PullMessages':
-                $this->PullMessages();
-                return;
-            case 'Renew':
-                $this->Renew();
-                return;
-            case  'Reload':
-                $this->Unsubscribe();
-                if ($this->GetStatus() == IS_INACTIVE) {
-                    $this->WriteAttributeString(\ONVIF\IO\Attribute::ConsumerAddress, '');
-                    return;
-                }
-                $this->UpdateFormField('ErrorTitle', 'caption', $this->Translate('Please wait!'));
-                $this->UpdateFormField('ErrorText', 'caption', $this->Translate('Determine abilities of this device'));
-                $this->UpdateFormField('ErrorPopup', 'visible', true);
-                $this->WriteAttributeString(\ONVIF\IO\Attribute::ConsumerAddress, '');
-                $this->WriteAttributeInteger(\ONVIF\IO\Attribute::CapabilitiesVersion, 0);
-                $this->ApplyChanges();
-                $this->ReloadForm();
-                return;
-            case  'ShowLastError':
-                $Data = json_decode($Value, true);
-                $this->UpdateFormField('ErrorTitle', 'caption', $Data['Title']);
-                $this->UpdateFormField('ErrorText', 'caption', $Data['Message']);
-                $this->UpdateFormField('ErrorPopup', 'visible', true);
-                return;
-            case'KernelReady':
-                $this->KernelReady();
-                return;
-            case \ONVIF\IO\Property::EventHandler:
-                switch ((int) $Value) {
-                    case \ONVIF\EventHandler::None:
-                        $this->UpdateFormField('SubscribeExpansionPanel', 'visible', false);
-                        $this->UpdateFormField('PullPointExpansionPanel', 'visible', false);
-                        break;
-                    case \ONVIF\EventHandler::Subscribe:
-                        $this->UpdateFormField('SubscribeExpansionPanel', 'visible', true);
-                        $this->UpdateFormField('PullPointExpansionPanel', 'visible', false);
-                        break;
-                    case \ONVIF\EventHandler::PullPoint:
-                        $this->UpdateFormField('SubscribeExpansionPanel', 'visible', false);
-                        $this->UpdateFormField('PullPointExpansionPanel', 'visible', true);
-                        break;
-                    case \ONVIF\EventHandler::Automatic:
-                        $this->UpdateFormField('SubscribeExpansionPanel', 'visible', true);
-                        $this->UpdateFormField('PullPointExpansionPanel', 'visible', true);
-                        break;
-                }
-                return;
-        }
-    }
-    public function GetConfigurationForm()
-    {
-        $Form = json_decode(file_get_contents(__DIR__ . '/form.json'), true);
-        if ($this->GetStatus() == IS_CREATING) {
-            return json_encode($Form);
-        }
-        $EventHandler = $this->ReadPropertyInteger(\ONVIF\IO\Property::EventHandler);
-        switch ($EventHandler) {
-            case \ONVIF\EventHandler::None:
-                $Form['elements'][4]['visible'] = false;
-                $Form['elements'][5]['visible'] = false;
-                break;
-            case \ONVIF\EventHandler::Subscribe:
-                $Form['elements'][4]['visible'] = true;
-                $Form['elements'][5]['visible'] = false;
-                break;
-            case \ONVIF\EventHandler::PullPoint:
-                $Form['elements'][4]['visible'] = false;
-                $Form['elements'][5]['visible'] = true;
-                break;
-            case \ONVIF\EventHandler::Automatic:
-                $Form['elements'][4]['visible'] = true;
-                $Form['elements'][5]['visible'] = true;
-                break;
-        }
-        if ($this->GetStatus() == IS_ACTIVE) {
-            $Form['actions'][1]['items'][0]['items'] = $this->GetDeviceDataForForm();
-            $SubscriptionReference = $this->ReadAttributeString(\ONVIF\IO\Attribute::SubscriptionReference);
-            if ($SubscriptionReference == '') {
-                $SubscriptionReference = $this->Translate('This device not support events or they are disabled.');
-                $Form['actions'][4]['visible'] = false;
-            }
-            $Form['actions'][3]['items'][1]['caption'] = $SubscriptionReference;
-        }
-        if ($this->GetStatus() == IS_INACTIVE) {
-            $Form['actions'][1]['visible'] = false;
-            $Form['actions'][3]['visible'] = false;
-        }
-        $ConsumerAddress = $this->ReadAttributeString(\ONVIF\IO\Attribute::ConsumerAddress);
-        if ($ConsumerAddress != '') {
-            $Form['actions'][2]['visible'] = true;
-        }
-        $Form['actions'][2]['items'][1]['caption'] = $ConsumerAddress;
-
-        $EventList = @$this->GetEventReceiverFormValues();
-        if ($EventList) {
-            $Form['actions'][4]['values'] = $EventList;
-        }
-        $Warnings = $this->Warnings;
-        if (count($Warnings) && $this->ReadPropertyBoolean(\ONVIF\IO\Property::Active)) {
-            $WarningText = implode("\r\n", $Warnings);
-            $Form['actions'][5]['visible'] = true;
-            $Form['actions'][5]['popup']['items'][0]['caption'] = $this->Translate('Some features will not work properly');
-            $Form['actions'][5]['popup']['items'][1]['caption'] = $WarningText;
-        }
-        $this->SendDebug('FORM', json_encode($Form), 0);
-        $this->SendDebug('FORM', json_last_error_msg(), 0);
-        return json_encode($Form);
-    }
     protected function GetDeviceDataForForm(): array
     {
         $Device = $this->GetDeviceInformation();
@@ -860,7 +863,7 @@ class ONVIFIO extends IPSModule
 
         ];
 
-        return  [
+        return [
             [
                 'type'    => 'RowLayout',
                 'items'   => [
@@ -2015,7 +2018,7 @@ class ONVIFIO extends IPSModule
         if (isset($Url['scheme']) && isset($Url['host'])) {
             $this->Host = $Url['scheme'] . '://' . $Url['host'] . $Url['port'];
         }
-        $this->ApplyChanges();
+        $this->StartConnection();
     }
     protected static function unparse_url($parsed_url): string
     {
