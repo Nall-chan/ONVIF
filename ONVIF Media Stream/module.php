@@ -127,104 +127,6 @@ class ONVIFMediaStream extends ONVIFModuleBase
         parent::Destroy();
     }
 
-    public function ApplyChanges(): void
-    {
-        //Never delete this line!
-        parent::ApplyChanges();
-
-        $this->PTZ_token = '';
-        $this->PTZ_xAddr = '';
-        $this->PTZ_Presets = [];
-        $this->PTZ_HasHome = false;
-        $this->PTZ_MaxPresets = 0;
-        $this->PresetTokenList = [];
-        $this->AuthorizationKey = '';
-
-        if ($this->ReadPropertyString(\ONVIF\Stream\Property::VideoSource) == '') {
-            $this->SetStatus(IS_INACTIVE);
-            $this->SetMedia('');
-            return;
-        }
-        if ($this->ReadPropertyString(\ONVIF\Stream\Property::Profile) == '') {
-            $this->SetStatus(IS_INACTIVE);
-            $this->SetMedia('');
-            return;
-        }
-        if (IPS_GetKernelRunlevel() != KR_READY) {
-            return;
-        }
-
-        $StreamURL = $this->GetStreamUri();
-        if ($StreamURL) {
-            $this->SetMedia($StreamURL);
-            $this->SetStatus(IS_ACTIVE);
-        } else {
-            $this->SetMedia('');
-            $this->SetStatus(IS_EBASE + 1);
-        }
-
-        if ($this->ReadPropertyBoolean(\ONVIF\Stream\Property::EnablePanTiltHTML) || $this->ReadPropertyBoolean(\ONVIF\Stream\Property::EnableZoomHTML)) {
-            $this->RegisterHook('/hook/ONVIF/PTZ/' . $this->InstanceID);
-            $this->WritePTZInHTMLBox();
-        } else {
-            $this->UnregisterHook('/hook/ONVIF/PTZ/' . $this->InstanceID);
-            $this->UnregisterVariable('PTZControlHtml');
-        }
-        if ($this->ReadPropertyBoolean(\ONVIF\Stream\Property::EnablePanTiltVariable)) {
-            $this->RegisterVariableInteger('PT', $this->Translate('Move'), 'ONVIF.PanTilt', 3);
-            $this->SetValueInteger('PT', 2);
-            $this->EnableAction('PT');
-        } else {
-            $this->UnregisterVariable('PT');
-        }
-        if ($this->ReadPropertyBoolean(\ONVIF\Stream\Property::EnableZoomVariable)) {
-            $this->RegisterVariableInteger('ZOOM', $this->Translate('Zoom'), 'ONVIF.Zoom', 4);
-            $this->SetValueInteger('ZOOM', 1);
-            $this->EnableAction('ZOOM');
-        } else {
-            $this->UnregisterVariable('ZOOM');
-        }
-        if ($this->ReadPropertyBoolean(\ONVIF\Stream\Property::EnableSpeedVariable)) {
-            $this->RegisterVariableFloat('SPEED', $this->Translate('Speed'), 'ONVIF.Speed', 1);
-            $this->SetValueFloat('SPEED', 0);
-            $this->EnableAction('SPEED');
-        } else {
-            $this->UnregisterVariable('SPEED');
-        }
-        if ($this->ReadPropertyBoolean(\ONVIF\Stream\Property::EnableTimeVariable)) {
-            $this->RegisterVariableFloat('TIME', $this->Translate('Time'), 'ONVIF.Time', 2);
-            $this->SetValueFloat('TIME', 0);
-            $this->EnableAction('TIME');
-        } else {
-            $this->UnregisterVariable('TIME');
-        }
-        $PresetProfileName = 'ONVIF.Preset.' . $this->InstanceID;
-        if ($this->ReadPropertyBoolean(\ONVIF\Stream\Property::EnablePresetVariable)) {
-            $UsePresetName = $this->ReadPropertyBoolean(\ONVIF\Stream\Property::EnablePresetProfile);
-            $Presets = json_decode($this->ReadPropertyString(\ONVIF\Stream\Property::PresetProfile));
-            $PresetTokenList = [];
-            $PresetAssociations = [];
-            foreach ($Presets as $Preset) {
-                $PresetTokenList[$Preset->VariableValue] = $Preset->PresetToken;
-                if ($Preset->PresetActive) {
-                    $PresetAssociations[] = [
-                        $Preset->VariableValue,
-                        $UsePresetName ? ($Preset->PresetName == '' ? $Preset->VariableValue : $Preset->PresetName) : $Preset->VariableValue,
-                        '',
-                        -1
-                    ];
-                }
-            }
-            $this->PresetTokenList = $PresetTokenList;
-            $this->RegisterProfileIntegerEx($PresetProfileName, 'Move', '', '', $PresetAssociations);
-            $this->RegisterVariableInteger('PRESET', $this->Translate('Pre-position'), $PresetProfileName, 5);
-            $this->EnableAction('PRESET');
-        } else {
-            $this->UnregisterVariable('PRESET');
-            $this->UnregisterProfile($PresetProfileName);
-        }
-    }
-
     public function GetConfigurationForm(): string
     {
         $Form = json_decode(file_get_contents(__DIR__ . '/form.json'), true);
@@ -983,6 +885,103 @@ class ONVIFMediaStream extends ONVIFModuleBase
         $PreName = str_replace($this->ReadPropertyString(\ONVIF\Device\Property::EventTopic), '', $Data['Topic']);
         $this->SetEventStatusVariable($PreName, $EventProperties[$Data['Topic']], $Data);
         return '';
+    }
+
+    protected function InitFilterAndEvents(): void
+    {
+        parent::InitFilterAndEvents();
+
+        $this->PTZ_token = '';
+        $this->PTZ_xAddr = '';
+        $this->PTZ_Presets = [];
+        $this->PTZ_HasHome = false;
+        $this->PTZ_MaxPresets = 0;
+        $this->PresetTokenList = [];
+        $this->AuthorizationKey = '';
+
+        if ($this->ReadPropertyString(\ONVIF\Stream\Property::VideoSource) == '') {
+            $this->SetStatus(IS_INACTIVE);
+            $this->SetMedia('');
+            return;
+        }
+        if ($this->ReadPropertyString(\ONVIF\Stream\Property::Profile) == '') {
+            $this->SetStatus(IS_INACTIVE);
+            $this->SetMedia('');
+            return;
+        }
+        if (IPS_GetKernelRunlevel() != KR_READY) {
+            return;
+        }
+
+        $StreamURL = $this->GetStreamUri();
+        if ($StreamURL) {
+            $this->SetMedia($StreamURL);
+            $this->SetStatus(IS_ACTIVE);
+        } else {
+            $this->SetMedia('');
+            $this->SetStatus(IS_EBASE + 1);
+        }
+
+        if ($this->ReadPropertyBoolean(\ONVIF\Stream\Property::EnablePanTiltHTML) || $this->ReadPropertyBoolean(\ONVIF\Stream\Property::EnableZoomHTML)) {
+            $this->RegisterHook('/hook/ONVIF/PTZ/' . $this->InstanceID);
+            $this->WritePTZInHTMLBox();
+        } else {
+            $this->UnregisterHook('/hook/ONVIF/PTZ/' . $this->InstanceID);
+            $this->UnregisterVariable('PTZControlHtml');
+        }
+        if ($this->ReadPropertyBoolean(\ONVIF\Stream\Property::EnablePanTiltVariable)) {
+            $this->RegisterVariableInteger('PT', $this->Translate('Move'), 'ONVIF.PanTilt', 3);
+            $this->SetValueInteger('PT', 2);
+            $this->EnableAction('PT');
+        } else {
+            $this->UnregisterVariable('PT');
+        }
+        if ($this->ReadPropertyBoolean(\ONVIF\Stream\Property::EnableZoomVariable)) {
+            $this->RegisterVariableInteger('ZOOM', $this->Translate('Zoom'), 'ONVIF.Zoom', 4);
+            $this->SetValueInteger('ZOOM', 1);
+            $this->EnableAction('ZOOM');
+        } else {
+            $this->UnregisterVariable('ZOOM');
+        }
+        if ($this->ReadPropertyBoolean(\ONVIF\Stream\Property::EnableSpeedVariable)) {
+            $this->RegisterVariableFloat('SPEED', $this->Translate('Speed'), 'ONVIF.Speed', 1);
+            $this->SetValueFloat('SPEED', 0);
+            $this->EnableAction('SPEED');
+        } else {
+            $this->UnregisterVariable('SPEED');
+        }
+        if ($this->ReadPropertyBoolean(\ONVIF\Stream\Property::EnableTimeVariable)) {
+            $this->RegisterVariableFloat('TIME', $this->Translate('Time'), 'ONVIF.Time', 2);
+            $this->SetValueFloat('TIME', 0);
+            $this->EnableAction('TIME');
+        } else {
+            $this->UnregisterVariable('TIME');
+        }
+        $PresetProfileName = 'ONVIF.Preset.' . $this->InstanceID;
+        if ($this->ReadPropertyBoolean(\ONVIF\Stream\Property::EnablePresetVariable)) {
+            $UsePresetName = $this->ReadPropertyBoolean(\ONVIF\Stream\Property::EnablePresetProfile);
+            $Presets = json_decode($this->ReadPropertyString(\ONVIF\Stream\Property::PresetProfile));
+            $PresetTokenList = [];
+            $PresetAssociations = [];
+            foreach ($Presets as $Preset) {
+                $PresetTokenList[$Preset->VariableValue] = $Preset->PresetToken;
+                if ($Preset->PresetActive) {
+                    $PresetAssociations[] = [
+                        $Preset->VariableValue,
+                        $UsePresetName ? ($Preset->PresetName == '' ? $Preset->VariableValue : $Preset->PresetName) : $Preset->VariableValue,
+                        '',
+                        -1
+                    ];
+                }
+            }
+            $this->PresetTokenList = $PresetTokenList;
+            $this->RegisterProfileIntegerEx($PresetProfileName, 'Move', '', '', $PresetAssociations);
+            $this->RegisterVariableInteger('PRESET', $this->Translate('Pre-position'), $PresetProfileName, 5);
+            $this->EnableAction('PRESET');
+        } else {
+            $this->UnregisterVariable('PRESET');
+            $this->UnregisterProfile($PresetProfileName);
+        }
     }
 
     protected function IOChangeState(int $State): void

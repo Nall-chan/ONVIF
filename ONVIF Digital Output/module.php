@@ -20,48 +20,6 @@ class ONVIFDigitalOutput extends ONVIFModuleBase
         $this->RegisterAttributeArray(\ONVIF\Output\Attribute::RelayOutputs, []);
     }
 
-    public function ApplyChanges(): void
-    {
-        //Never delete this line!
-        parent::ApplyChanges();
-        if (IPS_GetKernelRunlevel() != KR_READY) {
-            return;
-        }
-        if ($this->ReadPropertyString(\ONVIF\Device\Property::EventTopic) == '') {
-            $this->SetStatus(IS_INACTIVE);
-            return;
-        }
-        if ($this->HasActiveParent()) {
-            $Capabilities = @$this->GetCapabilities();
-            if (!$Capabilities) {
-                $this->SetStatus(IS_EBASE + 1);
-                return;
-            }
-            if ($Capabilities['XAddr'][\ONVIF\NS::DeviceIO]) {
-                $this->xAddr = $Capabilities['XAddr'][\ONVIF\NS::DeviceIO];
-                $this->wsdl = \ONVIF\WSDL::DeviceIO;
-            } else {
-                $this->xAddr = $Capabilities['XAddr'][\ONVIF\NS::Management];
-                $this->wsdl = \ONVIF\WSDL::Management;
-            }
-            $this->WriteAttributeArray(\ONVIF\Output\Attribute::RelayOutputs, $Capabilities['RelayOutputs']);
-            foreach ($Capabilities['RelayOutputs'] as $Name => $RelayOutput) {
-                $Ident = str_replace([' - ', ':'], ['_', ''], (string) $Name);
-                $Ident = preg_replace('/[^a-zA-Z\d]/u', '_', $Ident);
-                $this->RegisterVariableBoolean($Ident, $Name, '~Switch', 0);
-                $this->EnableAction($Ident);
-            }
-            $Events = $this->ReadAttributeArray(\ONVIF\Device\Attribute::EventProperties);
-            if (count($Events) != 1) {
-                $this->SetStatus(IS_EBASE + 1);
-            } else {
-                $this->SetStatus(IS_ACTIVE);
-            }
-            return;
-        }
-        $this->SetStatus(IS_ACTIVE);
-    }
-
     public function SetRelayOutputState(string $Ident, bool $Value): bool
     {
         if (!array_key_exists($Ident, $this->ReadAttributeArray(\ONVIF\Output\Attribute::RelayOutputs))) {
@@ -200,5 +158,43 @@ class ONVIFDigitalOutput extends ONVIFModuleBase
         $this->SendDebug('FORM', json_last_error_msg(), 0);
 
         return json_encode($Form);
+    }
+
+    protected function InitFilterAndEvents(): void
+    {
+        parent::InitFilterAndEvents();
+        if ($this->ReadPropertyString(\ONVIF\Device\Property::EventTopic) == '') {
+            $this->SetStatus(IS_INACTIVE);
+            return;
+        }
+        if ($this->HasActiveParent()) {
+            $Capabilities = @$this->GetCapabilities();
+            if (!$Capabilities) {
+                $this->SetStatus(IS_EBASE + 1);
+                return;
+            }
+            if ($Capabilities['XAddr'][\ONVIF\NS::DeviceIO]) {
+                $this->xAddr = $Capabilities['XAddr'][\ONVIF\NS::DeviceIO];
+                $this->wsdl = \ONVIF\WSDL::DeviceIO;
+            } else {
+                $this->xAddr = $Capabilities['XAddr'][\ONVIF\NS::Management];
+                $this->wsdl = \ONVIF\WSDL::Management;
+            }
+            $this->WriteAttributeArray(\ONVIF\Output\Attribute::RelayOutputs, $Capabilities['RelayOutputs']);
+            foreach ($Capabilities['RelayOutputs'] as $Name => $RelayOutput) {
+                $Ident = str_replace([' - ', ':'], ['_', ''], (string) $Name);
+                $Ident = preg_replace('/[^a-zA-Z\d]/u', '_', $Ident);
+                $this->RegisterVariableBoolean($Ident, $Name, '~Switch', 0);
+                $this->EnableAction($Ident);
+            }
+            $Events = $this->ReadAttributeArray(\ONVIF\Device\Attribute::EventProperties);
+            if (count($Events) != 1) {
+                $this->SetStatus(IS_EBASE + 1);
+            } else {
+                $this->SetStatus(IS_ACTIVE);
+            }
+            return;
+        }
+        $this->SetStatus(IS_ACTIVE);
     }
 }

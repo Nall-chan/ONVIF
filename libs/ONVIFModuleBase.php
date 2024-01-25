@@ -95,7 +95,7 @@ class ONVIFModuleBase extends IPSModuleStrict
                 break;
         }
     }
-    protected function InitFilterAndEvents()
+    protected function InitFilterAndEvents(): void
     {
         $EventTopic = $this->ReadPropertyString(\ONVIF\Device\Property::EventTopic);
         $SyncEvents = ($EventTopic != $this->EventTopic);
