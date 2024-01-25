@@ -1313,9 +1313,9 @@ class ONVIFIO extends IPSModule
         }
         if (is_object($ProfileResult->Profiles)) {
             $Profiles = [];
-            $Profiles[] = json_decode(json_encode($ProfileResult), true)['Profiles'];
+            $Profiles[] = json_decode(json_encode($ProfileResult->Profiles), true);
         } else {
-            $Profiles = json_decode(json_encode($ProfileResult), true)['Profiles'];
+            $Profiles = json_decode(json_encode($ProfileResult->Profiles), true);
         }
 
         $H264Profiles = array_filter($Profiles, function ($Profile)
@@ -1411,9 +1411,9 @@ class ONVIFIO extends IPSModule
         }
         if (is_object($ProfileResult->Profiles)) {
             $Profiles = [];
-            $Profiles[] = json_decode(json_encode($ProfileResult), true)['Profiles'];
+            $Profiles[] = json_decode(json_encode($ProfileResult->Profiles), true);
         } else {
-            $Profiles = json_decode(json_encode($ProfileResult), true)['Profiles'];
+            $Profiles = json_decode(json_encode($ProfileResult->Profiles), true);
         }
 
         $H264Profiles = array_filter($Profiles, function ($Profile)
@@ -1448,7 +1448,6 @@ class ONVIFIO extends IPSModule
         $H264VideoSources = array_values($H264VideoSourcesItems);
         $this->SendDebug('VideoSources H.26x', $H264VideoSources, 0);
         $this->WriteAttributeArray(\ONVIF\IO\Attribute::VideoSources, $H264VideoSources);
-
         $JPEGProfiles = array_filter($Profiles, function ($Profile)
         {
             if (isset($Profile['VideoEncoderConfiguration']['Encoding'])) {
@@ -1596,19 +1595,21 @@ class ONVIFIO extends IPSModule
     }
     protected function GetScopes()
     {
-        $Scopes = $this->SendData('', \ONVIF\WSDL::Management, 'GetScopes', true);
-        if (is_a($Scopes, 'SoapFault')) {
+        $ScopeResult = $this->SendData('', \ONVIF\WSDL::Management, 'GetScopes', true);
+        if (is_a($ScopeResult, 'SoapFault')) {
             return false;
         }
-        $Scopes = json_decode(json_encode($Scopes), true);
-        if (!array_key_exists('Scopes', $Scopes)) {
+        if (!property_exists($ScopeResult, 'Scopes')) {
             return false;
+        }
+        if (is_object($ScopeResult->Scopes)) {
+            $Scopes = [];
+            $Scopes[] = json_decode(json_encode($ScopeResult->Scopes), true);
+        } else {
+            $Scopes = json_decode(json_encode($ScopeResult->Scopes), true);
         }
         $Result = [];
-        foreach ($Scopes['Scopes'] as $Scope) {
-            $Result[] = $Scope['ScopeItem'];
-        }
-        return $Result;
+        return array_column($Scopes, 'ScopeItem');
     }
     protected function GetNodes()
     {
@@ -1617,7 +1618,12 @@ class ONVIFIO extends IPSModule
         if (is_a($Nodes, 'SoapFault')) {
             return false;
         }
-        $Result = json_decode(json_encode($Nodes), true);
+        if (is_object($Nodes)) {
+            $Result = [];
+            $Result[] = json_decode(json_encode($Nodes), true);
+        } else {
+            $Result = json_decode(json_encode($Nodes), true);
+        }
         return $Result;
     }
     protected function GetVideoSources($Uri, $WSDL)
@@ -1626,7 +1632,12 @@ class ONVIFIO extends IPSModule
         if (is_a($VideoSources, 'SoapFault')) {
             return false;
         }
-        $Result = json_decode(json_encode($VideoSources), true);
+        if (is_object($VideoSources)) {
+            $Result = [];
+            $Result[] = json_decode(json_encode($VideoSources), true);
+        } else {
+            $Result = json_decode(json_encode($VideoSources), true);
+        }
         return $Result;
     }
     protected function GetAudioSources($Uri, $WSDL)
@@ -1635,7 +1646,12 @@ class ONVIFIO extends IPSModule
         if (is_a($AudioSources, 'SoapFault')) {
             return false;
         }
-        $Result = json_decode(json_encode($AudioSources), true);
+        if (is_object($AudioSources)) {
+            $Result = [];
+            $Result[] = json_decode(json_encode($AudioSources), true);
+        } else {
+            $Result = json_decode(json_encode($AudioSources), true);
+        }
         return $Result;
     }
 
@@ -1698,7 +1714,12 @@ class ONVIFIO extends IPSModule
         if (is_a($Services, 'SoapFault')) {
             return false;
         }
-        $ServicesResult = json_decode(json_encode($Services), true);
+        if (is_object($Services->Service)) {
+            $ServicesResult = [];
+            $ServicesResult[] = json_decode(json_encode($Services->Service), true);
+        } else {
+            $ServicesResult = json_decode(json_encode($Services->Service), true);
+        }
         $XAddr = $this->ReadAttributeArray(\ONVIF\IO\Attribute::XAddr);
         /*$XAddr = [
             \ONVIF\NS::Management => '/onvif/device_service',
@@ -1712,7 +1733,7 @@ class ONVIFIO extends IPSModule
             //                'Recording' => '',
             //                'Replay'    => ''
         ];*/
-        foreach ($ServicesResult['Service'] as $Service) {
+        foreach ($ServicesResult as $Service) {
             $XAddr[$Service['Namespace']] = parse_url($Service['XAddr'], PHP_URL_PATH);
         }
         $this->WriteAttributeArray(\ONVIF\IO\Attribute::XAddr, $XAddr);
