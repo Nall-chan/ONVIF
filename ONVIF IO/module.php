@@ -298,10 +298,16 @@ class ONVIFIO extends IPSModule
                 $this->Renew();
                 return;
             case 'Reload':
-                $this->Unsubscribe();
                 if ($this->GetStatus() == IS_INACTIVE) {
                     $this->WriteAttributeString(\ONVIF\IO\Attribute::ConsumerAddress, '');
                     return;
+                }
+                if ($this->GetStatus() == IS_ACTIVE) { // block childs
+                    $this->SetStatus(IS_INACTIVE);
+                }
+                $this->SetTimerInterval(\ONVIF\IO\Timer::RenewSubscription, 0);
+                if ($this->isSubscribed) {
+                    $this->Unsubscribe();
                 }
                 $this->UpdateFormField('ErrorTitle', 'caption', $this->Translate('Please wait!'));
                 $this->UpdateFormField('ErrorText', 'caption', $this->Translate('Determine abilities of this device'));
