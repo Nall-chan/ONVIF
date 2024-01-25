@@ -14,39 +14,6 @@ class ONVIFDigitalInput extends ONVIFModuleBase
         parent::Create();
         $this->RegisterAttributeArray(\ONVIF\Input\Attribute::DigitalInputs, []);
     }
-    public function ApplyChanges()
-    {
-        //Never delete this line!
-        parent::ApplyChanges();
-        if (IPS_GetKernelRunlevel() != KR_READY) {
-            return;
-        }
-        if ($this->ReadPropertyString(\ONVIF\Device\Property::EventTopic) == '') {
-            $this->SetStatus(IS_INACTIVE);
-            return;
-        }
-        if ($this->HasActiveParent()) {
-            $Capabilities = @$this->GetCapabilities();
-            if (!$Capabilities) {
-                $this->SetStatus(IS_EBASE + 1);
-                return;
-            }
-            $this->WriteAttributeArray(\ONVIF\Input\Attribute::DigitalInputs, $Capabilities['DigitalInputs']);
-            foreach ($Capabilities['DigitalInputs'] as $Name => $DigitalInput) {
-                $Ident = str_replace([' - ', ':'], ['_', ''], (string) $Name);
-                $Ident = preg_replace('/[^a-zA-Z\d]/u', '_', $Ident);
-                $this->RegisterVariableBoolean($Ident, $Name, '~Switch', 0);
-            }
-
-            $Events = $this->GetEvents($this->ReadPropertyString(\ONVIF\Device\Property::EventTopic));
-            $this->SendDebug('EventConfig', $Events, 0);
-            if (count($Events) != 1) {
-                $this->SetStatus(IS_EBASE + 1);
-            } else {
-                $this->SetStatus(IS_ACTIVE);
-            }
-        }
-    }
 
     public function ReceiveData($JSONString)
     {
@@ -119,5 +86,34 @@ class ONVIFDigitalInput extends ONVIFModuleBase
         $this->SendDebug('FORM', json_last_error_msg(), 0);
 
         return json_encode($Form);
+    }
+    protected function InitFilterAndEvents()
+    {
+        parent::InitFilterAndEvents();
+        if ($this->ReadPropertyString(\ONVIF\Device\Property::EventTopic) == '') {
+            $this->SetStatus(IS_INACTIVE);
+            return;
+        }
+        if ($this->HasActiveParent()) {
+            $Capabilities = @$this->GetCapabilities();
+            if (!$Capabilities) {
+                $this->SetStatus(IS_EBASE + 1);
+                return;
+            }
+            $this->WriteAttributeArray(\ONVIF\Input\Attribute::DigitalInputs, $Capabilities['DigitalInputs']);
+            foreach ($Capabilities['DigitalInputs'] as $Name => $DigitalInput) {
+                $Ident = str_replace([' - ', ':'], ['_', ''], (string) $Name);
+                $Ident = preg_replace('/[^a-zA-Z\d]/u', '_', $Ident);
+                $this->RegisterVariableBoolean($Ident, $Name, '~Switch', 0);
+            }
+
+            $Events = $this->GetEvents($this->ReadPropertyString(\ONVIF\Device\Property::EventTopic));
+            $this->SendDebug('EventConfig', $Events, 0);
+            if (count($Events) != 1) {
+                $this->SetStatus(IS_EBASE + 1);
+            } else {
+                $this->SetStatus(IS_ACTIVE);
+            }
+        }
     }
 }

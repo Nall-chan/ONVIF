@@ -22,37 +22,6 @@ class ONVIFImageGrabber extends ONVIFModuleBase
         $this->RegisterTimer(\ONVIF\ImageGrabber\Timer::UpdateImage, 0, 'ONVIF_UpdateImage(' . $this->InstanceID . ');');
         $this->ImageURL = false;
     }
-    public function ApplyChanges()
-    {
-        //Never delete this line!
-        parent::ApplyChanges();
-        $MediaId = $this->GetMediaId();
-        IPS_SetMediaCached($MediaId, $this->ReadPropertyBoolean(\ONVIF\ImageGrabber\Property::UseCaching));
-
-        if ($this->ReadPropertyString(\ONVIF\ImageGrabber\Property::VideoSource) == '') {
-            $this->SetStatus(IS_INACTIVE);
-            $this->SetTimerInterval(\ONVIF\ImageGrabber\Timer::UpdateImage, 0);
-            return;
-        }
-        if ($this->ReadPropertyString(\ONVIF\ImageGrabber\Property::Profile) == '') {
-            $this->SetStatus(IS_INACTIVE);
-            $this->SetTimerInterval(\ONVIF\ImageGrabber\Timer::UpdateImage, 0);
-            return;
-        }
-        if (IPS_GetKernelRunlevel() != KR_READY) {
-            return;
-        }
-
-        $this->ImageURL = $SnapshotURL = $this->GetSnapshotUri();
-        if ($SnapshotURL) {
-            $this->SetStatus(IS_ACTIVE);
-            $this->UpdateImage();
-            $this->SetTimerInterval(\ONVIF\ImageGrabber\Timer::UpdateImage, $this->ReadPropertyInteger(\ONVIF\ImageGrabber\Property::Interval) * 1000);
-        } else {
-            $this->SetTimerInterval(\ONVIF\ImageGrabber\Timer::UpdateImage, 0);
-            $this->SetStatus(IS_EBASE + 1);
-        }
-    }
     public function UpdateImage()
     {
         $URL = $this->ImageURL;
@@ -341,6 +310,36 @@ class ONVIFImageGrabber extends ONVIFModuleBase
                     $this->ReloadForm();
                 }
                 return;
+        }
+    }
+    protected function InitFilterAndEvents()
+    {
+        parent::InitFilterAndEvents();
+        $MediaId = $this->GetMediaId();
+        IPS_SetMediaCached($MediaId, $this->ReadPropertyBoolean(\ONVIF\ImageGrabber\Property::UseCaching));
+
+        if ($this->ReadPropertyString(\ONVIF\ImageGrabber\Property::VideoSource) == '') {
+            $this->SetStatus(IS_INACTIVE);
+            $this->SetTimerInterval(\ONVIF\ImageGrabber\Timer::UpdateImage, 0);
+            return;
+        }
+        if ($this->ReadPropertyString(\ONVIF\ImageGrabber\Property::Profile) == '') {
+            $this->SetStatus(IS_INACTIVE);
+            $this->SetTimerInterval(\ONVIF\ImageGrabber\Timer::UpdateImage, 0);
+            return;
+        }
+        if (IPS_GetKernelRunlevel() != KR_READY) {
+            return;
+        }
+
+        $this->ImageURL = $SnapshotURL = $this->GetSnapshotUri();
+        if ($SnapshotURL) {
+            $this->SetStatus(IS_ACTIVE);
+            $this->UpdateImage();
+            $this->SetTimerInterval(\ONVIF\ImageGrabber\Timer::UpdateImage, $this->ReadPropertyInteger(\ONVIF\ImageGrabber\Property::Interval) * 1000);
+        } else {
+            $this->SetTimerInterval(\ONVIF\ImageGrabber\Timer::UpdateImage, 0);
+            $this->SetStatus(IS_EBASE + 1);
         }
     }
     protected function IOChangeState($State)

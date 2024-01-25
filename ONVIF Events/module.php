@@ -11,25 +11,6 @@ class ONVIFEvents extends ONVIFModuleBase
     {
         parent::Create();
     }
-    public function ApplyChanges()
-    {
-        //Never delete this line!
-        parent::ApplyChanges();
-        if (IPS_GetKernelRunlevel() != KR_READY) {
-            return;
-        }
-        if ($this->ReadPropertyString(\ONVIF\Device\Property::EventTopic) == '') {
-            $this->SetStatus(IS_INACTIVE);
-        } else {
-            $Events = $this->GetEvents($this->ReadPropertyString(\ONVIF\Device\Property::EventTopic));
-            $this->SendDebug('EventConfig', $Events, 0);
-            if (count($Events) == 0) {
-                $this->SetStatus(IS_INACTIVE);
-            } else {
-                $this->SetStatus(IS_ACTIVE);
-            }
-        }
-    }
 
     public function ReceiveData($JSONString)
     {
@@ -55,5 +36,21 @@ class ONVIFEvents extends ONVIFModuleBase
         $this->SendDebug('FORM', json_encode($Form), 0);
         $this->SendDebug('FORM', json_last_error_msg(), 0);
         return json_encode($Form);
+    }
+
+    protected function InitFilterAndEvents()
+    {
+        parent::InitFilterAndEvents();
+        if ($this->ReadPropertyString(\ONVIF\Device\Property::EventTopic) == '') {
+            $this->SetStatus(IS_INACTIVE);
+        } else {
+            $Events = $this->GetEvents($this->ReadPropertyString(\ONVIF\Device\Property::EventTopic));
+            $this->SendDebug('EventConfig', $Events, 0);
+            if (count($Events) == 0) {
+                $this->SetStatus(IS_INACTIVE);
+            } else {
+                $this->SetStatus(IS_ACTIVE);
+            }
+        }
     }
 }
