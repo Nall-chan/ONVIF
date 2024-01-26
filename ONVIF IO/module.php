@@ -615,6 +615,7 @@ class ONVIFIO extends IPSModule
             $this->WriteAttributeArray(\ONVIF\IO\Attribute::DigitalInputs, $DigitalInputs);
 
             // Wenn \ONVIF\WSDL::Media2 unterstützt
+            $Media2Supported = $XAddr[\ONVIF\NS::Media2] != '';
             if ($XAddr[\ONVIF\NS::Media2]) {
                 // 4c.ONVIF Request GetServiceCapabilities an \ONVIF\WSDL::Media2
                 $MediaCapabilities = $this->GetServiceCapabilities($XAddr[\ONVIF\NS::Media2], \ONVIF\WSDL::Media2); // noch ohne Funktion..
@@ -631,11 +632,9 @@ class ONVIFIO extends IPSModule
                     }
                 }
                 // 4c.ONVIF Request GetProfiles an \ONVIF\WSDL::Media2
-                if (!$this->GetProfiles2()) {
-                    $this->SetStatus(IS_EBASE + 2);
-                    return;
-                }
-            } else {
+                $Media2Supported = $this->GetProfiles2();
+            }
+            if (!$Media2Supported) {
                 // Wenn \ONVIF\WSDL::Media2 NICHT unterstützt
                 // 4c.ONVIF Request GetServiceCapabilities an \ONVIF\WSDL::Media
                 $MediaCapabilities = $this->GetServiceCapabilities($XAddr[\ONVIF\NS::Media], \ONVIF\WSDL::Media); // noch ohne Funktion..
@@ -1335,6 +1334,9 @@ class ONVIFIO extends IPSModule
         });
         $H264VideoSourcesItems = [];
         foreach ($H264Profiles as $Profile) {
+            if (!array_key_exists('Configurations', $Profile)) {
+                continue;
+            }
             if (!array_key_exists('VideoEncoder', $Profile['Configurations'])) {
                 continue;
             }
@@ -1370,6 +1372,9 @@ class ONVIFIO extends IPSModule
         }
         $JPEGVideoSourcesItems = [];
         foreach ($JPEGProfiles as $Profile) {
+            if (!array_key_exists('Configurations', $Profile)) {
+                continue;
+            }
             if (!array_key_exists('VideoEncoder', $Profile['Configurations'])) {
                 continue;
             }
@@ -1396,14 +1401,26 @@ class ONVIFIO extends IPSModule
             if (isset($Profile['Configurations']['Analytics'])) {
                 return true;
             }
+            return false;
         });
         foreach ($AnalyticsProfiles as $AnalyticsProfile) {
+            if (!array_key_exists('Configurations', $AnalyticsProfile)) {
+                continue;
+            }
+            if (!array_key_exists('Analytics', $AnalyticsProfile['Configurations'])) {
+                continue;
+            }
             $Token = $AnalyticsProfile['Configurations']['Analytics']['token'];
             $Name = $AnalyticsProfile['Configurations']['Analytics']['Name'];
             $AnalyticsTokens[$Token] = $Name;
         }
         $this->SendDebug('AnalyticsTokens', $AnalyticsTokens, 0);
         $this->WriteAttributeArray(\ONVIF\IO\Attribute::AnalyticsTokens, $AnalyticsTokens);
+        if ((count($H264VideoSources) + count($JPEGVideoSources) + count($AnalyticsTokens)) == 0) {
+            $this->Warnings = array_merge($this->Warnings, [$this->Translate('Failed to get GetProfiles on Media2 service. Device reported Media2 support, but does not support this service!')]);
+            $this->LogMessage($this->Translate('Failed to get GetProfiles on Media2 service. Device reported Media2 support, but does not support this service!'), KL_WARNING);
+            return false;
+        }
         return true;
     }
     protected function GetProfiles(): bool

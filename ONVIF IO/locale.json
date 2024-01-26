@@ -42,6 +42,7 @@
             "Address is invalid": "Adresse ungültig",
             "Failed to get scopes, device not ONVIF compliant!": "Scopes konnten nicht abgerufen werden, Gerät ist nicht ONVIF-konform!",
             "No profile in scopes, device not ONVIF compliant!": "Kein Profil in Scopes, Gerät nicht ONVIF-konform!",
+            "Failed to get GetProfiles on Media2 service. Device reported Media2 support, but does not support this service!": "Fehler beim laden von GetProfiles. Das Gerät meldet Media2 Unterstützung, unterstützt diesen Dienst aber nicht!",
             "Failed to get DeviceIO service capabilities. Device reported ONVIF T scope, but is not compliant!": "DeviceIO-Dienstfunktionen konnten nicht abgerufen werden. Das Gerät hat den ONVIF T-Scope gemeldet, ist aber nicht konform!",
             "Failed to get Media2 service capabilities. Device reported ONVIF T scope, but is not compliant!": "Fehler beim Abrufen der Media2-Dienstfunktionen. Das Gerät hat den ONVIF T-Scope gemeldet, ist aber nicht konform!",
             "Failed to get Imaging service capabilities. Device reported ONVIF T scope, but is not compliant!": "Imaging-Dienstfunktionen konnten nicht abgerufen werden. Das Gerät hat den ONVIF T-Scope gemeldet, ist aber nicht konform!",

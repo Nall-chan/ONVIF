@@ -142,7 +142,8 @@ Für das Discovery werden Pakete über die Multicast-Adresse `239.255.255.250` a
 
 **Version 2.15**  
  - Wurde nur ein Service von dem Gerät gemeldet, so erzeugte der IO Fehlermeldungen.  
-
+ - Können die Stream-Profile von `ver20/media` nicht ermittelt werden, wo wird versucht die Stream-Profile vom `ver10/media` zu laden. Auch wenn das Gerät explizit `ver20/media` unterstützt.  
+ 
 **Version 2.13:** <span style="color:red">**(Dies ist die letzte Version für IPS kleiner Version 7.0)**</span>  
 - Lesen der Fähigkeiten eines Gerätes in der IO Instanz verbessert.  
 - IO Instanz schreibt Warnungen in das Meldungslog.  
