@@ -636,6 +636,8 @@ class ONVIFIO extends IPSModule
             }
             if (!$Media2Supported) {
                 // Wenn \ONVIF\WSDL::Media2 NICHT unterstützt
+                $XAddr[\ONVIF\NS::Media2] = '';
+                $this->WriteAttributeArray(\ONVIF\IO\Attribute::XAddr, $XAddr);
                 // 4c.ONVIF Request GetServiceCapabilities an \ONVIF\WSDL::Media
                 $MediaCapabilities = $this->GetServiceCapabilities($XAddr[\ONVIF\NS::Media], \ONVIF\WSDL::Media); // noch ohne Funktion..
                 if ($MediaCapabilities) {
