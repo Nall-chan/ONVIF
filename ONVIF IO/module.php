@@ -499,7 +499,6 @@ class ONVIFIO extends IPSModule
             $WSSubscriptionPolicySupport = false;
             $WSPullPointSupport = false;
             $HasRTSPStreaming = false;
-            $HasSnapshotUri = false;
             if ($this->GetCapabilities()) { // besorgt XAddr und einige Attribute Pflicht für Profil S.
                 $AnalyticsModuleSupport = $this->ReadAttributeBoolean(\ONVIF\IO\Attribute::AnalyticsModuleSupport);
                 $RuleSupport = $this->ReadAttributeBoolean(\ONVIF\IO\Attribute::RuleSupport);
@@ -515,12 +514,23 @@ class ONVIFIO extends IPSModule
 
             // 3.ONVIF Request GetServices
             // GetServices besorgt XAddr, Pflicht bei T, selten bei S unterstützt.
-            if (!$this->GetServices() && $this->Profile->HasProfile(\ONVIF\Profile::T)) {
+            $GetServices = $this->GetServices();
+            if (!$GetServices && $this->Profile->HasProfile(\ONVIF\Profile::T)) {
                 $this->Warnings = array_merge($this->Warnings, [$this->Translate('Failed to get services. Device reported ONVIF T scope, but is not compliant!')]);
                 $this->LogMessage($this->Translate('Failed to get services. Device reported ONVIF T scope, but is not compliant!'), KL_WARNING);
             }
-            $XAddr = $this->ReadAttributeArray(\ONVIF\IO\Attribute::XAddr);
-
+            if ($GetServices) {
+                $WSSubscriptionPolicySupport = $this->ReadAttributeBoolean(\ONVIF\IO\Attribute::WSSubscriptionPolicySupport);
+                $WSPullPointSupport = $this->ReadAttributeBoolean(\ONVIF\IO\Attribute::WSPullPointSupport);
+                $HasRTSPStreaming = $this->ReadAttributeBoolean(\ONVIF\IO\Attribute::HasRTSPStreaming);
+                $HasSnapshotUri = $this->ReadAttributeBoolean(\ONVIF\IO\Attribute::HasSnapshotUri);
+                $NbrOfVideoSources = $this->ReadAttributeInteger(\ONVIF\IO\Attribute::NbrOfVideoSources);
+                $NbrOfAudioSources = $this->ReadAttributeInteger(\ONVIF\IO\Attribute::NbrOfAudioSources);
+                $NbrOfInputs = $this->ReadAttributeInteger(\ONVIF\IO\Attribute::NbrOfInputs);
+                $NbrOfOutputs = $this->ReadAttributeInteger(\ONVIF\IO\Attribute::NbrOfOutputs);
+                $NbrOfSerialPorts = $this->ReadAttributeInteger(\ONVIF\IO\Attribute::NbrOfSerialPorts);
+                $XAddr = $this->ReadAttributeArray(\ONVIF\IO\Attribute::XAddr);
+            }
             // 4. ONVIF Request GetServiceCapabilities an \ONVIF\WSDL::Management
             //$this->GetServiceCapabilities($XAddr[\ONVIF\NS::Management], \ONVIF\WSDL::Management); // noch ohne Funktion..
             // Wenn \ONVIF\WSDL::DeviceIO unterstützt
@@ -615,6 +625,7 @@ class ONVIFIO extends IPSModule
             $this->WriteAttributeArray(\ONVIF\IO\Attribute::DigitalInputs, $DigitalInputs);
 
             // Wenn \ONVIF\WSDL::Media2 unterstützt
+
             $Media2Supported = $XAddr[\ONVIF\NS::Media2] != '';
             if ($XAddr[\ONVIF\NS::Media2]) {
                 // 4c.ONVIF Request GetServiceCapabilities an \ONVIF\WSDL::Media2
@@ -1292,6 +1303,7 @@ class ONVIFIO extends IPSModule
         $query = '//*[@wstop:topic="true"]/tt:MessageDescription';
         $wsTopics = $xpath->query($query);
         $TopicData = [];
+        /** @var \DOMNode $wsData */
         foreach ($wsTopics as $wsData) {
             $Topic = preg_replace('/\[\d*\]/', '', substr($wsData->parentNode->getNodePath(), $prefixPathLen + 1));
             $SourcesNodeList = $xpath->query('tt:Source/tt:SimpleItemDescription', $wsData, true);
@@ -1318,7 +1330,7 @@ class ONVIFIO extends IPSModule
             $this->ShowLastError($this->lastSOAPError);
             return false;
         }
-        if (is_object($ProfileResult->Profiles)) {
+        if (!is_array($ProfileResult->Profiles)) {
             $Profiles = [];
             $Profiles[] = json_decode(json_encode($ProfileResult->Profiles), true);
         } else {
@@ -1434,7 +1446,7 @@ class ONVIFIO extends IPSModule
             $this->ShowLastError($this->lastSOAPError);
             return false;
         }
-        if (is_object($ProfileResult->Profiles)) {
+        if (!is_array($ProfileResult->Profiles)) {
             $Profiles = [];
             $Profiles[] = json_decode(json_encode($ProfileResult->Profiles), true);
         } else {
@@ -1627,7 +1639,7 @@ class ONVIFIO extends IPSModule
         if (!property_exists($ScopeResult, 'Scopes')) {
             return false;
         }
-        if (is_object($ScopeResult->Scopes)) {
+        if (!is_array($ScopeResult->Scopes)) {
             $Scopes = [];
             $Scopes[] = json_decode(json_encode($ScopeResult->Scopes), true);
         } else {
@@ -1643,7 +1655,7 @@ class ONVIFIO extends IPSModule
         if (is_a($Nodes, 'SoapFault')) {
             return false;
         }
-        if (is_object($Nodes)) {
+        if (!is_array($Nodes)) {
             $Result = [];
             $Result[] = json_decode(json_encode($Nodes), true);
         } else {
@@ -1657,7 +1669,7 @@ class ONVIFIO extends IPSModule
         if (is_a($VideoSources, 'SoapFault')) {
             return false;
         }
-        if (is_object($VideoSources)) {
+        if (!is_array($VideoSources)) {
             $Result = [];
             $Result[] = json_decode(json_encode($VideoSources), true);
         } else {
@@ -1671,7 +1683,7 @@ class ONVIFIO extends IPSModule
         if (is_a($AudioSources, 'SoapFault')) {
             return false;
         }
-        if (is_object($AudioSources)) {
+        if (!is_array($AudioSources)) {
             $Result = [];
             $Result[] = json_decode(json_encode($AudioSources), true);
         } else {
@@ -1735,11 +1747,12 @@ class ONVIFIO extends IPSModule
         $Params = [
             'IncludeCapability'=> true
         ];
-        $Services = $this->SendData('', \ONVIF\WSDL::Management, 'GetServices', true, $Params);
+        $Response = '';
+        $Services = $this->SendData('', \ONVIF\WSDL::Management, 'GetServices', true, $Params, $Response);
         if (is_a($Services, 'SoapFault')) {
             return false;
         }
-        if (is_object($Services->Service)) {
+        if (!is_array($Services->Service)) {
             $ServicesResult = [];
             $ServicesResult[] = json_decode(json_encode($Services->Service), true);
         } else {
@@ -1758,8 +1771,47 @@ class ONVIFIO extends IPSModule
             //                'Recording' => '',
             //                'Replay'    => ''
         ];*/
+        //todo
+
+        $xml = new DOMDocument();
+        $xml->loadXML($Response);
+        $this->SendDebug('TEST', $Response, 0);
+        $xPath = new DOMXPath($xml);
+
         foreach ($ServicesResult as $Service) {
             $XAddr[$Service['Namespace']] = parse_url($Service['XAddr'], PHP_URL_PATH);
+            $NSKey = array_search($Service['Namespace'], \ONVIF\NS::Namespaces);
+            $xPath->registerNamespace($NSKey, $Service['Namespace']);
+
+            switch ($Service['Namespace']) {
+                case \ONVIF\NS::Event:
+                    $Query = '//' . $NSKey . ':Capabilities/@WSSubscriptionPolicySupport';
+                    $this->WriteAttributeBooleanByXPathQuery(\ONVIF\IO\Attribute::WSSubscriptionPolicySupport, $Query, $xPath);
+                    $Query = '//' . $NSKey . ':Capabilities/@WSPullPointSupport';
+                    $this->WriteAttributeBooleanByXPathQuery(\ONVIF\IO\Attribute::WSPullPointSupport, $Query, $xPath);
+                    break;
+                case \ONVIF\NS::DeviceIO:
+                    $Query = '//' . $NSKey . ':Capabilities/@VideoSources';
+                    $this->WriteAttributeIntegerByXPathQuery(\ONVIF\IO\Attribute::NbrOfVideoSources, $Query, $xPath);
+                    $Query = '//' . $NSKey . ':Capabilities/@AudioSources';
+                    $this->WriteAttributeIntegerByXPathQuery(\ONVIF\IO\Attribute::NbrOfAudioSources, $Query, $xPath);
+                    $Query = '//' . $NSKey . ':Capabilities/@RelayOutputs';
+                    $this->WriteAttributeIntegerByXPathQuery(\ONVIF\IO\Attribute::NbrOfOutputs, $Query, $xPath);
+                    $Query = '//' . $NSKey . ':Capabilities/@DigitalInputs';
+                    $this->WriteAttributeIntegerByXPathQuery(\ONVIF\IO\Attribute::NbrOfInputs, $Query, $xPath);
+                    $Query = '//' . $NSKey . ':Capabilities/@SerialPorts';
+                    $this->WriteAttributeIntegerByXPathQuery(\ONVIF\IO\Attribute::NbrOfSerialPorts, $Query, $xPath);
+                    break;
+                case \ONVIF\NS::Media:
+                case \ONVIF\NS::Media2:
+                    $Query = '//' . $NSKey . ':StreamingCapabilities/@SnapshotUri';
+                    $this->WriteAttributeBooleanByXPathQuery(\ONVIF\IO\Attribute::HasSnapshotUri, $Query, $xPath);
+                    $Query = '//' . $NSKey . ':StreamingCapabilities/@RTSPStreaming';
+                    $this->WriteAttributeBooleanByXPathQuery(\ONVIF\IO\Attribute::HasRTSPStreaming, $Query, $xPath);
+                    $Query = '//' . $NSKey . ':StreamingCapabilities/@RTP_RTSP_TCP';
+                    $this->WriteAttributeBooleanByXPathQuery(\ONVIF\IO\Attribute::HasRTSPStreaming, $Query, $xPath);
+                    break;
+            }
         }
         $this->WriteAttributeArray(\ONVIF\IO\Attribute::XAddr, $XAddr);
         return true;
@@ -1904,6 +1956,7 @@ class ONVIFIO extends IPSModule
      * @param string $Function
      * @param bool $UseLogin
      * @param array $Params
+     * @return \SoapFault|\stdClass
      */
     protected function SendData(string $URI, string $wsdl, string $Function, bool $UseLogin = false, array $Params = [], string &$Response = '', array $Header = [], int $Timeout = 5)
     {
@@ -2146,5 +2199,31 @@ class ONVIFIO extends IPSModule
         $this->SendDebug('TerminationTime', $this->TerminationTime, 0);
         $this->SendDebug('Renew Interval', $Interval - 5, 0);
         $this->SetTimerInterval(\ONVIF\IO\Timer::RenewSubscription, ($Interval - 5) * 1000);
+    }
+    private static function GetNodeBoolValue(\DOMNode $Node): bool
+    {
+        $val = $Node->nodeValue;
+        $boolval = (is_string($val) ? filter_var($val, FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE) : (bool) $val);
+        return $boolval === null ? false : $boolval;
+    }
+    private function WriteAttributeBooleanByXPathQuery(string $Name, string $Query, \DOMXPath &$xPath)
+    {
+        $NodeList = $xPath->query($Query);
+        /** @var \DOMNode $Value */
+        if ($NodeList->length) {
+            $Value = self::GetNodeBoolValue($NodeList->item(0));
+            $this->SendDebug($Name, $Value, 0);
+            $this->WriteAttributeBoolean($Name, $Value);
+        }
+    }
+    private function WriteAttributeIntegerByXPathQuery(string $Name, string $Query, \DOMXPath &$xPath)
+    {
+        $NodeList = $xPath->query($Query);
+        /** @var \DOMNode $Value */
+        if ($NodeList->length) {
+            $Value = (int) $NodeList->item(0)->nodeValue;
+            $this->SendDebug($Name, $Value, 0);
+            $this->WriteAttributeInteger($Name, $Value);
+        }
     }
 }
