@@ -1806,7 +1806,7 @@ class ONVIFIO extends IPSModule
                     break;
                 case \ONVIF\NS::Media:
                 case \ONVIF\NS::Media2:
-                    $Query = '//' . $NSKey . ':StreamingCapabilities/@SnapshotUri';
+                    $Query = '//' . $NSKey . ':Capabilities/@SnapshotUri';
                     $this->WriteAttributeBooleanByXPathQuery(\ONVIF\IO\Attribute::HasSnapshotUri, $Query, $xPath);
                     $Query = '//' . $NSKey . ':StreamingCapabilities/@RTSPStreaming';
                     $this->WriteAttributeBooleanByXPathQuery(\ONVIF\IO\Attribute::HasRTSPStreaming, $Query, $xPath);
