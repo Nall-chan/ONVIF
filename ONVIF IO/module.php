@@ -600,11 +600,11 @@ class ONVIFIO extends IPSModule
                 //Fallback für reine Profile S Geräte
                 $VideoSources = $this->GetVideoSources($XAddr[\ONVIF\NS::Media], \ONVIF\WSDL::Media); // array of Token
                 if ($VideoSources) {
-                    $NbrOfVideoSources = count($VideoSources['VideoSources']);
+                    $NbrOfVideoSources = count($VideoSources);
                 }
                 $AudioSources = $this->GetAudioSources($XAddr[\ONVIF\NS::Media], \ONVIF\WSDL::Media); // array of Token
                 if ($AudioSources) {
-                    $NbrOfAudioSources = count($AudioSources['AudioSources']);
+                    $NbrOfAudioSources = count($AudioSources);
                 }
                 $DigitalInputs = $this->GetDigitalInputs($XAddr[\ONVIF\NS::Management], \ONVIF\WSDL::Management);
                 if (!$DigitalInputs) {
@@ -1669,11 +1669,11 @@ class ONVIFIO extends IPSModule
         if (is_a($VideoSources, 'SoapFault')) {
             return false;
         }
-        if (!is_array($VideoSources)) {
+        if (!is_array($VideoSources->VideoSources)) {
             $Result = [];
-            $Result[] = json_decode(json_encode($VideoSources), true);
+            $Result[] = json_decode(json_encode($VideoSources->VideoSources), true);
         } else {
-            $Result = json_decode(json_encode($VideoSources), true);
+            $Result = json_decode(json_encode($VideoSources->VideoSources), true);
         }
         return $Result;
     }
@@ -1683,11 +1683,11 @@ class ONVIFIO extends IPSModule
         if (is_a($AudioSources, 'SoapFault')) {
             return false;
         }
-        if (!is_array($AudioSources)) {
+        if (!is_array($AudioSources->AudioSources)) {
             $Result = [];
-            $Result[] = json_decode(json_encode($AudioSources), true);
+            $Result[] = json_decode(json_encode($AudioSources->AudioSources), true);
         } else {
-            $Result = json_decode(json_encode($AudioSources), true);
+            $Result = json_decode(json_encode($AudioSources->AudioSources), true);
         }
         return $Result;
     }
@@ -1775,12 +1775,14 @@ class ONVIFIO extends IPSModule
 
         $xml = new DOMDocument();
         $xml->loadXML($Response);
-        $this->SendDebug('TEST', $Response, 0);
         $xPath = new DOMXPath($xml);
 
         foreach ($ServicesResult as $Service) {
             $XAddr[$Service['Namespace']] = parse_url($Service['XAddr'], PHP_URL_PATH);
             $NSKey = array_search($Service['Namespace'], \ONVIF\NS::Namespaces);
+            if (!$NSKey) {
+                continue;
+            }
             $xPath->registerNamespace($NSKey, $Service['Namespace']);
 
             switch ($Service['Namespace']) {

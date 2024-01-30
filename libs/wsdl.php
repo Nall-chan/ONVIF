@@ -17,6 +17,10 @@ namespace ONVIF
         public const DeviceIO = 'ver10/deviceio.wsdl';
         public const Imaging = 'ver20/imaging/wsdl/imaging.wsdl';
         public const Analytics = 'ver20/analytics/wsdl/analytics.wsdl';
+        public const AnalyticsDevice = 'ver10/analyticsdevice.wsdl';
+        public const Recording = 'ver10/recording.wsdl';
+        public const SearchRecording = 'ver10/search.wsdl';
+        public const Replay = 'ver10/replay.wsdl';
     }
     /**
      * Namespaces ONVIF, SOAP & XML
@@ -31,40 +35,49 @@ namespace ONVIF
         public const DeviceIO = 'http://www.onvif.org/ver10/deviceIO/wsdl';
         public const Imaging = 'http://www.onvif.org/ver20/imaging/wsdl';
         public const Analytics = 'http://www.onvif.org/ver20/analytics/wsdl';
+        public const AnalyticsDevice = 'http://www.onvif.org/ver10/analyticsdevice/wsdl';
+        public const Recording = 'http://www.onvif.org/ver10/recording/wsdl';
+        public const SearchRecording = 'http://www.onvif.org/ver10/search/wsdl';
+        public const Replay = 'http://www.onvif.org/ver10/replay/wsdl';
         public const Addressing = 'http://www.w3.org/2005/08/addressing';
+
         // all other NS
         public const Namespaces = [
-            's'      => 'http://www.w3.org/2003/05/soap-envelope',
-            'e'      => 'http://www.w3.org/2003/05/soap-encoding',
-            'wsa'    => self::Addressing,
-            'xs'     => 'http://www.w3.org/2001/XMLSchema',
-            'xsi'    => 'http://www.w3.org/2001/XMLSchema-instance',
-            'wsaw'   => 'http://www.w3.org/2006/05/addressing/wsdl',
-            'wsnt'   => 'http://docs.oasis-open.org/wsn/b-2',
-            'wstop'  => 'http://docs.oasis-open.org/wsn/t-1',
-            'wsntw'  => 'http://docs.oasis-open.org/wsn/bw-2',
-            'wsrf-rw'=> 'http://docs.oasis-open.org/wsrf/rw-2',
-            'wsrf-r' => 'http://docs.oasis-open.org/wsrf/r-2',
-            'wsrf-bf'=> 'http://docs.oasis-open.org/wsrf/bf-2',
-            'wsdl'   => 'http://schemas.xmlsoap.org/wsdl',
-            'wsoap12'=> 'http://schemas.xmlsoap.org/wsdl/soap12',
-            'http'   => 'http://schemas.xmlsoap.org/wsdl/http',
-            'd'      => 'http://schemas.xmlsoap.org/ws/2005/04/discovery',
-            'wsadis' => 'http://schemas.xmlsoap.org/ws/2004/08/addressing',
-            'tt'     => 'http://www.onvif.org/ver10/schema',
-            'tns1'   => 'http://www.onvif.org/ver10/topics',
-            'tds'    => self::Management,
-            'trt'    => self::Media,
-            'tev'    => self::Event,
-            'timg'   => self::Imaging,
-            'tst'    => 'http://www.onvif.org/ver10/storage/wsdl',
-            'dn'     => 'http://www.onvif.org/ver10/network/wsdl',
-            'tr2'    => self::Media2,
-            'tptz'   => self::PTZ,
-            'tan'    => self::Analytics,
-            'axt'    => 'http://www.onvif.org/ver20/analytics',
-            'tmd'    => self::DeviceIO,
-            'ter'    => 'http://www.onvif.org/ver10/error'
+            's'       => 'http://www.w3.org/2003/05/soap-envelope',
+            'e'       => 'http://www.w3.org/2003/05/soap-encoding',
+            'wsa'     => self::Addressing,
+            'xs'      => 'http://www.w3.org/2001/XMLSchema',
+            'xsi'     => 'http://www.w3.org/2001/XMLSchema-instance',
+            'wsaw'    => 'http://www.w3.org/2006/05/addressing/wsdl',
+            'wsnt'    => 'http://docs.oasis-open.org/wsn/b-2',
+            'wstop'   => 'http://docs.oasis-open.org/wsn/t-1',
+            'wsntw'   => 'http://docs.oasis-open.org/wsn/bw-2',
+            'wsrf-rw' => 'http://docs.oasis-open.org/wsrf/rw-2',
+            'wsrf-r'  => 'http://docs.oasis-open.org/wsrf/r-2',
+            'wsrf-bf' => 'http://docs.oasis-open.org/wsrf/bf-2',
+            'wsdl'    => 'http://schemas.xmlsoap.org/wsdl',
+            'wsoap12' => 'http://schemas.xmlsoap.org/wsdl/soap12',
+            'http'    => 'http://schemas.xmlsoap.org/wsdl/http',
+            'd'       => 'http://schemas.xmlsoap.org/ws/2005/04/discovery',
+            'wsadis'  => 'http://schemas.xmlsoap.org/ws/2004/08/addressing',
+            'dn'      => 'http://www.onvif.org/ver10/network/wsdl',
+            'axt'     => 'http://www.onvif.org/ver20/analytics',
+            'tad'     => self::AnalyticsDevice,
+            'tan'     => self::Analytics,
+            'tds'     => self::Management,
+            'tev'     => self::Event,
+            'ter'     => 'http://www.onvif.org/ver10/error',
+            'timg'    => self::Imaging,
+            'tmd'     => self::DeviceIO,
+            'tptz'    => self::PTZ,
+            'tns1'    => 'http://www.onvif.org/ver10/topics',
+            'trp'     => self::Replay,
+            'trt'     => self::Media,
+            'tse'     => self::SearchRecording,
+            'tst'     => 'http://www.onvif.org/ver10/storage/wsdl',
+            'tr2'     => self::Media2,
+            'trc'     => self::Recording,
+            'tt'      => 'http://www.onvif.org/ver10/schema',
         ];
     }
 
