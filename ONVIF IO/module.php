@@ -1042,7 +1042,7 @@ class ONVIFIO extends IPSModule
         ];
         $Response = '';
         $ResponseTime = time() + $Timeout;
-        $PullMessagesResult = $this->SendData($SubscriptionReference, \ONVIF\WSDL::Event, 'PullMessages', true, $Params, $Response, $Header, 15);
+        $PullMessagesResult = $this->SendData($SubscriptionReference, \ONVIF\WSDL::Event, 'PullMessages', true, $Params, $Response, $Header, $Timeout +5);
         if ($Response) {
             if (is_a($PullMessagesResult, 'SoapFault')) {
                 if ($this->isSubscribed) {
