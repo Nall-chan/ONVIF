@@ -140,6 +140,9 @@ Für das Discovery werden Pakete über die Multicast-Adresse `239.255.255.250` a
 ----------
 ### 2. Changelog
 
+**Version 2.17**  
+ - Weitere Prüfungen in der Auswertungen von Gerätefähigkeiten eingebaut um Fehler vorzubeugen.
+  
 **Version 2.15**  
  - Wurde nur ein Service von dem Gerät gemeldet, so erzeugte der IO Fehlermeldungen.  
  - Können die Stream-Profile von `ver20/media` nicht ermittelt werden, wo wird versucht die Stream-Profile vom `ver10/media` zu laden. Auch wenn das Gerät explizit `ver20/media` unterstützt.  
