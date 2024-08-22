@@ -115,8 +115,8 @@ class ONVIF
             'location'           => $service
         ];
         if (($username != null) || ($password != null)) {
-            $username = ($username == null ? '' : $username);
-            $password = ($password == null ? '' : $password);
+            $username = $username ?? '';
+            $password = $password ?? '';
             $Options['login'] = $username;
             $Options['password'] = $password;
             $Options['authentication'] = SOAP_AUTHENTICATION_DIGEST;

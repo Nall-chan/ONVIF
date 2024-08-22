@@ -856,7 +856,7 @@ class ONVIFMediaStream extends ONVIFModuleBase
         $this->SendDebug('ReceiveEvent', $Data, 0);
         $EventProperties = $this->ReadAttributeArray(\ONVIF\Device\Attribute::EventProperties);
         if (!array_key_exists($Data['Topic'], $EventProperties)) {
-            return false;
+            return '';
         }
         $EventProperty = $EventProperties[$Data['Topic']];
         $FoundEventIndex = false;
@@ -882,7 +882,8 @@ class ONVIFMediaStream extends ONVIFModuleBase
             unset($Data['Sources'][$FoundEventIndex]);
         }
         $PreName = str_replace($this->ReadPropertyString(\ONVIF\Device\Property::EventTopic), '', $Data['Topic']);
-        return $this->SetEventStatusVariable($PreName, $EventProperties[$Data['Topic']], $Data);
+        $this->SetEventStatusVariable($PreName, $EventProperties[$Data['Topic']], $Data);
+        return '';
     }
 
     protected function InitFilterAndEvents()
@@ -993,10 +994,12 @@ class ONVIFMediaStream extends ONVIFModuleBase
             }
         }
     }
+
     protected function RefreshPresetProfileForm($EnablePresetProfileForm)
     {
         $this->UpdateFormField('PresetProfile', 'visible', $EnablePresetProfileForm);
     }
+
     protected function RefreshProfileForm($NewVideoSource)
     {
         $Capabilities = @$this->GetCapabilities();
@@ -1092,6 +1095,9 @@ class ONVIFMediaStream extends ONVIFModuleBase
         if (($Capabilities['XAddr'][\ONVIF\NS::Media2]) != '') {
             $Params = [
                 'Protocol'     => 'RtspUnicast',
+                //'Protocol'     => 'RtspsUnicast',
+                //'Protocol'     => 'RtspMulticast',
+                //'Protocol'     => 'RtspsMulticast',
                 'ProfileToken' => $this->ReadPropertyString(\ONVIF\Stream\Property::Profile)
             ];
             $Result = $this->SendData($Capabilities['XAddr'][\ONVIF\NS::Media2], 'GetStreamUri', true, $Params, \ONVIF\WSDL::Media2);
@@ -1139,6 +1145,7 @@ class ONVIFMediaStream extends ONVIFModuleBase
     {
         IPS_SetMediaFile($this->GetMediaId(), $StreamURL, false);
     }
+
     protected function GetMediaId()
     {
         $MediaId = @$this->GetIDForIdent('STREAM');
@@ -1150,6 +1157,7 @@ class ONVIFMediaStream extends ONVIFModuleBase
         }
         return $MediaId;
     }
+
     protected function WritePTZInHTMLBox()
     {
         $this->RegisterVariableString('PTZControlHtml', 'PTZ Control for Webfront', '~HTMLBox', 5);
@@ -1221,6 +1229,7 @@ class ONVIFMediaStream extends ONVIFModuleBase
 
         $this->SetValueString('PTZControlHtml', $HTMLData);
     }
+
     protected function ProcessHookData()
     {
         if (!isset($_GET['authorization']) || ($_GET['authorization'] != $this->AuthorizationKey)) {
