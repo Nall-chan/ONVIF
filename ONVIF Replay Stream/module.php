@@ -207,13 +207,14 @@ class ONVIFReplayStream extends ONVIFModuleBase
         $this->UpdateFormField('RecordingToken', 'options', json_encode($ProfileOptions));
     }
 
-    protected function GetRecordingSummary(): void
+    protected function GetRecordingSummary(): bool
     {
         $Capabilities = $this->Capabilities;
         $Result = $this->SendData($Capabilities['XAddr'][\ONVIF\NS::SearchRecording], 'GetRecordingSummary', true, [], \ONVIF\WSDL::SearchRecording);
         if ($Result == false) {
             return false;
         }
+        return true;
     }
     /*
     protected function GetRecordingInformation()

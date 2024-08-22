@@ -7,7 +7,8 @@ require_once __DIR__ . '/../libs/ONVIFModuleBase.php';
 class ONVIFEvents extends ONVIFModuleBase
 {
     public const wsdl = '';
-    public function Create()
+
+    public function Create(): void
     {
         parent::Create();
     }

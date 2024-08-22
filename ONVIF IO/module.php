@@ -420,7 +420,7 @@ class ONVIFIO extends IPSModuleStrict
         }
 
         $Url = parse_url($this->ReadPropertyString(\ONVIF\IO\Property::Address));
-        $Url['port'] = $Url['port'] ?? '';
+        $Url['port'] = isset($Url['port']) ? ':' . $Url['port'] : '';
         if (!isset($Url['scheme']) && !isset($Url['host'])) {
             $this->Host = '';
             $this->SetStatus(IS_EBASE + 1);
