@@ -999,6 +999,7 @@ class ONVIFMediaStream extends ONVIFModuleBase
     {
         $this->UpdateFormField('PresetProfile', 'visible', $EnablePresetProfileForm);
     }
+
     protected function RefreshProfileForm(string $NewVideoSource): void
     {
         $Capabilities = @$this->GetCapabilities();
@@ -1094,6 +1095,9 @@ class ONVIFMediaStream extends ONVIFModuleBase
         if (($Capabilities['XAddr'][\ONVIF\NS::Media2]) != '') {
             $Params = [
                 'Protocol'     => 'RtspUnicast',
+                //'Protocol'     => 'RtspsUnicast',
+                //'Protocol'     => 'RtspMulticast',
+                //'Protocol'     => 'RtspsMulticast',
                 'ProfileToken' => $this->ReadPropertyString(\ONVIF\Stream\Property::Profile)
             ];
             $Result = $this->SendData($Capabilities['XAddr'][\ONVIF\NS::Media2], 'GetStreamUri', true, $Params, \ONVIF\WSDL::Media2);

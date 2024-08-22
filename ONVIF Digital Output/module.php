@@ -58,8 +58,8 @@ class ONVIFDigitalOutput extends ONVIFModuleBase
         $Data = json_decode($JSONString, true);
         unset($Data['DataID']);
         $this->SendDebug('ReceiveEvent', $Data, 0);
-        $Events = $this->ReadAttributeArray(\ONVIF\Device\Attribute::EventProperties);
-        $EventProperty = array_pop($Events);
+        $EventProperties = $this->ReadAttributeArray(\ONVIF\Device\Attribute::EventProperties);
+        $EventProperty = array_pop($EventProperties);
         $SourceIndex = array_search('tt:ReferenceToken', array_column($EventProperty['Sources'], 'Type'));
         if ($SourceIndex === false) {
             return '';

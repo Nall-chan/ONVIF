@@ -7,6 +7,10 @@ require_once __DIR__ . '/../libs/ONVIFModuleBase.php';
 class ONVIFEvents extends ONVIFModuleBase
 {
     public const wsdl = '';
+    public function Create()
+    {
+        parent::Create();
+    }
 
     public function ReceiveData(string $JSONString): string
     {
@@ -37,7 +41,6 @@ class ONVIFEvents extends ONVIFModuleBase
     protected function InitFilterAndEvents(): void
     {
         parent::InitFilterAndEvents();
-
         if ($this->ReadPropertyString(\ONVIF\Device\Property::EventTopic) == '') {
             $this->SetStatus(IS_INACTIVE);
         } else {

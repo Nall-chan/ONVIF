@@ -212,6 +212,7 @@ namespace ONVIF\IO
         public const RelayOutputs = 'RelayOutputs';
         public const DigitalInputs = 'DigitalInputs';
         public const Timestamp_Offset = 'Timestamp_Offset';
+        public const Scopes = 'Scopes';
         public const XAddr = 'XAddr';
         public const EventProperties = 'EventProperties';
         public const NbrOfInputs = 'NbrOfInputs';
@@ -304,6 +305,15 @@ namespace ONVIF\ImageGrabber
     class Timer
     {
         public const UpdateImage = 'UpdateImage';
+    }
+}
+
+namespace ONVIF\Replay
+{
+    class Property
+    {
+        public const VideoSource = 'VideoSource';
+        public const RecordingToken = 'RecordingToken';
     }
 }
 

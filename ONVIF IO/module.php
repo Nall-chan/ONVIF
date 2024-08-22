@@ -63,6 +63,7 @@ class ONVIFIO extends IPSModuleStrict
         $this->RegisterAttributeArray(\ONVIF\IO\Attribute::RelayOutputs, []);
         $this->RegisterAttributeArray(\ONVIF\IO\Attribute::DigitalInputs, []);
         $this->RegisterAttributeInteger(\ONVIF\IO\Attribute::Timestamp_Offset, 0);
+        $this->RegisterAttributeArray(\ONVIF\IO\Attribute::Scopes, []);
         $this->RegisterAttributeArray(\ONVIF\IO\Attribute::XAddr, []);
         $this->RegisterAttributeArray(\ONVIF\IO\Attribute::EventProperties, []);
         $this->RegisterAttributeInteger(\ONVIF\IO\Attribute::NbrOfInputs, 0);
@@ -349,6 +350,7 @@ class ONVIFIO extends IPSModuleStrict
                 return;
         }
     }
+
     public function GetConfigurationForm(): string
     {
         $Form = json_decode(file_get_contents(__DIR__ . '/form.json'), true);
@@ -408,6 +410,7 @@ class ONVIFIO extends IPSModuleStrict
         $this->SendDebug('FORM', json_last_error_msg(), 0);
         return json_encode($Form);
     }
+
     protected function StartConnection()
     {
         if (!$this->ReadPropertyBoolean(\ONVIF\IO\Property::Active)) {
@@ -417,7 +420,7 @@ class ONVIFIO extends IPSModuleStrict
         }
 
         $Url = parse_url($this->ReadPropertyString(\ONVIF\IO\Property::Address));
-        $Url['port'] = (isset($Url['port']) ? ':' . $Url['port'] : '');
+        $Url['port'] = $Url['port'] ?? '';
         if (!isset($Url['scheme']) && !isset($Url['host'])) {
             $this->Host = '';
             $this->SetStatus(IS_EBASE + 1);
@@ -470,9 +473,12 @@ class ONVIFIO extends IPSModuleStrict
             return;
         }
         if (!$Scopes) {
+            $this->WriteAttributeArray(\ONVIF\IO\Attribute::Scopes, []);
             $Scopes = [\ONVIF\Scopes::ProfileS];
             $this->Warnings = array_merge($this->Warnings, [$this->Translate('Failed to get scopes, device not ONVIF compliant!')]);
             $this->LogMessage($this->Translate('Failed to get scopes, device not ONVIF compliant!'), KL_WARNING);
+        } else {
+            $this->WriteAttributeArray(\ONVIF\IO\Attribute::Scopes, $Scopes);
         }
         $Profile = new \ONVIF\Profile($Scopes);
         $this->SendDebug('ProfileBitMask', $Profile->toString(), 0);
@@ -500,7 +506,6 @@ class ONVIFIO extends IPSModuleStrict
             $WSSubscriptionPolicySupport = false;
             $WSPullPointSupport = false;
             $HasRTSPStreaming = false;
-            $HasSnapshotUri = false;
             if ($this->GetCapabilities()) { // besorgt XAddr und einige Attribute Pflicht für Profil S.
                 $AnalyticsModuleSupport = $this->ReadAttributeBoolean(\ONVIF\IO\Attribute::AnalyticsModuleSupport);
                 $RuleSupport = $this->ReadAttributeBoolean(\ONVIF\IO\Attribute::RuleSupport);
@@ -516,12 +521,23 @@ class ONVIFIO extends IPSModuleStrict
 
             // 3.ONVIF Request GetServices
             // GetServices besorgt XAddr, Pflicht bei T, selten bei S unterstützt.
-            if (!$this->GetServices() && $this->Profile->HasProfile(\ONVIF\Profile::T)) {
+            $GetServices = $this->GetServices();
+            if (!$GetServices && $this->Profile->HasProfile(\ONVIF\Profile::T)) {
                 $this->Warnings = array_merge($this->Warnings, [$this->Translate('Failed to get services. Device reported ONVIF T scope, but is not compliant!')]);
                 $this->LogMessage($this->Translate('Failed to get services. Device reported ONVIF T scope, but is not compliant!'), KL_WARNING);
             }
+            if ($GetServices) {
+                $WSSubscriptionPolicySupport = $this->ReadAttributeBoolean(\ONVIF\IO\Attribute::WSSubscriptionPolicySupport);
+                $WSPullPointSupport = $this->ReadAttributeBoolean(\ONVIF\IO\Attribute::WSPullPointSupport);
+                $HasRTSPStreaming = $this->ReadAttributeBoolean(\ONVIF\IO\Attribute::HasRTSPStreaming);
+                $HasSnapshotUri = $this->ReadAttributeBoolean(\ONVIF\IO\Attribute::HasSnapshotUri);
+                $NbrOfVideoSources = $this->ReadAttributeInteger(\ONVIF\IO\Attribute::NbrOfVideoSources);
+                $NbrOfAudioSources = $this->ReadAttributeInteger(\ONVIF\IO\Attribute::NbrOfAudioSources);
+                $NbrOfInputs = $this->ReadAttributeInteger(\ONVIF\IO\Attribute::NbrOfInputs);
+                $NbrOfOutputs = $this->ReadAttributeInteger(\ONVIF\IO\Attribute::NbrOfOutputs);
+                $NbrOfSerialPorts = $this->ReadAttributeInteger(\ONVIF\IO\Attribute::NbrOfSerialPorts);
             $XAddr = $this->ReadAttributeArray(\ONVIF\IO\Attribute::XAddr);
-
+            }
             // 4. ONVIF Request GetServiceCapabilities an \ONVIF\WSDL::Management
             //$this->GetServiceCapabilities($XAddr[\ONVIF\NS::Management], \ONVIF\WSDL::Management); // noch ohne Funktion..
             // Wenn \ONVIF\WSDL::DeviceIO unterstützt
@@ -591,11 +607,11 @@ class ONVIFIO extends IPSModuleStrict
                 //Fallback für reine Profile S Geräte
                 $VideoSources = $this->GetVideoSources($XAddr[\ONVIF\NS::Media], \ONVIF\WSDL::Media); // array of Token
                 if ($VideoSources) {
-                    $NbrOfVideoSources = count($VideoSources['VideoSources']);
+                    $NbrOfVideoSources = count($VideoSources);
                 }
                 $AudioSources = $this->GetAudioSources($XAddr[\ONVIF\NS::Media], \ONVIF\WSDL::Media); // array of Token
                 if ($AudioSources) {
-                    $NbrOfAudioSources = count($AudioSources['AudioSources']);
+                    $NbrOfAudioSources = count($AudioSources);
                 }
                 $DigitalInputs = $this->GetDigitalInputs($XAddr[\ONVIF\NS::Management], \ONVIF\WSDL::Management);
                 if (!$DigitalInputs) {
@@ -615,7 +631,9 @@ class ONVIFIO extends IPSModuleStrict
             $this->WriteAttributeArray(\ONVIF\IO\Attribute::RelayOutputs, $RelayOutputs);
             $this->WriteAttributeArray(\ONVIF\IO\Attribute::DigitalInputs, $DigitalInputs);
 
+            // 4c.ONVIF Request GetServiceCapabilities für Media
             // Wenn \ONVIF\WSDL::Media2 unterstützt
+            $Media2Supported = $XAddr[\ONVIF\NS::Media2] != '';
             if ($XAddr[\ONVIF\NS::Media2]) {
                 // 4c.ONVIF Request GetServiceCapabilities an \ONVIF\WSDL::Media2
                 $MediaCapabilities = $this->GetServiceCapabilities($XAddr[\ONVIF\NS::Media2], \ONVIF\WSDL::Media2); // noch ohne Funktion..
@@ -632,12 +650,12 @@ class ONVIFIO extends IPSModuleStrict
                     }
                 }
                 // 4c.ONVIF Request GetProfiles an \ONVIF\WSDL::Media2
-                if (!$this->GetProfiles2()) {
-                    $this->SetStatus(IS_EBASE + 2);
-                    return;
+                $Media2Supported = $this->GetProfiles2();
                 }
-            } else {
+            if (!$Media2Supported) {
                 // Wenn \ONVIF\WSDL::Media2 NICHT unterstützt
+                $XAddr[\ONVIF\NS::Media2] = '';
+                $this->WriteAttributeArray(\ONVIF\IO\Attribute::XAddr, $XAddr);
                 // 4c.ONVIF Request GetServiceCapabilities an \ONVIF\WSDL::Media
                 $MediaCapabilities = $this->GetServiceCapabilities($XAddr[\ONVIF\NS::Media], \ONVIF\WSDL::Media); // noch ohne Funktion..
                 if ($MediaCapabilities) {
@@ -668,6 +686,7 @@ class ONVIFIO extends IPSModuleStrict
                 $PTZCapabilities = $this->GetServiceCapabilities($XAddr[\ONVIF\NS::PTZ], \ONVIF\WSDL::PTZ); // noch ohne Funktion.. todo
                 $this->GetNodes();
             }
+            // 4e.ONVIF Request GetNodes an \ONVIF\WSDL::Imaging
             if ($XAddr[\ONVIF\NS::Imaging]) {
                 $ImagingCapabilities = $this->GetServiceCapabilities($XAddr[\ONVIF\NS::Imaging], \ONVIF\WSDL::Imaging); // noch ohne Funktion.. todo
                 if ($ImagingCapabilities) {
@@ -675,6 +694,39 @@ class ONVIFIO extends IPSModuleStrict
                     if ($this->Profile->HasProfile(\ONVIF\Profile::T)) { //Profile T ist GetServiceCapabilities bei Imaging Pflicht
                         $this->Warnings = array_merge($this->Warnings, [$this->Translate('Failed to get Imaging service capabilities. Device reported ONVIF T scope, but is not compliant!')]);
                         $this->LogMessage($this->Translate('Failed to get Imaging service capabilities. Device reported ONVIF T scope, but is not compliant!'), KL_WARNING);
+                    }
+                }
+            }
+            // 4f.ONVIF Request GetNodes an \ONVIF\WSDL::Recording
+            if ($XAddr[\ONVIF\NS::Recording]) {
+                $RecordingCapabilities = $this->GetServiceCapabilities($XAddr[\ONVIF\NS::Recording], \ONVIF\WSDL::Recording); // noch ohne Funktion.. todo
+                if ($RecordingCapabilities) {
+                } else {
+                    if ($this->Profile->HasProfile(\ONVIF\Profile::G)) { //Profile G ist GetServiceCapabilities bei Recording Pflicht
+                        $this->Warnings = array_merge($this->Warnings, [$this->Translate('Failed to get Recording service capabilities. Device reported ONVIF G scope, but is not compliant!')]);
+                        $this->LogMessage($this->Translate('Failed to get Recording service capabilities. Device reported ONVIF G scope, but is not compliant!'), KL_WARNING);
+                    }
+                }
+            }
+            // 4g.ONVIF Request GetNodes an \ONVIF\WSDL::Replay
+            if ($XAddr[\ONVIF\NS::Replay]) {
+                $ReplayCapabilities = $this->GetServiceCapabilities($XAddr[\ONVIF\NS::Replay], \ONVIF\WSDL::Replay); // noch ohne Funktion.. todo
+                if ($ReplayCapabilities) {
+                } else {
+                    if ($this->Profile->HasProfile(\ONVIF\Profile::G)) { //Profile G ist GetServiceCapabilities bei Replay Pflicht
+                        $this->Warnings = array_merge($this->Warnings, [$this->Translate('Failed to get Replay service capabilities. Device reported ONVIF G scope, but is not compliant!')]);
+                        $this->LogMessage($this->Translate('Failed to get Replay service capabilities. Device reported ONVIF G scope, but is not compliant!'), KL_WARNING);
+                    }
+                }
+            }
+            // 4h.ONVIF Request GetNodes an \ONVIF\WSDL::SearchRecording
+            if ($XAddr[\ONVIF\NS::SearchRecording]) {
+                $SearchCapabilities = $this->GetServiceCapabilities($XAddr[\ONVIF\NS::SearchRecording], \ONVIF\WSDL::SearchRecording); // noch ohne Funktion.. todo
+                if ($SearchCapabilities) {
+                } else {
+                    if ($this->Profile->HasProfile(\ONVIF\Profile::G)) { //Profile G ist GetServiceCapabilities bei Search Pflicht
+                        $this->Warnings = array_merge($this->Warnings, [$this->Translate('Failed to get Search service capabilities. Device reported ONVIF G scope, but is not compliant!')]);
+                        $this->LogMessage($this->Translate('Failed to get Search service capabilities. Device reported ONVIF G scope, but is not compliant!'), KL_WARNING);
                     }
                 }
             }
@@ -814,7 +866,6 @@ class ONVIFIO extends IPSModuleStrict
             'type'      => 'Label',
             'caption'   => $this->Translate('Supported ONVIF Profile: ') . $this->Profile->toString()
         ];
-
         $InfoItems[] = [
             'type'      => 'Label',
             'caption'   => $this->Translate('Event subscription: ') . ($this->ReadAttributeBoolean(\ONVIF\IO\Attribute::WSSubscriptionPolicySupport) ? $this->Translate('supported') : $this->Translate('not supported'))
@@ -869,8 +920,19 @@ class ONVIFIO extends IPSModuleStrict
             ]
 
         ];
-
-        return [
+        /** @todo Scopes und XAddr anzeigen */
+        $Scopes = [];
+        foreach ($this->ReadAttributeArray(\ONVIF\IO\Attribute::Scopes) as $Scope) {
+            $Scopes[] = ['Scope' => $Scope];
+        }
+        $XAddr = [];
+        $this->SendDebug('xaddr', $this->ReadAttributeArray(\ONVIF\IO\Attribute::XAddr), 0);
+        foreach ($this->ReadAttributeArray(\ONVIF\IO\Attribute::XAddr) as $WSDL =>$URL) {
+            $XAddr[] = ['Url'=>$URL, 'WSDL'=>$WSDL];
+        }
+        return [[
+            'type' => 'ColumnLayout',
+            'items'=> [
             [
                 'type'    => 'RowLayout',
                 'items'   => [
@@ -883,8 +945,50 @@ class ONVIFIO extends IPSModuleStrict
                         'items'=> $DeviceItems
                     ]
                 ]
+                ],
+                [
+                    'caption'  => 'Scopes',
+                    'type'     => 'List',
+                    'add'      => false,
+                    'delete'   => false,
+                    'rowCount' => count($Scopes),
+                    'sort'     => [
+                        'column'   => 'Scope',
+                        'direction'=> 'ascending'
+                    ],
+                    'columns'=> [[
+                        'caption'=> 'Scope',
+                        'name'   => 'Scope',
+                        'width'  => 'auto'
+                    ]],
+                    'values'=> $Scopes
+                ],                    [
+                    'caption'  => 'XAddr',
+                    'type'     => 'List',
+                    'add'      => false,
+                    'delete'   => false,
+                    'rowCount' => count($XAddr),
+                    'sort'     => [
+                        'column'   => 'WSDL',
+                        'direction'=> 'ascending'
+                    ],
+                    'columns'=> [
+                        [
+                            'caption'=> 'WSDL',
+                            'name'   => 'WSDL',
+                            'width'  => '300px'
+                        ],
+                        [
+                            'caption'=> 'xAddr',
+                            'name'   => 'Url',
+                            'width'  => 'auto'
+                        ]
+
+                    ],
+                    'values'=> $XAddr
+                ]
             ]
-        ];
+        ]];
     }
 
     protected function ShowLastError(string $ErrorMessage, string $ErrorTitle = 'Answer from Device:'): void
@@ -917,7 +1021,7 @@ class ONVIFIO extends IPSModuleStrict
                 $sock = socket_create(AF_INET, SOCK_STREAM, SOL_TCP);
                 socket_bind($sock, '0.0.0.0', 0);
                 $Host = parse_url($this->Host);
-                $Host['port'] = isset($Host['port']) ? $Host['port'] : 80;
+                $Host['port'] = $Host['port'] ?? 80;
                 @socket_connect($sock, $Host['host'], $Host['port']);
                 $ip = '';
                 socket_getsockname($sock, $ip);
@@ -1031,7 +1135,7 @@ class ONVIFIO extends IPSModuleStrict
         ];
         $Response = '';
         $ResponseTime = time() + $Timeout;
-        $PullMessagesResult = $this->SendData($SubscriptionReference, \ONVIF\WSDL::Event, 'PullMessages', true, $Params, $Response, $Header, 15);
+        $PullMessagesResult = $this->SendData($SubscriptionReference, \ONVIF\WSDL::Event, 'PullMessages', true, $Params, $Response, $Header, $Timeout + 5);
         if ($Response) {
             if (is_a($PullMessagesResult, 'SoapFault')) {
                 if ($this->isSubscribed) {
@@ -1292,6 +1396,7 @@ class ONVIFIO extends IPSModuleStrict
         $query = '//*[@wstop:topic="true"]/tt:MessageDescription';
         $wsTopics = $xpath->query($query);
         $TopicData = [];
+        /** @var \DOMNode $wsData */
         foreach ($wsTopics as $wsData) {
             $Topic = preg_replace('/\[\d*\]/', '', substr($wsData->parentNode->getNodePath(), $prefixPathLen + 1));
             $SourcesNodeList = $xpath->query('tt:Source/tt:SimpleItemDescription', $wsData, true);
@@ -1318,14 +1423,14 @@ class ONVIFIO extends IPSModuleStrict
             $this->ShowLastError($this->lastSOAPError);
             return false;
         }
-        if (is_object($ProfileResult->Profiles)) {
+        if (!is_array($ProfileResult->Profiles)) {
             $Profiles = [];
-            $Profiles[] = json_decode(json_encode($ProfileResult), true)['Profiles'];
+            $Profiles[] = json_decode(json_encode($ProfileResult->Profiles), true);
         } else {
-            $Profiles = json_decode(json_encode($ProfileResult), true)['Profiles'];
+            $Profiles = json_decode(json_encode($ProfileResult->Profiles), true);
         }
 
-        $H264Profiles = array_filter($Profiles, function (array $Profile)
+        $H264Profiles = array_filter($Profiles, function ($Profile)
         {
             if (isset($Profile['Configurations']['VideoEncoder']['Encoding'])) {
                 if (strtoupper($Profile['Configurations']['VideoEncoder']['Encoding']) == 'JPEG') {
@@ -1336,6 +1441,9 @@ class ONVIFIO extends IPSModuleStrict
         });
         $H264VideoSourcesItems = [];
         foreach ($H264Profiles as $Profile) {
+            if (!array_key_exists('Configurations', $Profile)) {
+                continue;
+            }
             if (!array_key_exists('VideoEncoder', $Profile['Configurations'])) {
                 continue;
             }
@@ -1348,10 +1456,10 @@ class ONVIFIO extends IPSModuleStrict
             $H264VideoSourcesItems[$Profile['Configurations']['VideoSource']['SourceToken']]['Profile'][] = [
                 'Name'       => $Profile['Configurations']['VideoEncoder']['Name'],
                 'token'      => $Profile['token'],
-                'ptztoken'   => isset($Profile['Configurations']['PTZ']['token']) ? $Profile['Configurations']['PTZ']['token'] : '',
-                'Encoding'   => isset($Profile['Configurations']['VideoEncoder']['Encoding']) ? $Profile['Configurations']['VideoEncoder']['Encoding'] : 'unknown',
-                'Resolution' => isset($Profile['Configurations']['VideoEncoder']['Resolution']) ? $Profile['Configurations']['VideoEncoder']['Resolution'] : 'unknown',
-                'RateControl'=> isset($Profile['Configurations']['VideoEncoder']['RateControl']) ? $Profile['Configurations']['VideoEncoder']['RateControl'] : 'unknown'
+                'ptztoken'   => $Profile['Configurations']['PTZ']['token'] ?? '',
+                'Encoding'   => $Profile['Configurations']['VideoEncoder']['Encoding'] ?? 'unknown',
+                'Resolution' => $Profile['Configurations']['VideoEncoder']['Resolution'] ?? 'unknown',
+                'RateControl'=> $Profile['Configurations']['VideoEncoder']['RateControl'] ?? 'unknown'
             ];
         }
         $H264VideoSources = array_values($H264VideoSourcesItems);
@@ -1371,6 +1479,9 @@ class ONVIFIO extends IPSModuleStrict
         }
         $JPEGVideoSourcesItems = [];
         foreach ($JPEGProfiles as $Profile) {
+            if (!array_key_exists('Configurations', $Profile)) {
+                continue;
+            }
             if (!array_key_exists('VideoEncoder', $Profile['Configurations'])) {
                 continue;
             }
@@ -1383,9 +1494,9 @@ class ONVIFIO extends IPSModuleStrict
             $JPEGVideoSourcesItems[$Profile['Configurations']['VideoSource']['SourceToken']]['Profile'][] = [
                 'Name'       => $Profile['Configurations']['VideoEncoder']['Name'],
                 'token'      => $Profile['token'],
-                'Encoding'   => isset($Profile['Configurations']['VideoEncoder']['Encoding']) ? $Profile['Configurations']['VideoEncoder']['Encoding'] : 'unknown',
-                'Resolution' => isset($Profile['Configurations']['VideoEncoder']['Resolution']) ? $Profile['Configurations']['VideoEncoder']['Resolution'] : 'unknown',
-                'RateControl'=> isset($Profile['Configurations']['VideoEncoder']['RateControl']) ? $Profile['Configurations']['VideoEncoder']['RateControl'] : 'unknown'
+                'Encoding'   => $Profile['Configurations']['VideoEncoder']['Encoding'] ?? 'unknown',
+                'Resolution' => $Profile['Configurations']['VideoEncoder']['Resolution'] ?? 'unknown',
+                'RateControl'=> $Profile['Configurations']['VideoEncoder']['RateControl'] ?? 'unknown'
             ];
         }
         $JPEGVideoSources = array_values($JPEGVideoSourcesItems);
@@ -1397,14 +1508,26 @@ class ONVIFIO extends IPSModuleStrict
             if (isset($Profile['Configurations']['Analytics'])) {
                 return true;
             }
+            return false;
         });
         foreach ($AnalyticsProfiles as $AnalyticsProfile) {
+            if (!array_key_exists('Configurations', $AnalyticsProfile)) {
+                continue;
+            }
+            if (!array_key_exists('Analytics', $AnalyticsProfile['Configurations'])) {
+                continue;
+            }
             $Token = $AnalyticsProfile['Configurations']['Analytics']['token'];
             $Name = $AnalyticsProfile['Configurations']['Analytics']['Name'];
             $AnalyticsTokens[$Token] = $Name;
         }
         $this->SendDebug('AnalyticsTokens', $AnalyticsTokens, 0);
         $this->WriteAttributeArray(\ONVIF\IO\Attribute::AnalyticsTokens, $AnalyticsTokens);
+        if ((count($H264VideoSources) + count($JPEGVideoSources) + count($AnalyticsTokens)) == 0) {
+            $this->Warnings = array_merge($this->Warnings, [$this->Translate('Failed to get GetProfiles on Media2 service. Device reported Media2 support, but does not support this service!')]);
+            $this->LogMessage($this->Translate('Failed to get GetProfiles on Media2 service. Device reported Media2 support, but does not support this service!'), KL_WARNING);
+            return false;
+        }
         return true;
     }
     protected function GetProfiles(): bool
@@ -1416,14 +1539,14 @@ class ONVIFIO extends IPSModuleStrict
             $this->ShowLastError($this->lastSOAPError);
             return false;
         }
-        if (is_object($ProfileResult->Profiles)) {
+        if (!is_array($ProfileResult->Profiles)) {
             $Profiles = [];
-            $Profiles[] = json_decode(json_encode($ProfileResult), true)['Profiles'];
+            $Profiles[] = json_decode(json_encode($ProfileResult->Profiles), true);
         } else {
-            $Profiles = json_decode(json_encode($ProfileResult), true)['Profiles'];
+            $Profiles = json_decode(json_encode($ProfileResult->Profiles), true);
         }
 
-        $H264Profiles = array_filter($Profiles, function (array $Profile)
+        $H264Profiles = array_filter($Profiles, function ($Profile)
         {
             if (isset($Profile['VideoEncoderConfiguration']['Encoding'])) {
                 if (strtoupper($Profile['VideoEncoderConfiguration']['Encoding']) == 'JPEG') {
@@ -1446,10 +1569,10 @@ class ONVIFIO extends IPSModuleStrict
             $H264VideoSourcesItems[$Profile['VideoSourceConfiguration']['SourceToken']]['Profile'][] = [
                 'Name'       => $Profile['VideoEncoderConfiguration']['Name'],
                 'token'      => $Profile['token'],
-                'ptztoken'   => isset($Profile['PTZConfiguration']['token']) ? $Profile['PTZConfiguration']['token'] : '',
-                'Encoding'   => isset($Profile['VideoEncoderConfiguration']['Encoding']) ? $Profile['VideoEncoderConfiguration']['Encoding'] : 'unknown',
-                'Resolution' => isset($Profile['VideoEncoderConfiguration']['Resolution']) ? $Profile['VideoEncoderConfiguration']['Resolution'] : 'unknown',
-                'RateControl'=> isset($Profile['VideoEncoderConfiguration']['RateControl']) ? $Profile['VideoEncoderConfiguration']['RateControl'] : 'unknown'
+                'ptztoken'   => $Profile['PTZConfiguration']['token'] ?? '',
+                'Encoding'   => $Profile['VideoEncoderConfiguration']['Encoding'] ?? 'unknown',
+                'Resolution' => $Profile['VideoEncoderConfiguration']['Resolution'] ?? 'unknown',
+                'RateControl'=> $Profile['VideoEncoderConfiguration']['RateControl'] ?? 'unknown'
             ];
         }
         $H264VideoSources = array_values($H264VideoSourcesItems);
@@ -1478,9 +1601,9 @@ class ONVIFIO extends IPSModuleStrict
             $JPEGVideoSourcesItems[$Profile['VideoSourceConfiguration']['SourceToken']]['Profile'][] = [
                 'Name'       => $Profile['VideoEncoderConfiguration']['Name'],
                 'token'      => $Profile['token'],
-                'Encoding'   => isset($Profile['VideoEncoderConfiguration']['Encoding']) ? $Profile['VideoEncoderConfiguration']['Encoding'] : 'unknown',
-                'Resolution' => isset($Profile['VideoEncoderConfiguration']['Resolution']) ? $Profile['VideoEncoderConfiguration']['Resolution'] : 'unknown',
-                'RateControl'=> isset($Profile['VideoEncoderConfiguration']['RateControl']) ? $Profile['VideoEncoderConfiguration']['RateControl'] : 'unknown'
+                'Encoding'   => $Profile['VideoEncoderConfiguration']['Encoding'] ?? 'unknown',
+                'Resolution' => $Profile['VideoEncoderConfiguration']['Resolution'] ?? 'unknown',
+                'RateControl'=> $Profile['VideoEncoderConfiguration']['RateControl'] ?? 'unknown'
             ];
         }
         $JPEGVideoSources = array_values($JPEGVideoSourcesItems);
@@ -1508,13 +1631,15 @@ class ONVIFIO extends IPSModuleStrict
             \ONVIF\NS::Management => '/onvif/device_service',
             \ONVIF\NS::Event      => '',
             \ONVIF\NS::Media      => '/onvif/media_service',
+            \ONVIF\NS::Media2              => '',
             \ONVIF\NS::PTZ        => '/onvif/ptz_service',
+            \ONVIF\NS::DeviceIO            => '',
             \ONVIF\NS::Imaging    => '',
             \ONVIF\NS::Analytics  => '',
-            \ONVIF\NS::DeviceIO   => '',
-            \ONVIF\NS::Media2     => '',
-            //            'Recording' => '',
-            //            'Replay'    => ''
+            \ONVIF\NS::Recording           => '',
+            \ONVIF\NS::SearchRecording     => '',
+            \ONVIF\NS::Replay              => ''
+
         ];
         $HasRTSPStreaming = false;
         $AnalyticsModuleSupport = false;
@@ -1558,6 +1683,15 @@ class ONVIFIO extends IPSModuleStrict
             if (isset($CapabilitiesResult['Capabilities']['Imaging']['XAddr'])) {
                 $XAddr[\ONVIF\NS::Imaging] = parse_url($CapabilitiesResult['Capabilities']['Imaging']['XAddr'], PHP_URL_PATH);
             }
+            if (isset($CapabilitiesResult['Capabilities']['Extension']['Recording']['XAddr'])) {
+                $XAddr[\ONVIF\NS::Recording] = parse_url($CapabilitiesResult['Capabilities']['Extension']['Recording']['XAddr'], PHP_URL_PATH);
+            }
+            if (isset($CapabilitiesResult['Capabilities']['Extension']['Search']['XAddr'])) {
+                $XAddr[\ONVIF\NS::SearchRecording] = parse_url($CapabilitiesResult['Capabilities']['Extension']['Search']['XAddr'], PHP_URL_PATH);
+            }
+            if (isset($CapabilitiesResult['Capabilities']['Extension']['Replay']['XAddr'])) {
+                $XAddr[\ONVIF\NS::Replay] = parse_url($CapabilitiesResult['Capabilities']['Extension']['Replay']['XAddr'], PHP_URL_PATH);
+            }
             if (isset($CapabilitiesResult['Capabilities']['Extension']['DeviceIO']['XAddr'])) {
                 $XAddr[\ONVIF\NS::DeviceIO] = parse_url($CapabilitiesResult['Capabilities']['Extension']['DeviceIO']['XAddr'], PHP_URL_PATH);
             }
@@ -1575,12 +1709,6 @@ class ONVIFIO extends IPSModuleStrict
                 $NbrOfOutputs = $CapabilitiesResult['Capabilities']['Device']['IO']['RelayOutputs'];
             }
 
-            /*            if (isset($CapabilitiesResult['Capabilities']['Extension']['Recording']['XAddr'])) {
-                            $XAddr['Recording'] = parse_url($CapabilitiesResult['Capabilities']['Extension']['Recording']['XAddr'], PHP_URL_PATH);
-                        }
-                        if (isset($CapabilitiesResult['Capabilities']['Extension']['Replay']['XAddr'])) {
-                            $XAddr['Replay'] = parse_url($CapabilitiesResult['Capabilities']['Extension']['Replay']['XAddr'], PHP_URL_PATH);
-                        }*/
             if ($XAddr[\ONVIF\NS::Media2] == '') {
                 if ($this->Profile->HasProfile(\ONVIF\Profile::T)) {
                     //media2 patchen bei Profile T
@@ -1603,19 +1731,20 @@ class ONVIFIO extends IPSModuleStrict
     }
     protected function GetScopes(): false|array
     {
-        $Scopes = $this->SendData('', \ONVIF\WSDL::Management, 'GetScopes', true);
-        if (is_a($Scopes, 'SoapFault')) {
+        $ScopeResult = $this->SendData('', \ONVIF\WSDL::Management, 'GetScopes', true);
+        if (is_a($ScopeResult, 'SoapFault')) {
             return false;
         }
-        $Scopes = json_decode(json_encode($Scopes), true);
-        if (!array_key_exists('Scopes', $Scopes)) {
+        if (!property_exists($ScopeResult, 'Scopes')) {
             return false;
         }
-        $Result = [];
-        foreach ($Scopes['Scopes'] as $Scope) {
-            $Result[] = $Scope['ScopeItem'];
+        if (!is_array($ScopeResult->Scopes)) {
+            $Scopes = [];
+            $Scopes[] = json_decode(json_encode($ScopeResult->Scopes), true);
+        } else {
+            $Scopes = json_decode(json_encode($ScopeResult->Scopes), true);
         }
-        return $Result;
+        return array_column($Scopes, 'ScopeItem');
     }
     protected function GetNodes(): false|array
     {
@@ -1624,7 +1753,12 @@ class ONVIFIO extends IPSModuleStrict
         if (is_a($Nodes, 'SoapFault')) {
             return false;
         }
+        if (!is_array($Nodes)) {
+            $Result = [];
+            $Result[] = json_decode(json_encode($Nodes), true);
+        } else {
         $Result = json_decode(json_encode($Nodes), true);
+        }
         return $Result;
     }
     protected function GetVideoSources($Uri, $WSDL): false|array
@@ -1633,7 +1767,12 @@ class ONVIFIO extends IPSModuleStrict
         if (is_a($VideoSources, 'SoapFault')) {
             return false;
         }
-        $Result = json_decode(json_encode($VideoSources), true);
+        if (!is_array($VideoSources->VideoSources)) {
+            $Result = [];
+            $Result[] = json_decode(json_encode($VideoSources->VideoSources), true);
+        } else {
+            $Result = json_decode(json_encode($VideoSources->VideoSources), true);
+        }
         return $Result;
     }
     protected function GetAudioSources($Uri, $WSDL): false|array
@@ -1642,7 +1781,12 @@ class ONVIFIO extends IPSModuleStrict
         if (is_a($AudioSources, 'SoapFault')) {
             return false;
         }
-        $Result = json_decode(json_encode($AudioSources), true);
+        if (!is_array($AudioSources->AudioSources)) {
+            $Result = [];
+            $Result[] = json_decode(json_encode($AudioSources->AudioSources), true);
+        } else {
+            $Result = json_decode(json_encode($AudioSources->AudioSources), true);
+        }
         return $Result;
     }
 
@@ -1701,26 +1845,67 @@ class ONVIFIO extends IPSModuleStrict
         $Params = [
             'IncludeCapability'=> true
         ];
-        $Services = $this->SendData('', \ONVIF\WSDL::Management, 'GetServices', true, $Params);
+        $Response = '';
+        $Services = $this->SendData('', \ONVIF\WSDL::Management, 'GetServices', true, $Params, $Response);
         if (is_a($Services, 'SoapFault')) {
             return false;
         }
-        $ServicesResult = json_decode(json_encode($Services), true);
+        if (!is_array($Services->Service)) {
+            $ServicesResult = [];
+            $ServicesResult[] = json_decode(json_encode($Services->Service), true);
+        } else {
+            $ServicesResult = json_decode(json_encode($Services->Service), true);
+        }
         $XAddr = $this->ReadAttributeArray(\ONVIF\IO\Attribute::XAddr);
-        /*$XAddr = [
-            \ONVIF\NS::Management => '/onvif/device_service',
-            \ONVIF\NS::Event      => '',
-            \ONVIF\NS::Media      => '/onvif/media_service',
-            \ONVIF\NS::PTZ        => '',
-            \ONVIF\NS::Imaging    => '',
-            \ONVIF\NS::Analytics  => '',
-            \ONVIF\NS::DeviceIO   => '',
-            \ONVIF\NS::Media2     => '',
-            //                'Recording' => '',
-            //                'Replay'    => ''
-        ];*/
-        foreach ($ServicesResult['Service'] as $Service) {
+        $xml = new DOMDocument();
+        $xml->loadXML($Response);
+        $xPath = new DOMXPath($xml);
+
+        foreach ($ServicesResult as $Service) {
             $XAddr[$Service['Namespace']] = parse_url($Service['XAddr'], PHP_URL_PATH);
+            $NSKey = array_search($Service['Namespace'], \ONVIF\NS::Namespaces);
+            if (!$NSKey) {
+                continue;
+            }
+            $xPath->registerNamespace($NSKey, $Service['Namespace']);
+
+            switch ($Service['Namespace']) {
+                case \ONVIF\NS::Event:
+                    $Query = '//' . $NSKey . ':Capabilities/@WSSubscriptionPolicySupport';
+                    $this->WriteAttributeBooleanByXPathQuery(\ONVIF\IO\Attribute::WSSubscriptionPolicySupport, $Query, $xPath);
+                    $Query = '//' . $NSKey . ':Capabilities/@WSPullPointSupport';
+                    $this->WriteAttributeBooleanByXPathQuery(\ONVIF\IO\Attribute::WSPullPointSupport, $Query, $xPath);
+                    break;
+                case \ONVIF\NS::DeviceIO:
+                    $Query = '//' . $NSKey . ':Capabilities/@VideoSources';
+                    $this->WriteAttributeIntegerByXPathQuery(\ONVIF\IO\Attribute::NbrOfVideoSources, $Query, $xPath);
+                    $Query = '//' . $NSKey . ':Capabilities/@AudioSources';
+                    $this->WriteAttributeIntegerByXPathQuery(\ONVIF\IO\Attribute::NbrOfAudioSources, $Query, $xPath);
+                    $Query = '//' . $NSKey . ':Capabilities/@RelayOutputs';
+                    $this->WriteAttributeIntegerByXPathQuery(\ONVIF\IO\Attribute::NbrOfOutputs, $Query, $xPath);
+                    $Query = '//' . $NSKey . ':Capabilities/@DigitalInputs';
+                    $this->WriteAttributeIntegerByXPathQuery(\ONVIF\IO\Attribute::NbrOfInputs, $Query, $xPath);
+                    $Query = '//' . $NSKey . ':Capabilities/@SerialPorts';
+                    $this->WriteAttributeIntegerByXPathQuery(\ONVIF\IO\Attribute::NbrOfSerialPorts, $Query, $xPath);
+                    break;
+                case \ONVIF\NS::Media:
+                case \ONVIF\NS::Media2:
+                    $Query = '//' . $NSKey . ':Capabilities/@SnapshotUri';
+                    $this->WriteAttributeBooleanByXPathQuery(\ONVIF\IO\Attribute::HasSnapshotUri, $Query, $xPath);
+                    $Query = '//' . $NSKey . ':StreamingCapabilities/@RTSPStreaming';
+                    $this->WriteAttributeBooleanByXPathQuery(\ONVIF\IO\Attribute::HasRTSPStreaming, $Query, $xPath);
+                    $Query = '//' . $NSKey . ':StreamingCapabilities/@RTP_RTSP_TCP';
+                    $this->WriteAttributeBooleanByXPathQuery(\ONVIF\IO\Attribute::HasRTSPStreaming, $Query, $xPath);
+                    break;
+                    /** @todo  */
+                    // Welche Capabilities brauchen wir?
+                case \ONVIF\NS::Recording:
+                    break;
+                case \ONVIF\NS::Replay:
+                    break;
+                case \ONVIF\NS::SearchRecording:
+                    break;
+            }
         }
         $this->WriteAttributeArray(\ONVIF\IO\Attribute::XAddr, $XAddr);
         return true;
@@ -1865,6 +2050,7 @@ class ONVIFIO extends IPSModuleStrict
      * @param string $Function
      * @param bool $UseLogin
      * @param array $Params
+     * @return \SoapFault|\stdClass
      */
     protected function SendData(string $URI, string $wsdl, string $Function, bool $UseLogin = false, array $Params = [], string &$Response = '', array $Header = [], int $Timeout = 5): SoapFault|stdClass
     {
@@ -2027,19 +2213,21 @@ class ONVIFIO extends IPSModuleStrict
         }
         $this->StartConnection();
     }
+
     protected static function unparse_url($parsed_url): string
     {
         $scheme = isset($parsed_url['scheme']) ? $parsed_url['scheme'] . '://' : '';
-        $host = isset($parsed_url['host']) ? $parsed_url['host'] : '';
+        $host = $parsed_url['host'] ?? '';
         $port = isset($parsed_url['port']) ? ':' . $parsed_url['port'] : '';
         $user = isset($parsed_url['user']) ? urlencode($parsed_url['user']) : '';
         $pass = isset($parsed_url['pass']) ? ':' . urlencode($parsed_url['pass']) : '';
         $pass = ($user || $pass) ? "$pass@" : '';
-        $path = isset($parsed_url['path']) ? $parsed_url['path'] : '';
+        $path = $parsed_url['path'] ?? '';
         $query = isset($parsed_url['query']) ? '?' . $parsed_url['query'] : '';
         $fragment = isset($parsed_url['fragment']) ? '#' . $parsed_url['fragment'] : '';
         return "$scheme$user$pass$host$port$path$query$fragment";
     }
+
     protected static function generateMessageID()
     {
         $uuid = md5(uniqid((string) mt_rand(), true));
@@ -2107,5 +2295,31 @@ class ONVIFIO extends IPSModuleStrict
         $this->SendDebug('TerminationTime', $this->TerminationTime, 0);
         $this->SendDebug('Renew Interval', $Interval - 5, 0);
         $this->SetTimerInterval(\ONVIF\IO\Timer::RenewSubscription, ($Interval - 5) * 1000);
+    }
+    private static function GetNodeBoolValue(\DOMNode $Node): bool
+    {
+        $val = $Node->nodeValue;
+        $boolval = (is_string($val) ? filter_var($val, FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE) : (bool) $val);
+        return $boolval === null ? false : $boolval;
+    }
+    private function WriteAttributeBooleanByXPathQuery(string $Name, string $Query, \DOMXPath &$xPath)
+    {
+        $NodeList = $xPath->query($Query);
+        /** @var \DOMNode $Value */
+        if ($NodeList->length) {
+            $Value = self::GetNodeBoolValue($NodeList->item(0));
+            $this->SendDebug($Name, $Value, 0);
+            $this->WriteAttributeBoolean($Name, $Value);
+        }
+    }
+    private function WriteAttributeIntegerByXPathQuery(string $Name, string $Query, \DOMXPath &$xPath)
+    {
+        $NodeList = $xPath->query($Query);
+        /** @var \DOMNode $Value */
+        if ($NodeList->length) {
+            $Value = (int) $NodeList->item(0)->nodeValue;
+            $this->SendDebug($Name, $Value, 0);
+            $this->WriteAttributeInteger($Name, $Value);
+        }
     }
 }
