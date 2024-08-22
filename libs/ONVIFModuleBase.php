@@ -70,6 +70,7 @@ class ONVIFModuleBase extends IPSModuleStrict
         $this->RegisterMessage($this->InstanceID, FM_DISCONNECT);
         $this->InitFilterAndEvents();
     }
+
     public function RequestAction(string $Ident, mixed $Value, bool &$done = false): void
     {
         $done = false;

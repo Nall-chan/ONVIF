@@ -536,7 +536,7 @@ class ONVIFIO extends IPSModuleStrict
                 $NbrOfInputs = $this->ReadAttributeInteger(\ONVIF\IO\Attribute::NbrOfInputs);
                 $NbrOfOutputs = $this->ReadAttributeInteger(\ONVIF\IO\Attribute::NbrOfOutputs);
                 $NbrOfSerialPorts = $this->ReadAttributeInteger(\ONVIF\IO\Attribute::NbrOfSerialPorts);
-            $XAddr = $this->ReadAttributeArray(\ONVIF\IO\Attribute::XAddr);
+                $XAddr = $this->ReadAttributeArray(\ONVIF\IO\Attribute::XAddr);
             }
             // 4. ONVIF Request GetServiceCapabilities an \ONVIF\WSDL::Management
             //$this->GetServiceCapabilities($XAddr[\ONVIF\NS::Management], \ONVIF\WSDL::Management); // noch ohne Funktion..
@@ -651,7 +651,7 @@ class ONVIFIO extends IPSModuleStrict
                 }
                 // 4c.ONVIF Request GetProfiles an \ONVIF\WSDL::Media2
                 $Media2Supported = $this->GetProfiles2();
-                }
+            }
             if (!$Media2Supported) {
                 // Wenn \ONVIF\WSDL::Media2 NICHT unterstützt
                 $XAddr[\ONVIF\NS::Media2] = '';
@@ -933,18 +933,18 @@ class ONVIFIO extends IPSModuleStrict
         return [[
             'type' => 'ColumnLayout',
             'items'=> [
-            [
-                'type'    => 'RowLayout',
-                'items'   => [
-                    [
-                        'type' => 'ColumnLayout',
-                        'items'=> $InfoItems
-                    ],
-                    [
-                        'type' => 'ColumnLayout',
-                        'items'=> $DeviceItems
+                [
+                    'type'    => 'RowLayout',
+                    'items'   => [
+                        [
+                            'type' => 'ColumnLayout',
+                            'items'=> $InfoItems
+                        ],
+                        [
+                            'type' => 'ColumnLayout',
+                            'items'=> $DeviceItems
+                        ]
                     ]
-                ]
                 ],
                 [
                     'caption'  => 'Scopes',
@@ -1628,14 +1628,14 @@ class ONVIFIO extends IPSModuleStrict
     protected function GetCapabilities(): bool
     {
         $XAddr = [
-            \ONVIF\NS::Management => '/onvif/device_service',
-            \ONVIF\NS::Event      => '',
-            \ONVIF\NS::Media      => '/onvif/media_service',
+            \ONVIF\NS::Management          => '/onvif/device_service',
+            \ONVIF\NS::Event               => '',
+            \ONVIF\NS::Media               => '/onvif/media_service',
             \ONVIF\NS::Media2              => '',
-            \ONVIF\NS::PTZ        => '/onvif/ptz_service',
+            \ONVIF\NS::PTZ                 => '/onvif/ptz_service',
             \ONVIF\NS::DeviceIO            => '',
-            \ONVIF\NS::Imaging    => '',
-            \ONVIF\NS::Analytics  => '',
+            \ONVIF\NS::Imaging             => '',
+            \ONVIF\NS::Analytics           => '',
             \ONVIF\NS::Recording           => '',
             \ONVIF\NS::SearchRecording     => '',
             \ONVIF\NS::Replay              => ''
@@ -1757,7 +1757,7 @@ class ONVIFIO extends IPSModuleStrict
             $Result = [];
             $Result[] = json_decode(json_encode($Nodes), true);
         } else {
-        $Result = json_decode(json_encode($Nodes), true);
+            $Result = json_decode(json_encode($Nodes), true);
         }
         return $Result;
     }

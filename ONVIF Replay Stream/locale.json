@@ -1,0 +1,34 @@
+{
+    "translations": {
+        "de": {
+            "Videosource": "Videoquelle",
+            "Stream-Profile": "Stream-Profil",
+            "Events of videosource": "Ereignisse der Videoquelle",
+            "Configuration is valid": "Konfiguration ist gültig",
+            "Configuration is invalid": "Konfiguration ist ungültig",
+            "Snapshot URL could not be determined": "Snapshot URL konnte nicht bestimmt werden",
+            "Error on read capabilities.": "Fehler beim Lesen der Fähigkeiten.",
+            "Device has no xAddr for this service.": "Gerät hat keine xAddr für diesen Dienst.",
+            "Instance has no active parent.": "Instanz hat kein aktives übergeordnetes Element.",
+            "Unknown error.": "Unbekannter Fehler.",
+            "No valid answer.": "Keine gültige Antwort.",
+            "none": "keine",
+            "nothing": "keins",
+            "Videoencoder-Profilename:": "Videoencoder-Profilname:",
+            "Videosource-Name:": "Videoquellen-Name:",
+            "Resolution:": "Auflösung:",
+            "Framerate:": "Bildrate:",
+            "Encoding-Interval:": "Kodierungsintervall:",
+            "Bitratelimit:": "Bitraten-Limit",
+            "Invalid parameters.": "Ungültige Parameter.",
+            "Stream properties": "Stream Eigenschaften",
+            "Show Image": "Zeige Bild",
+            "This options should not be disabled for SymBox or SD/SSD media": "Diese Option sollte nicht für die SymBox oder SD/SSD Speichermedien deaktiviert werden",
+            "Use in-memory cache": "Benutze In-Memory Cache",
+            "Update Image": "Jetzt aktualisieren",
+            "seconds": "Sekunden",
+            "Image": "Bild",
+            "This module is free for non-commercial use,\r\nDonations in support of the author are accepted here:": "Dieses Modul ist für die nicht kommerzielle Nutzung kostenlos,\r\nSchenkungen als Unterstützung für den Autor werden hier akzeptiert:"
+        }
+    }
+}

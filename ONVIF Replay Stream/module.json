@@ -1,0 +1,16 @@
+{
+    "id": "{24EE27C1-F77B-4EEE-9C9E-C53C674EFF47}",
+    "name": "ONVIF Replay Stream",
+    "type": 3,
+    "vendor": "ONVIF",
+    "aliases": [],
+    "parentRequirements": [
+        "{9B9C8DA6-BC89-21BC-3E8C-BA6E534ABC37}"
+    ],
+    "childRequirements": [],
+    "implemented": [
+        "{E23DD2CD-F098-268A-CE49-1CC04FE8060B}"
+    ],
+    "prefix": "ONVIF",
+    "url": "https://github.com/Nall-chan/ONVIF/blob/master/ONVIF%20Replay%20Stream/README.md"
+}
