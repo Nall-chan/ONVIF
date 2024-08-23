@@ -71,6 +71,7 @@ class ONVIFIO extends IPSModuleStrict
         $this->RegisterAttributeInteger(\ONVIF\IO\Attribute::NbrOfVideoSources, 0);
         $this->RegisterAttributeInteger(\ONVIF\IO\Attribute::NbrOfAudioSources, 0);
         $this->RegisterAttributeInteger(\ONVIF\IO\Attribute::NbrOfSerialPorts, 0);
+        $this->RegisterAttributeInteger(\ONVIF\IO\Attribute::NbrOfRecordingJobs, 0);
         $this->RegisterAttributeBoolean(\ONVIF\IO\Attribute::HasSnapshotUri, false);
         $this->RegisterAttributeBoolean(\ONVIF\IO\Attribute::HasRTSPStreaming, false);
         $this->RegisterAttributeBoolean(\ONVIF\IO\Attribute::RuleSupport, false);
@@ -165,6 +166,7 @@ class ONVIFIO extends IPSModuleStrict
             $Capabilities[\ONVIF\IO\Attribute::NbrOfOutputs] = $this->ReadAttributeInteger(\ONVIF\IO\Attribute::NbrOfOutputs);
             $Capabilities[\ONVIF\IO\Attribute::NbrOfInputs] = $this->ReadAttributeInteger(\ONVIF\IO\Attribute::NbrOfInputs);
             $Capabilities[\ONVIF\IO\Attribute::NbrOfSerialPorts] = $this->ReadAttributeInteger(\ONVIF\IO\Attribute::NbrOfSerialPorts);
+            $Capabilities[\ONVIF\IO\Attribute::NbrOfRecordingJobs] = $this->ReadAttributeInteger(\ONVIF\IO\Attribute::NbrOfRecordingJobs);
             $Capabilities[\ONVIF\IO\Attribute::HasSnapshotUri] = $this->ReadAttributeBoolean(\ONVIF\IO\Attribute::HasSnapshotUri);
             $Capabilities[\ONVIF\IO\Attribute::HasRTSPStreaming] = $this->ReadAttributeBoolean(\ONVIF\IO\Attribute::HasRTSPStreaming);
             $Capabilities[\ONVIF\IO\Attribute::AnalyticsModuleSupport] = $this->ReadAttributeBoolean(\ONVIF\IO\Attribute::AnalyticsModuleSupport);
@@ -499,6 +501,7 @@ class ONVIFIO extends IPSModuleStrict
             $NbrOfOutputs = 0;
             $NbrOfInputs = 0;
             $NbrOfSerialPorts = 0;
+            $NbrOfRecordingJobs = 0;
             $RelayOutputs = [];
             $DigitalInputs = [];
             $AnalyticsModuleSupport = false;
@@ -516,6 +519,7 @@ class ONVIFIO extends IPSModuleStrict
                 $NbrOfAudioSources = $this->ReadAttributeInteger(\ONVIF\IO\Attribute::NbrOfAudioSources);
                 $NbrOfInputs = $this->ReadAttributeInteger(\ONVIF\IO\Attribute::NbrOfInputs);
                 $NbrOfOutputs = $this->ReadAttributeInteger(\ONVIF\IO\Attribute::NbrOfOutputs);
+                $NbrOfRecordingJobs = $this->ReadAttributeInteger(\ONVIF\IO\Attribute::NbrOfRecordingJobs);
             }
             $XAddr = $this->ReadAttributeArray(\ONVIF\IO\Attribute::XAddr);
 
@@ -536,6 +540,7 @@ class ONVIFIO extends IPSModuleStrict
                 $NbrOfInputs = $this->ReadAttributeInteger(\ONVIF\IO\Attribute::NbrOfInputs);
                 $NbrOfOutputs = $this->ReadAttributeInteger(\ONVIF\IO\Attribute::NbrOfOutputs);
                 $NbrOfSerialPorts = $this->ReadAttributeInteger(\ONVIF\IO\Attribute::NbrOfSerialPorts);
+                $NbrOfRecordingJobs = $this->ReadAttributeInteger(\ONVIF\IO\Attribute::NbrOfRecordingJobs);
                 $XAddr = $this->ReadAttributeArray(\ONVIF\IO\Attribute::XAddr);
             }
             // 4. ONVIF Request GetServiceCapabilities an \ONVIF\WSDL::Management
@@ -701,6 +706,7 @@ class ONVIFIO extends IPSModuleStrict
             if ($XAddr[\ONVIF\NS::Recording]) {
                 $RecordingCapabilities = $this->GetServiceCapabilities($XAddr[\ONVIF\NS::Recording], \ONVIF\WSDL::Recording); // noch ohne Funktion.. todo
                 if ($RecordingCapabilities) {
+                    $NbrOfRecordingJobs = $RecordingCapabilities['Capabilities']['MaxRecordingJobs'] ?? $NbrOfRecordingJobs;
                 } else {
                     if ($this->Profile->HasProfile(\ONVIF\Profile::G)) { //Profile G ist GetServiceCapabilities bei Recording Pflicht
                         $this->Warnings = array_merge($this->Warnings, [$this->Translate('Failed to get Recording service capabilities. Device reported ONVIF G scope, but is not compliant!')]);
@@ -708,6 +714,8 @@ class ONVIFIO extends IPSModuleStrict
                     }
                 }
             }
+            // Variablen in Attribute schreiben:
+            $this->WriteAttributeInteger(\ONVIF\IO\Attribute::NbrOfRecordingJobs, $NbrOfRecordingJobs);
             // 4g.ONVIF Request GetNodes an \ONVIF\WSDL::Replay
             if ($XAddr[\ONVIF\NS::Replay]) {
                 $ReplayCapabilities = $this->GetServiceCapabilities($XAddr[\ONVIF\NS::Replay], \ONVIF\WSDL::Replay); // noch ohne Funktion.. todo
@@ -1729,6 +1737,7 @@ class ONVIFIO extends IPSModuleStrict
         $this->WriteAttributeInteger(\ONVIF\IO\Attribute::NbrOfOutputs, $NbrOfOutputs);
         return !is_a($Result, 'SoapFault');
     }
+
     protected function GetScopes(): false|array
     {
         $ScopeResult = $this->SendData('', \ONVIF\WSDL::Management, 'GetScopes', true);
@@ -1746,6 +1755,7 @@ class ONVIFIO extends IPSModuleStrict
         }
         return array_column($Scopes, 'ScopeItem');
     }
+
     protected function GetNodes(): false|array
     {
         $XAddr = $this->ReadAttributeArray(\ONVIF\IO\Attribute::XAddr);
@@ -1761,6 +1771,7 @@ class ONVIFIO extends IPSModuleStrict
         }
         return $Result;
     }
+
     protected function GetVideoSources($Uri, $WSDL): false|array
     {
         $VideoSources = $this->SendData($Uri, $WSDL, 'GetVideoSources', true);
@@ -1900,6 +1911,8 @@ class ONVIFIO extends IPSModuleStrict
                     /** @todo  */
                     // Welche Capabilities brauchen wir?
                 case \ONVIF\NS::Recording:
+                    $Query = '//' . $NSKey . ':Capabilities/@MaxRecordingJobs';
+                    $this->WriteAttributeIntegerByXPathQuery(\ONVIF\IO\Attribute::NbrOfRecordingJobs, $Query, $xPath);
                     break;
                 case \ONVIF\NS::Replay:
                     break;
@@ -2052,7 +2065,7 @@ class ONVIFIO extends IPSModuleStrict
      * @param array $Params
      * @return \SoapFault|\stdClass
      */
-    protected function SendData(string $URI, string $wsdl, string $Function, bool $UseLogin = false, array $Params = [], string &$Response = '', array $Header = [], int $Timeout = 5): SoapFault|stdClass
+    protected function SendData(string $URI, string $wsdl, string $Function, bool $UseLogin = false, array $Params = [], string &$Response = '', array $Header = [], int $Timeout = 5): null|SoapFault|stdClass
     {
         if ($URI == '') {
             $URI = $this->Host . '/onvif/device_service';
@@ -2103,6 +2116,7 @@ class ONVIFIO extends IPSModuleStrict
         unset($ONVIFClient);
         return $Result;
     }
+
     protected function GetEventReceiverFormValues(): array
     {
         $EventList = [];

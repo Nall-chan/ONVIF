@@ -187,6 +187,7 @@ namespace ONVIF
         public const Stream = '{FA889450-38B6-7E20-D4DC-F2C6D0B074FB}';
         public const ImageGrabber = '{18EA97C1-3CEC-80B7-4CAA-D91F8A2A0599}';
         public const Event = '{62584C2E-4542-4EBF-1E92-299F4CF364E4}';
+        public const Recording = '{24EE27C1-F77B-4EEE-9C9E-C53C674EFF47}';
     }
 }
 
@@ -234,6 +235,7 @@ namespace ONVIF\IO
         public const NbrOfVideoSources = 'NbrOfVideoSources';
         public const NbrOfAudioSources = 'NbrOfAudioSources';
         public const NbrOfSerialPorts = 'NbrOfSerialPorts';
+        public const NbrOfRecordingJobs = 'NbrOfRecordingJobs';
         public const HasSnapshotUri = 'HasSnapshotUri';
         public const HasRTSPStreaming = 'HasRTSPStreaming';
         public const RuleSupport = 'RuleSupport';

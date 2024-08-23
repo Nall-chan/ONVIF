@@ -74,7 +74,7 @@ class ONVIFsoapClient extends \SoapClient
         $curl_errno = curl_errno($ch);
         if ($curl_errno) {
             throw new \SoapFault((string) $curl_errno, curl_error($ch));
-            return '';
+            return null;
         }
         if (!is_bool($response)) {
             $Parts = explode("\r\n\r\n<?xml", $response);
@@ -90,9 +90,9 @@ class ONVIFsoapClient extends \SoapClient
                 $response = '';
             }
         }
-        if ($http_code > 400) { /*&& ($response == ''))*/
+        if ($http_code > 400) {
             throw new \SoapFault('http:' . $http_code, explode("\r\n", $this->__last_response_headers)[0]);
-            return '';
+            return null;
         }
         return is_bool($response) ? '' : $response;
     }
@@ -100,7 +100,7 @@ class ONVIFsoapClient extends \SoapClient
 
 class ONVIF
 {
-    public $client;
+    public ONVIFsoapClient $client;
 
     public function __construct(string $wsdl, string $service, ?string $username = null, ?string $password = null, array $Headers = [], int $Timeout = 5)
     {

@@ -6,7 +6,7 @@
 [![Run Tests](https://github.com/Nall-chan/ONVIF/workflows/Run%20Tests/badge.svg)](https://github.com/Nall-chan/ONVIF/actions)  
 [![Spenden](https://www.paypalobjects.com/de_DE/DE/i/btn/btn_donate_SM.gif)](#3-spenden)[![Wunschliste](https://img.shields.io/badge/Wunschliste-Amazon-ff69fb.svg)](#3-spenden)  
 
-# ONVIF Profil S & T Library <!-- omit in toc -->
+# ONVIF Profil S, T & G Library <!-- omit in toc -->
 
 Einbinden von ONVIF kompatiblen Geräten in IPS.  
 
@@ -29,7 +29,7 @@ Einbinden von ONVIF kompatiblen Geräten in IPS.
 ## 1. Vorbemerkungen
 
 ### Zur Library
-Diese Library wurde nicht dazu entwickelt komplett den Profil S & T Spezifikationen zu entsprechen oder deren gesamten Funktionsumfang abzubilden.  
+Diese Library wurde nicht dazu entwickelt komplett den Profile Spezifikationen S, T und G zu entsprechen oder deren gesamten Funktionsumfang abzubilden.  
 Vielmehr liegt der Schwerpunkt auf eine einfache und unkomplizierte Integration bestimmter Bestandteile (LiveStream, Steuerung) und Funktionen (Events, Digital Ein-/Ausgänge) in Symcon.  
 Dadurch ist es auch möglich Geräte in Symcon einzubinden welche ihrerseits die Spezifikationen nicht vollständig oder nicht korrekt umsetzen.  
 Dennoch wird geprüft ob Geräte sich nicht an verpflichtende Funktionen halten und diese als Popup in der Konfiguration der IO-Instanzen gemeldet.  
@@ -84,7 +84,7 @@ Für das Discovery werden Pakete über die Multicast-Adresse `239.255.255.250` a
 ## 2. Voraussetzungen
 
 * IP-Symcon ab Version 7.0
-* Kameras oder Video-Encoder mit ONVIF Profil S und/oder Profil T Unterstützung.
+* Kameras oder Video-Encoder mit ONVIF Profil S und/oder Profil T & G Unterstützung.
  
  ## 3. Software-Installation
   
@@ -119,6 +119,8 @@ Für das Discovery werden Pakete über die Multicast-Adresse `239.255.255.250` a
 - __ONVIF Events__ ([Dokumentation](ONVIF%20Events/README.md))  
 	Bildet empfangbare ONVIF-Ereignisse in Symcon ab.  
 
+- __ONVIF Recording__ ([Dokumentation](ONVIF%20Recording/README.md))  
+	Anzeige und Steuerung von vom Gerät verwalteten Aufzeichnungen. 
 
 ## 5. Anhang
 

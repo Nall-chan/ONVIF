@@ -50,9 +50,10 @@ class ONVIFConfigurator extends ONVIFModuleBase
         $this->SendDebug(\ONVIF\IO\Attribute::NbrOfInputs, $Capabilities[\ONVIF\IO\Attribute::NbrOfInputs], 0);
         $this->SendDebug(\ONVIF\IO\Attribute::NbrOfOutputs, $Capabilities[\ONVIF\IO\Attribute::NbrOfOutputs], 0);
         $this->SendDebug(\ONVIF\IO\Attribute::AnalyticsTokens, $Capabilities[\ONVIF\IO\Attribute::AnalyticsTokens], 0);
+        $this->SendDebug(\ONVIF\IO\Attribute::NbrOfRecordingJobs, $Capabilities[\ONVIF\IO\Attribute::NbrOfRecordingJobs], 0);
 
         //Events
-        $OtherEvents = array_keys($this->GetEvents('', 0, [':VideoSource', ':PTZ', '/Relay', '/DigitalInput']));
+        $OtherEvents = array_keys($this->GetEvents('', 0, [':VideoSource', ':PTZ', '/Relay', '/DigitalInput', 'RecordingConfig/']));
         $LastTopic = '';
         $Events = [];
         foreach ($OtherEvents as $Event) {
@@ -141,6 +142,23 @@ class ONVIFConfigurator extends ONVIFModuleBase
             $OutputTopics = array_shift($OutputTopics);
         }
         $OutputValues = $this->GetConfigurationArray(\ONVIF\GUID::Output, $Capabilities[\ONVIF\IO\Attribute::NbrOfOutputs] > 0, $OutputTopics);
+
+        // Recording
+        $RecordingEvents = $this->GetEvents('/JobState', 0);
+        $RecordingTopics = [];
+        foreach (array_keys($RecordingEvents) as $Topic) {
+            $RecordingTopics[$Topic] = [
+                'moduleID'      => \ONVIF\GUID::Recording,
+                'configuration' => [
+                    'EventTopic' => $Topic
+                ],
+                'location'      => [$this->Translate('ONVIF Devices'), IPS_GetName($this->InstanceID)]
+            ];
+        }
+        if (count($RecordingTopics) == 1) {
+            $RecordingTopics = array_shift($RecordingTopics);
+        }
+        $RecordingValues = $this->GetConfigurationArray(\ONVIF\GUID::Recording, $Capabilities[\ONVIF\IO\Attribute::NbrOfRecordingJobs] > 0, $RecordingTopics);
 
         // Stream H264
         $StreamCreateParams = [
@@ -273,7 +291,7 @@ class ONVIFConfigurator extends ONVIFModuleBase
             $StreamJPEGValues[] = $Device;
         }
 
-        $Values = array_merge($EventValues, $InputValues, $OutputValues, $StreamValues, $StreamJPEGValues);
+        $Values = array_merge($EventValues, $InputValues, $OutputValues, $RecordingValues, $StreamValues, $StreamJPEGValues);
         $Form['actions'][0]['values'] = $Values;
         $this->SendDebug('FORM', json_encode($Form), 0);
         $this->SendDebug('FORM', json_last_error_msg(), 0);
