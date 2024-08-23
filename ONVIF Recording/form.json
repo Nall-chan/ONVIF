@@ -2,26 +2,16 @@
     "elements": [
         {
             "type": "Select",
-            "name": "VideoSource",
-            "caption": "Videosource",
-            "width": "300px",
-            "options": [],
-            "onChange": "IPS_RequestAction($id,'RefreshRecordingTokenForm',$VideoSource);"
-        },
-        {
-            "type": "Select",
-            "name": "RecordingToken",
-            "caption": "Recording",
-            "width": "300px",
-            "options": []
-        },
-        {
-            "type": "Select",
             "name": "EventTopic",
             "caption": "Events of recording",
             "width": "300px",
             "options": [],
             "enabled": false
+        },
+        {
+            "name": "EmulateStatus",
+            "type": "CheckBox",
+            "caption": "Emulate Status"
         }
     ],
     "actions": [
@@ -54,12 +44,12 @@
         {
             "code": 104,
             "icon": "inactive",
-            "caption": "Configuration is invalid"
+            "caption": "Event missing"
         },
         {
             "code": 201,
             "icon": "error",
-            "caption": "Snapshot URL could not be determined"
+            "caption": "Event not valid"
         }
     ]
 }

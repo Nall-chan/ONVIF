@@ -170,6 +170,7 @@ namespace ONVIF
         {
             $Profiles = [];
             foreach (self::ProfileBitToChar as $Bit => $Char) {
+                /** @var int $Bit */
                 if ($this->HasProfile($Bit)) {
                     $Profiles[] = $Char;
                 }
@@ -321,12 +322,11 @@ namespace ONVIF\ImageGrabber
     }
 }
 
-namespace ONVIF\Replay
+namespace ONVIF\Recording
 {
     class Property
     {
-        public const VideoSource = 'VideoSource';
-        public const RecordingToken = 'RecordingToken';
+        public const EmulateStatus = 'EmulateStatus';
     }
 }
 

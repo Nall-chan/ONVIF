@@ -1,5 +1,5 @@
 [![SDK](https://img.shields.io/badge/Symcon-PHPModul-red.svg)](https://www.symcon.de/service/dokumentation/entwicklerbereich/sdk-tools/sdk-php/)
-[![Version](https://img.shields.io/badge/Modul%20Version-2.13-blue.svg)](https://community.symcon.de/t/modul-onvif-profil-s-fuer-ip-kameras-und-encoder/52036)
+[![Version](https://img.shields.io/badge/Modul%20Version-2.20-blue.svg)](https://community.symcon.de/t/modul-onvif-profil-s-fuer-ip-kameras-und-encoder/52036)
 [![Version](https://img.shields.io/badge/Symcon%20Version-7.0%20%3E-green.svg)](https://www.symcon.de/service/dokumentation/installation/migrationen/v60-v61-q1-2022/)  
 [![License](https://img.shields.io/badge/License-CC%20BY--NC--SA%204.0-green.svg)](https://creativecommons.org/licenses/by-nc-sa/4.0/)
 [![Check Style](https://github.com/Nall-chan/ONVIF/workflows/Check%20Style/badge.svg)](https://github.com/Nall-chan/ONVIF/actions)
@@ -135,10 +135,17 @@ Für das Discovery werden Pakete über die Multicast-Adresse `239.255.255.250` a
 |    ONVIF Events     |    Gerät     | ONVIF  | {62584C2E-4542-4EBF-1E92-299F4CF364E4} |
 |     ONVIF Input     |    Gerät     | ONVIF  | {73097230-1ECC-FEEB-5969-C85148DFA76E} |
 |    ONVIF Output     |    Gerät     | ONVIF  | {A44B3114-1F72-1FD1-96FB-D7E970BD8614} |
+|   ONVIF Recording   |    Gerät     | ONVIF  | {24EE27C1-F77B-4EEE-9C9E-C53C674EFF47} |
 
 
 ----------
 ### 2. Changelog
+
+**Version 2.20**  
+ - Voraussetzung für IP-Symcon Version 7.0 oder neuer.  
+ - IO zeigt unter Geräteinformationen die Scopes und Adressen der Services an.  
+ - Unterstützung für Profil G (Recording).  
+ - Neue Instanz `ONVIF Recording`.  
 
 **Version 2.17**  
  - Weitere Prüfungen in der Auswertungen von Gerätefähigkeiten eingebaut um Fehler vorzubeugen.

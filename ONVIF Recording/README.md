@@ -4,12 +4,12 @@
 [![License](https://img.shields.io/badge/License-CC%20BY--NC--SA%204.0-green.svg)](https://creativecommons.org/licenses/by-nc-sa/4.0/)
 [![Check Style](https://github.com/Nall-chan/ONVIF/workflows/Check%20Style/badge.svg)](https://github.com/Nall-chan/ONVIF/actions)
 [![Run Tests](https://github.com/Nall-chan/ONVIF/workflows/Run%20Tests/badge.svg)](https://github.com/Nall-chan/ONVIF/actions)  
-[![Spenden](https://www.paypalobjects.com/de_DE/DE/i/btn/btn_donate_SM.gif)](#2-spenden)[![Wunschliste](https://img.shields.io/badge/Wunschliste-Amazon-ff69fb.svg)](#2-spenden)  
+[![Spenden](https://www.paypalobjects.com/de_DE/DE/i/btn/btn_donate_SM.gif)](#3-spenden)[![Wunschliste](https://img.shields.io/badge/Wunschliste-Amazon-ff69fb.svg)](#3-spenden)  
 
-# ONVIF Digital Output  <!-- omit in toc -->
-Bildet Digitale Ausgänge (Relays) in Symcon ab.  
+# ONVIF Recording <!-- omit in toc -->
+Anzeige uns Steuerung von Aufnahmen.  
 
-## Inhaltsverzeichnis  <!-- omit in toc -->  
+## Inhaltsverzeichnis <!-- omit in toc -->
 
 - [1. Funktionsumfang](#1-funktionsumfang)
 - [2. Voraussetzungen](#2-voraussetzungen)
@@ -17,7 +17,7 @@ Bildet Digitale Ausgänge (Relays) in Symcon ab.
 - [4. Einrichten der Instanzen in IP-Symcon](#4-einrichten-der-instanzen-in-ip-symcon)
 - [5. Statusvariablen](#5-statusvariablen)
 - [6. WebFront](#6-webfront)
-- [7. PHP-Befehlsreferenz](#7-php-befehlsreferenz)
+- [7. PHP-Funktionsreferenz](#7-php-funktionsreferenz)
 - [8. Aktionen](#8-aktionen)
 - [9. Anhang](#9-anhang)
   - [1. Changelog](#1-changelog)
@@ -26,22 +26,20 @@ Bildet Digitale Ausgänge (Relays) in Symcon ab.
 
 ## 1. Funktionsumfang
 
-* Empfang von Statusmeldungen der Digitalen Ausgängen von ONVIF-Geräten.  
-* Ansteuern der Digitalen Ausgänge über Symcon.  
+* Instanz für die einfache Anzeige und Steuerung von Aufzeichnungen welche durch die Geräten selbstständig  verwaltet werden.  
 
 ## 2. Voraussetzungen
 
-* IP-Symcon ab Version 7.0
-* Kameras oder Video-Encoder mit ONVIF Profil S und/oder Profil T Unterstützung.
-* Geräte müssen über mindestens einen Digitalen Ausgang (bzw. Relais) verfügen.  
+* IP-Symcon ab Version 6.1
+* Kameras oder Video-Encoder mit ONVIF Profil G und eingerichteter Aufzeichnung.
 
 ## 3. Software-Installation
 
-* Über den Module Store das  ['ONVIF'-Modul](../README.md) installieren.
+* Dieses Modul ist Bestandteil der [ONVIF-Library](../README.md#3-software-installation).    
 
 ## 4. Einrichten der Instanzen in IP-Symcon
 
- Unter 'Instanz hinzufügen' ist das 'ONVIF Digital Output'-Modul unter dem Hersteller 'ONVIF' aufgeführt.  
+ Unter 'Instanz hinzufügen' ist das 'ONVIF Recording'-Modul unter dem Hersteller 'ONVIF' aufgeführt.
 ![Module](../imgs/Module.png)  
 
  Es wird empfohlen diese Instanz über die dazugehörige Instanz des [Configurator-Moduls](../ONVIF%20Configurator/README.md) von diesem Geräte anzulegen.  
@@ -50,48 +48,50 @@ __Konfigurationsseite__:
 
 ![Config](imgs/Config.png)  
 
-| Name          | Text                    | Beschreibung                                                                                                                                                                           |
-| ------------- | ----------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| EventTopic    | Ereignisse der Ausgänge | Auswahl des Ereignis-Pfad ab welchen Ereignisse empfangen und verarbeitet werden.                                                                                                      |
-| EmulateStatus | Status simulieren       | Wenn aktiviert, wird die Statusvariable in Symcon auf den neuen Wert gesetzt, sobald ein Schaltbefehl erfolgreich übertragen wurde. Sonst wird nur über ankommende Ereignisse gesetzt. |
+| Name        | Text                       | Beschreibung                                                                                                  |
+| ----------- | -------------------------- | ------------------------------------------------------------------------------------------------------------- |
+| EventTopic  | Ereignisse für die Aufzeichnung | Auswahl des Ereignis-Pfad für Recording-Jobs (*).                         |
+| EmulateStatus | Status simulieren       | Wenn aktiviert, wird die Statusvariable in Symcon auf den neuen Wert gesetzt, sobald ein Steuerbefehl erfolgreich übertragen wurde. Sonst wird nur über ankommende Ereignisse gesetzt. |
 
-Der Ereignis-Pfad wird bei Digital-Outputs versucht automatisch zu erkennen, funktioniert dies nicht, ist das Eingabefeld aktiv und das Ereignis muss manuell ausgewählt werden.  
+(*)  _Durch eine Änderung des Ereignis-Pfad werden die alten Statusvariablen hinfällig und müssen manuell gelöscht werden._   
+
+Der Ereignis-Pfad wird für Recordings Jobs versucht automatisch zu erkennen, funktioniert dies nicht, ist das Eingabefeld aktiv und das Ereignis muss manuell ausgewählt werden. 
 
 ## 5. Statusvariablen
 
-Die Statusvariablen werden automatisch angelegt und erhalten das `~Switch` Profil. Das Löschen einzelner Statusvariablen kann zu Fehlfunktionen führen.  
+Die Statusvariablen werden automatisch angelegt und erhalten das `~Switch` Profil. Das Löschen einzelner Statusvariablen kann zu Fehlfunktionen führen. 
 
 | Name                                                | Typ  | Beschreibung                                                               |
 | --------------------------------------------------- | ---- | -------------------------------------------------------------------------- |
-| je nach Name des Relay-Token aus dem Onvif-Ereignis | bool | Für jeden bekannten Output wird eine passende Variable in Symcon erstellt. |
+| je nach Name des RecordingJob-Token aus dem Onvif-Ereignis | bool | Für jeden bekannten Job wird eine passende Variable in Symcon erstellt. |
 
 ## 6. WebFront
 
-Die Statusvariablen haben eine hinterlegte Standardaktion und somit können die Ausgänge direkt bedient werden. 
+Die Statusvariablen haben eine hinterlegte Standardaktion und somit können die Aufnahmen direkt  bedient werden. 
 
 Die direkte Darstellung der Statusvariablen ist möglich; es wird aber empfohlen mit Links zu arbeiten.  
 
-## 7. PHP-Befehlsreferenz
+## 7. PHP-Funktionsreferenz
 
-```php
-boolean ONVIF_SetRelayOutputState(integer $InstanzID, string $Ident, bool $Value);
+``` php
+boolean ONVIF_SetRecordingJobMode(integer $InstanzID, string $Ident, bool $State)
 ```
-De/Aktiviert den in `$Ident` übergeben Ausgang, je nach übergebenen Wert in `$Value`.  
+Startet oder Beendet die in `$Ident` übergeben Aufnahme, je nach übergebenen Wert in `$Value`.  
 Konnte der Befehl erfolgreich ausgeführt werden, wird `TRUE` zurückgegeben.  
 Im Fehlerfall wird eine Warnung erzeugt und `FALSE` zurückgegeben.  
 
 Beispiel:
-`ONVIF_SetRelayOutputState(12345, '1', true);`  
-Schalte Ausgang 1 an.
+`ONVIF_SetRecordingJobMode(12345, 'JobStateRecJob_Cam1Rec0', false);`  
+Beendet die Aufzeichnung `RecJob_Cam1Rec0`.
 
 ## 8. Aktionen
 
 __Grundsätzlich können alle bedienbaren Statusvariablen als Ziel einer [`Aktion`](https://www.symcon.de/service/dokumentation/konzepte/automationen/ablaufplaene/aktionen/) mit 'Auf Wert schalten' angesteuert werden, so das hier keine speziellen Aktionen benutzt werden müssen.__
 
-Dennoch gibt es eine Aktion für die 'ONVIF Digital Output' Instanz.  
+Dennoch gibt es eine Aktion für die 'ONVIF Recording' Instanz.  
 Wenn so eine Instanz als Ziel einer Aktion ausgewählt wurde, steht folgende Aktion zur Verfügung:  
 ![Aktionen](imgs/Actions.png)  
-* Aktivieren oder deaktivieren eines digitalen Ausgang  
+* Starten oder Stoppen einer Aufzeichnung    
 
 ## 9. Anhang
 
@@ -101,7 +101,7 @@ Wenn so eine Instanz als Ziel einer Aktion ausgewählt wurde, steht folgende Akt
 
 ### 2. Spenden
 
-Die Library ist für die nicht kommerzielle Nutzung kostenlos, Schenkungen als Unterstützung für den Autor werden hier akzeptiert:  
+  Die Library ist für die nicht kommerzielle Nutzung kostenlos, Schenkungen als Unterstützung für den Autor werden hier akzeptiert:  
 
 <a href="https://www.paypal.com/donate?hosted_button_id=G2SLW2MEMQZH2" target="_blank"><img src="https://www.paypalobjects.com/de_DE/DE/i/btn/btn_donate_LG.gif" border="0" /></a>  
 

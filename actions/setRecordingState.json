@@ -1,0 +1,49 @@
+{
+    "id": "{93A6C580-16C1-4AB5-9BFC-38B9E63C96FE}",
+    "caption": "Start or stop recording",
+    "form": [
+        "$Childs = IPS_GetChildrenIDs($_IPS['TARGET']);",
+        "$Form = ['type' => 'Select', 'name' => 'IDENT', 'caption' => 'Recording job','options'=>[]];",
+        "foreach ($Childs as $VarId) {",
+        "   $Ident = IPS_GetObject($VarId)['ObjectIdent'];",
+        "   if (stripos($Ident, 'JobState') === 0) {",
+        "       $Form['options'][] = [",
+        "           'caption'   =>  IPS_GetName($VarId),",
+        "           'value'     =>  $Ident",
+        "           ];",
+        "   }",
+        "}",
+        "usort($Form['options'], function($a,$b){",
+        "   return strtolower($a['caption'])>strtolower($b['caption']);",
+        "});",
+        "$Form = [$Form];",
+        "$Form[]=['type' => 'CheckBox', 'name' => 'ACTIVE', 'caption' => 'Recording active?'];",
+        "return $Form;"
+    ],
+    "action": "ONVIF_SetRecordingJobMode($_IPS['TARGET'],$_IPS['IDENT'],$_IPS['ACTIVE']);",
+    "category": "target",
+    "restrictions": {
+        "objectType": [
+            1
+        ],
+        "hasActionStatusVariables": true,
+        "moduleID": [
+            "{24EE27C1-F77B-4EEE-9C9E-C53C674EFF47}"
+        ],
+        "includeEnvironments": [
+            "TestCommands",
+            "Default"
+        ]
+    },
+    "locale": {
+        "de": {
+            "Start or stop recording": "Starten oder Stoppen einer Aufzeichnung",
+            "Recording job": "Aufzeichnungs Job",
+            "Recording active?": "Aufzeichnung aktiv?",
+            "Control recording": "Steuerung von Aufnahmen",
+            "Set {TARGET, object, ident IDENT} to {ACTIVE, select, true {active} false {inactive}}": "Setze {TARGET, object, ident IDENT} auf {ACTIVE, select, true {aktiv} false {inaktiv}}"
+        }
+    },
+    "description": "Control recording",
+    "format": "Set {TARGET, object, ident IDENT} to {ACTIVE, select, true {active} false {inactive}}"
+}

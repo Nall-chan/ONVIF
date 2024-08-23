@@ -1,0 +1,18 @@
+{
+    "translations": {
+        "de": {
+            "Events of recording": "Ereignisse für die Aufzeichnung",
+            "Emulate Status": "Status simulieren",
+            "Configuration is valid": "Konfiguration ist gültig",
+            "Event missing": "Ereignis fehlt",
+            "Event not valid": "Ereignis ist nicht gültig",
+            "none": "keine",
+            "nothing": "keins",
+            "Device has no xAddr for this service.": "Gerät hat keine xAddr für diesen Dienst.",
+            "Instance has no active parent.": "Instanz hat kein aktives übergeordnetes Element.",
+            "Unknown error.": "Unbekannter Fehler.",
+            "No valid answer.": "Keine gültige Antwort.",
+            "This module is free for non-commercial use,\r\nDonations in support of the author are accepted here:": "Dieses Modul ist für die nicht kommerzielle Nutzung kostenlos,\r\nSchenkungen als Unterstützung für den Autor werden hier akzeptiert:"
+        }
+    }
+}
