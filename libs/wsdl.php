@@ -101,6 +101,7 @@ namespace ONVIF
         public const ProfileT = 'onvif://www.onvif.org/Profile/T';
         public const ProfileG = 'onvif://www.onvif.org/Profile/G';
         public const ProfileS = 'onvif://www.onvif.org/Profile/Streaming';
+        public const ProfileM = 'onvif://www.onvif.org/Profile/M';
     }
 
     class EventHandler
@@ -137,16 +138,19 @@ namespace ONVIF
         public const S = 2; // Streaming und WS-Event
         public const G = 4; // Recording (ohne streaming!)
         public const T = 8; // Streaming und pull point Event, Image Settings
+        public const M = 16; // Metadata (u.a. MQTT)
         private const ScopesToProfile = [
             Scopes::ProfileS         => self::S,
             Scopes::ProfileG         => self::G,
-            Scopes::ProfileT         => self::T
+            Scopes::ProfileT         => self::T,
+            Scopes::ProfileM         => self::M
         ];
         private const ProfileBitToChar = [
             self::NONE => 'Fallback S',
             self::S    => 'S',
             self::G    => 'G',
-            self::T    => 'T'
+            self::T    => 'T',
+            self::M    => 'M'
         ];
         public int $Profile;
         public function __construct(array $Scopes = [])

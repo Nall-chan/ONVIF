@@ -1,5 +1,5 @@
 [![SDK](https://img.shields.io/badge/Symcon-PHPModul-red.svg)](https://www.symcon.de/service/dokumentation/entwicklerbereich/sdk-tools/sdk-php/)
-[![Version](https://img.shields.io/badge/Modul%20Version-2.20-blue.svg)](https://community.symcon.de/t/modul-onvif-profil-s-fuer-ip-kameras-und-encoder/52036)
+[![Version](https://img.shields.io/badge/Modul%20Version-2.21-blue.svg)](https://community.symcon.de/t/modul-onvif-profil-s-fuer-ip-kameras-und-encoder/52036)
 [![Version](https://img.shields.io/badge/Symcon%20Version-7.0%20%3E-green.svg)](https://www.symcon.de/service/dokumentation/installation/migrationen/v60-v61-q1-2022/)  
 [![License](https://img.shields.io/badge/License-CC%20BY--NC--SA%204.0-green.svg)](https://creativecommons.org/licenses/by-nc-sa/4.0/)
 [![Check Style](https://github.com/Nall-chan/ONVIF/workflows/Check%20Style/badge.svg)](https://github.com/Nall-chan/ONVIF/actions)
@@ -48,10 +48,10 @@ __Konfigurationsseite__:
 
 ![Config](imgs/Config.png)  
 
-| Name        | Text                       | Beschreibung                                                                                                  |
-| ----------- | -------------------------- | ------------------------------------------------------------------------------------------------------------- |
-| EventTopic  | Ereignisse für die Aufzeichnung | Auswahl des Ereignis-Pfad für Recording-Jobs (*).                         |
-| EmulateStatus | Status simulieren       | Wenn aktiviert, wird die Statusvariable in Symcon auf den neuen Wert gesetzt, sobald ein Steuerbefehl erfolgreich übertragen wurde. Sonst wird nur über ankommende Ereignisse gesetzt. |
+| Name          | Text                            | Beschreibung                                                                                                                                                                           |
+| ------------- | ------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| EventTopic    | Ereignisse für die Aufzeichnung | Auswahl des Ereignis-Pfad für Recording-Jobs (*).                                                                                                                                      |
+| EmulateStatus | Status simulieren               | Wenn aktiviert, wird die Statusvariable in Symcon auf den neuen Wert gesetzt, sobald ein Steuerbefehl erfolgreich übertragen wurde. Sonst wird nur über ankommende Ereignisse gesetzt. |
 
 (*)  _Durch eine Änderung des Ereignis-Pfad werden die alten Statusvariablen hinfällig und müssen manuell gelöscht werden._   
 
@@ -61,8 +61,8 @@ Der Ereignis-Pfad wird für Recordings Jobs versucht automatisch zu erkennen, fu
 
 Die Statusvariablen werden automatisch angelegt und erhalten das `~Switch` Profil. Das Löschen einzelner Statusvariablen kann zu Fehlfunktionen führen. 
 
-| Name                                                | Typ  | Beschreibung                                                               |
-| --------------------------------------------------- | ---- | -------------------------------------------------------------------------- |
+| Name                                                       | Typ  | Beschreibung                                                            |
+| ---------------------------------------------------------- | ---- | ----------------------------------------------------------------------- |
 | je nach Name des RecordingJob-Token aus dem Onvif-Ereignis | bool | Für jeden bekannten Job wird eine passende Variable in Symcon erstellt. |
 
 ## 6. WebFront

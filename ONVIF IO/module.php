@@ -784,6 +784,8 @@ class ONVIFIO extends IPSModuleStrict
                         $AllEventProperties = array_merge($AllEventProperties, $SupportedRuleTopicData);
                     }
                 }
+                //$this->SendData($XAddr[\ONVIF\NS::Analytics], \ONVIF\WSDL::Analytics, 'GetRules', true); VideoAnalyticsConfiguration
+                //$this->SendData($XAddr[\ONVIF\NS::Analytics], \ONVIF\WSDL::Analytics, 'GetSupportedRules', true);   Video Analytics configuration
             } else {
                 if (count($AnalyticsTokens)) {
                     $this->Warnings = array_merge($this->Warnings, [$this->Translate('Analytics events could not be retrieved. The device reported AnalyticsTokens, but the Analytics namespace and XAddr were not reported!')]);
@@ -1268,7 +1270,7 @@ class ONVIFIO extends IPSModuleStrict
     {
         $SubscriptionReference = $this->ReadAttributeString(\ONVIF\IO\Attribute::SubscriptionReference);
         if ($SubscriptionReference == '') {
-            $this->SendDebug('ERROR SetSynchronizationPoint', 'No SubscriptionReference', 0);
+            $this->SendDebug('ERROR ' . __FUNCTION__, 'No SubscriptionReference', 0);
             $this->LogMessage($this->Translate('Call SetSynchronizationPoint with no SubscriptionReference'), KL_ERROR);
             return false;
         }
@@ -1277,7 +1279,12 @@ class ONVIFIO extends IPSModuleStrict
         $SubscriptionId = $this->ReadAttributeString(\ONVIF\IO\Attribute::SubscriptionId);
         if ($SubscriptionId != '') {
             $xml = new DOMDocument();
-            $xml->loadXML($SubscriptionId);
+            $validXML = @$xml->loadXML($SubscriptionId);
+            if (!$validXML) {
+                $this->LogMessage($this->Translate('Malformed XML in ' . __FUNCTION__ . ' received'), KL_ERROR);
+                $this->SendDebug('ERROR ' . __FUNCTION__, $this->Translate('Malformed XML received'), 0);
+                return false;
+            }
             $ns = $xml->firstChild->namespaceURI;
             $name = $xml->firstChild->nodeName;
             $Header[] = new SoapHeader($ns, $name, new SoapVar($SubscriptionId, XSD_ANYXML), true);
@@ -1300,7 +1307,7 @@ class ONVIFIO extends IPSModuleStrict
         $this->lock(\ONVIF\IO\Property::EventHandler);
         $SubscriptionReference = $this->ReadAttributeString(\ONVIF\IO\Attribute::SubscriptionReference);
         if ($SubscriptionReference == '') {
-            $this->SendDebug('ERROR Renew', 'No SubscriptionReference', 0);
+            $this->SendDebug('ERROR ' . __FUNCTION__, 'No SubscriptionReference', 0);
             $this->LogMessage($this->Translate('Call Renew with no SubscriptionReference'), KL_ERROR);
             $this->unlock(\ONVIF\IO\Property::EventHandler);
             return false;
@@ -1310,7 +1317,13 @@ class ONVIFIO extends IPSModuleStrict
         $SubscriptionId = $this->ReadAttributeString(\ONVIF\IO\Attribute::SubscriptionId);
         if ($SubscriptionId != '') {
             $xml = new DOMDocument();
-            $xml->loadXML($SubscriptionId);
+            $validXML = @$xml->loadXML($SubscriptionId);
+            if (!$validXML) {
+                $this->LogMessage($this->Translate('Malformed XML in ' . __FUNCTION__ . ' received'), KL_ERROR);
+                $this->SendDebug('ERROR ' . __FUNCTION__, $this->Translate('Malformed XML received'), 0);
+                $this->unlock(\ONVIF\IO\Property::EventHandler);
+                return false;
+            }
             $ns = $xml->firstChild->namespaceURI;
             $name = $xml->firstChild->nodeName;
             $Header[] = new SoapHeader($ns, $name, new SoapVar($SubscriptionId, XSD_ANYXML), true);
@@ -1329,7 +1342,7 @@ class ONVIFIO extends IPSModuleStrict
             return false;
         }
         if (!is_object($RenewResult)) {
-            $this->SendDebug('ERROR Renew', 'No Response', 0);
+            $this->SendDebug('ERROR ' . __FUNCTION__, 'No Response', 0);
             $this->LogMessage($this->Translate('Error Renew with no Response'), KL_ERROR);
             $this->SetStatus(IS_EBASE + 3);
             $this->isSubscribed = false;
@@ -1365,7 +1378,13 @@ class ONVIFIO extends IPSModuleStrict
         $Header = $this->GenerateSOAPHeader($Action, $SubscriptionReference);
         if ($SubscriptionId != '') {
             $xml = new DOMDocument();
-            $xml->loadXML($SubscriptionId);
+            $validXML = @$xml->loadXML($SubscriptionId);
+            if (!$validXML) {
+                $this->LogMessage($this->Translate('Malformed XML in ' . __FUNCTION__ . ' received'), KL_ERROR);
+                $this->SendDebug('ERROR ' . __FUNCTION__, $this->Translate('Malformed XML received'), 0);
+                $this->unlock(\ONVIF\IO\Property::EventHandler);
+                return false;
+            }
             $ns = $xml->firstChild->namespaceURI;
             $name = $xml->firstChild->nodeName;
             $Header[] = new SoapHeader($ns, $name, new SoapVar($SubscriptionId, XSD_ANYXML));
@@ -1392,7 +1411,12 @@ class ONVIFIO extends IPSModuleStrict
         }
 
         $xml = new DOMDocument();
-        $xml->loadXML($Response);
+        $validXML = @$xml->loadXML($Response);
+        if (!$validXML) {
+            $this->LogMessage($this->Translate('Malformed XML in ' . __FUNCTION__ . ' received'), KL_ERROR);
+            $this->SendDebug('ERROR ' . __FUNCTION__, $this->Translate('Malformed XML received'), 0);
+            return false;
+        }
         $xpath = new DOMXPath($xml);
         foreach (\ONVIF\NS::Namespaces as $NSKey => $Namespace) {
             $EventNS[$NSKey] = $xml->lookupPrefix($Namespace);
@@ -1814,6 +1838,7 @@ class ONVIFIO extends IPSModuleStrict
         }
         return $this->DecodeAnalyticsAndRuleResponse($Response);
     }
+
     protected function GetSupportedRules(string $AnalyticsToken): false|array
     {
         $XAddr = $this->ReadAttributeArray(\ONVIF\IO\Attribute::XAddr);
@@ -1827,10 +1852,16 @@ class ONVIFIO extends IPSModuleStrict
         }
         return $this->DecodeAnalyticsAndRuleResponse($Response);
     }
+
     protected function DecodeAnalyticsAndRuleResponse(string $ResponseXML): array
     {
         $xml = new DOMDocument();
-        $xml->loadXML($ResponseXML);
+        $validXML = @$xml->loadXML($ResponseXML);
+        if (!$validXML) {
+            $this->LogMessage($this->Translate('Malformed XML in ' . __FUNCTION__ . ' received'), KL_ERROR);
+            $this->SendDebug('ERROR ' . __FUNCTION__, $this->Translate('Malformed XML received'), 0);
+            return [];
+        }
         $xpath = new DOMXPath($xml);
         foreach (\ONVIF\NS::Namespaces as $NSKey => $Namespace) {
             $EventNS[$NSKey] = $xml->lookupPrefix($Namespace);
@@ -1851,6 +1882,7 @@ class ONVIFIO extends IPSModuleStrict
         }
         return $TopicData;
     }
+
     protected function GetServices(): bool
     {
         $Params = [
@@ -1869,9 +1901,13 @@ class ONVIFIO extends IPSModuleStrict
         }
         $XAddr = $this->ReadAttributeArray(\ONVIF\IO\Attribute::XAddr);
         $xml = new DOMDocument();
-        $xml->loadXML($Response);
+        $validXML = @$xml->loadXML($Response);
+        if (!$validXML) {
+            $this->LogMessage($this->Translate('Malformed XML in ' . __FUNCTION__ . ' received'), KL_ERROR);
+            $this->SendDebug('ERROR ' . __FUNCTION__, $this->Translate('Malformed XML received'), 0);
+            return false;
+        }
         $xPath = new DOMXPath($xml);
-
         foreach ($ServicesResult as $Service) {
             $XAddr[$Service['Namespace']] = parse_url($Service['XAddr'], PHP_URL_PATH);
             $NSKey = array_search($Service['Namespace'], \ONVIF\NS::Namespaces);
@@ -2178,8 +2214,9 @@ class ONVIFIO extends IPSModuleStrict
     protected function DecodeNotificationMessage(string $NotificationMessageXML): bool
     {
         $xml = new DOMDocument();
-        $xml->loadXML($NotificationMessageXML);
-        if ($xml === false) {
+        /** @var mixed $validXML */
+        $validXML = @$xml->loadXML($NotificationMessageXML);
+        if (!$validXML) {
             $this->LogMessage($this->Translate('Malformed XML event received'), KL_ERROR);
             $this->SendDebug('Event', $this->Translate('Malformed XML event received'), 0);
             return false;

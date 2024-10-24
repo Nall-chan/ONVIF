@@ -254,7 +254,7 @@ class ONVIFDiscovery extends IPSModuleStrict
                     }
                     $this->SendDebug('Receive', $response, 0);
                     $xml = new DOMDocument();
-                    if (false === $xml->loadXML($response)) {
+                    if (false === @$xml->loadXML($response)) {
                         $this->SendDebug('Error on parse XML', $response, 0);
                         continue;
                     }
@@ -298,7 +298,7 @@ class ONVIFDiscovery extends IPSModuleStrict
                     }
                     $this->SendDebug('Receive', $response, 0);
                     $xml = new DOMDocument();
-                    if (false === $xml->loadXML($response)) {
+                    if (false === @$xml->loadXML($response)) {
                         $this->SendDebug('Error on parse XML', $response, 0);
                         continue;
                     }
