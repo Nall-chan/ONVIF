@@ -3,7 +3,6 @@
 declare(strict_types=1);
 
 require_once __DIR__ . '/../libs/ONVIFModuleBase.php';
-eval('declare(strict_types=1);namespace ONVIFMediaStream {?>' . file_get_contents(__DIR__ . '/../libs/helper/WebhookHelper.php') . '}');
 
 /**
  * @property string $PTZ_token
@@ -16,7 +15,6 @@ eval('declare(strict_types=1);namespace ONVIFMediaStream {?>' . file_get_content
  */
 class ONVIFMediaStream extends ONVIFModuleBase
 {
-    use \ONVIFMediaStream\WebhookHelper;
     public const wsdl = \ONVIF\WSDL::Media; // default für Media1
     public const PTZwsdl = \ONVIF\WSDL::PTZ; // statisch
     public const TopicFilter = 'videosource';
@@ -119,14 +117,6 @@ class ONVIFMediaStream extends ONVIFModuleBase
     /**
      * Interne Funktion des SDK.
      */
-    public function Destroy(): void
-    {
-        if (!IPS_InstanceExists($this->InstanceID)) {
-            $this->UnregisterHook('/hook/ONVIF/PTZ/' . $this->InstanceID);
-        }
-        parent::Destroy();
-    }
-
     public function GetConfigurationForm(): string
     {
         $Form = json_decode(file_get_contents(__DIR__ . '/form.json'), true);
@@ -926,7 +916,6 @@ class ONVIFMediaStream extends ONVIFModuleBase
             $this->RegisterHook('/hook/ONVIF/PTZ/' . $this->InstanceID);
             $this->WritePTZInHTMLBox();
         } else {
-            $this->UnregisterHook('/hook/ONVIF/PTZ/' . $this->InstanceID);
             $this->UnregisterVariable('PTZControlHtml');
         }
         if ($this->ReadPropertyBoolean(\ONVIF\Stream\Property::EnablePanTiltVariable)) {

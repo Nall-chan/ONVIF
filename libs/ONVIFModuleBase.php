@@ -24,8 +24,7 @@ require_once __DIR__ . '/wsdl.php';
  * @method void RegisterProfileIntegerEx(string $Name, string $Icon, string $Prefix, string $Suffix, array $Associations, int $MaxValue = -1, float $StepSize = 0)
  * @method void RegisterProfileFloatEx(string $Name, string $Icon, string $Prefix, string $Suffix, array $Associations, float $MaxValue = -1, float $StepSize = 0, int $Digits = 0)
  * @method void UnregisterProfile(string $Name)
- * @method void RegisterHook(string $WebHook)
- * @method void UnregisterHook(string $WebHook)
+ * @method bool RegisterHook(string $WebHook)
  * @uses \ONVIFModuleBase\BufferHelper
  */
 class ONVIFModuleBase extends IPSModuleStrict

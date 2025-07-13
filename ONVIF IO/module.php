@@ -5,7 +5,6 @@ declare(strict_types=1);
 eval('declare(strict_types=1);namespace ONVIFIO {?>' . file_get_contents(dirname(__DIR__) . '/libs/helper/DebugHelper.php') . '}');
 eval('declare(strict_types=1);namespace ONVIFIO {?>' . file_get_contents(dirname(__DIR__) . '/libs/helper/BufferHelper.php') . '}');
 eval('declare(strict_types=1);namespace ONVIFIO {?>' . file_get_contents(dirname(__DIR__) . '/libs/helper/AttributeArrayHelper.php') . '}');
-eval('declare(strict_types=1);namespace ONVIFIO {?>' . file_get_contents(dirname(__DIR__) . '/libs/helper/WebhookHelper.php') . '}');
 eval('declare(strict_types=1);namespace ONVIFIO {?>' . file_get_contents(dirname(__DIR__) . '/libs/helper/SemaphoreHelper.php') . '}');
 require_once dirname(__DIR__) . '/libs/wsdl.php';
 require_once dirname(__DIR__) . '/libs/ONVIF.inc.php';
@@ -27,15 +26,13 @@ require_once dirname(__DIR__) . '/libs/ONVIF.inc.php';
  * @method bool SendDebug(string $Message, mixed $Data, int $Format)
  * @method bool lock(string $ident)
  * @method void unlock(string $ident)
- * @method void RegisterHook(string $WebHook)
- * @method void UnregisterHook(string $WebHook)
+ * @method bool RegisterHook(string $WebHook)
  */
 class ONVIFIO extends IPSModuleStrict
 {
     use \ONVIFIO\DebugHelper;
     use \ONVIFIO\BufferHelper;
     use \ONVIFIO\AttributeArrayHelper;
-    use \ONVIFIO\WebhookHelper;
     use \ONVIFIO\Semaphore;
     protected $lastSOAPError = '';
 
@@ -103,14 +100,6 @@ class ONVIFIO extends IPSModuleStrict
     /**
      * Interne Funktion des SDK.
      */
-    public function Destroy(): void
-    {
-        if (!IPS_InstanceExists($this->InstanceID)) {
-            $this->UnregisterHook('/hook/ONVIFEvents/IO/' . $this->InstanceID);
-        }
-        parent::Destroy();
-    }
-
     public function MessageSink(int $TimeStamp, int $SenderID, int $Message, array $Data): void
     {
         switch ($Message) {
@@ -444,6 +433,7 @@ class ONVIFIO extends IPSModuleStrict
         $this->SendDebug('ReloadCapabilities', $ReloadCapabilities, 0);
         $this->SetSummary($Host);
         $this->Host = $Host;
+        $this->MyIP = $MyIP;
         $this->MyIP = $MyIP;
         $this->MyPort = $MyPort;
         $this->MyHTTPS = $MyHTTPS;
@@ -1053,6 +1043,7 @@ class ONVIFIO extends IPSModuleStrict
         $this->WriteAttributeString(\ONVIF\IO\Attribute::ConsumerAddress, $Url);
         return true;
     }
+
     protected function CreatePullPointSubscription(): bool
     {
         $XAddr = $this->ReadAttributeArray(\ONVIF\IO\Attribute::XAddr);

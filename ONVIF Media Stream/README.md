@@ -259,7 +259,7 @@ Befehle um in den Geräten abgespeicherte Szenen anzufahren.
     ONVIF_GotoPreset(int $InstanzID, int $PresetIndex)
 ```
 Erwartet in `PresetIndex` den Index einer Szene, welche unter PTZ-Eigenschaft angezeigt wird.  
-Dabei ist irrrelevant ob die Szene im dem VariablenProfil ONVIF.Preset.`<InstanzID>` vorhanden ist.  
+Dabei ist irrelevant ob die Szene im dem VariablenProfil ONVIF.Preset.`<InstanzID>` vorhanden ist.  
 
 ----------
 ```php
