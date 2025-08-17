@@ -26,7 +26,6 @@ require_once dirname(__DIR__) . '/libs/ONVIF.inc.php';
  * @method bool SendDebug(string $Message, mixed $Data, int $Format)
  * @method bool lock(string $ident)
  * @method void unlock(string $ident)
- * @method bool RegisterHook(string $WebHook)
  */
 class ONVIFIO extends IPSModuleStrict
 {
@@ -80,6 +79,7 @@ class ONVIFIO extends IPSModuleStrict
         $this->RegisterAttributeString(\ONVIF\IO\Attribute::SubscriptionId, '');
         $this->RegisterAttributeInteger(\ONVIF\IO\Attribute::CapabilitiesVersion, 0);
         $this->RegisterTimer(\ONVIF\IO\Timer::RenewSubscription, 0, 'IPS_RequestAction(' . $this->InstanceID . ',"Renew",true);');
+        $this->RegisterHook('ONVIFEvents/IO/' . $this->InstanceID);
         $this->Host = '';
         $this->MyIP = '';
         $this->MyPort = 3777;
@@ -499,6 +499,7 @@ class ONVIFIO extends IPSModuleStrict
             $WSSubscriptionPolicySupport = false;
             $WSPullPointSupport = false;
             $HasRTSPStreaming = false;
+            $HasSnapshotUri = false;
             if ($this->GetCapabilities()) { // besorgt XAddr und einige Attribute Pflicht für Profil S.
                 $AnalyticsModuleSupport = $this->ReadAttributeBoolean(\ONVIF\IO\Attribute::AnalyticsModuleSupport);
                 $RuleSupport = $this->ReadAttributeBoolean(\ONVIF\IO\Attribute::RuleSupport);
@@ -817,7 +818,6 @@ class ONVIFIO extends IPSModuleStrict
                     if ($AllowedEventHandler == \ONVIF\EventHandler::PullPoint) {
                         IPS_RunScriptText('IPS_Sleep(1000);IPS_RequestAction(' . $this->InstanceID . ',"CreatePullPointSubscription",true);');
                     } else {
-                        $this->RegisterHook('/hook/ONVIFEvents/IO/' . $this->InstanceID);
                         if ($this->GetConsumerAddress()) { // yeah, we can receive events
                             IPS_RunScriptText('IPS_Sleep(1000);IPS_RequestAction(' . $this->InstanceID . ',"Subscribe",true);');
                         } else { // we cannot receive events :(

@@ -53,6 +53,8 @@ class ONVIFMediaStream extends ONVIFModuleBase
         $this->RegisterPropertyBoolean(\ONVIF\Stream\Property::EnablePresetVariable, false);
         $this->RegisterPropertyBoolean(\ONVIF\Stream\Property::EnablePresetProfile, false);
         $this->RegisterPropertyString(\ONVIF\Stream\Property::PresetProfile, json_encode([]));
+        //Hook
+        $this->RegisterHook('ONVIF/PTZ/' . $this->InstanceID);
         // Buffer
         $this->PTZ_token = '';
         $this->PTZ_xAddr = '';
@@ -913,7 +915,6 @@ class ONVIFMediaStream extends ONVIFModuleBase
         }
 
         if ($this->ReadPropertyBoolean(\ONVIF\Stream\Property::EnablePanTiltHTML) || $this->ReadPropertyBoolean(\ONVIF\Stream\Property::EnableZoomHTML)) {
-            $this->RegisterHook('/hook/ONVIF/PTZ/' . $this->InstanceID);
             $this->WritePTZInHTMLBox();
         } else {
             $this->UnregisterVariable('PTZControlHtml');
