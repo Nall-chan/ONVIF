@@ -80,7 +80,14 @@ class ONVIFDigitalOutput extends ONVIFModuleBase
             return '';
         }
         $Value = $Data['DataValues'][$EventDataIndex]['Value'];
-        $this->RegisterVariableBoolean($Ident, $Ident, '~Switch', 0);
+        $this->RegisterVariableBoolean(
+            $Ident,
+            $Ident,
+            [
+                'PRESENTATION' => VARIABLE_PRESENTATION_SWITCH
+            ],
+            0
+        );
         $this->SetValueBoolean($Ident, ($Value == 'active'));
         return '';
     }
@@ -184,7 +191,14 @@ class ONVIFDigitalOutput extends ONVIFModuleBase
             foreach ($Capabilities['RelayOutputs'] as $Name => $RelayOutput) {
                 $Ident = str_replace([' - ', ':'], ['_', ''], (string) $Name);
                 $Ident = preg_replace('/[^a-zA-Z\d]/u', '_', $Ident);
-                $this->RegisterVariableBoolean($Ident, $Name, '~Switch', 0);
+                $this->RegisterVariableBoolean(
+                    $Ident,
+                    $Name,
+                    [
+                        'PRESENTATION' => VARIABLE_PRESENTATION_SWITCH
+                    ],
+                    0
+                );
                 $this->EnableAction($Ident);
             }
             $Events = $this->ReadAttributeArray(\ONVIF\Device\Attribute::EventProperties);

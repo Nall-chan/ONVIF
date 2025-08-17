@@ -46,4 +46,8 @@ class LibraryTest extends TestCaseSymconValidation
     {
         $this->validateModule(__DIR__ . '/../ONVIF Image Grabber');
     }
+    public function testValidateRecording(): void
+    {
+        $this->validateModule(__DIR__ . '/../ONVIF Recording');
+    }
 }

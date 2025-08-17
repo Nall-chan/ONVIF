@@ -40,8 +40,40 @@ class ONVIFDigitalInput extends ONVIFModuleBase
         if (intval($DataValue) === 1) {
             $VariableValue = true;
         }
+        $this->RegisterVariableBoolean(
+            $Ident,
+            $Name,
+            [
 
-        $this->RegisterVariableBoolean($Ident, $Name, '', 0);
+                'COLOR'        => -1,
+                'ICON'         => 'binary',
+                'PRESENTATION' => VARIABLE_PRESENTATION_VALUE_PRESENTATION,
+                'OPTIONS'      => json_encode(
+                    [
+                        [
+                            'ColorDisplay' => 16077123,
+                            'Value'        => false,
+                            'Caption'      => $this->Translate('open'),
+                            'IconValue'    => '',
+                            'IconActive'   => false,
+                            'ColorActive'  => true,
+                            'ColorValue'   => 1692672
+                        ],
+                        [
+                            'ColorDisplay' => 1692672,
+                            'Value'        => true,
+                            'Caption'      => $this->Translate('closed'),
+                            'IconValue'    => '',
+                            'IconActive'   => false,
+                            'ColorActive'  => true,
+                            'ColorValue'   => 16077123
+                        ],
+                    ]
+                )
+
+            ],
+            0
+        );
         $this->SetValueBoolean($Ident, $VariableValue);
         return '';
     }
@@ -104,7 +136,40 @@ class ONVIFDigitalInput extends ONVIFModuleBase
             foreach ($Capabilities['DigitalInputs'] as $Name => $DigitalInput) {
                 $Ident = str_replace([' - ', ':'], ['_', ''], (string) $Name);
                 $Ident = preg_replace('/[^a-zA-Z\d]/u', '_', $Ident);
-                $this->RegisterVariableBoolean($Ident, $Name, '~Switch', 0);
+                $this->RegisterVariableBoolean(
+                    $Ident,
+                    $Name,
+                    [
+
+                        'COLOR'        => -1,
+                        'ICON'         => 'binary',
+                        'PRESENTATION' => VARIABLE_PRESENTATION_VALUE_PRESENTATION,
+                        'OPTIONS'      => json_encode(
+                            [
+                                [
+                                    'ColorDisplay' => 16077123,
+                                    'Value'        => false,
+                                    'Caption'      => $this->Translate('open'),
+                                    'IconValue'    => '',
+                                    'IconActive'   => false,
+                                    'ColorActive'  => true,
+                                    'ColorValue'   => 1692672
+                                ],
+                                [
+                                    'ColorDisplay' => 1692672,
+                                    'Value'        => true,
+                                    'Caption'      => $this->Translate('closed'),
+                                    'IconValue'    => '',
+                                    'IconActive'   => false,
+                                    'ColorActive'  => true,
+                                    'ColorValue'   => 16077123
+                                ],
+                            ]
+                        )
+
+                    ],
+                    0
+                );
             }
 
             $Events = $this->GetEvents($this->ReadPropertyString(\ONVIF\Device\Property::EventTopic));

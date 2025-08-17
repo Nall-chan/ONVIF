@@ -21,8 +21,6 @@ require_once __DIR__ . '/wsdl.php';
  * @method void SetValueFloat(string $Ident, float $value)
  * @method void SetValueInteger(string $Ident, int $value)
  * @method void SetValueString(string $Ident, string $value)
- * @method void RegisterProfileIntegerEx(string $Name, string $Icon, string $Prefix, string $Suffix, array $Associations, int $MaxValue = -1, float $StepSize = 0)
- * @method void RegisterProfileFloatEx(string $Name, string $Icon, string $Prefix, string $Suffix, array $Associations, float $MaxValue = -1, float $StepSize = 0, int $Digits = 0)
  * @method void UnregisterProfile(string $Name)
  * @uses \ONVIFModuleBase\BufferHelper
  */
@@ -379,7 +377,7 @@ class ONVIFModuleBase extends IPSModuleStrict
             }
             $Ident = str_replace([' - ', ':'], ['_', ''], $Name);
             $Ident = preg_replace('/[^a-zA-Z\d]/u', '_', $Ident);
-            $this->RegisterVariableBoolean($Ident, $Name, '', 0);
+            $this->RegisterVariableBoolean($Ident, $Name, [], 0);
             $this->SetValueBoolean($Ident, true);
             return;
         }
@@ -411,11 +409,11 @@ class ONVIFModuleBase extends IPSModuleStrict
                     if (intval($DataValue['Value']) === 1) {
                         $VariableValue = true;
                     }
-                    $this->RegisterVariableBoolean($Ident, $Name, '', 0);
+                    $this->RegisterVariableBoolean($Ident, $Name, [], 0);
                     $this->SetValueBoolean($Ident, $VariableValue);
                     break;
                 case 'tt:RelayLogicalState':
-                    $this->RegisterVariableBoolean($Ident, $Name, '', 0);
+                    $this->RegisterVariableBoolean($Ident, $Name, [], 0);
                     $this->SetValueBoolean($Ident, (strtolower($DataValue['Value']) === 'active'));
                     break;
                 case 'xs:float':
@@ -424,7 +422,7 @@ class ONVIFModuleBase extends IPSModuleStrict
                 case 'tt:float':
                 case 'tt:double':
                 case 'tt:long':
-                    $this->RegisterVariableFloat($Ident, $Name, '', 0);
+                    $this->RegisterVariableFloat($Ident, $Name, [], 0);
                     $this->SetValueFloat($Ident, (float) $DataValue['Value']);
                     break;
                 case 'xs:integer':
@@ -443,11 +441,11 @@ class ONVIFModuleBase extends IPSModuleStrict
                 case 'tt:unsignedInt':
                 case 'tt:unsignedShort':
                 case 'tt:unsignedByte':
-                    $this->RegisterVariableInteger($Ident, $Name, '', 0);
+                    $this->RegisterVariableInteger($Ident, $Name, [], 0);
                     $this->SetValueInteger($Ident, (int) $DataValue['Value']);
                     break;
                 default:
-                    $this->RegisterVariableString($Ident, $Name, '', 0);
+                    $this->RegisterVariableString($Ident, $Name, [], 0);
                     $this->SetValueString($Ident, $DataValue['Value']);
                     break;
             }

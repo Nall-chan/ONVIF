@@ -67,7 +67,14 @@ class ONVIFRecording extends ONVIFModuleBase
             return '';
         }
         $Value = $Data['DataValues'][$EventDataIndex]['Value'];
-        $this->RegisterVariableBoolean($Ident, $Name, '~Switch', 0);
+        $this->RegisterVariableBoolean(
+            $Ident,
+            $Name,
+            [
+                'PRESENTATION' => VARIABLE_PRESENTATION_SWITCH
+            ],
+            0
+        );
         $this->EnableAction($Ident);
         $this->SetValueBoolean($Ident, (strtolower($Value) == 'active'));
         return '';
@@ -90,7 +97,14 @@ class ONVIFRecording extends ONVIFModuleBase
             if (($this->ReadPropertyBoolean(\ONVIF\Output\Property::EmulateStatus))) {
                 $Ident = 'JobState' . $JobToken;
                 $Name = 'JobState:' . $JobToken;
-                $this->RegisterVariableBoolean($Ident, $Name, '~Switch', 0);
+                $this->RegisterVariableBoolean(
+                    $Ident,
+                    $Name,
+                    [
+                        'PRESENTATION' => VARIABLE_PRESENTATION_SWITCH
+                    ],
+                    0
+                );
                 $this->EnableAction($Ident);
                 $this->SetValueBoolean($Ident, $State);
             }
@@ -159,7 +173,14 @@ class ONVIFRecording extends ONVIFModuleBase
         $Value = $GetRecordingJobStateResult->State->State;
         $Ident = 'JobState' . $JobToken;
         $Name = 'JobState:' . $JobToken;
-        $this->RegisterVariableBoolean($Ident, $Name, '~Switch', 0);
+        $this->RegisterVariableBoolean(
+            $Ident,
+            $Name,
+            [
+                'PRESENTATION' => VARIABLE_PRESENTATION_SWITCH
+            ],
+            0
+        );
         $this->EnableAction($Ident);
         $this->SetValueBoolean($Ident, (strtolower($Value) == 'active'));
         return true;

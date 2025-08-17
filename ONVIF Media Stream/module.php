@@ -63,57 +63,11 @@ class ONVIFMediaStream extends ONVIFModuleBase
         $this->PTZ_MaxPresets = 0;
         $this->PresetTokenList = [];
         $this->AuthorizationKey = '';
-        // Profile
-        $this->RegisterProfileIntegerEx(
-            'ONVIF.PanTilt',
-            'Move',
-            '',
-            '',
-            [
-                [0, '◄◄', 'HollowLargeArrowLeft', -1],
-                [1, '▲▲', 'HollowLargeArrowUp', -1],
-                [2, 'Stop', 'Move', -1],
-                [3, '▼▼', 'HollowLargeArrowDown', -1],
-                [4, '►►', 'HollowLargeArrowRight', -1]
-            ]
-        );
-        $this->RegisterProfileIntegerEx(
-            'ONVIF.Zoom',
-            'Move',
-            '',
-            '',
-            [
-                [0, '↑↑', 'HollowDoubleArrowUp', -1],
-                [1, 'Stop', 'Move', -1],
-                [2, '↓↓', 'HollowDoubleArrowDown', -1]
-            ]
-        );
-        $this->RegisterProfileFloatEx(
-            'ONVIF.Speed',
-            'Speedo',
-            '',
-            '',
-            [
-                [0, $this->Translate('default'), '', -1],
-                [0.1, '%.1f', '', -1]
-            ],
-            5,
-            0.5,
-            1
-        );
-        $this->RegisterProfileFloatEx(
-            'ONVIF.Time',
-            'Clock',
-            '',
-            '',
-            [
-                [0, $this->Translate('default'), '', -1],
-                [0.1, '%.1f ' . $this->Translate('sec.'), '', -1]
-            ],
-            1,
-            0.1,
-            1
-        );
+        // Profile löschen
+        $this->UnregisterProfile('ONVIF.PanTilt');
+        $this->UnregisterProfile('ONVIF.Zoom');
+        $this->UnregisterProfile('ONVIF.Speed');
+        $this->UnregisterProfile('ONVIF.Time');
     }
 
     /**
@@ -920,34 +874,227 @@ class ONVIFMediaStream extends ONVIFModuleBase
             $this->UnregisterVariable('PTZControlHtml');
         }
         if ($this->ReadPropertyBoolean(\ONVIF\Stream\Property::EnablePanTiltVariable)) {
-            $this->RegisterVariableInteger('PT', $this->Translate('Move'), 'ONVIF.PanTilt', 3);
+            $this->RegisterVariableInteger(
+                'PT',
+                $this->Translate('Move'),
+                [
+                    'PRESENTATION' => VARIABLE_PRESENTATION_ENUMERATION,
+                    'ICON'         => 'Move',
+                    'LAYOUT'       => 0,
+                    'OPTIONS'      => json_encode(
+                        [
+                            [
+                                'Value'      => 0,
+                                'Caption'    => '⬅️',
+                                'IconActive' => true,
+                                'IconValue'  => 'HollowLargeArrowLeft',
+                                'Color'      => -1,
+                            ],
+                            [
+                                'Value'      => 1,
+                                'Caption'    => '⬆️',
+                                'IconActive' => true,
+                                'IconValue'  => 'HollowLargeArrowUp',
+                                'Color'      => -1,
+                            ],
+                            [
+                                'Value'      => 2,
+                                'Caption'    => '⏹️',
+                                'IconActive' => true,
+                                'IconValue'  => 'Move',
+                                'Color'      => -1,
+                            ],
+                            [
+                                'Value'      => 3,
+                                'Caption'    => '⬇️',
+                                'IconActive' => true,
+                                'IconValue'  => 'HollowLargeArrowDown',
+                                'Color'      => -1,
+                            ],
+                            [
+                                'Value'      => 4,
+                                'Caption'    => '➡️',
+                                'IconActive' => true,
+                                'IconValue'  => 'HollowLargeArrowRight',
+                                'Color'      => -1,
+                            ]
+                        ]
+                    )
+                ],
+                3
+            );
             $this->SetValueInteger('PT', 2);
             $this->EnableAction('PT');
         } else {
             $this->UnregisterVariable('PT');
         }
         if ($this->ReadPropertyBoolean(\ONVIF\Stream\Property::EnableZoomVariable)) {
-            $this->RegisterVariableInteger('ZOOM', $this->Translate('Zoom'), 'ONVIF.Zoom', 4);
+            $this->RegisterVariableInteger(
+                'ZOOM',
+                $this->Translate('Zoom'),
+                [
+                    'PRESENTATION' => VARIABLE_PRESENTATION_ENUMERATION,
+                    'ICON'         => 'Move',
+                    'LAYOUT'       => 0,
+                    'OPTIONS'      => json_encode(
+                        [
+                            [
+                                'Value'      => 0,
+                                'Caption'    => '➕',
+                                'IconActive' => true,
+                                'IconValue'  => 'HollowDoubleArrowUp',
+                                'Color'      => -1,
+                            ],
+                            [
+                                'Value'      => 1,
+                                'Caption'    => '⏹️',
+                                'IconActive' => true,
+                                'IconValue'  => 'Move',
+                                'Color'      => -1,
+                            ],
+                            [
+                                'Value'      => 2,
+                                'Caption'    => '➖',
+                                'IconActive' => true,
+                                'IconValue'  => 'HollowDoubleArrowDown',
+                                'Color'      => -1,
+                            ]
+                        ]
+                    )
+                ],
+                4
+            );
             $this->SetValueInteger('ZOOM', 1);
             $this->EnableAction('ZOOM');
         } else {
             $this->UnregisterVariable('ZOOM');
         }
         if ($this->ReadPropertyBoolean(\ONVIF\Stream\Property::EnableSpeedVariable)) {
-            $this->RegisterVariableFloat('SPEED', $this->Translate('Speed'), 'ONVIF.Speed', 1);
+            $this->RegisterVariableFloat(
+                'SPEED',
+                $this->Translate('Speed'),
+                [
+                    'DIGITS'              => 1,
+                    'CUSTOM_GRADIENT'     => '[]',
+                    'ICON'                => 'person-running-fast',
+                    'DECIMAL_SEPARATOR'   => 'Client',
+                    'GRADIENT_TYPE'       => 0,
+                    'MAX'                 => 5,
+                    'PRESENTATION'        => VARIABLE_PRESENTATION_SLIDER,
+                    'INTERVALS'           => json_encode(
+                        [
+                            [
+                                'IntervalMinValue' => 0,
+                                'IntervalMaxValue' => 0.1,
+                                'ConstantActive'   => true,
+                                'ConstantValue'    => $this->Translate('default'),
+                                'ConversionFactor' => 1,
+                                'IconActive'       => false,
+                                'IconValue'        => '',
+                                'PrefixActive'     => false,
+                                'PrefixValue'      => '',
+                                'SuffixActive'     => false,
+                                'SuffixValue'      => '',
+                                'DigitsActive'     => false,
+                                'DigitsValue'      => 0,
+                            ],
+                            [
+                                'IntervalMinValue' => 0.1,
+                                'IntervalMaxValue' => 5,
+                                'ConstantActive'   => false,
+                                'ConstantValue'    => '',
+                                'ConversionFactor' => 1,
+                                'IconActive'       => false,
+                                'IconValue'        => '',
+                                'PrefixActive'     => false,
+                                'PrefixValue'      => '',
+                                'SuffixActive'     => false,
+                                'SuffixValue'      => '',
+                                'DigitsActive'     => false,
+                                'DigitsValue'      => 0,
+                            ],
+                        ]
+                    ),
+                    'INTERVALS_ACTIVE'    => true,
+                    'MIN'                 => 0,
+                    'PERCENTAGE'          => false,
+                    'PREFIX'              => '',
+                    'STEP_SIZE'           => 0.5,
+                    'SUFFIX'              => '',
+                    'THOUSANDS_SEPARATOR' => '',
+                    'USAGE_TYPE'          => 5,
+                ],
+                1
+            );
             $this->SetValueFloat('SPEED', 0);
             $this->EnableAction('SPEED');
         } else {
             $this->UnregisterVariable('SPEED');
         }
         if ($this->ReadPropertyBoolean(\ONVIF\Stream\Property::EnableTimeVariable)) {
-            $this->RegisterVariableFloat('TIME', $this->Translate('Time'), 'ONVIF.Time', 2);
+            $this->RegisterVariableFloat(
+                'TIME',
+                $this->Translate('Time'),
+                [
+                    'DIGITS'              => 1,
+                    'CUSTOM_GRADIENT'     => '[]',
+                    'ICON'                => 'Clock',
+                    'DECIMAL_SEPARATOR'   => 'Client',
+                    'GRADIENT_TYPE'       => 0,
+                    'MAX'                 => 5,
+                    'PRESENTATION'        => VARIABLE_PRESENTATION_SLIDER,
+                    'INTERVALS'           => json_encode(
+                        [
+                            [
+                                'IntervalMinValue' => 0,
+                                'IntervalMaxValue' => 0.1,
+                                'ConstantActive'   => true,
+                                'ConstantValue'    => $this->Translate('default'),
+                                'ConversionFactor' => 1,
+                                'IconActive'       => false,
+                                'IconValue'        => '',
+                                'PrefixActive'     => false,
+                                'PrefixValue'      => '',
+                                'SuffixActive'     => false,
+                                'SuffixValue'      => '',
+                                'DigitsActive'     => false,
+                                'DigitsValue'      => 0,
+                            ],
+                            [
+                                'IntervalMinValue' => 0.1,
+                                'IntervalMaxValue' => 5,
+                                'ConstantActive'   => false,
+                                'ConstantValue'    => '',
+                                'ConversionFactor' => 1,
+                                'IconActive'       => false,
+                                'IconValue'        => '',
+                                'PrefixActive'     => false,
+                                'PrefixValue'      => '',
+                                'SuffixActive'     => false,
+                                'SuffixValue'      => '',
+                                'DigitsActive'     => false,
+                                'DigitsValue'      => 0,
+                            ],
+                        ]
+                    ),
+                    'INTERVALS_ACTIVE'    => true,
+                    'MIN'                 => 0,
+                    'PERCENTAGE'          => false,
+                    'PREFIX'              => '',
+                    'STEP_SIZE'           => 0.1,
+                    'SUFFIX'              => $this->Translate('sec.'),
+                    'THOUSANDS_SEPARATOR' => '',
+                    'USAGE_TYPE'          => 5,
+                ],
+                2
+            );
             $this->SetValueFloat('TIME', 0);
             $this->EnableAction('TIME');
         } else {
             $this->UnregisterVariable('TIME');
         }
         $PresetProfileName = 'ONVIF.Preset.' . $this->InstanceID;
+        $this->UnregisterProfile($PresetProfileName);
         if ($this->ReadPropertyBoolean(\ONVIF\Stream\Property::EnablePresetVariable)) {
             $UsePresetName = $this->ReadPropertyBoolean(\ONVIF\Stream\Property::EnablePresetProfile);
             $Presets = json_decode($this->ReadPropertyString(\ONVIF\Stream\Property::PresetProfile));
@@ -957,20 +1104,30 @@ class ONVIFMediaStream extends ONVIFModuleBase
                 $PresetTokenList[$Preset->VariableValue] = $Preset->PresetToken;
                 if ($Preset->PresetActive) {
                     $PresetAssociations[] = [
-                        $Preset->VariableValue,
-                        $UsePresetName ? ($Preset->PresetName == '' ? $Preset->VariableValue : $Preset->PresetName) : $Preset->VariableValue,
-                        '',
-                        -1
+                        'Value'      => $Preset->VariableValue,
+                        'Caption'    => $UsePresetName ? ($Preset->PresetName == '' ? $Preset->VariableValue : $Preset->PresetName) : $Preset->VariableValue,
+                        'IconActive' => false,
+                        'IconValue'  => '',
+                        'Color'      => -1,
                     ];
                 }
             }
             $this->PresetTokenList = $PresetTokenList;
-            $this->RegisterProfileIntegerEx($PresetProfileName, 'Move', '', '', $PresetAssociations);
-            $this->RegisterVariableInteger('PRESET', $this->Translate('Pre-position'), $PresetProfileName, 5);
+            $this->RegisterVariableInteger(
+                'PRESET',
+                $this->Translate('Pre-position'),
+                [
+                    'PRESENTATION' => VARIABLE_PRESENTATION_ENUMERATION,
+                    'ICON'         => 'Move',
+                    'LAYOUT'       => 0,
+                    'OPTIONS'      => json_encode($PresetAssociations)
+
+                ],
+                5
+            );
             $this->EnableAction('PRESET');
         } else {
             $this->UnregisterVariable('PRESET');
-            $this->UnregisterProfile($PresetProfileName);
         }
     }
 
@@ -1148,7 +1305,11 @@ class ONVIFMediaStream extends ONVIFModuleBase
     }
     protected function WritePTZInHTMLBox(): void
     {
-        $this->RegisterVariableString('PTZControlHtml', 'PTZ Control for Webfront', '~HTMLBox', 5);
+        $this->RegisterVariableString('PTZControlHtml', 'PTZ Control for Webfront', [
+            'HTML_TYPE'    => 0,
+            'PADDING'      => true,
+            'PRESENTATION' => VARIABLE_PRESENTATION_WEB_CONTENT,
+        ], 5);
         $mId = $this->FindIDForIdent('STREAM');
         if (!$mId) {
             $this->SetValueString('PTZControlHtml', '');
@@ -1156,7 +1317,7 @@ class ONVIFMediaStream extends ONVIFModuleBase
         }
         $this->AuthorizationKey = $Key = base64_encode('token:' . IPS_CreateTemporaryMediaStreamToken($mId, 900));
         $Key = urlencode($Key);
-        $ImgSrc = '<img class="stream" src="proxy/' . $mId . '?authorization=' . $Key . '">';
+        $ImgSrc = '<img class="stream" style="max-width: 100%;max-height: 100%;" src="proxy/' . $mId . '?authorization=' . $Key . '">';
         $PanTiltSVG = '';
         if ($this->ReadPropertyBoolean(\ONVIF\Stream\Property::EnablePanTiltHTML)) {
             $PanTiltSVG = str_replace(
