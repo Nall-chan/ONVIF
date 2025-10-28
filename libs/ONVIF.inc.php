@@ -40,7 +40,7 @@ class ONVIFsoapClient extends \SoapClient
         return $this->__last_response_headers;
     }
 
-    public function __doRequest(string $request, string $location, string $action, int $version, bool $one_way = false): ?string
+    public function __doRequest(string $request, string $location, string $action, int $version, bool $one_way = false, ?string $uriParserClass = null): ?string
     {
         $headers = [
             'Method: POST',
