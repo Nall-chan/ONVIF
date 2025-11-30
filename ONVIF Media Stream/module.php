@@ -35,10 +35,14 @@ class ONVIFMediaStream extends ONVIFModuleBase
         $this->RegisterPropertyBoolean(\ONVIF\Stream\Property::EnableZoomVariable, false);
         $this->RegisterPropertyBoolean(\ONVIF\Stream\Property::EnableSpeedVariable, false);
         $this->RegisterPropertyBoolean(\ONVIF\Stream\Property::EnableTimeVariable, false);
-        //HTML-Box
-        $this->RegisterPropertyBoolean(\ONVIF\Stream\Property::EnablePanTiltHTML, false);
-        $this->RegisterPropertyBoolean(\ONVIF\Stream\Property::EnableZoomHTML, false);
-        //SVG-Design in HTML-Box
+        // Tile Visu
+        $this->RegisterPropertyBoolean(\ONVIF\Stream\Property::EnablePTZTileDisplay, false);
+        // HTML-Box
+        $this->RegisterPropertyBoolean(\ONVIF\Stream\Property::EnablePTZHTMLDisplay, false);
+        //Controls für HTML-Box / Tile Visu
+        $this->RegisterPropertyBoolean(\ONVIF\Stream\Property::EnablePanTilt, false);
+        $this->RegisterPropertyBoolean(\ONVIF\Stream\Property::EnableZoom, false);
+        //SVG-Design in HTML-Box / Tile Visu
         $this->RegisterPropertyInteger(\ONVIF\Stream\Property::PanTiltControlWidth, 100);
         $this->RegisterPropertyInteger(\ONVIF\Stream\Property::PanTiltControlHeight, 100);
         $this->RegisterPropertyInteger(\ONVIF\Stream\Property::PanTiltControlOpacity, 60);
@@ -68,6 +72,19 @@ class ONVIFMediaStream extends ONVIFModuleBase
         $this->UnregisterProfile('ONVIF.Zoom');
         $this->UnregisterProfile('ONVIF.Speed');
         $this->UnregisterProfile('ONVIF.Time');
+    }
+
+    public function Migrate(string $JSONData): string
+    {
+        // Prüfe Version diese Modul-Instanz
+        $j = json_decode($JSONData);
+        if (isset($j->configuration->EnablePanTiltHTML)) {
+            if ($j->configuration->EnablePanTiltHTML || $j->configuration->EnableZoomHTML) {
+                $j->configuration->EnablePTZHTMLDisplay = true;
+                $j->configuration->EnablePTZTileDisplay = true;
+            }
+        }
+        return json_encode($j);
     }
 
     /**
@@ -789,11 +806,67 @@ class ONVIFMediaStream extends ONVIFModuleBase
                     $this->SetValueInteger('ZOOM', (int) $Value);
                 }
                 return;
+            case 'StopPTZ':
+                $this->StopPTZ();
+                return;
+            case 'StartPTZ':
+                switch ($Value) {
+                    case 'left':
+                        $this->MoveLeft();
+                        return;
+                    case 'right':
+                        $this->MoveRight();
+                        return;
+                    case 'up':
+                        $this->MoveUp();
+                        return;
+                    case 'down':
+                        $this->MoveDown();
+                        return;
+                    case 'near':
+                        $this->ZoomNear();
+                        return;
+                    case 'far':
+                        $this->ZoomFar();
+                        return;
+                    default:
+                        echo $this->Translate('Invalid parameters.');
+                        return;
+                }
         }
         set_error_handler([$this, 'ModulErrorHandler']);
         trigger_error($this->Translate('Invalid Ident.'), E_USER_NOTICE);
         restore_error_handler();
         return;
+    }
+    public function GetVisualizationTile(): string
+    {
+        $mId = $this->FindIDForIdent('STREAM');
+        if (!$mId) {
+            return '';
+        }
+        $Key = base64_encode('token:' . IPS_CreateTemporaryMediaStreamToken($mId, 900));
+        $Key = urlencode($Key);
+        $Messages = [[
+            'ident' => 'stream',
+            'value' => '../../proxy/' . $mId . '?authorization=' . $Key
+        ]];
+        // Add static HTML content from file
+        $Stream = file_get_contents(__DIR__ . '/stream.html');
+        $PanTiltSVG = $this->GetPanTiltSVG();
+        $ZoomSVG = $this->GetZoomSVG();
+        // Inject current values using the message handling function
+        $all = $Stream .
+        '<div style="position:absolute; right:0px; bottom:0px; margin:10px">' .
+        $ZoomSVG .
+        $PanTiltSVG .
+        '</div>' .
+        '<script>' . 'instanceId = ' . $this->InstanceID . ';' .
+        'pt = ' . (int) $this->ReadPropertyBoolean(\ONVIF\Stream\Property::EnablePanTilt) . ';' .
+        'zoom = ' . (int) $this->ReadPropertyBoolean(\ONVIF\Stream\Property::EnableZoom) . ';' .
+        'handleMessage(\'' . json_encode($Messages) . '\');' . '</script>';
+        $this->SendDebug('TileSize Bytes', strlen($all), 0);
+        return $all;
     }
 
     public function ReceiveData(string $JSONString): string
@@ -867,8 +940,8 @@ class ONVIFMediaStream extends ONVIFModuleBase
             $this->SetMedia('');
             $this->SetStatus(IS_EBASE + 1);
         }
-
-        if ($this->ReadPropertyBoolean(\ONVIF\Stream\Property::EnablePanTiltHTML) || $this->ReadPropertyBoolean(\ONVIF\Stream\Property::EnableZoomHTML)) {
+        $this->SetVisualizationType((int) $this->ReadPropertyBoolean(\ONVIF\Stream\Property::EnablePTZTileDisplay));
+        if ($this->ReadPropertyBoolean(\ONVIF\Stream\Property::EnablePTZHTMLDisplay)) {
             $this->WritePTZInHTMLBox();
         } else {
             $this->UnregisterVariable('PTZControlHtml');
@@ -1108,7 +1181,7 @@ class ONVIFMediaStream extends ONVIFModuleBase
                         'Caption'    => $UsePresetName ? ($Preset->PresetName == '' ? $Preset->VariableValue : $Preset->PresetName) : $Preset->VariableValue,
                         'IconActive' => false,
                         'IconValue'  => '',
-                        'Color'      => -1,
+                        'Color'      => -1
                     ];
                 }
             }
@@ -1317,43 +1390,9 @@ class ONVIFMediaStream extends ONVIFModuleBase
         }
         $this->AuthorizationKey = $Key = base64_encode('token:' . IPS_CreateTemporaryMediaStreamToken($mId, 900));
         $Key = urlencode($Key);
-        $ImgSrc = '<img class="stream" style="max-width: 100%;max-height: 100%;" src="proxy/' . $mId . '?authorization=' . $Key . '">';
-        $PanTiltSVG = '';
-        if ($this->ReadPropertyBoolean(\ONVIF\Stream\Property::EnablePanTiltHTML)) {
-            $PanTiltSVG = str_replace(
-                [
-                    '%%InstanceId%%',
-                    '%%width%%',
-                    '%%height',
-                    '%%opacity%%'
-                ],
-                [
-                    $this->InstanceID,
-                    $this->ReadPropertyInteger(\ONVIF\Stream\Property::PanTiltControlWidth),
-                    $this->ReadPropertyInteger(\ONVIF\Stream\Property::PanTiltControlHeight),
-                    sprintf('%F', $this->ReadPropertyInteger(\ONVIF\Stream\Property::PanTiltControlOpacity) / 100)
-                ],
-                file_get_contents(__DIR__ . '/../libs/PanTiltControl.svg')
-            );
-        }
-        $ZoomSVG = '';
-        if ($this->ReadPropertyBoolean(\ONVIF\Stream\Property::EnableZoomHTML)) {
-            $ZoomSVG = str_replace(
-                [
-                    '%%InstanceId%%',
-                    '%%width%%',
-                    '%%height',
-                    '%%opacity%%'
-                ],
-                [
-                    $this->InstanceID,
-                    $this->ReadPropertyInteger(\ONVIF\Stream\Property::ZoomControlWidth),
-                    $this->ReadPropertyInteger(\ONVIF\Stream\Property::ZoomControlHeight),
-                    sprintf('%F', $this->ReadPropertyInteger(\ONVIF\Stream\Property::ZoomControlOpacity) / 100)
-                ],
-                file_get_contents(__DIR__ . '/../libs/ZoomControl.svg')
-            );
-        }
+        $ImgSrc = '<img class="stream" style="height: auto;width: auto;max-width: 100%;max-height: 100%;" src="proxy/' . $mId . '?authorization=' . $Key . '">';
+        $PanTiltSVG = $this->GetPanTiltSVG();
+        $ZoomSVG = $this->GetZoomSVG();
         $JS = str_replace(
             [
                 '%%InstanceId%%',
@@ -1450,9 +1489,51 @@ class ONVIFMediaStream extends ONVIFModuleBase
                         echo $this->Translate('Invalid parameters.');
                         return;
                 }
-                break;
         }
         echo $this->Translate('Invalid parameters.');
         return;
+    }
+
+    private function GetPanTiltSVG(): string
+    {
+        if ($this->ReadPropertyBoolean(\ONVIF\Stream\Property::EnablePanTilt)) {
+            return str_replace(
+                [
+                    '%%InstanceId%%',
+                    '%%width%%',
+                    '%%height',
+                    '%%opacity%%'
+                ],
+                [
+                    $this->InstanceID,
+                    $this->ReadPropertyInteger(\ONVIF\Stream\Property::PanTiltControlWidth),
+                    $this->ReadPropertyInteger(\ONVIF\Stream\Property::PanTiltControlHeight),
+                    sprintf('%F', $this->ReadPropertyInteger(\ONVIF\Stream\Property::PanTiltControlOpacity) / 100)
+                ],
+                file_get_contents(__DIR__ . '/../libs/PanTiltControl.svg')
+            );
+        }
+        return '';
+    }
+    private function GetZoomSVG(): string
+    {
+        if ($this->ReadPropertyBoolean(\ONVIF\Stream\Property::EnableZoom)) {
+            return str_replace(
+                [
+                    '%%InstanceId%%',
+                    '%%width%%',
+                    '%%height',
+                    '%%opacity%%'
+                ],
+                [
+                    $this->InstanceID,
+                    $this->ReadPropertyInteger(\ONVIF\Stream\Property::ZoomControlWidth),
+                    $this->ReadPropertyInteger(\ONVIF\Stream\Property::ZoomControlHeight),
+                    sprintf('%F', $this->ReadPropertyInteger(\ONVIF\Stream\Property::ZoomControlOpacity) / 100)
+                ],
+                file_get_contents(__DIR__ . '/../libs/ZoomControl.svg')
+            );
+        }
+        return '';
     }
 }

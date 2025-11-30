@@ -1,10 +1,10 @@
 [![SDK](https://img.shields.io/badge/Symcon-PHPModul-red.svg)](https://www.symcon.de/service/dokumentation/entwicklerbereich/sdk-tools/sdk-php/)
-[![Version](https://img.shields.io/badge/Modul%20Version-2.50-blue.svg)](https://community.symcon.de/t/modul-onvif-profil-s-fuer-ip-kameras-und-encoder/52036)
-[![Version](https://img.shields.io/badge/Symcon%20Version-8.1%20%3E-green.svg)](https://www.symcon.de/de/service/dokumentation/installation/migrationen/v80-v81-q3-2025/)  
+[![Module Version](https://img.shields.io/badge/dynamic/json?url=https%3A%2F%2Fraw.githubusercontent.com%2FNall-chan%2FONVIF%2Frefs%2Fheads%2Fstrict%2Flibrary.json&query=%24.version&label=Modul%20Version&color=blue)](https://community.symcon.de/t/modul-onvif-profil-s-fuer-ip-kameras-und-encoder/52036)
+[![Symcon Version](https://img.shields.io/badge/dynamic/json?url=https%3A%2F%2Fraw.githubusercontent.com%2FNall-chan%2FONVIF%2Frefs%2Fheads%2Fstrict%2Flibrary.json&query=%24.compatibility.version&suffix=%3E&label=Symcon%20Version&color=green)](https://www.symcon.de/de/service/dokumentation/installation/migrationen/v80-v81-q3-2025/)  
 [![License](https://img.shields.io/badge/License-CC%20BY--NC--SA%204.0-green.svg)](https://creativecommons.org/licenses/by-nc-sa/4.0/)
 [![Check Style](https://github.com/Nall-chan/ONVIF/workflows/Check%20Style/badge.svg)](https://github.com/Nall-chan/ONVIF/actions)
 [![Run Tests](https://github.com/Nall-chan/ONVIF/workflows/Run%20Tests/badge.svg)](https://github.com/Nall-chan/ONVIF/actions)  
-[![Spenden](https://www.paypalobjects.com/de_DE/DE/i/btn/btn_donate_SM.gif)](#3-spenden)[![Wunschliste](https://img.shields.io/badge/Wunschliste-Amazon-ff69fb.svg)](#3-spenden)  
+[![PayPal.Me](https://img.shields.io/badge/PayPal-Me-lightblue.svg)](#3-spenden)[![Wunschliste](https://img.shields.io/badge/Wunschliste-Amazon-ff69fb.svg)](#3-spenden)  
 
 # ONVIF Profil S, T & G Library <!-- omit in toc -->
 
@@ -13,22 +13,25 @@ Einbinden von ONVIF kompatiblen Geräten in IPS.
 ## Inhaltsverzeichnis <!-- omit in toc -->
 
 - [1. Vorbemerkungen](#1-vorbemerkungen)
-	- [Zur Library](#zur-library)
-	- [Zur Integration von Geräten](#zur-integration-von-geräten)
-	- [Hinweise zum Symcon-System / Host](#hinweise-zum-symcon-system--host)
+  - [Zur Library](#zur-library)
+  - [Zur Integration von Geräten](#zur-integration-von-geräten)
+  - [Hinweise zum Symcon-System / Host](#hinweise-zum-symcon-system--host)
 - [2. Voraussetzungen](#2-voraussetzungen)
 - [3. Software-Installation](#3-software-installation)
 - [4. Enthaltende Module](#4-enthaltende-module)
 - [5. Anhang](#5-anhang)
-	- [1. GUID der Module](#1-guid-der-module)
-	- [2. Changelog](#2-changelog)
-	- [3. Spenden](#3-spenden)
+  - [1. GUID der Module](#1-guid-der-module)
+  - [2. Changelog](#2-changelog)
+  - [3. Spenden](#3-spenden)
 - [6. Lizenz](#6-lizenz)
 
 ----------
+
 ## 1. Vorbemerkungen
 
 ### Zur Library
+
+> [!IMPORTANT] Hinweis
 Diese Library wurde nicht dazu entwickelt komplett den Profile Spezifikationen S, T und G zu entsprechen oder deren gesamten Funktionsumfang abzubilden.  
 Vielmehr liegt der Schwerpunkt auf eine einfache und unkomplizierte Integration bestimmter Bestandteile (LiveStream, Steuerung) und Funktionen (Events, Digital Ein-/Ausgänge) in Symcon.  
 Dadurch ist es auch möglich Geräte in Symcon einzubinden welche ihrerseits die Spezifikationen nicht vollständig oder nicht korrekt umsetzen.  
@@ -36,6 +39,7 @@ Dennoch wird geprüft ob Geräte sich nicht an verpflichtende Funktionen halten 
 Dies ist kein Fehler, sondern ein beabsichtigtes Verhalten.  
 
 ----------
+
 ### Zur Integration von Geräten  
 
 Es werden Instanzen zum auffinden (Discovery) und einrichten (Konfigurator) von Geräten in Symcon bereitgestellt.  
@@ -44,36 +48,42 @@ So gibt es Geräte bei welchen am Werk z.B. das ONVIF Protokoll oder ONVIF Disco
 Oder wo eine entsprechende Zugangsberechtigung erstellt bzw. erweitert werden muss.  
 Eine Konfiguration der Geräte über Symcon ist in dieser Library aktuell nicht vorgesehen.  
 Unerlässlich ist eine korrekte Uhrzeit auf den Geräten, da eine Authentifizierung sonst fehlschlägt.  
-Es wird dringend empfohlen vor der Integration in IPS folgende Parameter in den Geräten fertig zu konfigurieren und ggfls. zu testen:
 
-- Netzwerk-Schnittstelle (IP-Adresse)  
-- Auffindbarkeit / Discovery über ONVIF aktivieren  
-- Zugangsdaten (u.U. eigene für ONVIF)  
-	- Die Zugangsdaten sollten bei allen Geräten identisch sein.  
-- Zeitsynchronisation  
-	- Nach Möglichkeit sollten die Geräte und der Symcon Host die Uhrzeit aus der gleichen Quelle beziehen (NTP-Server).  
-- PTZ-Vorpositionen / Szenen  (sofern vorhanden)  
-- h264-Profile bzw. Media-Profile für ONVIF  
-- Sinnvolle Namen der Videoquellen, der Media-Profile und der Ein-/Ausgänge, sofern die Geräte das umbenennen unterstützen.  
+> [!CAUTION] ACHTUNG
+> Es wird dringend empfohlen vor der Integration in IPS folgende Parameter in den Geräten fertig zu konfigurieren und ggfls. zu testen:
+>
+> - Netzwerk-Schnittstelle (IP-Adresse)  
+> Auffindbarkeit / Discovery über ONVIF aktivieren  
+> - Zugangsdaten (u.U. eigene für ONVIF)  
+>   - Die Zugangsdaten sollten bei allen Geräten identisch sein.  
+> - Zeitsynchronisation  
+>   - Nach Möglichkeit sollten die Geräte und der Symcon Host die Uhrzeit aus der gleichen Quelle beziehen (NTP-Server).  
+> - PTZ-Vorpositionen / Szenen  (sofern vorhanden)  
+> - h264-Profile bzw. Media-Profile für ONVIF  
+> - Sinnvolle Namen der Videoquellen, der Media-Profile und der Ein-/Ausgänge, sofern die Geräte das umbenennen unterstützen.  
 
 ----------
+
 ### Hinweise zum Symcon-System / Host  
 
-Die Maximale Anzahl der gleichzeitig verwendbaren RTSP-Streams hängt von der Symcon Lizenz ab. Bitte hierzu die [Funktionsübersicht der Editionen](https://www.symcon.de/produkt/editionen/) beachten.  
+> [!WARNING] Wichtig
+> Die Maximale Anzahl der gleichzeitig verwendbaren RTSP-Streams hängt von der Symcon Lizenz ab. Bitte hierzu die [Funktionsübersicht der Editionen](https://www.symcon.de/produkt/editionen/) beachten.  
 
 ----------
-<span style="color:red">**Folgendes gilt nicht für reine Profil T Geräte:**</span>  
 
+> [!CAUTION] Folgendes gilt nicht für reine Profil T Geräte:
 Um Ereignisse der Geräte ressourcenschonend in Symcon zu verarbeiten, werden diese vom Gerät abonniert. Dazu wird beim abonnieren eine Zieladresse an das Gerät übertragen, an welches es auftretende Ereignisse senden soll.  
 Die Zieladresse ist ein Webhook, welcher pro [IO-Modul](ONVIF%20IO/README.md) automatisch erzeugt wird.  
 Beim anlegen der IO-Instanz wird automatisch nur der interne WebServer von Symcon auf Port 3777 eingetragen.  
 Die IP-Adresse auf welchem Symcon die Daten empfängt wird automatisch ermittelt.  
 
 Bei System mit **aktiven NAT-Support** funktioniert die automatische Erkennung der eigenen IP-Adresse nicht.  
-__In dem Fall wird automatisch die NATPublicIP aus den [Symcon-Spezialschaltern](https://www.symcon.de/service/dokumentation/entwicklerbereich/spezialschalter/) benutzt.__  
+**In dem Fall wird automatisch die NATPublicIP aus den [Symcon-Spezialschaltern](https://www.symcon.de/service/dokumentation/entwicklerbereich/spezialschalter/) benutzt.**  
+
 <span style="color:red">**Auch bei Systemen mit aktiven NAT-Support wird extern automatisch nur der Port 3777 beim anlegen von IO-Instanzen unterstützt.**</span>  
   
-Sollte es nötig sein, so können bei Bedarf die eigene IP und der Port, sowie die Verwendung von https anstatt http, in den IO-Instanzen unter `Experteneinstellungen` geändert und fixiert werden.
+> [!TIP] Tipp:
+> Sollte es nötig sein, so können bei Bedarf die eigene IP und der Port, sowie die Verwendung von https anstatt http, in den IO-Instanzen unter `Experteneinstellungen` geändert und fixiert werden.
 
 ----------
 Damit Geräte über das [Discovery-Modul](ONVIF%20Discovery/README.md) gefunden werden können, müssen bei in gerouteten Netzen und bei NAT Systemen Multicast-Pakete korrekt weitergeleitet werden.  
@@ -81,56 +91,56 @@ Damit Geräte über das [Discovery-Modul](ONVIF%20Discovery/README.md) gefunden 
 Für das Discovery werden Pakete über die Multicast-Adresse `239.255.255.250` auf Port `3702` gesendet und auf UDP Port `3703` empfangen.  
 
 ----------
+
 ## 2. Voraussetzungen
 
-* IP-Symcon ab Version 8.1
-* Kameras oder Video-Encoder mit ONVIF Profil S und/oder Profil T & G Unterstützung.
- 
- ## 3. Software-Installation
-  
-  Über den 'Module-Store' in IPS das Modul 'ONVIF' hinzufügen.  
-   **Bei kommerzieller Nutzung (z.B. als Errichter oder Integrator) wenden Sie sich bitte an den Autor.**  
-![Module-Store](imgs/install.png) 
+- IP-Symcon ab Version 8.2
+- Kameras oder Video-Encoder mit ONVIF Profil S und/oder Profil T & G Unterstützung.
 
-  ## 4. Enthaltende Module
+## 3. Software-Installation
 
-- __ONVIF Discovery__ ([Dokumentation](ONVIF%20Discovery/README.md))  
-	Erkennt ONVIF kompatible Geräte innerhalb des lokalen LAN.  
-	<span style="color:red">**Funktioniert nicht in einem Docker Container welcher per NAT angebunden ist**</span>  
- 
-- __ONVIF Configurator__ ([Dokumentation](ONVIF%20Configurator/README.md))  
-	Unterstützt beim Einrichten der verschiedenen Instanzen für ein ONVIF-Gerät.
+Über den 'Module-Store' in IPS das Modul 'ONVIF' hinzufügen.  
+**Bei kommerzieller Nutzung (z.B. als Errichter oder Integrator) wenden Sie sich bitte an den Autor.**  
+![Module-Store](imgs/install.png)
 
-- __ONVIF IO__ ([Dokumentation](ONVIF%20IO/README.md))  
-	Stellt die Verbindung zu einem ONVIF-Gerät her.  
+## 4. Enthaltende Module
 
-- __ONVIF Media Stream__ ([Dokumentation](ONVIF%20Media%20Stream/README.md))  
-	Konfiguriert ein IPS Medien-Objekt (RTSP-Stream) anhand der Geräte-Fähigkeiten.  
+- **ONVIF Discovery** ([Dokumentation](ONVIF%20Discovery/README.md))  
+  Erkennt ONVIF kompatible Geräte innerhalb des lokalen LAN.  
+  <span style="color:red">**Funktioniert nicht in einem Docker Container welcher per NAT angebunden ist**</span>  
 
-- __ONVIF Image Grabber__ ([Dokumentation](ONVIF%20Image%20Grabber/README.md))  
-	Lädt Snapshots (Standbilder) von dem Gerät und legt es in einem Media-Objekt ab.  
+- **ONVIF Konfigurator** ([Dokumentation](ONVIF%20Configurator/README.md))  
+  Unterstützt beim Einrichten der verschiedenen Instanzen für ein ONVIF-Gerät.
 
-- __ONVIF Digital Input__ ([Dokumentation](ONVIF%20Digital%20Input/README.md))  
-	Bildet die Digitalen Eingänge in Symcon ab.  
+- **ONVIF IO** ([Dokumentation](ONVIF%20IO/README.md))  
+  Stellt die Verbindung zu einem ONVIF-Gerät her.  
 
-- __ONVIF Digital Output__ ([Dokumentation](ONVIF%20Digital%20Output/README.md))  
-	Bildet Digitale Ausgänge (Relays) in Symcon ab.  
+- **ONVIF Media Stream** ([Dokumentation](ONVIF%20Media%20Stream/README.md))  
+  Konfiguriert ein IPS Medien-Objekt (RTSP-Stream) anhand der Geräte-Fähigkeiten.  
 
-- __ONVIF Events__ ([Dokumentation](ONVIF%20Events/README.md))  
-	Bildet empfangbare ONVIF-Ereignisse in Symcon ab.  
+- **ONVIF Image Grabber** ([Dokumentation](ONVIF%20Image%20Grabber/README.md))  
+  Lädt Snapshots (Standbilder) von dem Gerät und legt es in einem Media-Objekt ab.  
 
-- __ONVIF Recording__ ([Dokumentation](ONVIF%20Recording/README.md))  
-	Anzeige und Steuerung von vom Gerät verwalteten Aufzeichnungen. 
+- **ONVIF Digital Input** ([Dokumentation](ONVIF%20Digital%20Input/README.md))  
+  Bildet die Digitalen Eingänge in Symcon ab.  
+
+- **ONVIF Digital Output** ([Dokumentation](ONVIF%20Digital%20Output/README.md))  
+  Bildet Digitale Ausgänge (Relays) in Symcon ab.  
+
+- **ONVIF Events** ([Dokumentation](ONVIF%20Events/README.md))  
+  Bildet empfangbare ONVIF-Ereignisse in Symcon ab.  
+
+- **ONVIF Recording** ([Dokumentation](ONVIF%20Recording/README.md))  
+  Anzeige und Steuerung von vom Gerät verwalteten Aufzeichnungen.  
 
 ## 5. Anhang
 
-###  1. GUID der Module
+### 1. GUID der Module
 
- 
 |        Modul        |     Typ      | Prefix |                  GUID                  |
 | :-----------------: | :----------: | :----: | :------------------------------------: |
 |   ONVIF Discovery   |  Discovery   | ONVIF  | {3E7839DC-5CC9-30A0-F48A-58DF2339EADD} |
-| ONVIF Configurator  | Konfigurator | ONVIF  | {C6A79C49-19D5-8D45-FFE5-5D77165FAEE6} |
+| ONVIF Konfigurator  | Konfigurator | ONVIF  | {C6A79C49-19D5-8D45-FFE5-5D77165FAEE6} |
 |      ONVIF IO       |      IO      | ONVIF  | {F40CA9A7-3B4D-4B26-7214-3A94B6074DFB} |
 | ONVIF Media Stream  |    Gerät     | ONVIF  | {FA889450-38B6-7E20-D4DC-F2C6D0B074FB} |
 | ONVIF Image Grabber |    Gerät     | ONVIF  | {18EA97C1-3CEC-80B7-4CAA-D91F8A2A0599} |
@@ -139,37 +149,61 @@ Für das Discovery werden Pakete über die Multicast-Adresse `239.255.255.250` a
 |    ONVIF Output     |    Gerät     | ONVIF  | {A44B3114-1F72-1FD1-96FB-D7E970BD8614} |
 |   ONVIF Recording   |    Gerät     | ONVIF  | {24EE27C1-F77B-4EEE-9C9E-C53C674EFF47} |
 
-
 ----------
+
 ### 2. Changelog
 
-**Version 2.50**
- - Version für Symcon 8.1 und neuer  
- - Durchgängige Nutzung von Darstellungen anstatt von Profilen  
+**Version 2.53**  
+
+- Version für Symcon 8.2 und neuer
+- Video-Kachel für die Kachel Visualisierung hinzugefügt
+
+**Version 2.50**  
+
+- Version für Symcon 8.1 und neuer  
+- Durchgängige Nutzung von Darstellungen anstatt von Profilen  
+
+----------
 
 **Version 2.21**  
- - Verbesserte Fehlerbehandlung bei falschen/defekten/korrupten XML Antworten von Geräten.  
-  
+
+- Verbesserte Fehlerbehandlung bei falschen/defekten/korrupten XML Antworten von Geräten.  
+
+----------
+
 **Version 2.20**  
- - Voraussetzung für IP-Symcon Version 7.0 oder neuer.  
- - IO zeigt unter Geräteinformationen die Scopes und Adressen der Services an.  
- - Unterstützung für Profil G (Recording).  
- - Neue Instanz `ONVIF Recording`.  
+
+- Voraussetzung für IP-Symcon Version 7.0 oder neuer.  
+- IO zeigt unter Geräteinformationen die Scopes und Adressen der Services an.  
+- Unterstützung für Profil G (Recording).  
+- Neue Instanz `ONVIF Recording`.  
+
+----------
 
 **Version 2.17**  
- - Weitere Prüfungen in der Auswertungen von Gerätefähigkeiten eingebaut um Fehler vorzubeugen.
-  
+
+- Weitere Prüfungen in der Auswertungen von Gerätefähigkeiten eingebaut um Fehler vorzubeugen.
+
+----------
+
 **Version 2.15**  
- - Wurde nur ein Service von dem Gerät gemeldet, so erzeugte der IO Fehlermeldungen.  
- - Können die Stream-Profile von `ver20/media` nicht ermittelt werden, wo wird versucht die Stream-Profile vom `ver10/media` zu laden. Auch wenn das Gerät explizit `ver20/media` unterstützt.  
- 
+
+- Wurde nur ein Service von dem Gerät gemeldet, so erzeugte der IO Fehlermeldungen.  
+- Können die Stream-Profile von `ver20/media` nicht ermittelt werden, wo wird versucht die Stream-Profile vom `ver10/media` zu laden. Auch wenn das Gerät explizit `ver20/media` unterstützt.  
+
+----------
+
 **Version 2.13:** <span style="color:red">**(Dies ist die letzte Version für IPS kleiner Version 7.0)**</span>  
+
 - Lesen der Fähigkeiten eines Gerätes in der IO Instanz verbessert.  
 - IO Instanz schreibt Warnungen in das Meldungslog.  
 - Vorhandene Fehlermeldungen bei der Kommunikation enthalten jetzt den Funktionsnamen bei welchem er Fehler aufgetreten ist.  
 - Falsche Zeitstempel in Antworten von Geräten (`TerminationTime`) konnten zu Fehlern führen.  
 
+----------
+
 **Version 2.10:**  
+
 - Discovery Instanz hat bei Geräten mit Port 80xx nicht mehr funktioniert.  
 - Änderungen an der IO-Instanz:
   - Möglichkeit die Geräte-URL im Browser zu öffnen.  
@@ -179,7 +213,10 @@ Für das Discovery werden Pakete über die Multicast-Adresse `239.255.255.250` a
   - Geräteinformationen um Informationen zur Ereignisverarbeitung ergänzt.  
   - Das Intervall zum erneuern der Registrierung für Ereignisse ist nicht mehr fest auf 55 Sekunden eingestellt, sondern wird automatisch durch das Feld `TerminationTime` aus der Antwort der Geräte berechnet.  
 
+----------
+
 **Version 2.00:**  
+
 - Verbindungsaufbau des IO überarbeitet.
 - Wechsel von PHP-Streams auf CURL zur Unterstützung von HTTP digest Authentifizierung.  
 - Sonderzeichen in Passwörtern und auch Benutzernamen sind jetzt möglich. <sup>*1</sup>  
@@ -191,73 +228,93 @@ Für das Discovery werden Pakete über die Multicast-Adresse `239.255.255.250` a
 - Auswertung von allen Quellen und allen Daten der Events. (Achtung, hierdurch können neue Statusvariablen angelegt werden und alte ungültig werden!)  
 - Konfigurator bietet jetzt von allen Events das Parent-Topics zum Erstellen einer Events-Instanz an.  
 - Verbesserte Erkennung von Relais und Digitalen Eingängen.  
-- Childs versuchen keine Daten mehr abzurufen, wenn der IO noch nicht fertig initialisiert ist.    
+- Childs versuchen keine Daten mehr abzurufen, wenn der IO noch nicht fertig initialisiert ist.  
 - Übersetzungen ergänzt / verbessert.  
 - Discovery sucht jetzt auf allen Netzwerkschnittstellen und IP-Adressen nach Geräten.  
 
  <sup>*1</sup> Sofern von den Geräten unterstützt.  
 
----  
+----------
+
 **Version 1.23:**  
+
 - Image im Testbereich des ImageGrabber wurde nicht aktualisiert.  
 
----  
+----------
+
 **Version 1.20:**  
+
 - Fehlermeldung in der Discovery Instanz bei ungültiger Anmeldung wird durch bestätigen mit 'Ignorieren' nicht mehr angezeigt, bis die Anmeldedaten geändert wurden.  
 - Es wird eine Meldung angezeigt, wenn die Discovery Instanz nicht funktioniert (Docker + NAT).  
 - Experteneinstellungen in den IO-Instanzen ermöglichen das umstellen auf http/https und ändern der IP und Port vom Ereignis-Hook.  
 - Aktion für Digital Output war defekt.
   
----  
+----------
+
 **Version 1.10:**  
+
 - Beta Release für Symcon 6.0  
 - Aktionen für Kamerasteuerung, Snapshot des Image Grabber und für Ansteuerung der Ausgänge.  
 
----  
+----------
+
 **Version 1.08:**  
+
 - Fehlermeldungen vom Image Grabber, wenn IO nicht verbunden war.  
 
----  
+----------
+
 **Version 1.07:**  
+
 - Die Ansteuerung der PTZ-Kommandos kann invertiert werden.  
 - Eventuelle Fehlermeldung wenn die Option `Variablenprofil benutzt Namen der Szenen` aktiviert war.  
 
----  
+----------
+
 **Version 1.06:**  
+
 - Eventuell wurden die Topics eines Events falsch ermittelt.  
 - Statusvariablen für Topics mit Sonderzeichen wurden nicht korrekt angelegt.  
 
----  
+----------
+
 **Version 1.05:**  
+
 - Fehlermeldung wenn Geräte keinen Namen für PTZ-Szenen geliefert haben.  
 - Fehlermeldung im IO wenn Geräte keine Auflösung, kein Encoding oder keine Bitrate gemeldet haben.  
 
----  
+----------
+
 **Version 1.02:**  
+
 - ONVIF_StopPTZ und das Anhalten beim loslassen der PTZ-Overlay Steuerung hat bei einigen Geräten nicht funktioniert  
 - Profile ONVIF.Time und ONVIF.Speed waren bei der Beschreibung vertauscht  
 - Fehlende Übersetzungen ergänzt  
 
----  
+----------
+
 **Version 1.01:**  
+
 - Release für Symcon 5.5  
 - Fehlende Übersetzungen ergänzt  
 
----  
+----------
+
 **Version 1.00:**  
+
 - Beta Release für Symcon 5.5  
 
 ----------
+
 ### 3. Spenden  
   
   Die Library ist für die nicht kommerzielle Nutzung kostenlos, Schenkungen als Unterstützung für den Autor werden hier akzeptiert:  
 
-<a href="https://www.paypal.com/donate?hosted_button_id=G2SLW2MEMQZH2" target="_blank"><img src="https://www.paypalobjects.com/de_DE/DE/i/btn/btn_donate_LG.gif" border="0" /></a>
+[![PayPal.Me](https://img.shields.io/badge/PayPal-Me-lightblue.svg)](https://paypal.me/Nall4chan)  
 
-[![Wunschliste](https://img.shields.io/badge/Wunschliste-Amazon-ff69fb.svg)](https://www.amazon.de/hz/wishlist/ls/YU4AI9AQT9F?ref_=wl_share) 
+[![Wunschliste](https://img.shields.io/badge/Wunschliste-Amazon-ff69fb.svg)](https://www.amazon.de/hz/wishlist/ls/YU4AI9AQT9F?ref_=wl_share)
 
 ## 6. Lizenz
 
   IPS-Modul:  
   [CC BY-NC-SA 4.0](https://creativecommons.org/licenses/by-nc-sa/4.0/)  
- 

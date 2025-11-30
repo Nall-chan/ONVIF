@@ -22,6 +22,7 @@ require_once __DIR__ . '/wsdl.php';
  * @method void SetValueInteger(string $Ident, int $value)
  * @method void SetValueString(string $Ident, string $value)
  * @method void UnregisterProfile(string $Name)
+ * @method int FindIDForIdent(string $Ident)
  * @uses \ONVIFModuleBase\BufferHelper
  */
 class ONVIFModuleBase extends IPSModuleStrict

@@ -1,12 +1,13 @@
 [![SDK](https://img.shields.io/badge/Symcon-PHPModul-red.svg)](https://www.symcon.de/service/dokumentation/entwicklerbereich/sdk-tools/sdk-php/)
-[![Version](https://img.shields.io/badge/Modul%20Version-2.50-blue.svg)](https://community.symcon.de/t/modul-onvif-profil-s-fuer-ip-kameras-und-encoder/52036)
-[![Version](https://img.shields.io/badge/Symcon%20Version-8.1%20%3E-green.svg)](https://www.symcon.de/de/service/dokumentation/installation/migrationen/v80-v81-q3-2025/)  
+[![Module Version](https://img.shields.io/badge/dynamic/json?url=https%3A%2F%2Fraw.githubusercontent.com%2FNall-chan%2FONVIF%2Frefs%2Fheads%2Fstrict%2Flibrary.json&query=%24.version&label=Modul%20Version&color=blue)](https://community.symcon.de/t/modul-onvif-profil-s-fuer-ip-kameras-und-encoder/52036)
+[![Symcon Version](https://img.shields.io/badge/dynamic/json?url=https%3A%2F%2Fraw.githubusercontent.com%2FNall-chan%2FONVIF%2Frefs%2Fheads%2Fstrict%2Flibrary.json&query=%24.compatibility.version&suffix=%3E&label=Symcon%20Version&color=green)](https://www.symcon.de/de/service/dokumentation/installation/migrationen/v80-v81-q3-2025/)  
 [![License](https://img.shields.io/badge/License-CC%20BY--NC--SA%204.0-green.svg)](https://creativecommons.org/licenses/by-nc-sa/4.0/)
 [![Check Style](https://github.com/Nall-chan/ONVIF/workflows/Check%20Style/badge.svg)](https://github.com/Nall-chan/ONVIF/actions)
 [![Run Tests](https://github.com/Nall-chan/ONVIF/workflows/Run%20Tests/badge.svg)](https://github.com/Nall-chan/ONVIF/actions)  
-[![Spenden](https://www.paypalobjects.com/de_DE/DE/i/btn/btn_donate_SM.gif)](#2-spenden)[![Wunschliste](https://img.shields.io/badge/Wunschliste-Amazon-ff69fb.svg)](#2-spenden)  
+[![PayPal.Me](https://img.shields.io/badge/PayPal-Me-lightblue.svg)](#2-spenden)[![Wunschliste](https://img.shields.io/badge/Wunschliste-Amazon-ff69fb.svg)](#2-spenden)  
 
 # ONVIF IO  <!-- omit in toc -->
+
 Stellt die Verbindung zu einem ONVIF-Gerät her.  
 
 ## Inhaltsverzeichnis <!-- omit in toc -->
@@ -19,7 +20,7 @@ Stellt die Verbindung zu einem ONVIF-Gerät her.
   - [Konfigurationsseite: Ereignisse möglich](#konfigurationsseite-ereignisse-möglich)
   - [Konfigurationsseite: Ereignisse nicht möglich](#konfigurationsseite-ereignisse-nicht-möglich)
 - [5. Statusvariablen](#5-statusvariablen)
-- [6. WebFront](#6-webfront)
+- [6. Visualisierung](#6-visualisierung)
 - [7. PHP-Funktionsreferenz](#7-php-funktionsreferenz)
 - [8. Aktionen](#8-aktionen)
 - [9. Anhang](#9-anhang)
@@ -29,31 +30,31 @@ Stellt die Verbindung zu einem ONVIF-Gerät her.
 
 ## 1. Funktionsumfang
 
-* Interface für die Kommunikation mit einem ONVIF Profil S und/oder Profil T kompatiblen Gerät.  
-* Ereignisverwaltung für Geräte welche Events unterstützen.  
+- Interface für die Kommunikation mit einem ONVIF Profil S und/oder Profil T kompatiblen Gerät.  
+- Ereignisverwaltung für Geräte welche Events unterstützen.  
 
 ## 2. Voraussetzungen
 
-* IP-Symcon ab Version 8.1
-* Kameras oder Video-Encoder mit ONVIF Profil S und/oder Profil T Unterstützung.  
+- IP-Symcon ab Version 8.2
+- Kameras oder Video-Encoder mit ONVIF Profil S und/oder Profil T Unterstützung.  
 
 ## 3. Software-Installation
 
-* Dieses Modul ist Bestandteil der [ONVIF-Library](../README.md#3-software-installation).  
+- Dieses Modul ist Bestandteil der [ONVIF-Library](../README.md#3-software-installation).  
 
 ## 4. Einrichten der Instanzen in IP-Symcon
 
- Unter 'Instanz hinzufügen' ist das 'ONVIF IO'-Modul unter dem Hersteller 'ONVIF' aufgeführt.  
+Unter 'Instanz hinzufügen' ist das 'ONVIF IO'-Modul unter dem Hersteller 'ONVIF' aufgeführt.  
 ![Module](../imgs/Module.png)  
 
- Diese Instanz wird automatisch angelegt, wenn im ['Discovery-Modul'](../ONVIF%20Discovery/README.md) ein Gerät in Symcon angelegt wird.  
- 
- ### Konfigurationsseite: Übersicht
+Diese Instanz wird automatisch angelegt, wenn im ['Discovery-Modul'](../ONVIF%20Discovery/README.md) ein Gerät in Symcon angelegt wird.  
+
+### Konfigurationsseite: Übersicht
 
 | Name                            | Text                             | Typ     | Beschreibung                                                           |
 | ------------------------------- | -------------------------------- | ------- | ---------------------------------------------------------------------- |
 | Open                            | Aktiv                            | bool    | Öffnet/Aktiviert die Verbindung zum Gerät                              |
-| Address                         | Adresse                          | string  | URL von dem Gerät (z.B. http://192.168.1.111:8080)                     |
+| Address                         | Adresse                          | string  | URL von dem Gerät (z.B. `http://192.168.1.111:8080`)                   |
 | Username                        | Benutzername                     | string  | Benutzername für die Anmeldung                                         |
 | Password                        | Passwort                         | string  | Passwort zum Benutzernamen                                             |
 | EventHandler                    | Ereignisse verarbeiten           | Bitmask | Bit0: Subscribe, Bit1: PullPoint                                       |
@@ -77,31 +78,33 @@ Unter `Geräteinformationen` werden die gemeldeten Informationen und erkannten F
 Es gibt zwei verschiedene Arten der Ereignisverarbeitung welche vom IO unterstützt werden.  
 Die bevorzugte Variante wird vom IO automatisch anhand der ermittelten Fähigkeiten der Geräte festgelegt.  
 
-__Abonnieren__
+**Abonnieren**  
 
 Für Geräte welche das ONVIF Profile S unterstützen, wird der `Ereignis-Hook`, auf welchen Symcon die Nachrichten des Endgerätes empfängt angezeigt.  
 Die IP-Adresse des `Ereignis-Hook` wird automatisch ermittelt, je nachdem über welchen Adresse das Gerät erreichbar ist.  
-<span style="color:red">**Diese Erkennung funktioniert nicht bei NAT, da hier die externe Adresse Symcon nicht automatisch ermitteln kann.  
-Es müssen die [Spezialschalter](https://www.symcon.de/service/dokumentation/entwicklerbereich/spezialschalter/) `NATSupport` und `NATPublicIP` benutzt werden**</span>  
+> [!CAUTION] ACHTUNG Bei nutzung von NAT
+**Es müssen die [Spezialschalter](https://www.symcon.de/service/dokumentation/entwicklerbereich/spezialschalter/) `NATSupport` und `NATPublicIP` von Symcon korrekt eingestellt werden**</span>  
 
 Sollte es nötig sein, so können bei Bedarf die eigene IP und der Port, sowie die Verwendung von https anstatt http, in den  `Experteneinstellungen (Ereignisse abonnieren)` geändert und fixiert werden.
 
-<span style="color:red">**Wird der übliche Port (3777) von Symcon nicht benutzt (z.B. Port forwarding) so kann hier auch der Port, unter welchen Symcon erreichbar ist, angepasst werden.**</span>  
+> [!TIP] Tipp
+> Wird der übliche Port (3777) von Symcon nicht benutzt (z.B. Port forwarding) so kann hier auch der Port, unter welchen Symcon erreichbar ist, angepasst werden.
 
 ---
 
-__Abfragen__
+**Abfragen**  
 
 Für Geräte welche das Profil S nicht unterstützen, gibt es außerdem noch die Möglichkeit die Ereignisse von dem Gerät abzufragen.  
 Hierzu baut Symcon der IO eine Verbindung zum Gerät auf und wartet auf eine Antwort. Das Gerät sendet bis zum erreichen der Wartezeit ein auftretendes Ereignis als Antwort an Symcon.  
-Anschließend baut Symcon die nächste Verbindung auf.  
-<span style="color:red">**Bei dieser Art der Verarbeitung ist zu beachten, dass permanent ein PHP-Thread von der IO-Instanz belegt wird!**</span>  
+Anschließend baut Symcon die nächste Verbindung auf.
+> [!CAUTION] ACHTUNG  
+**Bei dieser Art der Verarbeitung ist zu beachten, dass permanent ein PHP-Thread von der IO-Instanz belegt wird!**
 
 ---
 
-__Allgemein__
+**Allgemein**  
 
-Sofern das Gerät ONVIF-Ereignisse unterstützt und Symcon sich erfolgreich am Gerät angemeldet hat, wird eine Adresse unter  `Abonnementreferenz` angezeigt. 
+Sofern das Gerät ONVIF-Ereignisse unterstützt und Symcon sich erfolgreich am Gerät angemeldet hat, wird eine Adresse unter  `Abonnementreferenz` angezeigt.
 
 In der Tabelle wird eine Liste aller vom Gerät gemeldeten Ereignissen angezeigt, welche sich in Symcon nutzen lassen. Über das Feld `Benutzt` wird angezeigt ob das Ereignis in einer Instanz konfiguriert wurde. Und über das Zahnrad einer Zeile werden diese Instanzen tabellarisch angezeigt.  
 
@@ -118,13 +121,13 @@ Geräte welche beim ermitteln der Fähigkeiten von Ereignissen eine Fehlermeldun
 
 Dieses Modul erzeugt keine Statusvariablen.  
 
-## 6. WebFront
+## 6. Visualisierung
 
-Dieses Modul ist nicht für die Darstellung im Webfront geeignet.  
+Dieses Modul ist nicht für die Darstellung in einer Visualisierung geeignet.  
 
 ## 7. PHP-Funktionsreferenz
 
-Keine Funktionen verfügbar. 
+Keine Funktionen verfügbar.
 
 ## 8. Aktionen
 
@@ -140,9 +143,9 @@ Keine Aktionen verfügbar.
 
 Die Library ist für die nicht kommerzielle Nutzung kostenlos, Schenkungen als Unterstützung für den Autor werden hier akzeptiert:  
 
-<a href="https://www.paypal.com/donate?hosted_button_id=G2SLW2MEMQZH2" target="_blank"><img src="https://www.paypalobjects.com/de_DE/DE/i/btn/btn_donate_LG.gif" border="0" /></a>  
+[![PayPal.Me](https://img.shields.io/badge/PayPal-Me-lightblue.svg)](https://paypal.me/Nall4chan)  
 
-[![Wunschliste](https://img.shields.io/badge/Wunschliste-Amazon-ff69fb.svg)](https://www.amazon.de/hz/wishlist/ls/YU4AI9AQT9F?ref_=wl_share) 
+[![Wunschliste](https://img.shields.io/badge/Wunschliste-Amazon-ff69fb.svg)](https://www.amazon.de/hz/wishlist/ls/YU4AI9AQT9F?ref_=wl_share)
 
 ## 10. Lizenz
 

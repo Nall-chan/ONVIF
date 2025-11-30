@@ -1,12 +1,13 @@
 [![SDK](https://img.shields.io/badge/Symcon-PHPModul-red.svg)](https://www.symcon.de/service/dokumentation/entwicklerbereich/sdk-tools/sdk-php/)
-[![Version](https://img.shields.io/badge/Modul%20Version-2.50-blue.svg)](https://community.symcon.de/t/modul-onvif-profil-s-fuer-ip-kameras-und-encoder/52036)
-[![Version](https://img.shields.io/badge/Symcon%20Version-8.1%20%3E-green.svg)](https://www.symcon.de/de/service/dokumentation/installation/migrationen/v80-v81-q3-2025/)  
+[![Module Version](https://img.shields.io/badge/dynamic/json?url=https%3A%2F%2Fraw.githubusercontent.com%2FNall-chan%2FONVIF%2Frefs%2Fheads%2Fstrict%2Flibrary.json&query=%24.version&label=Modul%20Version&color=blue)](https://community.symcon.de/t/modul-onvif-profil-s-fuer-ip-kameras-und-encoder/52036)
+[![Symcon Version](https://img.shields.io/badge/dynamic/json?url=https%3A%2F%2Fraw.githubusercontent.com%2FNall-chan%2FONVIF%2Frefs%2Fheads%2Fstrict%2Flibrary.json&query=%24.compatibility.version&suffix=%3E&label=Symcon%20Version&color=green)](https://www.symcon.de/de/service/dokumentation/installation/migrationen/v80-v81-q3-2025/)  
 [![License](https://img.shields.io/badge/License-CC%20BY--NC--SA%204.0-green.svg)](https://creativecommons.org/licenses/by-nc-sa/4.0/)
 [![Check Style](https://github.com/Nall-chan/ONVIF/workflows/Check%20Style/badge.svg)](https://github.com/Nall-chan/ONVIF/actions)
 [![Run Tests](https://github.com/Nall-chan/ONVIF/workflows/Run%20Tests/badge.svg)](https://github.com/Nall-chan/ONVIF/actions)  
-[![Spenden](https://www.paypalobjects.com/de_DE/DE/i/btn/btn_donate_SM.gif)](#2-spenden)[![Wunschliste](https://img.shields.io/badge/Wunschliste-Amazon-ff69fb.svg)](#2-spenden)  
+[![PayPal.Me](https://img.shields.io/badge/PayPal-Me-lightblue.svg)](#2-spenden)[![Wunschliste](https://img.shields.io/badge/Wunschliste-Amazon-ff69fb.svg)](#2-spenden)  
 
-# ONVIF Configurator  <!-- omit in toc -->
+# ONVIF Konfigurator  <!-- omit in toc -->
+
 Beschreibung des Moduls.
 
 ## Inhaltsverzeichnis <!-- omit in toc -->
@@ -20,7 +21,7 @@ Beschreibung des Moduls.
   - [Beispiel 3: Multikanal-Geräte](#beispiel-3-multikanal-geräte)
   - [Beispiel 4: Mit Events und mehreren Profilen](#beispiel-4-mit-events-und-mehreren-profilen)
 - [5. Statusvariablen](#5-statusvariablen)
-- [6. WebFront](#6-webfront)
+- [6. Visualisierung](#6-visualisierung)
 - [7. PHP-Funktionsreferenz](#7-php-funktionsreferenz)
 - [8. Aktionen](#8-aktionen)
 - [9. Anhang](#9-anhang)
@@ -30,20 +31,20 @@ Beschreibung des Moduls.
 
 ## 1. Funktionsumfang
 
-* Unterstützt beim Einrichten der verschiedenen Instanzen für ein ONVIF-Gerät.  
+- Unterstützt beim Einrichten der verschiedenen Instanzen für ein ONVIF-Gerät.  
 
 ## 2. Voraussetzungen
 
-* IP-Symcon ab Version 8.1
-* Kameras oder Video-Encoder mit ONVIF Profil S und/oder Profil T Unterstützung.  
+- IP-Symcon ab Version 8.2
+- Kameras oder Video-Encoder mit ONVIF Profil S und/oder Profil T Unterstützung.  
 
 ## 3. Software-Installation
 
-* Dieses Modul ist Bestandteil der [ONVIF-Library](../README.md#3-software-installation).    
+- Dieses Modul ist Bestandteil der [ONVIF-Library](../README.md#3-software-installation).  
 
 ## 4. Einrichten der Instanzen in IP-Symcon
 
- Unter 'Instanz hinzufügen' ist das 'ONVIF Configurator'-Modul unter dem Hersteller 'ONVIF' aufgeführt.  
+ Unter 'Instanz hinzufügen' ist das 'ONVIF Konfigurator'-Modul unter dem Hersteller 'ONVIF' aufgeführt.  
  ![Module](../imgs/Module.png)  
  Es wird empfohlen, die Instanzen über das [ONVIF Discovery'-Modul](../ONVIF%20Discovery/README.md) einzurichten.  
 
@@ -57,20 +58,24 @@ Beschreibung des Moduls.
 - ONVIF Digital Output ([Dokumentation](../ONVIF%20Digital%20Output/README.md))
 - ONVIF Events ([Dokumentation](../ONVIF%20Events/README.md))
 
-### Beispiel 1: Keine Digital IOs   
+### Beispiel 1: Keine Digital IOs
+
 ![Config](imgs/Config1.png)  
 Hier wird als Beispiel ein Konfigurator eines Gerätes dargestellt, welche nur einen Videoeingang (Videosignal / Videoquelle) hat und über keine Digital I/O's verfügt.  
 
 ### Beispiel 2: Mit Digital IOs
+
 ![Config](imgs/Config2.png)  
 Dieses Gerät hat ebenfalls nur einen Videoeingang (Videosignal / Videoquelle), verfügt aber über Digitale Ein- und Ausgänge.  
 
 ### Beispiel 3: Multikanal-Geräte
+
 ![Config](imgs/Config3.png)
 Dieses Gerät stellt 5 Videosignale (Videoquellen) bereit.  
 In diesem Fall sind es 4 Videoeingänge und ein Quad-Bild aller 4 Videoeingänge.
 
 ### Beispiel 4: Mit Events und mehreren Profilen
+
 ![Config](imgs/Config4.png)
 Dieses Gerät stellt 3 Parent Topics für Events bereit.  
 In diesem Fall sind es `RecordingConfig`, `Media` und `IVA` (=> Intelligent Video Analytics).  
@@ -81,13 +86,13 @@ Hier ist die Stream-Instanz für das `HD Bit Rate`-Profil schon vorhanden und de
 
 Dieses Modul erzeugt keine Statusvariablen.  
 
-## 6. WebFront
+## 6. Visualisierung
 
-Dieses Modul ist nicht für die Darstellung im Webfront geeignet.  
+Dieses Modul ist nicht für die Darstellung in einer Visualisierung geeignet.  
 
 ## 7. PHP-Funktionsreferenz
 
-Keine Funktionen verfügbar. 
+Keine Funktionen verfügbar.
 
 ## 8. Aktionen
 
@@ -103,9 +108,9 @@ Keine Aktionen verfügbar.
 
 Die Library ist für die nicht kommerzielle Nutzung kostenlos, Schenkungen als Unterstützung für den Autor werden hier akzeptiert:  
 
-<a href="https://www.paypal.com/donate?hosted_button_id=G2SLW2MEMQZH2" target="_blank"><img src="https://www.paypalobjects.com/de_DE/DE/i/btn/btn_donate_LG.gif" border="0" /></a>  
+[![PayPal.Me](https://img.shields.io/badge/PayPal-Me-lightblue.svg)](https://paypal.me/Nall4chan)  
 
-[![Wunschliste](https://img.shields.io/badge/Wunschliste-Amazon-ff69fb.svg)](https://www.amazon.de/hz/wishlist/ls/YU4AI9AQT9F?ref_=wl_share) 
+[![Wunschliste](https://img.shields.io/badge/Wunschliste-Amazon-ff69fb.svg)](https://www.amazon.de/hz/wishlist/ls/YU4AI9AQT9F?ref_=wl_share)
 
 ## 10. Lizenz
 

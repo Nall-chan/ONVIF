@@ -1,6 +1,7 @@
 {
     "translations": {
         "de": {
+            "ONVIF Configurator": "ONVIF Konfigurator",
             "Type": "Typ",
             "VideoSource": "Video-Quelle",
             "Location": "Lokation",

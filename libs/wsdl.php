@@ -296,8 +296,6 @@ namespace ONVIF\Stream
         public const EnableZoomVariable = 'EnableZoomVariable';
         public const EnableSpeedVariable = 'EnableSpeedVariable';
         public const EnableTimeVariable = 'EnableTimeVariable';
-        public const EnablePanTiltHTML = 'EnablePanTiltHTML';
-        public const EnableZoomHTML = 'EnableZoomHTML';
         public const PanTiltControlWidth = 'PanTiltControlWidth';
         public const PanTiltControlHeight = 'PanTiltControlHeight';
         public const PanTiltControlOpacity = 'PanTiltControlOpacity';
@@ -310,6 +308,10 @@ namespace ONVIF\Stream
         public const EnablePresetVariable = 'EnablePresetVariable';
         public const EnablePresetProfile = 'EnablePresetProfile';
         public const PresetProfile = 'PresetProfile';
+        public const EnablePTZTileDisplay = 'EnablePTZTileDisplay';
+        public const EnablePTZHTMLDisplay = 'EnablePTZHTMLDisplay';
+        public const EnablePanTilt = 'EnablePanTilt';
+        public const EnableZoom = 'EnableZoom';
     }
 }
 

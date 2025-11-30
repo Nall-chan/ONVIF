@@ -1,0 +1,66 @@
+<head>
+    <style>
+        body {
+            margin-left: 0;
+            margin-right: 0;
+        }
+    </style>
+    <script>
+        let instanceId;
+        let pt = false;
+        let zoom = false;
+        function handleMessage(message) {
+            const decodedData = JSON.parse(message);
+            for (const data of decodedData) {
+                const ident = data.ident.toLowerCase();
+                switch (ident) {
+                    case 'stream':
+                        document.getElementById(ident).src = data.value;
+                        break;
+                    default:
+                        break;
+                }
+            }
+        }
+
+        function sendPTZstart(event) {
+            this.childNodes[1].setAttribute("stroke", "#000000");
+            this.childNodes[1].setAttribute("fill", "#5B9BA2");
+            this.childNodes[3].setAttribute("fill", "#000000");
+            var action = this.id.split('_');
+            requestAction('StartPTZ', action[1]);
+        }
+
+        function sendPTZstop(event) {
+            this.childNodes[1].setAttribute("stroke", "none");
+            this.childNodes[1].setAttribute("fill", "#33666C");
+            this.childNodes[3].setAttribute("fill", "#ffffff");
+            requestAction('StopPTZ', '');
+        }
+
+        document.addEventListener('DOMContentLoaded', function () {
+            if (pt) {
+                document.getElementById(instanceId + "_left").addEventListener("mousedown", sendPTZstart);
+                document.getElementById(instanceId + "_right").addEventListener("mousedown", sendPTZstart);
+                document.getElementById(instanceId + "_up").addEventListener("mousedown", sendPTZstart);
+                document.getElementById(instanceId + "_down").addEventListener("mousedown", sendPTZstart);
+                document.getElementById(instanceId + "_left").addEventListener("mouseup", sendPTZstop);
+                document.getElementById(instanceId + "_right").addEventListener("mouseup", sendPTZstop);
+                document.getElementById(instanceId + "_up").addEventListener("mouseup", sendPTZstop);
+                document.getElementById(instanceId + "_down").addEventListener("mouseup", sendPTZstop);
+            }
+            if (zoom) {
+                document.getElementById(instanceId + "_near").addEventListener("mousedown", sendPTZstart);
+                document.getElementById(instanceId + "_far").addEventListener("mousedown", sendPTZstart);
+                document.getElementById(instanceId + "_near").addEventListener("mouseup", sendPTZstop);
+                document.getElementById(instanceId + "_far").addEventListener("mouseup", sendPTZstop);
+            }
+        });
+    </script>
+</head>
+
+<body>
+    <div id="container">
+        <img id="stream" style="height: auto;width: auto;max-width: 100%;max-height: 100%;">
+    </div>
+</body>

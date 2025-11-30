@@ -1,12 +1,13 @@
 [![SDK](https://img.shields.io/badge/Symcon-PHPModul-red.svg)](https://www.symcon.de/service/dokumentation/entwicklerbereich/sdk-tools/sdk-php/)
-[![Version](https://img.shields.io/badge/Modul%20Version-2.50-blue.svg)](https://community.symcon.de/t/modul-onvif-profil-s-fuer-ip-kameras-und-encoder/52036)
-[![Version](https://img.shields.io/badge/Symcon%20Version-8.1%20%3E-green.svg)](https://www.symcon.de/de/service/dokumentation/installation/migrationen/v80-v81-q3-2025/)  
+[![Module Version](https://img.shields.io/badge/dynamic/json?url=https%3A%2F%2Fraw.githubusercontent.com%2FNall-chan%2FONVIF%2Frefs%2Fheads%2Fstrict%2Flibrary.json&query=%24.version&label=Modul%20Version&color=blue)](https://community.symcon.de/t/modul-onvif-profil-s-fuer-ip-kameras-und-encoder/52036)
+[![Symcon Version](https://img.shields.io/badge/dynamic/json?url=https%3A%2F%2Fraw.githubusercontent.com%2FNall-chan%2FONVIF%2Frefs%2Fheads%2Fstrict%2Flibrary.json&query=%24.compatibility.version&suffix=%3E&label=Symcon%20Version&color=green)](https://www.symcon.de/de/service/dokumentation/installation/migrationen/v80-v81-q3-2025/)  
 [![License](https://img.shields.io/badge/License-CC%20BY--NC--SA%204.0-green.svg)](https://creativecommons.org/licenses/by-nc-sa/4.0/)
 [![Check Style](https://github.com/Nall-chan/ONVIF/workflows/Check%20Style/badge.svg)](https://github.com/Nall-chan/ONVIF/actions)
 [![Run Tests](https://github.com/Nall-chan/ONVIF/workflows/Run%20Tests/badge.svg)](https://github.com/Nall-chan/ONVIF/actions)  
-[![Spenden](https://www.paypalobjects.com/de_DE/DE/i/btn/btn_donate_SM.gif)](#2-spenden)[![Wunschliste](https://img.shields.io/badge/Wunschliste-Amazon-ff69fb.svg)](#2-spenden)  
+[![PayPal.Me](https://img.shields.io/badge/PayPal-Me-lightblue.svg)](#2-spenden)[![Wunschliste](https://img.shields.io/badge/Wunschliste-Amazon-ff69fb.svg)](#2-spenden)  
 
 # ONVIF Events <!-- omit in toc -->
+
 Bildet verschiedene Ereignisse (Events) als Statusvariablen in Symcon ab.
 
 ## Inhaltsverzeichnis <!-- omit in toc -->
@@ -15,8 +16,8 @@ Bildet verschiedene Ereignisse (Events) als Statusvariablen in Symcon ab.
 - [2. Voraussetzungen](#2-voraussetzungen)
 - [3. Software-Installation](#3-software-installation)
 - [4. Einrichten der Instanzen in IP-Symcon](#4-einrichten-der-instanzen-in-ip-symcon)
-  - [Anlegen der Instanz:](#anlegen-der-instanz)
-  - [Zuordnen zur IO-Instanz:](#zuordnen-zur-io-instanz)
+  - [Anlegen der Instanz](#anlegen-der-instanz)
+  - [Zuordnen zur IO-Instanz](#zuordnen-zur-io-instanz)
   - [Auswahl des Ereignis-Pfad](#auswahl-des-ereignis-pfad)
 - [5. Statusvariablen](#5-statusvariablen)
   - [Beispiel 1: Ein einzelnes Ereignis](#beispiel-1-ein-einzelnes-ereignis)
@@ -24,7 +25,7 @@ Bildet verschiedene Ereignisse (Events) als Statusvariablen in Symcon ab.
   - [Beispiel 3: Ein Ordner](#beispiel-3-ein-ordner)
   - [Beispiel 4: Ein Teilbaum](#beispiel-4-ein-teilbaum)
   - [Tips \& Tricks](#tips--tricks)
-- [6. WebFront](#6-webfront)
+- [6. Visualisierung](#6-visualisierung)
 - [7. PHP-Funktionsreferenz](#7-php-funktionsreferenz)
 - [8. Aktionen](#8-aktionen)
 - [9. Anhang](#9-anhang)
@@ -34,28 +35,28 @@ Bildet verschiedene Ereignisse (Events) als Statusvariablen in Symcon ab.
 
 ## 1. Funktionsumfang
 
-* Empfang von Statusmeldungen von einem ONVIF-Gerät.  
+- Empfang von Statusmeldungen von einem ONVIF-Gerät.  
 
 ## 2. Voraussetzungen
 
-* IP-Symcon ab Version 8.1  
-* Kameras oder Video-Encoder mit ONVIF Profil S und/oder Profil T Unterstützung.
-* Geräte müssen ONVIF-Events unterstützen.  
+- IP-Symcon ab Version 8.2  
+- Kameras oder Video-Encoder mit ONVIF Profil S und/oder Profil T Unterstützung.
+- Geräte müssen ONVIF-Events unterstützen.  
 
 ## 3. Software-Installation
 
-* Dieses Modul ist Bestandteil der [ONVIF-Library](../README.md#3-software-installation).    
+- Dieses Modul ist Bestandteil der [ONVIF-Library](../README.md#3-software-installation).
 
 ## 4. Einrichten der Instanzen in IP-Symcon
 
-### Anlegen der Instanz:  
+### Anlegen der Instanz
 
  Unter 'Instanz hinzufügen' ist das 'ONVIF Events'-Modul unter dem Hersteller 'ONVIF' aufgeführt.
 ![Module](../imgs/Module.png)  
 
-Diese Instanzen können __nicht__ über die dazugehörige Instanz des [Configurator-Moduls](../ONVIF%20Configurator/README.md) von diesem Geräte angelegt werden und müssen immer manuell erzeugt hinzugefügt werden.  
+Diese Instanzen können __nicht__ über die dazugehörige Instanz des [Konfigurator-Moduls](../ONVIF%20Configurator/README.md) von diesem Geräte angelegt werden und müssen immer manuell erzeugt hinzugefügt werden.  
 
-### Zuordnen zur IO-Instanz:    
+### Zuordnen zur IO-Instanz
 
 ![Config](imgs/Config1.png)  
 Nach dem erzeugen der Instanz, muss zuerst über die Schaltfläche `Gateway ändern` die gewünschte IO-Instanz ausgewählt werden, von welcher Ereignisse empfangen werden sollen.  
@@ -84,12 +85,11 @@ Dies erfolgt immer, wenn sich die dazugehörige [IO-Instanz](../ONVIF%20IO/READM
 
 __Die Namen der Statusvariablen werden initial vorgegeben, damit Diese einfach zu identifizieren sind. Selbstverständlich können die Statusvariablen beliebig umbenannt werden.__
 
-
 ### Beispiel 1: Ein einzelnes Ereignis
 
 __Beispiel-Baum__  
 
-```
+```plain
 tns1:Device
 │    │──tnsaxis:IO
 │    │   │──VirtualInput
@@ -128,9 +128,9 @@ Der Name der Statusvariable entspricht dem Beispiel 2, zusätzlich wird aber der
 Als Ereignis-Pfad wurde der Ordner `tns1:Device/` ausgewählt.
 Der Objektbaum enthält, bei diesem Beispiel-Baum, vierzig Statusvariablen:  
 ![Event-Beispiel](imgs/Event4.png)  
-Dem Namen der Statusvariablen wird, zusätzlich wie bei Beispiel 3, der jeweilige Name der Ebenen vorangestellt. 
-Da einige Ereignisse mehrere Quellen haben, werden z.B. für `VirtualInput` alle 32 Quellen als Statusvariablen angelegt.   
-In diesem Beispiel fehlt eine Statusvariable für ` Network - Lost`, da das Gerät keine Ereignisse für das Event `tns1:Device/tnsaxis:Network/Lost` sendet.  
+Dem Namen der Statusvariablen wird, zusätzlich wie bei Beispiel 3, der jeweilige Name der Ebenen vorangestellt.  
+Da einige Ereignisse mehrere Quellen haben, werden z.B. für `VirtualInput` alle 32 Quellen als Statusvariablen angelegt.  
+In diesem Beispiel fehlt eine Statusvariable für `Network - Lost`, da das Gerät keine Ereignisse für das Event `tns1:Device/tnsaxis:Network/Lost` sendet.  
 Das ist nicht verwunderlich, da ohne Netzwerkverbindung kein Ereignis mehr versendet werden kann und somit das Gerät dieses Event nie mit einen `false` senden könnte.  
 
 ### Tips & Tricks
@@ -138,9 +138,9 @@ Das ist nicht verwunderlich, da ohne Netzwerkverbindung kein Ereignis mehr verse
 Events für Videoquellen können direkt in der [Stream-Instanz](../ONVIF%20Media%20Stream/README.md)  oder der [Image Grabber-Instanz](../ONVIF%20Image%20Grabber/README.md) verarbeitet werden.  
 Hier wird automatisch auf die korrekte `VideoSource` gefiltert, welche in diesen Instanzen konfiguriert wurde.  
 
-## 6. WebFront
+## 6. Visualisierung
 
-Die direkte Darstellung der Statusvariablen von Ereignissen ist möglich; es wird aber empfohlen mit Links zu arbeiten.  
+Die direkte Darstellung der Statusvariablen von Ereignissen ist möglich, es wird aber empfohlen mit Links zu arbeiten.  
 
 ## 7. PHP-Funktionsreferenz
 
@@ -160,9 +160,10 @@ Keine Aktionen verfügbar.
 
 Die Library ist für die nicht kommerzielle Nutzung kostenlos, Schenkungen als Unterstützung für den Autor werden hier akzeptiert:  
 
-<a href="https://www.paypal.com/donate?hosted_button_id=G2SLW2MEMQZH2" target="_blank"><img src="https://www.paypalobjects.com/de_DE/DE/i/btn/btn_donate_LG.gif" border="0" /></a>  
+[![PayPal.Me](https://img.shields.io/badge/PayPal-Me-lightblue.svg)](https://paypal.me/Nall4chan)  
 
-[![Wunschliste](https://img.shields.io/badge/Wunschliste-Amazon-ff69fb.svg)](https://www.amazon.de/hz/wishlist/ls/YU4AI9AQT9F?ref_=wl_share) 
+[![Wunschliste](https://img.shields.io/badge/Wunschliste-Amazon-ff69fb.svg)](https://www.amazon.de/hz/wishlist/ls/YU4AI9AQT9F?ref_=wl_share)
+
 ## 10. Lizenz
 
   IPS-Modul:  

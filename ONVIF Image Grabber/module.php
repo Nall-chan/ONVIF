@@ -44,7 +44,6 @@ class ONVIFImageGrabber extends ONVIFModuleBase
         $Result = curl_exec($ch);
         $http_code = curl_getinfo($ch, CURLINFO_RESPONSE_CODE);
         $Error = curl_error($ch);
-        curl_close($ch);
         if (($Result === false) || ($http_code >= 400)) {
             $this->SendDebug('Request Image ' . $http_code, $Error, 0);
             set_error_handler([$this, 'ModulErrorHandler']);

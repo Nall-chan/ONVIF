@@ -1,12 +1,13 @@
 [![SDK](https://img.shields.io/badge/Symcon-PHPModul-red.svg)](https://www.symcon.de/service/dokumentation/entwicklerbereich/sdk-tools/sdk-php/)
-[![Version](https://img.shields.io/badge/Modul%20Version-2.50-blue.svg)](https://community.symcon.de/t/modul-onvif-profil-s-fuer-ip-kameras-und-encoder/52036)
-[![Version](https://img.shields.io/badge/Symcon%20Version-8.1%20%3E-green.svg)](https://www.symcon.de/de/service/dokumentation/installation/migrationen/v80-v81-q3-2025/)  
+[![Module Version](https://img.shields.io/badge/dynamic/json?url=https%3A%2F%2Fraw.githubusercontent.com%2FNall-chan%2FONVIF%2Frefs%2Fheads%2Fstrict%2Flibrary.json&query=%24.version&label=Modul%20Version&color=blue)](https://community.symcon.de/t/modul-onvif-profil-s-fuer-ip-kameras-und-encoder/52036)
+[![Symcon Version](https://img.shields.io/badge/dynamic/json?url=https%3A%2F%2Fraw.githubusercontent.com%2FNall-chan%2FONVIF%2Frefs%2Fheads%2Fstrict%2Flibrary.json&query=%24.compatibility.version&suffix=%3E&label=Symcon%20Version&color=green)](https://www.symcon.de/de/service/dokumentation/installation/migrationen/v80-v81-q3-2025/)  
 [![License](https://img.shields.io/badge/License-CC%20BY--NC--SA%204.0-green.svg)](https://creativecommons.org/licenses/by-nc-sa/4.0/)
 [![Check Style](https://github.com/Nall-chan/ONVIF/workflows/Check%20Style/badge.svg)](https://github.com/Nall-chan/ONVIF/actions)
 [![Run Tests](https://github.com/Nall-chan/ONVIF/workflows/Run%20Tests/badge.svg)](https://github.com/Nall-chan/ONVIF/actions)  
-[![Spenden](https://www.paypalobjects.com/de_DE/DE/i/btn/btn_donate_SM.gif)](#2-spenden)[![Wunschliste](https://img.shields.io/badge/Wunschliste-Amazon-ff69fb.svg)](#2-spenden)  
+[![PayPal.Me](https://img.shields.io/badge/PayPal-Me-lightblue.svg)](#2-spenden)[![Wunschliste](https://img.shields.io/badge/Wunschliste-Amazon-ff69fb.svg)](#2-spenden)  
 
 # ONVIF Digital Input  <!-- omit in toc -->
+
 Bildet die Digitalen Eingänge in Symcon ab.  
 
 ## Inhaltsverzeichnis  <!-- omit in toc -->
@@ -16,7 +17,7 @@ Bildet die Digitalen Eingänge in Symcon ab.
 - [3. Software-Installation](#3-software-installation)
 - [4. Einrichten der Instanzen in IP-Symcon](#4-einrichten-der-instanzen-in-ip-symcon)
 - [5. Statusvariablen](#5-statusvariablen)
-- [6. WebFront](#6-webfront)
+- [6. Visualisierung](#6-visualisierung)
 - [7. PHP-Funktionsreferenz](#7-php-funktionsreferenz)
 - [8. Aktionen](#8-aktionen)
 - [9. Anhang](#9-anhang)
@@ -26,33 +27,35 @@ Bildet die Digitalen Eingänge in Symcon ab.
 
 ## 1. Funktionsumfang
 
-* Empfang von Statusmeldungen der Digitalen Eingängen von ONVIF-Geräten.  
+- Empfang von Statusmeldungen der Digitalen Eingängen von ONVIF-Geräten.  
 
 ## 2. Voraussetzungen
 
-* IP-Symcon ab Version 8.1
-* Kameras oder Video-Encoder mit ONVIF Profil S und/oder Profil T Unterstützung.
-* Geräte müssen über mindestens einen Digitalen Eingang verfügen.  
+- IP-Symcon ab Version 8.2
+- Kameras oder Video-Encoder mit ONVIF Profil S und/oder Profil T Unterstützung.
+- Geräte müssen über mindestens einen Digitalen Eingang verfügen.  
 
 ## 3. Software-Installation
 
-* Dieses Modul ist Bestandteil der [ONVIF-Library](../README.md#3-software-installation).  
+- Dieses Modul ist Bestandteil der [ONVIF-Library](../README.md#3-software-installation).  
 
 ## 4. Einrichten der Instanzen in IP-Symcon
 
  Unter 'Instanz hinzufügen' ist das 'ONVIF Digital Input'-Modul unter dem Hersteller 'ONVIF' aufgeführt.
 ![Module](../imgs/Module.png)  
 
- Es wird empfohlen diese Instanz über die dazugehörige Instanz des [Configurator-Moduls](../ONVIF%20Configurator/README.md) von diesem Geräte anzulegen.  
- 
+ Es wird empfohlen diese Instanz über die dazugehörige Instanz des [Konfigurator-Moduls](../ONVIF%20Configurator/README.md) von diesem Geräte anzulegen.  
+
 __Konfigurationsseite__:  
 
 ![Config](imgs/Config.png)  
+
 | Name       | Text                    | Beschreibung                                                                      |
 | ---------- | ----------------------- | --------------------------------------------------------------------------------- |
 | EventTopic | Ereignisse der Eingänge | Auswahl des Ereignis-Pfad ab welchen Ereignisse empfangen und verarbeitet werden. |
 
-Der Ereignis-Pfad wird bei Digital-Input versucht automatisch zu erkennen, alternativ steht das universelle [ONVIF Events](../ONVIF%20Events/README.md) Modul zur Verfügung
+Der Ereignis-Pfad wird bei Digital-Input versucht automatisch zu erkennen, alternativ steht das universelle [ONVIF Events](../ONVIF%20Events/README.md) Modul zur Verfügung.
+
 ## 5. Statusvariablen
 
 Die Statusvariablen werden automatisch angelegt. Das Löschen einzelner kann zu Fehlfunktionen führen.
@@ -61,10 +64,9 @@ Die Statusvariablen werden automatisch angelegt. Das Löschen einzelner kann zu 
 | ------------------------------- | ---- | ------------------------------------------------------------------------- |
 | je nach Name des Onvif-Ereignis | bool | Für jeden Digital-Eingang wird eine passende Variable in Symcon erstellt. |
 
+## 6. Visualisierung
 
-## 6. WebFront
-
-Die direkte Darstellung der Statusvariablen ist möglich; es wird aber empfohlen mit Links zu arbeiten.  
+Die direkte Darstellung der Statusvariablen ist möglich, es wird aber empfohlen mit Links zu arbeiten.  
 
 ## 7. PHP-Funktionsreferenz
 
@@ -84,7 +86,7 @@ Keine Aktionen verfügbar.
 
 Die Library ist für die nicht kommerzielle Nutzung kostenlos, Schenkungen als Unterstützung für den Autor werden hier akzeptiert:  
 
-<a href="https://www.paypal.com/donate?hosted_button_id=G2SLW2MEMQZH2" target="_blank"><img src="https://www.paypalobjects.com/de_DE/DE/i/btn/btn_donate_LG.gif" border="0" /></a>  
+[![PayPal.Me](https://img.shields.io/badge/PayPal-Me-lightblue.svg)](https://paypal.me/Nall4chan)  
 
 [![Wunschliste](https://img.shields.io/badge/Wunschliste-Amazon-ff69fb.svg)](https://www.amazon.de/hz/wishlist/ls/YU4AI9AQT9F?ref_=wl_share)  
 

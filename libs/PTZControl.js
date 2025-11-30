@@ -29,7 +29,6 @@ function initPTZ(instanceId) {
     document.getElementById(instanceId + "_far").addEventListener("mousedown", sendPTZstart);
     document.getElementById(instanceId + "_near").addEventListener("mouseup", sendPTZstop);
     document.getElementById(instanceId + "_far").addEventListener("mouseup", sendPTZstop);
-
 }
 
 function myPTZRequestActionGet(o) {
