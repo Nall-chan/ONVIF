@@ -23,6 +23,9 @@ require_once __DIR__ . '/wsdl.php';
  * @method void SetValueString(string $Ident, string $value)
  * @method void UnregisterProfile(string $Name)
  * @method int FindIDForIdent(string $Ident)
+ * @method bool IORequestAction(string $Ident, mixed $Value)
+ * @method void IOMessageSink(int $TimeStamp, int $SenderID, int $Message, array $Data)
+ * @method int IORegisterParent()
  * @uses \ONVIFModuleBase\BufferHelper
  */
 class ONVIFModuleBase extends IPSModuleStrict
@@ -93,6 +96,7 @@ class ONVIFModuleBase extends IPSModuleStrict
                 break;
         }
     }
+
     protected function InitFilterAndEvents(): void
     {
         $EventTopic = $this->ReadPropertyString(\ONVIF\Device\Property::EventTopic);

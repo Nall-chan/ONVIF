@@ -153,7 +153,7 @@ Für das Discovery werden Pakete über die Multicast-Adresse `239.255.255.250` a
 
 ### 2. Changelog
 
-**Version 2.53**  
+**Version 2.54**  
 
 - Version für Symcon 8.2 und neuer
 - Video-Kachel für die Kachel Visualisierung hinzugefügt

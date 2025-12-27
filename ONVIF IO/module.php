@@ -79,7 +79,6 @@ class ONVIFIO extends IPSModuleStrict
         $this->RegisterAttributeString(\ONVIF\IO\Attribute::SubscriptionId, '');
         $this->RegisterAttributeInteger(\ONVIF\IO\Attribute::CapabilitiesVersion, 0);
         $this->RegisterTimer(\ONVIF\IO\Timer::RenewSubscription, 0, 'IPS_RequestAction(' . $this->InstanceID . ',"Renew",true);');
-        $this->RegisterHook('ONVIFEvents/IO/' . $this->InstanceID);
         $this->Host = '';
         $this->MyIP = '';
         $this->MyPort = 3777;
@@ -818,6 +817,7 @@ class ONVIFIO extends IPSModuleStrict
                     if ($AllowedEventHandler == \ONVIF\EventHandler::PullPoint) {
                         IPS_RunScriptText('IPS_Sleep(1000);IPS_RequestAction(' . $this->InstanceID . ',"CreatePullPointSubscription",true);');
                     } else {
+                        $this->RegisterHook('ONVIFEvents/IO/' . $this->InstanceID);
                         if ($this->GetConsumerAddress()) { // yeah, we can receive events
                             IPS_RunScriptText('IPS_Sleep(1000);IPS_RequestAction(' . $this->InstanceID . ',"Subscribe",true);');
                         } else { // we cannot receive events :(
