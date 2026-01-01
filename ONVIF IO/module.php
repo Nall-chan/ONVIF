@@ -815,6 +815,7 @@ class ONVIFIO extends IPSModuleStrict
                 } else {
                     //WSSubscription
                     if ($AllowedEventHandler == \ONVIF\EventHandler::PullPoint) {
+                        //$this->UnregisterHook('ONVIFEvents/IO/' . $this->InstanceID);
                         IPS_RunScriptText('IPS_Sleep(1000);IPS_RequestAction(' . $this->InstanceID . ',"CreatePullPointSubscription",true);');
                     } else {
                         $this->RegisterHook('ONVIFEvents/IO/' . $this->InstanceID);
