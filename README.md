@@ -153,6 +153,11 @@ Für das Discovery werden Pakete über die Multicast-Adresse `239.255.255.250` a
 
 ### 2. Changelog
 
+**Version 2.55**  
+
+- Szenen (Preset) Variable hat die Namen der Presets nicht genutzt  
+- Fehlerhafte Darstellung der Szenen (Preset) Variable hat das laden vom WebFront verhindert.  
+
 **Version 2.54**  
 
 - Version für Symcon 8.2 und neuer

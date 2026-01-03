@@ -1178,7 +1178,7 @@ class ONVIFMediaStream extends ONVIFModuleBase
                 if ($Preset->PresetActive) {
                     $PresetAssociations[] = [
                         'Value'      => (int) $Preset->VariableValue,
-                        'Caption'    => $UsePresetName ? ($Preset->PresetName == '' ? $Preset->VariableValue : $Preset->PresetName) : $Preset->VariableValue,
+                        'Caption'    => $UsePresetName ? ($Preset->PresetName == '' ? (string) $Preset->VariableValue : (string) $Preset->PresetName) : (string) $Preset->VariableValue,
                         'IconActive' => false,
                         'IconValue'  => '',
                         'Color'      => -1
@@ -1284,7 +1284,7 @@ class ONVIFMediaStream extends ONVIFModuleBase
                 $Presets = json_decode(json_encode($PresetResult->Preset), true);
             }
             foreach ($Presets as &$Preset) {
-                if ($Preset['Name'] = '') {
+                if ($Preset['Name'] == '') {
                     $Preset['Name'] = $Preset['token'];
                 }
             }
