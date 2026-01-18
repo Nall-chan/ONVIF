@@ -815,7 +815,7 @@ class ONVIFIO extends IPSModuleStrict
                 } else {
                     //WSSubscription
                     if ($AllowedEventHandler == \ONVIF\EventHandler::PullPoint) {
-                        //$this->UnregisterHook('ONVIFEvents/IO/' . $this->InstanceID);
+                        $this->UnregisterHook('ONVIFEvents/IO/' . $this->InstanceID);
                         IPS_RunScriptText('IPS_Sleep(1000);IPS_RequestAction(' . $this->InstanceID . ',"CreatePullPointSubscription",true);');
                     } else {
                         $this->RegisterHook('ONVIFEvents/IO/' . $this->InstanceID);
@@ -1434,7 +1434,7 @@ class ONVIFIO extends IPSModuleStrict
         return $TopicData;
     }
 
-    protected function GetProfiles2(string $Token = null, string $ConfigurationEnumeration = \ONVIF\Media2Conf::All): bool
+    protected function GetProfiles2(?string $Token = null, string $ConfigurationEnumeration = \ONVIF\Media2Conf::All): bool
     {
         $XAddr = $this->ReadAttributeArray(\ONVIF\IO\Attribute::XAddr);
         $Params['Type'] = $ConfigurationEnumeration;
@@ -2348,7 +2348,6 @@ class ONVIFIO extends IPSModuleStrict
     private function WriteAttributeBooleanByXPathQuery(string $Name, string $Query, \DOMXPath &$xPath)
     {
         $NodeList = $xPath->query($Query);
-        /** @var \DOMNode $Value */
         if ($NodeList->length) {
             $Value = self::GetNodeBoolValue($NodeList->item(0));
             $this->SendDebug($Name, $Value, 0);
@@ -2358,7 +2357,6 @@ class ONVIFIO extends IPSModuleStrict
     private function WriteAttributeIntegerByXPathQuery(string $Name, string $Query, \DOMXPath &$xPath)
     {
         $NodeList = $xPath->query($Query);
-        /** @var \DOMNode $Value */
         if ($NodeList->length) {
             $Value = (int) $NodeList->item(0)->nodeValue;
             $this->SendDebug($Name, $Value, 0);

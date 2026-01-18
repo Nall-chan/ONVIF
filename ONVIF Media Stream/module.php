@@ -943,7 +943,7 @@ class ONVIFMediaStream extends ONVIFModuleBase
             $this->RegisterHook('ONVIF/PTZ/' . $this->InstanceID);
             $this->WritePTZInHTMLBox();
         } else {
-            //$this->UnregisterHook('/hook/ONVIF/PTZ/' . $this->InstanceID);
+            $this->UnregisterHook('/hook/ONVIF/PTZ/' . $this->InstanceID);
             $this->UnregisterVariable('PTZControlHtml');
         }
         if ($this->ReadPropertyBoolean(\ONVIF\Stream\Property::EnablePanTiltVariable)) {

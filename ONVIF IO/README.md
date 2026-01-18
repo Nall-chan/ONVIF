@@ -82,12 +82,13 @@ Die bevorzugte Variante wird vom IO automatisch anhand der ermittelten Fähigkei
 
 Für Geräte welche das ONVIF Profile S unterstützen, wird der `Ereignis-Hook`, auf welchen Symcon die Nachrichten des Endgerätes empfängt angezeigt.  
 Die IP-Adresse des `Ereignis-Hook` wird automatisch ermittelt, je nachdem über welchen Adresse das Gerät erreichbar ist.  
-> [!CAUTION] ACHTUNG Bei nutzung von NAT
-**Es müssen die [Spezialschalter](https://www.symcon.de/service/dokumentation/entwicklerbereich/spezialschalter/) `NATSupport` und `NATPublicIP` von Symcon korrekt eingestellt werden**</span>  
+> [!CAUTION]
+> **Bei der Nutzung von NAT:**  
+> Es müssen die [Spezialschalter](https://www.symcon.de/service/dokumentation/entwicklerbereich/spezialschalter/) `NATSupport` und `NATPublicIP` von Symcon korrekt eingestellt werden</span>  
 
 Sollte es nötig sein, so können bei Bedarf die eigene IP und der Port, sowie die Verwendung von https anstatt http, in den  `Experteneinstellungen (Ereignisse abonnieren)` geändert und fixiert werden.
 
-> [!TIP] Tipp
+> [!TIP]  
 > Wird der übliche Port (3777) von Symcon nicht benutzt (z.B. Port forwarding) so kann hier auch der Port, unter welchen Symcon erreichbar ist, angepasst werden.
 
 ---
@@ -97,8 +98,8 @@ Sollte es nötig sein, so können bei Bedarf die eigene IP und der Port, sowie d
 Für Geräte welche das Profil S nicht unterstützen, gibt es außerdem noch die Möglichkeit die Ereignisse von dem Gerät abzufragen.  
 Hierzu baut Symcon der IO eine Verbindung zum Gerät auf und wartet auf eine Antwort. Das Gerät sendet bis zum erreichen der Wartezeit ein auftretendes Ereignis als Antwort an Symcon.  
 Anschließend baut Symcon die nächste Verbindung auf.
-> [!CAUTION] ACHTUNG  
-**Bei dieser Art der Verarbeitung ist zu beachten, dass permanent ein PHP-Thread von der IO-Instanz belegt wird!**
+> [!CAUTION]  
+>  **Bei dieser Art der Verarbeitung ist zu beachten, dass permanent ein PHP-Thread von der IO-Instanz belegt wird!**
 
 ---
 

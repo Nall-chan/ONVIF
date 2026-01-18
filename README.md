@@ -31,12 +31,12 @@ Einbinden von ONVIF kompatiblen Geräten in IPS.
 
 ### Zur Library
 
-> [!IMPORTANT] Hinweis
-Diese Library wurde nicht dazu entwickelt komplett den Profile Spezifikationen S, T und G zu entsprechen oder deren gesamten Funktionsumfang abzubilden.  
-Vielmehr liegt der Schwerpunkt auf eine einfache und unkomplizierte Integration bestimmter Bestandteile (LiveStream, Steuerung) und Funktionen (Events, Digital Ein-/Ausgänge) in Symcon.  
-Dadurch ist es auch möglich Geräte in Symcon einzubinden welche ihrerseits die Spezifikationen nicht vollständig oder nicht korrekt umsetzen.  
-Dennoch wird geprüft ob Geräte sich nicht an verpflichtende Funktionen halten und diese als Popup in der Konfiguration der IO-Instanzen gemeldet.  
-Dies ist kein Fehler, sondern ein beabsichtigtes Verhalten.  
+> [!IMPORTANT]
+> Diese Library wurde nicht dazu entwickelt komplett den Profile Spezifikationen S, T und G zu entsprechen oder deren gesamten Funktionsumfang abzubilden.  
+> Vielmehr liegt der Schwerpunkt auf eine einfache und unkomplizierte Integration bestimmter Bestandteile (LiveStream, Steuerung) und Funktionen (Events, Digital Ein-/Ausgänge) in Symcon.  
+> Dadurch ist es auch möglich Geräte in Symcon einzubinden welche ihrerseits die Spezifikationen nicht vollständig oder nicht korrekt umsetzen.  
+> Dennoch wird geprüft ob Geräte sich nicht an verpflichtende Funktionen halten und diese als Popup in der Konfiguration der IO-Instanzen gemeldet.  
+> Dies ist kein Fehler, sondern ein beabsichtigtes Verhalten.  
 
 ----------
 
@@ -49,8 +49,8 @@ Oder wo eine entsprechende Zugangsberechtigung erstellt bzw. erweitert werden mu
 Eine Konfiguration der Geräte über Symcon ist in dieser Library aktuell nicht vorgesehen.  
 Unerlässlich ist eine korrekte Uhrzeit auf den Geräten, da eine Authentifizierung sonst fehlschlägt.  
 
-> [!CAUTION] ACHTUNG
-> Es wird dringend empfohlen vor der Integration in IPS folgende Parameter in den Geräten fertig zu konfigurieren und ggfls. zu testen:
+> [!CAUTION]
+> Es wird dringend empfohlen vor der Integration in IPS folgende Parameter in den Geräten fertig zu konfigurieren und ggf. zu testen:
 >
 > - Netzwerk-Schnittstelle (IP-Adresse)  
 > Auffindbarkeit / Discovery über ONVIF aktivieren  
@@ -66,23 +66,26 @@ Unerlässlich ist eine korrekte Uhrzeit auf den Geräten, da eine Authentifizier
 
 ### Hinweise zum Symcon-System / Host  
 
-> [!WARNING] Wichtig
+> [!WARNING]
 > Die Maximale Anzahl der gleichzeitig verwendbaren RTSP-Streams hängt von der Symcon Lizenz ab. Bitte hierzu die [Funktionsübersicht der Editionen](https://www.symcon.de/produkt/editionen/) beachten.  
 
 ----------
 
-> [!CAUTION] Folgendes gilt nicht für reine Profil T Geräte:
-Um Ereignisse der Geräte ressourcenschonend in Symcon zu verarbeiten, werden diese vom Gerät abonniert. Dazu wird beim abonnieren eine Zieladresse an das Gerät übertragen, an welches es auftretende Ereignisse senden soll.  
-Die Zieladresse ist ein Webhook, welcher pro [IO-Modul](ONVIF%20IO/README.md) automatisch erzeugt wird.  
-Beim anlegen der IO-Instanz wird automatisch nur der interne WebServer von Symcon auf Port 3777 eingetragen.  
-Die IP-Adresse auf welchem Symcon die Daten empfängt wird automatisch ermittelt.  
+> [!CAUTION]
+> **Folgendes gilt nicht für reine Profil T Geräte:**  
+> Um Ereignisse der Geräte ressourcenschonend in Symcon zu verarbeiten, werden diese vom Gerät abonniert. Dazu wird beim abonnieren eine Zieladresse an das Gerät übertragen, an welches es auftretende Ereignisse senden soll.  
+> Die Zieladresse ist ein Webhook, welcher pro [IO-Modul](ONVIF%20IO/README.md) automatisch erzeugt wird.  
+> Beim anlegen der IO-Instanz wird automatisch nur der interne WebServer von Symcon auf Port 3777 eingetragen.  
+> Die IP-Adresse auf welchem Symcon die Daten empfängt wird automatisch ermittelt.  
+>  
+> Bei System mit **aktiven NAT-Support** funktioniert die automatische Erkennung der eigenen IP-Adresse nicht.  
+> **In dem Fall wird automatisch die NATPublicIP aus den [Symcon-Spezialschaltern](https://www.symcon.de/service/dokumentation/entwicklerbereich/spezialschalter/) benutzt.**  
+>   
+> <span style="color:red">**Auch bei Systemen mit aktiven NAT-Support wird extern automatisch nur der Port 3777 beim anlegen von IO-Instanzen unterstützt.**</span>  
 
-Bei System mit **aktiven NAT-Support** funktioniert die automatische Erkennung der eigenen IP-Adresse nicht.  
-**In dem Fall wird automatisch die NATPublicIP aus den [Symcon-Spezialschaltern](https://www.symcon.de/service/dokumentation/entwicklerbereich/spezialschalter/) benutzt.**  
+----------
 
-<span style="color:red">**Auch bei Systemen mit aktiven NAT-Support wird extern automatisch nur der Port 3777 beim anlegen von IO-Instanzen unterstützt.**</span>  
-  
-> [!TIP] Tipp:
+> [!TIP]  
 > Sollte es nötig sein, so können bei Bedarf die eigene IP und der Port, sowie die Verwendung von https anstatt http, in den IO-Instanzen unter `Experteneinstellungen` geändert und fixiert werden.
 
 ----------

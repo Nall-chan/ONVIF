@@ -54,7 +54,7 @@ Erkennt ONVIF kompatible Geräte innerhalb des lokalen LAN.
 Beim öffnen der Instanz wird automatisch ein Suchlauf gestartet, sofern Symcon nicht unter Docker mit NAT betrieben wird:  
 ![Wait](imgs/ConfigWait.png)  
 
-> [!CAUTION] ACHTUNG
+> [!CAUTION]  
 > **Wird Symcon in einen Docker Container welcher per NAT angebunden ist betrieben, so wird eine Fehlermeldung ausgegeben. Diese Konstellation wird aufgrund der fehlenden Multicast Fähigkeiten von Docker nicht unterstützt.**  
 >
 > **Werden die Geräte und Symcon über geroutete Netzwerke verbunden, so muss für das Discover die Multicast-Adresse `239.255.255.250` auf Port `3702` von Symcon zu den Geräten und UDP Port `3703` zu Symcon geroutet werden.**  
@@ -92,8 +92,8 @@ Die Namen der erzeugten Instanzen können selbstverständlich geändert werden, 
 In der erzeugten Instanz vom [IO-Module](../ONVIF%20IO/README.md) werden auch die Zugangsdaten mit übernommen.  
 Dies erfolgt einmalig wenn so eine Kette von Instanzen über diese Discovery-Instanz erstellt wurde.  
 
-> [!WARNING] Hinweis:
-**Nachträgliches ändern der Zugangsdaten muss direkt in den jeweiligen Instanzen vom [IO-Module](../ONVIF%20IO/README.md) erfolgen.**
+> [!WARNING]  
+> **Nachträgliches ändern der Zugangsdaten muss direkt in den jeweiligen Instanzen vom [IO-Module](../ONVIF%20IO/README.md) erfolgen.**
 
 Wurden beide Instanzen erzeugt, ändert sich die Schaltfläche von `Erstellen` auf `Konfigurieren`.  
 Hierüber wird dann direkt die Konfigurationsseite der zum Gerät gehörigen Instanz vom [Konfigurator-Module](../ONVIF%20Configurator/README.md) geöffnet.  
