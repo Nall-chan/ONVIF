@@ -1160,7 +1160,7 @@ class ONVIFIO extends IPSModuleStrict
                 }
             }
             // Continue PullMessages loop when subscribed
-            IPS_RunScriptText('IPS_RequestAction(' . $this->InstanceID . ',"PullMessages",true);');
+            $this->RegisterOnceTimer('PullMessages', 'IPS_RequestAction(' . $this->InstanceID . ',"PullMessages",true);');
         }
         if (is_object($PullMessagesResult)) {
             if (property_exists($PullMessagesResult, 'NotificationMessage')) {
