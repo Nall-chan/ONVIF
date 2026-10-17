@@ -40,8 +40,12 @@ class WsdlSnapshot
             'cache_wsdl'   => WSDL_CACHE_NONE,
             'exceptions'   => true
         ]);
+        // Aufzählungswerte gibt ext/soap erst ab neueren PHP-Versionen aus (8.5: "string AutoFocusMode {AUTO, MANUAL}",
+        // 8.2: "string AutoFocusMode"). Ohne sie ist der Snapshot unabhängig von der PHP-Version (CI läuft mit 8.2).
+        // Listentypen ("list StringList {string}") geben alle Versionen gleich aus.
+        $Types = preg_replace('/^(?!struct |list )(\S+ \S+) \{[^}\n]*\}$/', '$1', $Client->__getTypes());
         return '## Functions' . "\n" . self::sortedList($Client->__getFunctions()) . "\n\n" .
-            '## Types' . "\n" . self::sortedList($Client->__getTypes()) . "\n";
+            '## Types' . "\n" . self::sortedList($Types) . "\n";
     }
 
     /**

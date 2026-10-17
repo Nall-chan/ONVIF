@@ -20,16 +20,16 @@ UnsubscribeResponse Unsubscribe(Unsubscribe $UnsubscribeRequest)
 void Notify(Notify $Notify)
 
 ## Types
-NCName anonymous {default, preserve}
-QName FaultCodesType {tns:InvalidAddressingHeader, tns:InvalidAddress, tns:InvalidEPR, tns:InvalidCardinality, tns:MissingAddressInEPR, tns:DuplicateMessageID, tns:ActionMismatch, tns:MessageAddressingHeaderRequired, tns:DestinationUnreachable, tns:ActionNotSupported, tns:EndpointUnavailable}
+NCName anonymous
+QName FaultCodesType
 QName SimpleTopicExpression
-QName faultcodeEnum {tns:DataEncodingUnknown, tns:MustUnderstand, tns:Receiver, tns:Sender, tns:VersionMismatch}
+QName faultcodeEnum
 ReferenceToken JobToken
 ReferenceToken ReceiverReference
 ReferenceToken RecordingJobReference
 ReferenceToken RecordingReference
 ReferenceToken TrackReference
-anyURI RelationshipType {http://www.w3.org/2005/08/addressing/reply}
+anyURI RelationshipType
 hexBinary Dot11PSK
 hexBinary Dot11SSIDType
 int IANA-IfTypes
@@ -40,92 +40,91 @@ list ReferenceTokenList {ReferenceToken}
 list StringAttrList {string}
 list StringList {string}
 list anonymous {QName}
-string AFModes {OnceAfterMove}
-string AudioClassType {gun_shot, scream, glass_breaking, tire_screech}
-string AudioClassification {GunShot, Scream, GlassBreaking, TireScreech, Alarm}
-string AudioEncoding {G711, G726, AAC}
-string AudioEncodingMimeNames {PCMU, G726, MP4A-LATM, mpeg4-generic}
-string AutoFocusMode {AUTO, MANUAL}
+string AFModes
+string AudioClassType
+string AudioClassification
+string AudioEncoding
+string AudioEncodingMimeNames
+string AutoFocusMode
 string AuxiliaryData
-string BacklightCompensationMode {OFF, ON}
-string CapabilityCategory {All, Analytics, Device, Events, Imaging, Media, PTZ}
-string ConnectionStatus {Offline, Connecting, Connected}
-string DefoggingMode {OFF, ON, AUTO}
+string BacklightCompensationMode
+string CapabilityCategory
+string ConnectionStatus
+string DefoggingMode
 string Description
-string DigitalIdleState {closed, open}
-string DiscoveryMode {Discoverable, NonDiscoverable}
-string Dot11AuthAndMangementSuite {None, Dot1X, PSK, Extended}
-string Dot11Cipher {CCMP, TKIP, Any, Extended}
+string DigitalIdleState
+string DiscoveryMode
+string Dot11AuthAndMangementSuite
+string Dot11Cipher
 string Dot11PSKPassphrase
-string Dot11SecurityMode {None, WEP, PSK, Dot1X, Extended}
-string Dot11SignalStrength {None, Very Bad, Bad, Good, Very Good, Extended}
-string Dot11StationMode {Ad-hoc, Infrastructure, Extended}
-string Duplex {Full, Half}
-string DynamicDNSType {NoUpdate, ClientUpdates, ServerUpdates}
-string EFlipMode {OFF, ON, Extended}
-string Enabled {ENABLED, DISABLED}
-string EncryptionMode {CENC, CBCS}
-string Entity {Device, VideoSource, AudioSource}
-string EventBrokerProtocol {mqtt, mqtts, ws, wss}
-string ExposureMode {AUTO, MANUAL}
-string ExposurePriority {LowNoise, FrameRate}
-string ExtendedDirection {Left, Right, Any, Entering, Exiting, Approaching, Departing}
-string FactoryDefaultType {Hard, Soft}
-string H264Profile {Baseline, Main, Extended, High}
-string IPAddressFilterType {Allow, Deny}
-string IPType {IPv4, IPv6}
-string IPv6DHCPConfiguration {Auto, Stateful, Stateless, Off}
-string ImageSendingType {Embedded, LocalStorage, RemoteStorage}
-string ImageStabilizationMode {OFF, ON, AUTO, Extended}
-string IrCutFilterAutoBoundaryType {Common, ToOn, ToOff, Extended}
-string IrCutFilterMode {ON, OFF, AUTO}
-string MetadataCompressionType {None, GZIP, EXI}
-string ModeOfOperation {Idle, Active, Unknown}
-string MoveAndTrackMethod {PresetToken, GeoLocation, PTZVector, ObjectID}
-string MoveStatus {IDLE, MOVING, UNKNOWN}
-string Mpeg4Profile {SP, ASP}
+string Dot11SecurityMode
+string Dot11SignalStrength
+string Dot11StationMode
+string Duplex
+string DynamicDNSType
+string EFlipMode
+string Enabled
+string EncryptionMode
+string Entity
+string EventBrokerProtocol
+string ExposureMode
+string ExposurePriority
+string ExtendedDirection
+string FactoryDefaultType
+string H264Profile
+string IPAddressFilterType
+string IPType
+string IPv6DHCPConfiguration
+string ImageSendingType
+string ImageStabilizationMode
+string IrCutFilterAutoBoundaryType
+string IrCutFilterMode
+string MetadataCompressionType
+string ModeOfOperation
+string MoveAndTrackMethod
+string MoveStatus
+string Mpeg4Profile
 string Name
-string NetworkHostType {IPv4, IPv6, DNS}
-string NetworkProtocolType {HTTP, HTTPS, RTSP}
-string OSDType {Text, Image, Extended}
-string PTZPresetTourDirection {Forward, Backward, Extended}
-string PTZPresetTourOperation {Start, Stop, Pause, Extended}
-string PTZPresetTourState {Idle, Touring, Paused, Extended}
-string PropertyOperation {Initialized, Deleted, Changed}
-string ReceiverMode {AutoConnect, AlwaysConnect, NeverConnect, Unknown}
-string ReceiverState {NotConnected, Connecting, Connected, Unknown}
+string NetworkHostType
+string NetworkProtocolType
+string OSDType
+string PTZPresetTourDirection
+string PTZPresetTourOperation
+string PTZPresetTourState
+string PropertyOperation
+string ReceiverMode
+string ReceiverState
 string RecordingJobMode
 string RecordingJobState
-string RecordingStatus {Initiated, Recording, Stopped, Removing, Removed, Unknown}
+string RecordingStatus
 string ReferenceToken
-string RelayIdleState {closed, open}
-string RelayLogicalState {active, inactive}
-string RelayMode {Monostable, Bistable}
-string ReverseMode {OFF, ON, AUTO, Extended}
-string RotateMode {OFF, ON, AUTO}
-string SceneOrientationMode {MANUAL, AUTO}
-string SceneOrientationOption {Below, Horizon, Above}
-string ScopeDefinition {Fixed, Configurable}
-string SearchState {Queued, Searching, Completed, Unknown}
-string SetDateTimeType {Manual, NTP}
-string SrtpSecurityAlgorithms {NONE, AES_CM_128_HMAC_SHA1_80, AEAD_AES_128_GCM, AEAD_AES_256_GCM}
-string StorageStrategy {External, Local, Both}
-string StreamType {RTP-Unicast, RTP-Multicast}
-string SystemLogType {System, Access}
-string TargetFormat {MP4, CMAF}
-string ToneCompensationMode {OFF, ON, AUTO}
-string TrackType {Video, Audio, Metadata, Extended}
-string TransportProtocol {UDP, TCP, RTSP, HTTP}
-string UserLevel {Administrator, Operator, User, Anonymous, Extended}
-string VideoEncoding {JPEG, MPEG4, H264}
-string VideoEncodingMimeNames {JPEG, MPV4-ES, H264, H265}
-string VideoEncodingProfiles {Simple, AdvancedSimple, Baseline, Main, Main10, Extended, High}
-string ViewModes {tt:Fisheye, tt:360Panorama, tt:180Panorama, tt:Quad, tt:Original, tt:LeftHalf, tt:RightHalf, tt:Dewarp}
-string WhiteBalanceMode {AUTO, MANUAL}
-string WideDynamicMode {OFF, ON}
+string RelayIdleState
+string RelayLogicalState
+string RelayMode
+string ReverseMode
+string RotateMode
+string SceneOrientationMode
+string SceneOrientationOption
+string ScopeDefinition
+string SearchState
+string SetDateTimeType
+string SrtpSecurityAlgorithms
+string StorageStrategy
+string StreamType
+string SystemLogType
+string TargetFormat
+string ToneCompensationMode
+string TrackType
+string TransportProtocol
+string UserLevel
+string VideoEncoding
+string VideoEncodingMimeNames
+string VideoEncodingProfiles
+string ViewModes
+string WhiteBalanceMode
+string WideDynamicMode
 string XPathExpression
 string anonymous
-string anonymous {}
 struct AACDecOptions {
  IntItems Bitrate;
  IntItems SampleRateRange;
@@ -3110,8 +3109,8 @@ token FullTopicExpression
 token HwAddress
 token IPv4Address
 token IPv6Address
-union AbsoluteOrRelativeTimeType {,dateTime,duration}
-union Direction {,ExtendedDirection}
-union FaultCodesOpenEnumType {,FaultCodesType,QName}
-union RelationshipTypeOpenEnum {,RelationshipType,anyURI}
-union anonymous {,language,anonymous}
+union AbsoluteOrRelativeTimeType
+union Direction
+union FaultCodesOpenEnumType
+union RelationshipTypeOpenEnum
+union anonymous
