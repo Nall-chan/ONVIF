@@ -1,0 +1,3355 @@
+## Functions
+CreateAnalyticsModulesResponse CreateAnalyticsModules(CreateAnalyticsModules $parameters)
+CreateRulesResponse CreateRules(CreateRules $parameters)
+DeleteAnalyticsModulesResponse DeleteAnalyticsModules(DeleteAnalyticsModules $parameters)
+DeleteRulesResponse DeleteRules(DeleteRules $parameters)
+GetAnalyticsModuleOptionsResponse GetAnalyticsModuleOptions(GetAnalyticsModuleOptions $parameters)
+GetAnalyticsModulesResponse GetAnalyticsModules(GetAnalyticsModules $parameters)
+GetRuleOptionsResponse GetRuleOptions(GetRuleOptions $parameters)
+GetRulesResponse GetRules(GetRules $parameters)
+GetServiceCapabilitiesResponse GetServiceCapabilities(GetServiceCapabilities $parameters)
+GetSupportedAnalyticsModulesResponse GetSupportedAnalyticsModules(GetSupportedAnalyticsModules $parameters)
+GetSupportedMetadataResponse GetSupportedMetadata(GetSupportedMetadata $parameters)
+GetSupportedRulesResponse GetSupportedRules(GetSupportedRules $parameters)
+ModifyAnalyticsModulesResponse ModifyAnalyticsModules(ModifyAnalyticsModules $parameters)
+ModifyRulesResponse ModifyRules(ModifyRules $parameters)
+
+## Types
+NCName anonymous {default, preserve}
+QName FaultCodesType {tns:InvalidAddressingHeader, tns:InvalidAddress, tns:InvalidEPR, tns:InvalidCardinality, tns:MissingAddressInEPR, tns:DuplicateMessageID, tns:ActionMismatch, tns:MessageAddressingHeaderRequired, tns:DestinationUnreachable, tns:ActionNotSupported, tns:EndpointUnavailable}
+QName SimpleTopicExpression
+QName faultcodeEnum {tns:DataEncodingUnknown, tns:MustUnderstand, tns:Receiver, tns:Sender, tns:VersionMismatch}
+ReferenceToken JobToken
+ReferenceToken ReceiverReference
+ReferenceToken RecordingJobReference
+ReferenceToken RecordingReference
+ReferenceToken TrackReference
+anyURI RelationshipType {http://www.w3.org/2005/08/addressing/reply}
+hexBinary Dot11PSK
+hexBinary Dot11SSIDType
+int IANA-IfTypes
+integer NetworkInterfaceConfigPriority
+list FloatList {float}
+list IntList {int}
+list ReferenceTokenList {ReferenceToken}
+list StringAttrList {string}
+list StringList {string}
+list anonymous {QName}
+string AFModes {OnceAfterMove}
+string AudioClassType {gun_shot, scream, glass_breaking, tire_screech}
+string AudioEncoding {G711, G726, AAC}
+string AudioEncodingMimeNames {PCMU, G726, MP4A-LATM, mpeg4-generic}
+string AutoFocusMode {AUTO, MANUAL}
+string AuxiliaryData
+string BacklightCompensationMode {OFF, ON}
+string BodyShape {Fat, Thin, Other}
+string BottomsCategory {Trousers, Shorts, Skirt, Other}
+string BottomsStyle {FornalPants, Jeans, Other}
+string CapabilityCategory {All, Analytics, Device, Events, Imaging, Media, PTZ}
+string CartCategory {BabyCarriage, TwoWheelVehicle, Tricyle, Other}
+string Chin {Double, Pointed, Round}
+string ClassType {Animal, Face, Human, Vehical, Other}
+string Complexion {White, Black, Asian, Other}
+string DefoggingMode {OFF, ON, AUTO}
+string Description
+string DigitalIdleState {closed, open}
+string Direction {Left, Right, Any}
+string DiscoveryMode {Discoverable, NonDiscoverable}
+string Dot11AuthAndMangementSuite {None, Dot1X, PSK, Extended}
+string Dot11Cipher {CCMP, TKIP, Any, Extended}
+string Dot11PSKPassphrase
+string Dot11SecurityMode {None, WEP, PSK, Dot1X, Extended}
+string Dot11SignalStrength {None, Very Bad, Bad, Good, Very Good, Extended}
+string Dot11StationMode {Ad-hoc, Infrastructure, Extended}
+string Duplex {Full, Half}
+string DynamicDNSType {NoUpdate, ClientUpdates, ServerUpdates}
+string EFlipMode {OFF, ON, Extended}
+string Ear {Round, Pointed, Narrow, BroadLobe, Other}
+string Enabled {ENABLED, DISABLED}
+string Entity {Device, VideoSource, AudioSource}
+string ExposureMode {AUTO, MANUAL}
+string ExposurePriority {LowNoise, FrameRate}
+string Expression {Natural, Smile, RaisedEyebrows, Squint, Frown, Other}
+string EyeShape {Almond, Slitty, Round, Other}
+string Eyeball {Black, Blue, Brown, Gray, Green, Pink, Other}
+string EyebrowSpace {Joint, Separate}
+string EyebrowWidth {Long, Short}
+string Eyelid {Single, Double, Other}
+string FacialShape {Long, Round, Square, Oval, Other}
+string FactoryDefaultType {Hard, Soft}
+string FrecklesType {AroundCheek, Nose, forehead, Other}
+string Gender {Male, Female}
+string Grain {Stria, Plaid, PureColour, Decal, Other}
+string H264Profile {Baseline, Main, Extended, High}
+string HairStyle {Straight, Wave, Curly, CrewCut, Bald, Ponytail, Pigtail, Other}
+string HumanActivity {Walking, Running, Fallen, Squatting, Sitting, Standing, Driving, Other}
+string IPAddressFilterType {Allow, Deny}
+string IPType {IPv4, IPv6}
+string IPv6DHCPConfiguration {Auto, Stateful, Stateless, Off}
+string ImageSendingType {Embedded, LocalStorage, RemoteStorage}
+string ImageStabilizationMode {OFF, ON, AUTO, Extended}
+string IrCutFilterAutoBoundaryType {Common, ToOn, ToOff, Extended}
+string IrCutFilterMode {ON, OFF, AUTO}
+string KnapsackCategory {SingleShoulderBag, Backpack, Other}
+string Length {Long, Medium, Short}
+string Lip {Full, Medium, Thin}
+string MetadataCompressionType {None, GZIP, EXI}
+string ModeOfOperation {Idle, Active, Unknown}
+string MoveAndTrackMethod {PresetToken, GeoLocation, PTZVector, ObjectID}
+string MoveStatus {IDLE, MOVING, UNKNOWN}
+string Mpeg4Profile {SP, ASP}
+string Name
+string NetworkHostType {IPv4, IPv6, DNS}
+string NetworkProtocolType {HTTP, HTTPS, RTSP}
+string NoseBridge {Straight, Arch}
+string NoseEnd {Snub, Turnedup, Flat, Hooked, Other}
+string NoseLength {Short, Long}
+string NoseWing {Narrow, Broad}
+string OSDType {Text, Image, Extended}
+string ObjectType {Animal, HumanFace, Human, Bicycle, Vehicle, LicensePlate, Bike}
+string PTZPresetTourDirection {Forward, Backward, Extended}
+string PTZPresetTourOperation {Start, Stop, Pause, Extended}
+string PTZPresetTourState {Idle, Touring, Paused, Extended}
+string PlateType {Normal, Police, Diplomat, Temporary}
+string PropertyOperation {Initialized, Deleted, Changed}
+string ReceiverMode {AutoConnect, AlwaysConnect, NeverConnect, Unknown}
+string ReceiverState {NotConnected, Connecting, Connected, Unknown}
+string RecordingJobMode
+string RecordingJobState
+string RecordingStatus {Initiated, Recording, Stopped, Removing, Removed, Unknown}
+string ReferenceToken
+string RelayIdleState {closed, open}
+string RelayLogicalState {active, inactive}
+string RelayMode {Monostable, Bistable}
+string ReverseMode {OFF, ON, AUTO, Extended}
+string RotateMode {OFF, ON, AUTO}
+string SceneOrientationMode {MANUAL, AUTO}
+string SceneOrientationOption {Below, Horizon, Above}
+string ScopeDefinition {Fixed, Configurable}
+string SearchState {Queued, Searching, Completed, Unknown}
+string SetDateTimeType {Manual, NTP}
+string ShoesCategory {LeatherShoes, Sneakers, Sandal, Slipper, Other}
+string Smoking {NoSmoking, Cigar, ElectronicCigarettes, Other}
+string StreamType {RTP-Unicast, RTP-Multicast}
+string SystemLogType {System, Access}
+string ToneCompensationMode {OFF, ON, AUTO}
+string TopsCategory {LongSleeve, ShortSleeve, Other}
+string TopsStyle {Tailor, Jacket, Sweater, Overcoat, Dress, Other}
+string TrackType {Video, Audio, Metadata, Extended}
+string TransportProtocol {UDP, TCP, RTSP, HTTP}
+string UserLevel {Administrator, Operator, User, Anonymous, Extended}
+string UsingMobile {ByLeftHand, ByRightHand, Other}
+string VehicleType {Bus, Car, Truck, Bicycle, Motorcycle}
+string VideoEncoding {JPEG, MPEG4, H264}
+string VideoEncodingMimeNames {JPEG, MPV4-ES, H264, H265}
+string VideoEncodingProfiles {Simple, AdvancedSimple, Baseline, Main, Main10, Extended, High}
+string ViewModes {tt:Fisheye, tt:360Panorama, tt:180Panorama, tt:Quad, tt:Original, tt:LeftHalf, tt:RightHalf, tt:Dewarp}
+string WhiteBalanceMode {AUTO, MANUAL}
+string WideDynamicMode {OFF, ON}
+string XPathExpression
+string anonymous
+string anonymous {}
+struct AACDecOptions {
+ IntItems Bitrate;
+ IntItems SampleRateRange;
+ <anyXML> any;
+}
+struct AbsoluteFocus {
+ float Position;
+ float Speed;
+}
+struct AbsoluteFocusOptions {
+ FloatRange Position;
+ FloatRange Speed;
+}
+struct Accessory {
+ AccessoryDescription Opticals;
+ AccessoryDescription Hat;
+ AccessoryDescription Mask;
+ AccessoryDescription Hijab;
+ AccessoryDescription Helmet;
+ AccessoryDescription Kerchief;
+ AccessoryDescription RightEyePatch;
+ AccessoryDescription LeftEyePatch;
+ <anyXML> any;
+}
+struct AccessoryDescription {
+ boolean Wear;
+ ColorDescriptor Color;
+ <anyXML> any;
+}
+struct ActionEngineEventPayload {
+ Envelope RequestInfo;
+ Envelope ResponseInfo;
+ Fault Fault;
+ ActionEngineEventPayloadExtension Extension;
+}
+struct ActionEngineEventPayloadExtension {
+ <anyXML> any;
+}
+struct ActiveConnection {
+ float CurrentBitrate;
+ float CurrentFps;
+ <anyXML> any;
+}
+struct AdditionalFeatures {
+ boolean Scar;
+ boolean Mole;
+ boolean Tattoo;
+ string Freckles;
+ <anyXML> any;
+}
+struct AnalyticsCapabilities {
+ anyURI XAddr;
+ boolean RuleSupport;
+ boolean AnalyticsModuleSupport;
+ <anyXML> any;
+}
+struct AnalyticsDeviceCapabilities {
+ anyURI XAddr;
+ boolean RuleSupport;
+ AnalyticsDeviceExtension Extension;
+}
+struct AnalyticsDeviceEngineConfiguration {
+ EngineConfiguration EngineConfiguration;
+ AnalyticsDeviceEngineConfigurationExtension Extension;
+}
+struct AnalyticsDeviceEngineConfigurationExtension {
+ <anyXML> any;
+}
+struct AnalyticsDeviceExtension {
+ <anyXML> any;
+}
+struct AnalyticsEngine {
+ AnalyticsDeviceEngineConfiguration AnalyticsEngineConfiguration;
+ <anyXML> any;
+}
+struct AnalyticsEngineConfiguration {
+ Config AnalyticsModule;
+ AnalyticsEngineConfigurationExtension Extension;
+}
+struct AnalyticsEngineConfigurationExtension {
+ <anyXML> any;
+}
+struct AnalyticsEngineControl {
+ ReferenceToken EngineToken;
+ ReferenceToken EngineConfigToken;
+ ReferenceToken InputToken;
+ ReferenceToken ReceiverToken;
+ MulticastConfiguration Multicast;
+ Config Subscription;
+ ModeOfOperation Mode;
+ <anyXML> any;
+}
+struct AnalyticsEngineInput {
+ SourceIdentification SourceIdentification;
+ VideoEncoderConfiguration VideoInput;
+ MetadataInput MetadataInput;
+ <anyXML> any;
+}
+struct AnalyticsEngineInputInfo {
+ Config InputInfo;
+ AnalyticsEngineInputInfoExtension Extension;
+}
+struct AnalyticsEngineInputInfoExtension {
+ <anyXML> any;
+}
+struct AnalyticsState {
+ string Error;
+ string State;
+ <anyXML> any;
+}
+struct AnalyticsStateInformation {
+ ReferenceToken AnalyticsEngineControlToken;
+ AnalyticsState State;
+ <anyXML> any;
+}
+struct AnyHolder {
+ <anyXML> any;
+}
+struct Appearance {
+ Transformation Transformation;
+ ShapeDescriptor Shape;
+ ColorDescriptor Color;
+ ClassDescriptor Class;
+ AppearanceExtension Extension;
+ GeoLocation GeoLocation;
+ VehicleInfo VehicleInfo;
+ LicensePlateInfo LicensePlateInfo;
+ HumanFace HumanFace;
+ HumanBody HumanBody;
+ anyURI ImageRef;
+ base64Binary Image;
+ <anyXML> any;
+}
+struct AppearanceExtension {
+ <anyXML> any;
+}
+struct ArrayOfFileProgress {
+ FileProgress FileProgress;
+ ArrayOfFileProgressExtension Extension;
+}
+struct ArrayOfFileProgressExtension {
+ <anyXML> any;
+}
+struct AttachmentData {
+ Include Include;
+ anonymous contentType;
+}
+struct AttributedAnyType {
+ <anyXML> any;
+}
+struct AttributedQNameType {
+ QName _;
+}
+struct AttributedURIType {
+ anyURI _;
+}
+struct AttributedUnsignedLongType {
+ unsignedLong _;
+}
+struct AudioAnalyticsStream {
+ AudioDescriptor AudioDescriptor;
+ AudioAnalyticsStreamExtension Extension;
+ <anyXML> any;
+}
+struct AudioAnalyticsStreamExtension {
+ <anyXML> any;
+}
+struct AudioAttributes {
+ int Bitrate;
+ string Encoding;
+ int Samplerate;
+ <anyXML> any;
+}
+struct AudioClassCandidate {
+ AudioClassType Type;
+ float Likelihood;
+ <anyXML> any;
+}
+struct AudioClassDescriptor {
+ AudioClassCandidate ClassCandidate;
+ AudioClassDescriptorExtension Extension;
+}
+struct AudioClassDescriptorExtension {
+ <anyXML> any;
+}
+struct AudioDecoderConfiguration {
+ <anyXML> any;
+}
+struct AudioDecoderConfigurationOptions {
+ AACDecOptions AACDecOptions;
+ G711DecOptions G711DecOptions;
+ G726DecOptions G726DecOptions;
+ AudioDecoderConfigurationOptionsExtension Extension;
+}
+struct AudioDecoderConfigurationOptionsExtension {
+ <anyXML> any;
+}
+struct AudioDescriptor {
+ <anyXML> any;
+ dateTime UtcTime;
+}
+struct AudioEncoder2Configuration {
+ string Encoding;
+ MulticastConfiguration Multicast;
+ int Bitrate;
+ int SampleRate;
+ <anyXML> any;
+}
+struct AudioEncoder2ConfigurationOptions {
+ string Encoding;
+ IntItems BitrateList;
+ IntItems SampleRateList;
+ <anyXML> any;
+}
+struct AudioEncoderConfiguration {
+ AudioEncoding Encoding;
+ int Bitrate;
+ int SampleRate;
+ MulticastConfiguration Multicast;
+ duration SessionTimeout;
+ <anyXML> any;
+}
+struct AudioEncoderConfigurationOption {
+ AudioEncoding Encoding;
+ IntItems BitrateList;
+ IntItems SampleRateList;
+ <anyXML> any;
+}
+struct AudioEncoderConfigurationOptions {
+ AudioEncoderConfigurationOption Options;
+}
+struct AudioOutput {
+ <anyXML> any;
+}
+struct AudioOutputConfiguration {
+ ReferenceToken OutputToken;
+ anyURI SendPrimacy;
+ int OutputLevel;
+ <anyXML> any;
+}
+struct AudioOutputConfigurationOptions {
+ ReferenceToken OutputTokensAvailable;
+ anyURI SendPrimacyOptions;
+ IntRange OutputLevelRange;
+ <anyXML> any;
+}
+struct AudioSource {
+ int Channels;
+ <anyXML> any;
+}
+struct AudioSourceConfiguration {
+ ReferenceToken SourceToken;
+ <anyXML> any;
+}
+struct AudioSourceConfigurationOptions {
+ ReferenceToken InputTokensAvailable;
+ AudioSourceOptionsExtension Extension;
+}
+struct AudioSourceOptionsExtension {
+ <anyXML> any;
+}
+struct BacklightCompensation {
+ BacklightCompensationMode Mode;
+ float Level;
+}
+struct BacklightCompensation20 {
+ BacklightCompensationMode Mode;
+ float Level;
+}
+struct BacklightCompensationOptions {
+ WideDynamicMode Mode;
+ FloatRange Level;
+}
+struct BacklightCompensationOptions20 {
+ BacklightCompensationMode Mode;
+ FloatRange Level;
+}
+struct BackupFile {
+ string Name;
+ AttachmentData Data;
+}
+struct Bag {
+ string Category;
+ ColorDescriptor Color;
+ <anyXML> any;
+}
+struct BaseFaultType {
+ <anyXML> any;
+ dateTime Timestamp;
+ EndpointReferenceType Originator;
+ ErrorCode ErrorCode;
+ Description Description;
+ FaultCause FaultCause;
+}
+struct Behaviour {
+ Removed Removed;
+ Idle Idle;
+ BehaviourExtension Extension;
+ float Speed;
+ <anyXML> any;
+}
+struct Behaviour {
+ string Smoking;
+ string UsingMobile;
+ string Activity;
+ <anyXML> any;
+}
+struct BehaviourExtension {
+ <anyXML> any;
+}
+struct Belonging {
+ Bag Bag;
+ Umbrella Umbrella;
+ boolean LiftSomething;
+ Box Box;
+ Cart Cart;
+ boolean Weapon;
+ <anyXML> any;
+}
+struct BinaryData {
+ base64Binary Data;
+ anonymous contentType;
+}
+struct Body {
+ <anyXML> any;
+}
+struct BodyMetric {
+ int Height;
+ string BodyShape;
+ <anyXML> any;
+}
+struct Bottoms {
+ string Category;
+ ColorDescriptor Color;
+ string Grain;
+ string Style;
+ <anyXML> any;
+}
+struct Box {
+ ColorDescriptor Color;
+ boolean Lug;
+ <anyXML> any;
+}
+struct Capabilities {
+ <anyXML> any;
+ boolean RuleSupport;
+ boolean AnalyticsModuleSupport;
+ boolean CellBasedSceneDescriptionSupported;
+ boolean RuleOptionsSupported;
+ boolean AnalyticsModuleOptionsSupported;
+ boolean SupportedMetadata;
+ StringList ImageSendingType;
+}
+struct Capabilities {
+ AnalyticsCapabilities Analytics;
+ DeviceCapabilities Device;
+ EventCapabilities Events;
+ ImagingCapabilities Imaging;
+ MediaCapabilities Media;
+ PTZCapabilities PTZ;
+ CapabilitiesExtension Extension;
+}
+struct CapabilitiesExtension {
+ <anyXML> any;
+ DeviceIOCapabilities DeviceIO;
+ DisplayCapabilities Display;
+ RecordingCapabilities Recording;
+ SearchCapabilities Search;
+ ReplayCapabilities Replay;
+ ReceiverCapabilities Receiver;
+ AnalyticsDeviceCapabilities AnalyticsDevice;
+ CapabilitiesExtension2 Extensions;
+}
+struct CapabilitiesExtension2 {
+ <anyXML> any;
+}
+struct Cart {
+ string Category;
+ ColorDescriptor Color;
+ <anyXML> any;
+}
+struct CellLayout {
+ Transformation Transformation;
+ <anyXML> any;
+ integer Columns;
+ integer Rows;
+}
+struct Certificate {
+ token CertificateID;
+ BinaryData Certificate;
+}
+struct CertificateGenerationParameters {
+ token CertificateID;
+ string Subject;
+ token ValidNotBefore;
+ token ValidNotAfter;
+ CertificateGenerationParametersExtension Extension;
+}
+struct CertificateGenerationParametersExtension {
+ <anyXML> any;
+}
+struct CertificateInformation {
+ token CertificateID;
+ string IssuerDN;
+ string SubjectDN;
+ CertificateUsage KeyUsage;
+ CertificateUsage ExtendedKeyUsage;
+ int KeyLength;
+ string Version;
+ string SerialNum;
+ string SignatureAlgorithm;
+ DateTimeRange Validity;
+ CertificateInformationExtension Extension;
+}
+struct CertificateInformationExtension {
+ <anyXML> any;
+}
+struct CertificateStatus {
+ token CertificateID;
+ boolean Status;
+ <anyXML> any;
+}
+struct CertificateUsage {
+ string _;
+ boolean Critical;
+}
+struct CertificateWithPrivateKey {
+ token CertificateID;
+ BinaryData Certificate;
+ BinaryData PrivateKey;
+ <anyXML> any;
+}
+struct ClassCandidate {
+ ClassType Type;
+ float Likelihood;
+ <anyXML> any;
+}
+struct ClassDescriptor {
+ ClassCandidate ClassCandidate;
+ ClassDescriptorExtension Extension;
+ StringLikelihood Type;
+ <anyXML> any;
+}
+struct ClassDescriptorExtension {
+ <anyXML> any;
+ OtherType OtherTypes;
+ ClassDescriptorExtension2 Extension;
+}
+struct ClassDescriptorExtension2 {
+ <anyXML> any;
+}
+struct Clothing {
+ Scarf Scarf;
+ Gloves Gloves;
+ Tops Tops;
+ Bottoms Bottoms;
+ Shoes Shoes;
+ <anyXML> any;
+}
+struct CodingCapabilities {
+ AudioEncoderConfigurationOptions AudioEncodingCapabilities;
+ AudioDecoderConfigurationOptions AudioDecodingCapabilities;
+ VideoDecoderConfigurationOptions VideoDecodingCapabilities;
+ <anyXML> any;
+}
+struct Color {
+ float X;
+ float Y;
+ float Z;
+ anyURI Colorspace;
+ float Likelihood;
+}
+struct ColorCluster {
+ Color Color;
+ float Weight;
+ ColorCovariance Covariance;
+ <anyXML> any;
+}
+struct ColorCovariance {
+ float XX;
+ float YY;
+ float ZZ;
+ float XY;
+ float XZ;
+ float YZ;
+ anyURI Colorspace;
+}
+struct ColorDescriptor {
+ ColorCluster ColorCluster;
+ anyType Extension;
+ <anyXML> any;
+}
+struct ColorOptions {
+ Color ColorList;
+ ColorspaceRange ColorspaceRange;
+}
+struct ColorspaceRange {
+ FloatRange X;
+ FloatRange Y;
+ FloatRange Z;
+ anyURI Colorspace;
+}
+struct Config {
+ ItemList Parameters;
+ string Name;
+ QName Type;
+}
+struct ConfigDescription {
+ ItemListDescription Parameters;
+ Messages Messages;
+ ConfigDescriptionExtension Extension;
+ QName Name;
+ boolean fixed;
+ integer maxInstances;
+}
+struct ConfigDescriptionExtension {
+ <anyXML> any;
+}
+struct ConfigOptions {
+ <anyXML> any;
+ QName RuleType;
+ string Name;
+ QName Type;
+ QName AnalyticsModule;
+ int minOccurs;
+ int maxOccurs;
+}
+struct ConfigurationEntity {
+ Name Name;
+ int UseCount;
+ ReferenceToken token;
+}
+struct ContinuousFocus {
+ float Speed;
+}
+struct ContinuousFocusOptions {
+ FloatRange Speed;
+}
+struct CreateAnalyticsModules {
+ ReferenceToken ConfigurationToken;
+ Config AnalyticsModule;
+}
+struct CreateAnalyticsModulesResponse {
+}
+struct CreatePullPoint {
+ <anyXML> any;
+}
+struct CreatePullPointResponse {
+ EndpointReferenceType PullPoint;
+ <anyXML> any;
+}
+struct CreateRules {
+ ReferenceToken ConfigurationToken;
+ Config Rule;
+}
+struct CreateRulesResponse {
+}
+struct DNSInformation {
+ boolean FromDHCP;
+ token SearchDomain;
+ IPAddress DNSFromDHCP;
+ IPAddress DNSManual;
+ DNSInformationExtension Extension;
+}
+struct DNSInformationExtension {
+ <anyXML> any;
+}
+struct Date {
+ int Year;
+ int Month;
+ int Day;
+}
+struct DateTime {
+ Time Time;
+ Date Date;
+}
+struct DateTimeRange {
+ dateTime From;
+ dateTime Until;
+ <anyXML> any;
+}
+struct Defogging {
+ string Mode;
+ float Level;
+ DefoggingExtension Extension;
+}
+struct DefoggingExtension {
+ <anyXML> any;
+}
+struct DefoggingOptions {
+ string Mode;
+ boolean Level;
+ <anyXML> any;
+}
+struct DeleteAnalyticsModules {
+ ReferenceToken ConfigurationToken;
+ string AnalyticsModuleName;
+}
+struct DeleteAnalyticsModulesResponse {
+}
+struct DeleteRules {
+ ReferenceToken ConfigurationToken;
+ string RuleName;
+}
+struct DeleteRulesResponse {
+}
+struct Description {
+ string _;
+ anonymous lang;
+}
+struct DestroyPullPoint {
+ <anyXML> any;
+}
+struct DestroyPullPointResponse {
+ <anyXML> any;
+}
+struct DeviceCapabilities {
+ anyURI XAddr;
+ NetworkCapabilities Network;
+ SystemCapabilities System;
+ IOCapabilities IO;
+ SecurityCapabilities Security;
+ DeviceCapabilitiesExtension Extension;
+}
+struct DeviceCapabilitiesExtension {
+ <anyXML> any;
+}
+struct DeviceEntity {
+ ReferenceToken token;
+}
+struct DeviceIOCapabilities {
+ anyURI XAddr;
+ int VideoSources;
+ int VideoOutputs;
+ int AudioSources;
+ int AudioOutputs;
+ int RelayOutputs;
+ <anyXML> any;
+}
+struct DigitalInput {
+ <anyXML> any;
+ DigitalIdleState IdleState;
+}
+struct DisplayCapabilities {
+ anyURI XAddr;
+ boolean FixedLayout;
+ <anyXML> any;
+}
+struct Documentation {
+ <anyXML> any;
+}
+struct Dot11AvailableNetworks {
+ Dot11SSIDType SSID;
+ string BSSID;
+ Dot11AuthAndMangementSuite AuthAndMangementSuite;
+ Dot11Cipher PairCipher;
+ Dot11Cipher GroupCipher;
+ Dot11SignalStrength SignalStrength;
+ Dot11AvailableNetworksExtension Extension;
+}
+struct Dot11AvailableNetworksExtension {
+ <anyXML> any;
+}
+struct Dot11Capabilities {
+ boolean TKIP;
+ boolean ScanAvailableNetworks;
+ boolean MultipleConfiguration;
+ boolean AdHocStationMode;
+ boolean WEP;
+ <anyXML> any;
+}
+struct Dot11Configuration {
+ Dot11SSIDType SSID;
+ Dot11StationMode Mode;
+ Name Alias;
+ NetworkInterfaceConfigPriority Priority;
+ Dot11SecurityConfiguration Security;
+ <anyXML> any;
+}
+struct Dot11PSKSet {
+ Dot11PSK Key;
+ Dot11PSKPassphrase Passphrase;
+ Dot11PSKSetExtension Extension;
+}
+struct Dot11PSKSetExtension {
+ <anyXML> any;
+}
+struct Dot11SecurityConfiguration {
+ Dot11SecurityMode Mode;
+ Dot11Cipher Algorithm;
+ Dot11PSKSet PSK;
+ ReferenceToken Dot1X;
+ Dot11SecurityConfigurationExtension Extension;
+}
+struct Dot11SecurityConfigurationExtension {
+ <anyXML> any;
+}
+struct Dot11Status {
+ Dot11SSIDType SSID;
+ string BSSID;
+ Dot11Cipher PairCipher;
+ Dot11Cipher GroupCipher;
+ Dot11SignalStrength SignalStrength;
+ ReferenceToken ActiveConfigAlias;
+ <anyXML> any;
+}
+struct Dot1XConfiguration {
+ ReferenceToken Dot1XConfigurationToken;
+ string Identity;
+ string AnonymousID;
+ int EAPMethod;
+ token CACertificateID;
+ EAPMethodConfiguration EAPMethodConfiguration;
+ Dot1XConfigurationExtension Extension;
+}
+struct Dot1XConfigurationExtension {
+ <anyXML> any;
+}
+struct Dot3Configuration {
+ <anyXML> any;
+}
+struct DurationRange {
+ duration Min;
+ duration Max;
+}
+struct DynamicDNSInformation {
+ DynamicDNSType Type;
+ DNSName Name;
+ duration TTL;
+ DynamicDNSInformationExtension Extension;
+}
+struct DynamicDNSInformationExtension {
+ <anyXML> any;
+}
+struct EAPMethodConfiguration {
+ TLSConfiguration TLSConfiguration;
+ string Password;
+ EapMethodExtension Extension;
+}
+struct EFlip {
+ EFlipMode Mode;
+ <anyXML> any;
+}
+struct EFlipOptions {
+ EFlipMode Mode;
+ EFlipOptionsExtension Extension;
+}
+struct EFlipOptionsExtension {
+ <anyXML> any;
+}
+struct EapMethodExtension {
+ <anyXML> any;
+}
+struct ElementItem {
+ <anyXML> any;
+ string Name;
+}
+struct ElementItemDescription {
+ string Name;
+ QName Type;
+}
+struct EndpointReferenceType {
+ AttributedURIType Address;
+ ReferenceParametersType ReferenceParameters;
+ MetadataType Metadata;
+ <anyXML> any;
+}
+struct EngineConfiguration {
+ VideoAnalyticsConfiguration VideoAnalyticsConfiguration;
+ AnalyticsEngineInputInfo AnalyticsEngineInputInfo;
+ <anyXML> any;
+}
+struct Envelope {
+ Header Header;
+ Body Body;
+}
+struct ErrorCode {
+ anyType _;
+ anyURI dialect;
+}
+struct EventCapabilities {
+ anyURI XAddr;
+ boolean WSSubscriptionPolicySupport;
+ boolean WSPullPointSupport;
+ boolean WSPausableSubscriptionManagerInterfaceSupport;
+ <anyXML> any;
+}
+struct EventFilter {
+}
+struct EventStream {
+ NotificationMessageHolderType NotificationMessage;
+ EventStreamExtension Extension;
+ <anyXML> any;
+}
+struct EventStreamExtension {
+ <anyXML> any;
+}
+struct EventSubscription {
+ FilterType Filter;
+ SubscriptionPolicy SubscriptionPolicy;
+ <anyXML> any;
+}
+struct Exposure {
+ ExposureMode Mode;
+ ExposurePriority Priority;
+ Rectangle Window;
+ float MinExposureTime;
+ float MaxExposureTime;
+ float MinGain;
+ float MaxGain;
+ float MinIris;
+ float MaxIris;
+ float ExposureTime;
+ float Gain;
+ float Iris;
+}
+struct Exposure20 {
+ ExposureMode Mode;
+ ExposurePriority Priority;
+ Rectangle Window;
+ float MinExposureTime;
+ float MaxExposureTime;
+ float MinGain;
+ float MaxGain;
+ float MinIris;
+ float MaxIris;
+ float ExposureTime;
+ float Gain;
+ float Iris;
+}
+struct ExposureOptions {
+ ExposureMode Mode;
+ ExposurePriority Priority;
+ FloatRange MinExposureTime;
+ FloatRange MaxExposureTime;
+ FloatRange MinGain;
+ FloatRange MaxGain;
+ FloatRange MinIris;
+ FloatRange MaxIris;
+ FloatRange ExposureTime;
+ FloatRange Gain;
+ FloatRange Iris;
+}
+struct ExposureOptions20 {
+ ExposureMode Mode;
+ ExposurePriority Priority;
+ FloatRange MinExposureTime;
+ FloatRange MaxExposureTime;
+ FloatRange MinGain;
+ FloatRange MaxGain;
+ FloatRange MinIris;
+ FloatRange MaxIris;
+ FloatRange ExposureTime;
+ FloatRange Gain;
+ FloatRange Iris;
+}
+struct ExtensibleDocumented {
+ Documentation documentation;
+}
+struct Eye {
+ string Shape;
+ string Eyelid;
+ string Eyeball;
+ <anyXML> any;
+}
+struct Eyebrow {
+ string Width;
+ ColorDescriptor Color;
+ string Space;
+ <anyXML> any;
+}
+struct FacialHair {
+ boolean Mustache;
+ boolean Beard;
+ boolean Sideburn;
+ <anyXML> any;
+}
+struct Fault {
+ faultcode Code;
+ faultreason Reason;
+ anyURI Node;
+ anyURI Role;
+ detail Detail;
+}
+struct FaultCause {
+ <anyXML> any;
+}
+struct FileProgress {
+ string FileName;
+ float Progress;
+ <anyXML> any;
+}
+struct Filter {
+ string Topic;
+ string Source;
+ <anyXML> any;
+}
+struct FilterType {
+ <anyXML> any;
+}
+struct FindEventResult {
+ RecordingReference RecordingToken;
+ TrackReference TrackToken;
+ dateTime Time;
+ NotificationMessageHolderType Event;
+ boolean StartStateEvent;
+ <anyXML> any;
+}
+struct FindEventResultList {
+ SearchState SearchState;
+ FindEventResult Result;
+}
+struct FindMetadataResult {
+ RecordingReference RecordingToken;
+ TrackReference TrackToken;
+ dateTime Time;
+ <anyXML> any;
+}
+struct FindMetadataResultList {
+ SearchState SearchState;
+ FindMetadataResult Result;
+}
+struct FindPTZPositionResult {
+ RecordingReference RecordingToken;
+ TrackReference TrackToken;
+ dateTime Time;
+ PTZVector Position;
+ <anyXML> any;
+}
+struct FindPTZPositionResultList {
+ SearchState SearchState;
+ FindPTZPositionResult Result;
+}
+struct FindRecordingResultList {
+ SearchState SearchState;
+ RecordingInformation RecordingInformation;
+}
+struct FloatItems {
+ float Items;
+}
+struct FloatRange {
+ float Min;
+ float Max;
+}
+struct FocusConfiguration {
+ AutoFocusMode AutoFocusMode;
+ float DefaultSpeed;
+ float NearLimit;
+ float FarLimit;
+ <anyXML> any;
+}
+struct FocusConfiguration20 {
+ AutoFocusMode AutoFocusMode;
+ float DefaultSpeed;
+ float NearLimit;
+ float FarLimit;
+ FocusConfiguration20Extension Extension;
+ StringAttrList AFMode;
+}
+struct FocusConfiguration20Extension {
+ <anyXML> any;
+}
+struct FocusMove {
+ AbsoluteFocus Absolute;
+ RelativeFocus Relative;
+ ContinuousFocus Continuous;
+}
+struct FocusOptions {
+ AutoFocusMode AutoFocusModes;
+ FloatRange DefaultSpeed;
+ FloatRange NearLimit;
+ FloatRange FarLimit;
+}
+struct FocusOptions20 {
+ AutoFocusMode AutoFocusModes;
+ FloatRange DefaultSpeed;
+ FloatRange NearLimit;
+ FloatRange FarLimit;
+ FocusOptions20Extension Extension;
+}
+struct FocusOptions20Extension {
+ <anyXML> any;
+ StringAttrList AFModes;
+}
+struct FocusStatus {
+ float Position;
+ MoveStatus MoveStatus;
+ string Error;
+ <anyXML> any;
+}
+struct FocusStatus20 {
+ float Position;
+ MoveStatus MoveStatus;
+ string Error;
+ FocusStatus20Extension Extension;
+}
+struct FocusStatus20Extension {
+ <anyXML> any;
+}
+struct Frame {
+ PTZStatus PTZStatus;
+ Transformation Transformation;
+ Object Object;
+ ObjectTree ObjectTree;
+ FrameExtension Extension;
+ anyURI SceneImageRef;
+ base64Binary SceneImage;
+ <anyXML> any;
+ dateTime UtcTime;
+ string Colorspace;
+ string Source;
+}
+struct FrameExtension {
+ <anyXML> any;
+ MotionInCells MotionInCells;
+ FrameExtension2 Extension;
+}
+struct FrameExtension2 {
+ <anyXML> any;
+}
+struct G711DecOptions {
+ IntItems Bitrate;
+ IntItems SampleRateRange;
+ <anyXML> any;
+}
+struct G726DecOptions {
+ IntItems Bitrate;
+ IntItems SampleRateRange;
+ <anyXML> any;
+}
+struct GenericEapPwdConfigurationExtension {
+ <anyXML> any;
+}
+struct GeoLocation {
+ <anyXML> any;
+ double lon;
+ double lat;
+ float elevation;
+}
+struct GeoOrientation {
+ <anyXML> any;
+ float roll;
+ float pitch;
+ float yaw;
+}
+struct GetAnalyticsModuleOptions {
+ QName Type;
+ ReferenceToken ConfigurationToken;
+}
+struct GetAnalyticsModuleOptionsResponse {
+ ConfigOptions Options;
+}
+struct GetAnalyticsModules {
+ ReferenceToken ConfigurationToken;
+}
+struct GetAnalyticsModulesResponse {
+ Config AnalyticsModule;
+}
+struct GetCurrentMessage {
+ TopicExpressionType Topic;
+ <anyXML> any;
+}
+struct GetCurrentMessageResponse {
+ <anyXML> any;
+}
+struct GetMessages {
+ nonNegativeInteger MaximumNumber;
+ <anyXML> any;
+}
+struct GetMessagesResponse {
+ NotificationMessageHolderType NotificationMessage;
+ <anyXML> any;
+}
+struct GetRecordingJobsResponseItem {
+ RecordingJobReference JobToken;
+ RecordingJobConfiguration JobConfiguration;
+ <anyXML> any;
+}
+struct GetRecordingsResponseItem {
+ RecordingReference RecordingToken;
+ RecordingConfiguration Configuration;
+ GetTracksResponseList Tracks;
+ <anyXML> any;
+}
+struct GetRuleOptions {
+ QName RuleType;
+ ReferenceToken ConfigurationToken;
+}
+struct GetRuleOptionsResponse {
+ ConfigOptions RuleOptions;
+}
+struct GetRules {
+ ReferenceToken ConfigurationToken;
+}
+struct GetRulesResponse {
+ Config Rule;
+}
+struct GetServiceCapabilities {
+}
+struct GetServiceCapabilitiesResponse {
+ Capabilities Capabilities;
+}
+struct GetSupportedAnalyticsModules {
+ ReferenceToken ConfigurationToken;
+}
+struct GetSupportedAnalyticsModulesResponse {
+ SupportedAnalyticsModules SupportedAnalyticsModules;
+}
+struct GetSupportedMetadata {
+ QName Type;
+}
+struct GetSupportedMetadataResponse {
+ MetadataInfo AnalyticsModule;
+}
+struct GetSupportedRules {
+ ReferenceToken ConfigurationToken;
+}
+struct GetSupportedRulesResponse {
+ SupportedRules SupportedRules;
+}
+struct GetTracksResponseItem {
+ TrackReference TrackToken;
+ TrackConfiguration Configuration;
+ <anyXML> any;
+}
+struct GetTracksResponseList {
+ GetTracksResponseItem Track;
+}
+struct Gloves {
+ ColorDescriptor Color;
+ boolean Wear;
+ <anyXML> any;
+}
+struct H264Configuration {
+ int GovLength;
+ H264Profile H264Profile;
+}
+struct H264DecOptions {
+ VideoResolution ResolutionsAvailable;
+ H264Profile SupportedH264Profiles;
+ IntRange SupportedInputBitrate;
+ IntRange SupportedFrameRate;
+ <anyXML> any;
+}
+struct H264Options {
+ VideoResolution ResolutionsAvailable;
+ IntRange GovLengthRange;
+ IntRange FrameRateRange;
+ IntRange EncodingIntervalRange;
+ H264Profile H264ProfilesSupported;
+}
+struct H264Options2 {
+ IntRange BitrateRange;
+ <anyXML> any;
+}
+struct Hair {
+ string Length;
+ string Style;
+ ColorDescriptor Color;
+ boolean Bangs;
+}
+struct Header {
+ <anyXML> any;
+}
+struct HostnameInformation {
+ boolean FromDHCP;
+ token Name;
+ HostnameInformationExtension Extension;
+}
+struct HostnameInformationExtension {
+ <anyXML> any;
+}
+struct HumanBody {
+ BodyMetric BodyMetric;
+ Clothing Clothing;
+ Belonging Belonging;
+ Behaviour Behaviour;
+ <anyXML> any;
+}
+struct HumanFace {
+ IntRange Age;
+ string Gender;
+ float Temperature;
+ string Complexion;
+ string FacialShape;
+ Hair Hair;
+ Eyebrow Eyebrow;
+ Eye Eye;
+ Ear Ear;
+ Nose Nose;
+ FacialHair FacialHair;
+ string Lip;
+ string Chin;
+ string Expression;
+ PoseAngle PoseAngle;
+ Accessory Accessory;
+ AdditionalFeatures AdditionalFeatures;
+ <anyXML> any;
+}
+struct IOCapabilities {
+ int InputConnectors;
+ int RelayOutputs;
+ IOCapabilitiesExtension Extension;
+}
+struct IOCapabilitiesExtension {
+ <anyXML> any;
+ boolean Auxiliary;
+ AuxiliaryData AuxiliaryCommands;
+ IOCapabilitiesExtension2 Extension;
+}
+struct IOCapabilitiesExtension2 {
+ <anyXML> any;
+}
+struct IPAddress {
+ IPType Type;
+ IPv4Address IPv4Address;
+ IPv6Address IPv6Address;
+}
+struct IPAddressFilter {
+ IPAddressFilterType Type;
+ PrefixedIPv4Address IPv4Address;
+ PrefixedIPv6Address IPv6Address;
+ IPAddressFilterExtension Extension;
+}
+struct IPAddressFilterExtension {
+ <anyXML> any;
+}
+struct IPv4Configuration {
+ PrefixedIPv4Address Manual;
+ PrefixedIPv4Address LinkLocal;
+ PrefixedIPv4Address FromDHCP;
+ boolean DHCP;
+ <anyXML> any;
+}
+struct IPv4NetworkInterface {
+ boolean Enabled;
+ IPv4Configuration Config;
+}
+struct IPv4NetworkInterfaceSetConfiguration {
+ boolean Enabled;
+ PrefixedIPv4Address Manual;
+ boolean DHCP;
+}
+struct IPv6Configuration {
+ boolean AcceptRouterAdvert;
+ IPv6DHCPConfiguration DHCP;
+ PrefixedIPv6Address Manual;
+ PrefixedIPv6Address LinkLocal;
+ PrefixedIPv6Address FromDHCP;
+ PrefixedIPv6Address FromRA;
+ IPv6ConfigurationExtension Extension;
+}
+struct IPv6ConfigurationExtension {
+ <anyXML> any;
+}
+struct IPv6NetworkInterface {
+ boolean Enabled;
+ IPv6Configuration Config;
+}
+struct IPv6NetworkInterfaceSetConfiguration {
+ boolean Enabled;
+ boolean AcceptRouterAdvert;
+ PrefixedIPv6Address Manual;
+ IPv6DHCPConfiguration DHCP;
+}
+struct Idle {
+ <anyXML> any;
+}
+struct ImageStabilization {
+ ImageStabilizationMode Mode;
+ float Level;
+ ImageStabilizationExtension Extension;
+}
+struct ImageStabilizationExtension {
+ <anyXML> any;
+}
+struct ImageStabilizationOptions {
+ ImageStabilizationMode Mode;
+ FloatRange Level;
+ ImageStabilizationOptionsExtension Extension;
+}
+struct ImageStabilizationOptionsExtension {
+ <anyXML> any;
+}
+struct ImagingCapabilities {
+ anyURI XAddr;
+}
+struct ImagingOptions {
+ BacklightCompensationOptions BacklightCompensation;
+ FloatRange Brightness;
+ FloatRange ColorSaturation;
+ FloatRange Contrast;
+ ExposureOptions Exposure;
+ FocusOptions Focus;
+ IrCutFilterMode IrCutFilterModes;
+ FloatRange Sharpness;
+ WideDynamicRangeOptions WideDynamicRange;
+ WhiteBalanceOptions WhiteBalance;
+ <anyXML> any;
+}
+struct ImagingOptions20 {
+ BacklightCompensationOptions20 BacklightCompensation;
+ FloatRange Brightness;
+ FloatRange ColorSaturation;
+ FloatRange Contrast;
+ ExposureOptions20 Exposure;
+ FocusOptions20 Focus;
+ IrCutFilterMode IrCutFilterModes;
+ FloatRange Sharpness;
+ WideDynamicRangeOptions20 WideDynamicRange;
+ WhiteBalanceOptions20 WhiteBalance;
+ ImagingOptions20Extension Extension;
+}
+struct ImagingOptions20Extension {
+ <anyXML> any;
+ ImageStabilizationOptions ImageStabilization;
+ ImagingOptions20Extension2 Extension;
+}
+struct ImagingOptions20Extension2 {
+ IrCutFilterAutoAdjustmentOptions IrCutFilterAutoAdjustment;
+ ImagingOptions20Extension3 Extension;
+}
+struct ImagingOptions20Extension3 {
+ ToneCompensationOptions ToneCompensationOptions;
+ DefoggingOptions DefoggingOptions;
+ NoiseReductionOptions NoiseReductionOptions;
+ ImagingOptions20Extension4 Extension;
+}
+struct ImagingOptions20Extension4 {
+ <anyXML> any;
+}
+struct ImagingSettings {
+ BacklightCompensation BacklightCompensation;
+ float Brightness;
+ float ColorSaturation;
+ float Contrast;
+ Exposure Exposure;
+ FocusConfiguration Focus;
+ IrCutFilterMode IrCutFilter;
+ float Sharpness;
+ WideDynamicRange WideDynamicRange;
+ WhiteBalance WhiteBalance;
+ ImagingSettingsExtension Extension;
+}
+struct ImagingSettings20 {
+ BacklightCompensation20 BacklightCompensation;
+ float Brightness;
+ float ColorSaturation;
+ float Contrast;
+ Exposure20 Exposure;
+ FocusConfiguration20 Focus;
+ IrCutFilterMode IrCutFilter;
+ float Sharpness;
+ WideDynamicRange20 WideDynamicRange;
+ WhiteBalance20 WhiteBalance;
+ ImagingSettingsExtension20 Extension;
+}
+struct ImagingSettingsExtension {
+ <anyXML> any;
+}
+struct ImagingSettingsExtension20 {
+ <anyXML> any;
+ ImageStabilization ImageStabilization;
+ ImagingSettingsExtension202 Extension;
+}
+struct ImagingSettingsExtension202 {
+ IrCutFilterAutoAdjustment IrCutFilterAutoAdjustment;
+ ImagingSettingsExtension203 Extension;
+}
+struct ImagingSettingsExtension203 {
+ ToneCompensation ToneCompensation;
+ Defogging Defogging;
+ NoiseReduction NoiseReduction;
+ ImagingSettingsExtension204 Extension;
+}
+struct ImagingSettingsExtension204 {
+ <anyXML> any;
+}
+struct ImagingStatus {
+ FocusStatus FocusStatus;
+ <anyXML> any;
+}
+struct ImagingStatus20 {
+ FocusStatus20 FocusStatus20;
+ ImagingStatus20Extension Extension;
+}
+struct ImagingStatus20Extension {
+ <anyXML> any;
+}
+struct Include {
+ <anyXML> any;
+ anyURI href;
+}
+struct IntItems {
+ int Items;
+}
+struct IntRange {
+ int Min;
+ int Max;
+}
+struct IntRectangle {
+ int x;
+ int y;
+ int width;
+ int height;
+}
+struct IntRectangleRange {
+ IntRange XRange;
+ IntRange YRange;
+ IntRange WidthRange;
+ IntRange HeightRange;
+}
+struct InvalidFilterFaultType {
+ QName UnknownFilter;
+}
+struct InvalidMessageContentExpressionFaultType {
+}
+struct InvalidProducerPropertiesExpressionFaultType {
+}
+struct InvalidTopicExpressionFaultType {
+}
+struct IrCutFilterAutoAdjustment {
+ string BoundaryType;
+ float BoundaryOffset;
+ duration ResponseTime;
+ IrCutFilterAutoAdjustmentExtension Extension;
+}
+struct IrCutFilterAutoAdjustmentExtension {
+ <anyXML> any;
+}
+struct IrCutFilterAutoAdjustmentOptions {
+ string BoundaryType;
+ boolean BoundaryOffset;
+ DurationRange ResponseTimeRange;
+ IrCutFilterAutoAdjustmentOptionsExtension Extension;
+}
+struct IrCutFilterAutoAdjustmentOptionsExtension {
+ <anyXML> any;
+}
+struct ItemList {
+ SimpleItem SimpleItem;
+ ElementItem ElementItem;
+ ItemListExtension Extension;
+}
+struct ItemListDescription {
+ SimpleItemDescription SimpleItemDescription;
+ ElementItemDescription ElementItemDescription;
+ ItemListDescriptionExtension Extension;
+}
+struct ItemListDescriptionExtension {
+ <anyXML> any;
+}
+struct ItemListExtension {
+ <anyXML> any;
+}
+struct JpegDecOptions {
+ VideoResolution ResolutionsAvailable;
+ IntRange SupportedInputBitrate;
+ IntRange SupportedFrameRate;
+ <anyXML> any;
+}
+struct JpegOptions {
+ VideoResolution ResolutionsAvailable;
+ IntRange FrameRateRange;
+ IntRange EncodingIntervalRange;
+}
+struct JpegOptions2 {
+ IntRange BitrateRange;
+ <anyXML> any;
+}
+struct Layout {
+ PaneLayout PaneLayout;
+ LayoutExtension Extension;
+}
+struct LayoutExtension {
+ <anyXML> any;
+}
+struct LayoutOptions {
+ PaneLayoutOptions PaneLayoutOptions;
+ LayoutOptionsExtension Extension;
+}
+struct LayoutOptionsExtension {
+ <anyXML> any;
+}
+struct LensDescription {
+ LensOffset Offset;
+ LensProjection Projection;
+ float XFactor;
+ <anyXML> any;
+ float FocalLength;
+}
+struct LensOffset {
+ float x;
+ float y;
+}
+struct LensProjection {
+ float Angle;
+ float Radius;
+ float Transmittance;
+ <anyXML> any;
+}
+struct LicensePlateInfo {
+ StringLikelihood PlateNumber;
+ StringLikelihood PlateType;
+ StringLikelihood CountryCode;
+ StringLikelihood IssuingEntity;
+ <anyXML> any;
+}
+struct LocalLocation {
+ <anyXML> any;
+ float x;
+ float y;
+ float z;
+}
+struct LocalOrientation {
+ <anyXML> any;
+ float pan;
+ float tilt;
+ float roll;
+}
+struct LocationEntity {
+ GeoLocation GeoLocation;
+ GeoOrientation GeoOrientation;
+ LocalLocation LocalLocation;
+ LocalOrientation LocalOrientation;
+ string Entity;
+ ReferenceToken Token;
+ boolean Fixed;
+ anyURI GeoSource;
+ boolean AutoGeo;
+}
+struct MaximumNumberOfOSDs {
+ int Total;
+ int Image;
+ int PlainText;
+ int Date;
+ int Time;
+ int DateAndTime;
+}
+struct MediaAttributes {
+ RecordingReference RecordingToken;
+ TrackAttributes TrackAttributes;
+ dateTime From;
+ dateTime Until;
+ <anyXML> any;
+}
+struct MediaCapabilities {
+ anyURI XAddr;
+ RealTimeStreamingCapabilities StreamingCapabilities;
+ <anyXML> any;
+ MediaCapabilitiesExtension Extension;
+}
+struct MediaCapabilitiesExtension {
+ ProfileCapabilities ProfileCapabilities;
+ <anyXML> any;
+}
+struct MediaUri {
+ anyURI Uri;
+ boolean InvalidAfterConnect;
+ boolean InvalidAfterReboot;
+ duration Timeout;
+ <anyXML> any;
+}
+struct Merge {
+ ObjectId from;
+ ObjectId to;
+}
+struct Message {
+ <anyXML> any;
+}
+struct Message {
+ ItemList Source;
+ ItemList Key;
+ ItemList Data;
+ MessageExtension Extension;
+ dateTime UtcTime;
+ PropertyOperation PropertyOperation;
+}
+struct MessageDescription {
+ ItemListDescription Source;
+ ItemListDescription Key;
+ ItemListDescription Data;
+ MessageDescriptionExtension Extension;
+ boolean IsProperty;
+}
+struct MessageDescriptionExtension {
+ <anyXML> any;
+}
+struct MessageExtension {
+ <anyXML> any;
+}
+struct Messages {
+ string ParentTopic;
+}
+struct MetadataAttributes {
+ boolean CanContainPTZ;
+ boolean CanContainAnalytics;
+ boolean CanContainNotifications;
+ <anyXML> any;
+ StringAttrList PtzSpaces;
+}
+struct MetadataConfiguration {
+ PTZFilter PTZStatus;
+ EventSubscription Events;
+ boolean Analytics;
+ MulticastConfiguration Multicast;
+ duration SessionTimeout;
+ <anyXML> any;
+ AnalyticsEngineConfiguration AnalyticsEngineConfiguration;
+ MetadataConfigurationExtension Extension;
+ string CompressionType;
+ boolean GeoLocation;
+ boolean ShapePolygon;
+}
+struct MetadataConfigurationExtension {
+ <anyXML> any;
+}
+struct MetadataConfigurationOptions {
+ PTZStatusFilterOptions PTZStatusFilterOptions;
+ <anyXML> any;
+ MetadataConfigurationOptionsExtension Extension;
+ boolean GeoLocation;
+ int MaxContentFilterSize;
+}
+struct MetadataConfigurationOptionsExtension {
+ string CompressionType;
+ MetadataConfigurationOptionsExtension2 Extension;
+}
+struct MetadataConfigurationOptionsExtension2 {
+ <anyXML> any;
+}
+struct MetadataFilter {
+ XPathExpression MetadataStreamFilter;
+ <anyXML> any;
+}
+struct MetadataInfo {
+ Frame SampleFrame;
+ <anyXML> any;
+ QName Type;
+}
+struct MetadataInput {
+ Config MetadataConfig;
+ MetadataInputExtension Extension;
+}
+struct MetadataInputExtension {
+ <anyXML> any;
+}
+struct MetadataStream {
+ VideoAnalyticsStream VideoAnalytics;
+ PTZStream PTZ;
+ EventStream Event;
+ MetadataStreamExtension Extension;
+ <anyXML> any;
+}
+struct MetadataStreamExtension {
+ <anyXML> any;
+ AudioAnalyticsStream AudioAnalyticsStream;
+ MetadataStreamExtension2 Extension;
+}
+struct MetadataStreamExtension2 {
+ <anyXML> any;
+}
+struct MetadataType {
+ <anyXML> any;
+}
+struct ModifyAnalyticsModules {
+ ReferenceToken ConfigurationToken;
+ Config AnalyticsModule;
+}
+struct ModifyAnalyticsModulesResponse {
+}
+struct ModifyRules {
+ ReferenceToken ConfigurationToken;
+ Config Rule;
+}
+struct ModifyRulesResponse {
+}
+struct MotionExpression {
+ string Expression;
+ <anyXML> any;
+ string Type;
+}
+struct MotionExpressionConfiguration {
+ MotionExpression MotionExpression;
+ <anyXML> any;
+}
+struct MotionInCells {
+ <anyXML> any;
+ integer Columns;
+ integer Rows;
+ base64Binary Cells;
+}
+struct MoveOptions {
+ AbsoluteFocusOptions Absolute;
+ RelativeFocusOptions Relative;
+ ContinuousFocusOptions Continuous;
+}
+struct MoveOptions20 {
+ AbsoluteFocusOptions Absolute;
+ RelativeFocusOptions20 Relative;
+ ContinuousFocusOptions Continuous;
+}
+struct Mpeg4Configuration {
+ int GovLength;
+ Mpeg4Profile Mpeg4Profile;
+}
+struct Mpeg4DecOptions {
+ VideoResolution ResolutionsAvailable;
+ Mpeg4Profile SupportedMpeg4Profiles;
+ IntRange SupportedInputBitrate;
+ IntRange SupportedFrameRate;
+ <anyXML> any;
+}
+struct Mpeg4Options {
+ VideoResolution ResolutionsAvailable;
+ IntRange GovLengthRange;
+ IntRange FrameRateRange;
+ IntRange EncodingIntervalRange;
+ Mpeg4Profile Mpeg4ProfilesSupported;
+}
+struct Mpeg4Options2 {
+ IntRange BitrateRange;
+ <anyXML> any;
+}
+struct MulticastConfiguration {
+ IPAddress Address;
+ int Port;
+ int TTL;
+ boolean AutoStart;
+ <anyXML> any;
+}
+struct MultipleTopicsSpecifiedFaultType {
+}
+struct NTPInformation {
+ boolean FromDHCP;
+ NetworkHost NTPFromDHCP;
+ NetworkHost NTPManual;
+ NTPInformationExtension Extension;
+}
+struct NTPInformationExtension {
+ <anyXML> any;
+}
+struct NetworkCapabilities {
+ boolean IPFilter;
+ boolean ZeroConfiguration;
+ boolean IPVersion6;
+ boolean DynDNS;
+ NetworkCapabilitiesExtension Extension;
+}
+struct NetworkCapabilitiesExtension {
+ <anyXML> any;
+ boolean Dot11Configuration;
+ NetworkCapabilitiesExtension2 Extension;
+}
+struct NetworkCapabilitiesExtension2 {
+ <anyXML> any;
+}
+struct NetworkGateway {
+ IPv4Address IPv4Address;
+ IPv6Address IPv6Address;
+}
+struct NetworkHost {
+ NetworkHostType Type;
+ IPv4Address IPv4Address;
+ IPv6Address IPv6Address;
+ DNSName DNSname;
+ NetworkHostExtension Extension;
+}
+struct NetworkHostExtension {
+ <anyXML> any;
+}
+struct NetworkInterface {
+ boolean Enabled;
+ NetworkInterfaceInfo Info;
+ NetworkInterfaceLink Link;
+ IPv4NetworkInterface IPv4;
+ IPv6NetworkInterface IPv6;
+ NetworkInterfaceExtension Extension;
+}
+struct NetworkInterfaceConnectionSetting {
+ boolean AutoNegotiation;
+ int Speed;
+ Duplex Duplex;
+}
+struct NetworkInterfaceExtension {
+ <anyXML> any;
+ IANA-IfTypes InterfaceType;
+ Dot3Configuration Dot3;
+ Dot11Configuration Dot11;
+ NetworkInterfaceExtension2 Extension;
+}
+struct NetworkInterfaceExtension2 {
+ <anyXML> any;
+}
+struct NetworkInterfaceInfo {
+ string Name;
+ HwAddress HwAddress;
+ int MTU;
+}
+struct NetworkInterfaceLink {
+ NetworkInterfaceConnectionSetting AdminSettings;
+ NetworkInterfaceConnectionSetting OperSettings;
+ IANA-IfTypes InterfaceType;
+}
+struct NetworkInterfaceSetConfiguration {
+ boolean Enabled;
+ NetworkInterfaceConnectionSetting Link;
+ int MTU;
+ IPv4NetworkInterfaceSetConfiguration IPv4;
+ IPv6NetworkInterfaceSetConfiguration IPv6;
+ NetworkInterfaceSetConfigurationExtension Extension;
+}
+struct NetworkInterfaceSetConfigurationExtension {
+ <anyXML> any;
+ Dot3Configuration Dot3;
+ Dot11Configuration Dot11;
+ NetworkInterfaceSetConfigurationExtension2 Extension;
+}
+struct NetworkInterfaceSetConfigurationExtension2 {
+ <anyXML> any;
+}
+struct NetworkProtocol {
+ NetworkProtocolType Name;
+ boolean Enabled;
+ int Port;
+ NetworkProtocolExtension Extension;
+}
+struct NetworkProtocolExtension {
+ <anyXML> any;
+}
+struct NetworkZeroConfiguration {
+ ReferenceToken InterfaceToken;
+ boolean Enabled;
+ IPv4Address Addresses;
+ NetworkZeroConfigurationExtension Extension;
+}
+struct NetworkZeroConfigurationExtension {
+ <anyXML> any;
+ NetworkZeroConfiguration Additional;
+ NetworkZeroConfigurationExtension2 Extension;
+}
+struct NetworkZeroConfigurationExtension2 {
+ <anyXML> any;
+}
+struct NoCurrentMessageOnTopicFaultType {
+}
+struct NoiseReduction {
+ float Level;
+ <anyXML> any;
+}
+struct NoiseReductionOptions {
+ boolean Level;
+ <anyXML> any;
+}
+struct Nose {
+ string Length;
+ string NoseBridge;
+ string NoseWing;
+ string NoseEnd;
+ <anyXML> any;
+}
+struct NotUnderstoodType {
+ QName qname;
+}
+struct NotificationMessageHolderType {
+ EndpointReferenceType SubscriptionReference;
+ TopicExpressionType Topic;
+ EndpointReferenceType ProducerReference;
+ Message Message;
+}
+struct NotificationProducerRP {
+ TopicExpressionType TopicExpression;
+ boolean FixedTopicSet;
+ anyURI TopicExpressionDialect;
+ TopicSetType TopicSet;
+}
+struct Notify {
+ NotificationMessageHolderType NotificationMessage;
+ <anyXML> any;
+}
+struct NotifyMessageNotSupportedFaultType {
+}
+struct OSDColor {
+ Color Color;
+ int Transparent;
+}
+struct OSDColorOptions {
+ ColorOptions Color;
+ IntRange Transparent;
+ OSDColorOptionsExtension Extension;
+}
+struct OSDColorOptionsExtension {
+ <anyXML> any;
+}
+struct OSDConfiguration {
+ OSDReference VideoSourceConfigurationToken;
+ OSDType Type;
+ OSDPosConfiguration Position;
+ OSDTextConfiguration TextString;
+ OSDImgConfiguration Image;
+ OSDConfigurationExtension Extension;
+}
+struct OSDConfigurationExtension {
+ <anyXML> any;
+}
+struct OSDConfigurationOptions {
+ MaximumNumberOfOSDs MaximumNumberOfOSDs;
+ OSDType Type;
+ string PositionOption;
+ OSDTextOptions TextOption;
+ OSDImgOptions ImageOption;
+ OSDConfigurationOptionsExtension Extension;
+}
+struct OSDConfigurationOptionsExtension {
+ <anyXML> any;
+}
+struct OSDImgConfiguration {
+ anyURI ImgPath;
+ OSDImgConfigurationExtension Extension;
+}
+struct OSDImgConfigurationExtension {
+ <anyXML> any;
+}
+struct OSDImgOptions {
+ anyURI ImagePath;
+ OSDImgOptionsExtension Extension;
+ StringAttrList FormatsSupported;
+ int MaxSize;
+ int MaxWidth;
+ int MaxHeight;
+}
+struct OSDImgOptionsExtension {
+ <anyXML> any;
+}
+struct OSDPosConfiguration {
+ string Type;
+ Vector Pos;
+ OSDPosConfigurationExtension Extension;
+}
+struct OSDPosConfigurationExtension {
+ <anyXML> any;
+}
+struct OSDReference {
+ ReferenceToken _;
+}
+struct OSDTextConfiguration {
+ string Type;
+ string DateFormat;
+ string TimeFormat;
+ int FontSize;
+ OSDColor FontColor;
+ OSDColor BackgroundColor;
+ string PlainText;
+ OSDTextConfigurationExtension Extension;
+ boolean IsPersistentText;
+}
+struct OSDTextConfigurationExtension {
+ <anyXML> any;
+}
+struct OSDTextOptions {
+ string Type;
+ IntRange FontSizeRange;
+ string DateFormat;
+ string TimeFormat;
+ OSDColorOptions FontColor;
+ OSDColorOptions BackgroundColor;
+ OSDTextOptionsExtension Extension;
+}
+struct OSDTextOptionsExtension {
+ <anyXML> any;
+}
+struct Object {
+ Appearance Appearance;
+ Behaviour Behaviour;
+ ObjectExtension Extension;
+ <anyXML> any;
+ integer Parent;
+}
+struct ObjectExtension {
+ <anyXML> any;
+}
+struct ObjectId {
+ integer ObjectId;
+}
+struct ObjectTree {
+ Rename Rename;
+ Split Split;
+ Merge Merge;
+ ObjectId Delete;
+ ObjectTreeExtension Extension;
+ <anyXML> any;
+}
+struct ObjectTreeExtension {
+ <anyXML> any;
+}
+struct OnvifVersion {
+ int Major;
+ int Minor;
+}
+struct OtherType {
+ string Type;
+ float Likelihood;
+ <anyXML> any;
+}
+struct PTControlDirection {
+ EFlip EFlip;
+ Reverse Reverse;
+ PTControlDirectionExtension Extension;
+}
+struct PTControlDirectionExtension {
+ <anyXML> any;
+}
+struct PTControlDirectionOptions {
+ EFlipOptions EFlip;
+ ReverseOptions Reverse;
+ PTControlDirectionOptionsExtension Extension;
+}
+struct PTControlDirectionOptionsExtension {
+ <anyXML> any;
+}
+struct PTZCapabilities {
+ anyURI XAddr;
+ <anyXML> any;
+}
+struct PTZConfiguration {
+ ReferenceToken NodeToken;
+ anyURI DefaultAbsolutePantTiltPositionSpace;
+ anyURI DefaultAbsoluteZoomPositionSpace;
+ anyURI DefaultRelativePanTiltTranslationSpace;
+ anyURI DefaultRelativeZoomTranslationSpace;
+ anyURI DefaultContinuousPanTiltVelocitySpace;
+ anyURI DefaultContinuousZoomVelocitySpace;
+ PTZSpeed DefaultPTZSpeed;
+ duration DefaultPTZTimeout;
+ PanTiltLimits PanTiltLimits;
+ ZoomLimits ZoomLimits;
+ PTZConfigurationExtension Extension;
+ int MoveRamp;
+ int PresetRamp;
+ int PresetTourRamp;
+}
+struct PTZConfigurationExtension {
+ <anyXML> any;
+ PTControlDirection PTControlDirection;
+ PTZConfigurationExtension2 Extension;
+}
+struct PTZConfigurationExtension2 {
+ <anyXML> any;
+}
+struct PTZConfigurationOptions {
+ PTZSpaces Spaces;
+ DurationRange PTZTimeout;
+ <anyXML> any;
+ PTControlDirectionOptions PTControlDirection;
+ PTZConfigurationOptions2 Extension;
+ IntList PTZRamps;
+}
+struct PTZConfigurationOptions2 {
+ <anyXML> any;
+}
+struct PTZFilter {
+ boolean Status;
+ boolean Position;
+}
+struct PTZMoveStatus {
+ MoveStatus PanTilt;
+ MoveStatus Zoom;
+}
+struct PTZNode {
+ Name Name;
+ PTZSpaces SupportedPTZSpaces;
+ int MaximumNumberOfPresets;
+ boolean HomeSupported;
+ AuxiliaryData AuxiliaryCommands;
+ PTZNodeExtension Extension;
+ boolean FixedHomePosition;
+ boolean GeoMove;
+}
+struct PTZNodeExtension {
+ <anyXML> any;
+ PTZPresetTourSupported SupportedPresetTour;
+ PTZNodeExtension2 Extension;
+}
+struct PTZNodeExtension2 {
+ <anyXML> any;
+}
+struct PTZPositionFilter {
+ PTZVector MinPosition;
+ PTZVector MaxPosition;
+ boolean EnterOrExit;
+ <anyXML> any;
+}
+struct PTZPreset {
+ Name Name;
+ PTZVector PTZPosition;
+ ReferenceToken token;
+}
+struct PTZPresetTourExtension {
+ <anyXML> any;
+}
+struct PTZPresetTourOptions {
+ boolean AutoStart;
+ PTZPresetTourStartingConditionOptions StartingCondition;
+ PTZPresetTourSpotOptions TourSpot;
+ <anyXML> any;
+}
+struct PTZPresetTourPresetDetail {
+ ReferenceToken PresetToken;
+ boolean Home;
+ PTZVector PTZPosition;
+ PTZPresetTourTypeExtension TypeExtension;
+ <anyXML> any;
+}
+struct PTZPresetTourPresetDetailOptions {
+ ReferenceToken PresetToken;
+ boolean Home;
+ Space2DDescription PanTiltPositionSpace;
+ Space1DDescription ZoomPositionSpace;
+ PTZPresetTourPresetDetailOptionsExtension Extension;
+}
+struct PTZPresetTourPresetDetailOptionsExtension {
+ <anyXML> any;
+}
+struct PTZPresetTourSpot {
+ PTZPresetTourPresetDetail PresetDetail;
+ PTZSpeed Speed;
+ duration StayTime;
+ PTZPresetTourSpotExtension Extension;
+}
+struct PTZPresetTourSpotExtension {
+ <anyXML> any;
+}
+struct PTZPresetTourSpotOptions {
+ PTZPresetTourPresetDetailOptions PresetDetail;
+ DurationRange StayTime;
+ <anyXML> any;
+}
+struct PTZPresetTourStartingCondition {
+ int RecurringTime;
+ duration RecurringDuration;
+ PTZPresetTourDirection Direction;
+ PTZPresetTourStartingConditionExtension Extension;
+ boolean RandomPresetOrder;
+}
+struct PTZPresetTourStartingConditionExtension {
+ <anyXML> any;
+}
+struct PTZPresetTourStartingConditionOptions {
+ IntRange RecurringTime;
+ DurationRange RecurringDuration;
+ PTZPresetTourDirection Direction;
+ PTZPresetTourStartingConditionOptionsExtension Extension;
+}
+struct PTZPresetTourStartingConditionOptionsExtension {
+ <anyXML> any;
+}
+struct PTZPresetTourStatus {
+ PTZPresetTourState State;
+ PTZPresetTourSpot CurrentTourSpot;
+ PTZPresetTourStatusExtension Extension;
+}
+struct PTZPresetTourStatusExtension {
+ <anyXML> any;
+}
+struct PTZPresetTourSupported {
+ int MaximumNumberOfPresetTours;
+ PTZPresetTourOperation PTZPresetTourOperation;
+ PTZPresetTourSupportedExtension Extension;
+}
+struct PTZPresetTourSupportedExtension {
+ <anyXML> any;
+}
+struct PTZPresetTourTypeExtension {
+ <anyXML> any;
+}
+struct PTZSpaces {
+ Space2DDescription AbsolutePanTiltPositionSpace;
+ Space1DDescription AbsoluteZoomPositionSpace;
+ Space2DDescription RelativePanTiltTranslationSpace;
+ Space1DDescription RelativeZoomTranslationSpace;
+ Space2DDescription ContinuousPanTiltVelocitySpace;
+ Space1DDescription ContinuousZoomVelocitySpace;
+ Space1DDescription PanTiltSpeedSpace;
+ Space1DDescription ZoomSpeedSpace;
+ PTZSpacesExtension Extension;
+}
+struct PTZSpacesExtension {
+ <anyXML> any;
+}
+struct PTZSpeed {
+ Vector2D PanTilt;
+ Vector1D Zoom;
+}
+struct PTZStatus {
+ PTZVector Position;
+ PTZMoveStatus MoveStatus;
+ string Error;
+ dateTime UtcTime;
+ <anyXML> any;
+}
+struct PTZStatusFilterOptions {
+ boolean PanTiltStatusSupported;
+ boolean ZoomStatusSupported;
+ <anyXML> any;
+ boolean PanTiltPositionSupported;
+ boolean ZoomPositionSupported;
+ PTZStatusFilterOptionsExtension Extension;
+}
+struct PTZStatusFilterOptionsExtension {
+ <anyXML> any;
+}
+struct PTZStream {
+ PTZStatus PTZStatus;
+ PTZStreamExtension Extension;
+ <anyXML> any;
+}
+struct PTZStreamExtension {
+ <anyXML> any;
+}
+struct PTZVector {
+ Vector2D PanTilt;
+ Vector1D Zoom;
+}
+struct PanTiltLimits {
+ Space2DDescription Range;
+}
+struct PaneConfiguration {
+ string PaneName;
+ ReferenceToken AudioOutputToken;
+ ReferenceToken AudioSourceToken;
+ AudioEncoderConfiguration AudioEncoderConfiguration;
+ ReferenceToken ReceiverToken;
+ ReferenceToken Token;
+ <anyXML> any;
+}
+struct PaneLayout {
+ ReferenceToken Pane;
+ Rectangle Area;
+ <anyXML> any;
+}
+struct PaneLayoutOptions {
+ Rectangle Area;
+ PaneOptionExtension Extension;
+}
+struct PaneOptionExtension {
+ <anyXML> any;
+}
+struct PauseFailedFaultType {
+}
+struct PauseSubscription {
+ <anyXML> any;
+}
+struct PauseSubscriptionResponse {
+ <anyXML> any;
+}
+struct Polygon {
+ Vector Point;
+}
+struct PolygonOptions {
+ boolean RectangleOnly;
+ IntRange VertexLimits;
+ <anyXML> any;
+}
+struct Polyline {
+ Vector Point;
+}
+struct PolylineArray {
+ Polyline Segment;
+ PolylineArrayExtension Extension;
+}
+struct PolylineArrayConfiguration {
+ PolylineArray PolylineArray;
+ <anyXML> any;
+}
+struct PolylineArrayExtension {
+ <anyXML> any;
+}
+struct PoseAngle {
+ GeoOrientation PoseAngles;
+ GeoOrientation Uncertainty;
+ <anyXML> any;
+}
+struct PrefixedIPv4Address {
+ IPv4Address Address;
+ int PrefixLength;
+}
+struct PrefixedIPv6Address {
+ IPv6Address Address;
+ int PrefixLength;
+}
+struct PresetTour {
+ Name Name;
+ PTZPresetTourStatus Status;
+ boolean AutoStart;
+ PTZPresetTourStartingCondition StartingCondition;
+ PTZPresetTourSpot TourSpot;
+ PTZPresetTourExtension Extension;
+ ReferenceToken token;
+}
+struct ProblemActionType {
+ AttributedURIType Action;
+ anyURI SoapAction;
+}
+struct Profile {
+ Name Name;
+ VideoSourceConfiguration VideoSourceConfiguration;
+ AudioSourceConfiguration AudioSourceConfiguration;
+ VideoEncoderConfiguration VideoEncoderConfiguration;
+ AudioEncoderConfiguration AudioEncoderConfiguration;
+ VideoAnalyticsConfiguration VideoAnalyticsConfiguration;
+ PTZConfiguration PTZConfiguration;
+ MetadataConfiguration MetadataConfiguration;
+ ProfileExtension Extension;
+ ReferenceToken token;
+ boolean fixed;
+}
+struct ProfileCapabilities {
+ int MaximumNumberOfProfiles;
+ <anyXML> any;
+}
+struct ProfileExtension {
+ <anyXML> any;
+ AudioOutputConfiguration AudioOutputConfiguration;
+ AudioDecoderConfiguration AudioDecoderConfiguration;
+ ProfileExtension2 Extension;
+}
+struct ProfileExtension2 {
+ <anyXML> any;
+}
+struct ProfileStatus {
+ ActiveConnection ActiveConnections;
+ ProfileStatusExtension Extension;
+}
+struct ProfileStatusExtension {
+ <anyXML> any;
+}
+struct QueryExpressionType {
+ <anyXML> any;
+ anyURI Dialect;
+}
+struct RealTimeStreamingCapabilities {
+ boolean RTPMulticast;
+ boolean RTP_TCP;
+ boolean RTP_RTSP_TCP;
+ RealTimeStreamingCapabilitiesExtension Extension;
+}
+struct RealTimeStreamingCapabilitiesExtension {
+ <anyXML> any;
+}
+struct Receiver {
+ ReferenceToken Token;
+ ReceiverConfiguration Configuration;
+ <anyXML> any;
+}
+struct ReceiverCapabilities {
+ anyURI XAddr;
+ boolean RTP_Multicast;
+ boolean RTP_TCP;
+ boolean RTP_RTSP_TCP;
+ int SupportedReceivers;
+ int MaximumRTSPURILength;
+ <anyXML> any;
+}
+struct ReceiverConfiguration {
+ ReceiverMode Mode;
+ anyURI MediaUri;
+ StreamSetup StreamSetup;
+ <anyXML> any;
+}
+struct ReceiverStateInformation {
+ ReceiverState State;
+ boolean AutoCreated;
+ <anyXML> any;
+}
+struct RecordingCapabilities {
+ anyURI XAddr;
+ boolean ReceiverSource;
+ boolean MediaProfileSource;
+ boolean DynamicRecordings;
+ boolean DynamicTracks;
+ int MaxStringLength;
+ <anyXML> any;
+}
+struct RecordingConfiguration {
+ RecordingSourceInformation Source;
+ Description Content;
+ duration MaximumRetentionTime;
+ <anyXML> any;
+}
+struct RecordingEventFilter {
+ Filter Filter;
+ duration Before;
+ duration After;
+ <anyXML> any;
+}
+struct RecordingInformation {
+ RecordingReference RecordingToken;
+ RecordingSourceInformation Source;
+ dateTime EarliestRecording;
+ dateTime LatestRecording;
+ Description Content;
+ TrackInformation Track;
+ RecordingStatus RecordingStatus;
+ <anyXML> any;
+}
+struct RecordingJobConfiguration {
+ RecordingReference RecordingToken;
+ RecordingJobMode Mode;
+ int Priority;
+ RecordingJobSource Source;
+ RecordingJobConfigurationExtension Extension;
+ RecordingEventFilter EventFilter;
+ <anyXML> any;
+ UNKNOWN ScheduleToken;
+}
+struct RecordingJobConfigurationExtension {
+ <anyXML> any;
+}
+struct RecordingJobSource {
+ SourceReference SourceToken;
+ boolean AutoCreateReceiver;
+ RecordingJobTrack Tracks;
+ RecordingJobSourceExtension Extension;
+}
+struct RecordingJobSourceExtension {
+ <anyXML> any;
+}
+struct RecordingJobStateInformation {
+ RecordingReference RecordingToken;
+ RecordingJobState State;
+ RecordingJobStateSource Sources;
+ RecordingJobStateInformationExtension Extension;
+}
+struct RecordingJobStateInformationExtension {
+ <anyXML> any;
+}
+struct RecordingJobStateSource {
+ SourceReference SourceToken;
+ RecordingJobState State;
+ RecordingJobStateTracks Tracks;
+ <anyXML> any;
+}
+struct RecordingJobStateTrack {
+ string SourceTag;
+ TrackReference Destination;
+ string Error;
+ RecordingJobState State;
+ <anyXML> any;
+}
+struct RecordingJobStateTracks {
+ RecordingJobStateTrack Track;
+}
+struct RecordingJobTrack {
+ string SourceTag;
+ TrackReference Destination;
+ <anyXML> any;
+}
+struct RecordingSourceInformation {
+ anyURI SourceId;
+ Name Name;
+ Description Location;
+ Description Description;
+ anyURI Address;
+ <anyXML> any;
+}
+struct RecordingSummary {
+ dateTime DataFrom;
+ dateTime DataUntil;
+ int NumberRecordings;
+ <anyXML> any;
+}
+struct Rectangle {
+ float bottom;
+ float top;
+ float right;
+ float left;
+}
+struct ReferenceParametersType {
+ <anyXML> any;
+}
+struct RelatesToType {
+ anyURI _;
+ RelationshipTypeOpenEnum RelationshipType;
+}
+struct RelativeFocus {
+ float Distance;
+ float Speed;
+}
+struct RelativeFocusOptions {
+ FloatRange Distance;
+ FloatRange Speed;
+}
+struct RelativeFocusOptions20 {
+ FloatRange Distance;
+ FloatRange Speed;
+}
+struct RelayOutput {
+ RelayOutputSettings Properties;
+ <anyXML> any;
+}
+struct RelayOutputSettings {
+ RelayMode Mode;
+ duration DelayTime;
+ RelayIdleState IdleState;
+}
+struct RemoteUser {
+ string Username;
+ string Password;
+ boolean UseDerivedPassword;
+ <anyXML> any;
+}
+struct Removed {
+ <anyXML> any;
+}
+struct Rename {
+ ObjectId from;
+ ObjectId to;
+}
+struct Renew {
+ AbsoluteOrRelativeTimeType TerminationTime;
+ <anyXML> any;
+}
+struct RenewResponse {
+ dateTime TerminationTime;
+ dateTime CurrentTime;
+ <anyXML> any;
+}
+struct ReplayCapabilities {
+ anyURI XAddr;
+ <anyXML> any;
+}
+struct ReplayConfiguration {
+ duration SessionTimeout;
+ <anyXML> any;
+}
+struct ResumeFailedFaultType {
+}
+struct ResumeSubscription {
+ <anyXML> any;
+}
+struct ResumeSubscriptionResponse {
+ <anyXML> any;
+}
+struct Reverse {
+ ReverseMode Mode;
+ <anyXML> any;
+}
+struct ReverseOptions {
+ ReverseMode Mode;
+ ReverseOptionsExtension Extension;
+}
+struct ReverseOptionsExtension {
+ <anyXML> any;
+}
+struct Rotate {
+ RotateMode Mode;
+ int Degree;
+ RotateExtension Extension;
+}
+struct RotateExtension {
+ <anyXML> any;
+}
+struct RotateOptions {
+ RotateMode Mode;
+ IntItems DegreeList;
+ RotateOptionsExtension Extension;
+ boolean Reboot;
+}
+struct RotateOptionsExtension {
+ <anyXML> any;
+}
+struct RuleEngineConfiguration {
+ Config Rule;
+ RuleEngineConfigurationExtension Extension;
+}
+struct RuleEngineConfigurationExtension {
+ <anyXML> any;
+}
+struct Scarf {
+ ColorDescriptor Color;
+ boolean Wear;
+ <anyXML> any;
+}
+struct SceneOrientation {
+ SceneOrientationMode Mode;
+ string Orientation;
+}
+struct Scope {
+ ScopeDefinition ScopeDef;
+ anyURI ScopeItem;
+}
+struct SearchCapabilities {
+ anyURI XAddr;
+ boolean MetadataSearch;
+ <anyXML> any;
+}
+struct SearchScope {
+ SourceReference IncludedSources;
+ RecordingReference IncludedRecordings;
+ XPathExpression RecordingInformationFilter;
+ SearchScopeExtension Extension;
+}
+struct SearchScopeExtension {
+ <anyXML> any;
+}
+struct SecurityCapabilities {
+ boolean TLS1.1;
+ boolean TLS1.2;
+ boolean OnboardKeyGeneration;
+ boolean AccessPolicyConfig;
+ boolean X.509Token;
+ boolean SAMLToken;
+ boolean KerberosToken;
+ boolean RELToken;
+ <anyXML> any;
+ SecurityCapabilitiesExtension Extension;
+}
+struct SecurityCapabilitiesExtension {
+ boolean TLS1.0;
+ SecurityCapabilitiesExtension2 Extension;
+}
+struct SecurityCapabilitiesExtension2 {
+ boolean Dot1X;
+ int SupportedEAPMethod;
+ boolean RemoteUserHandling;
+ <anyXML> any;
+}
+struct ShapeDescriptor {
+ Rectangle BoundingBox;
+ Vector CenterOfGravity;
+ Polygon Polygon;
+ ShapeDescriptorExtension Extension;
+ <anyXML> any;
+}
+struct ShapeDescriptorExtension {
+ <anyXML> any;
+}
+struct Shoes {
+ string Category;
+ ColorDescriptor Color;
+ <anyXML> any;
+}
+struct SimpleItem {
+ string Name;
+ anySimpleType Value;
+}
+struct SimpleItemDescription {
+ string Name;
+ QName Type;
+}
+struct SourceIdentification {
+ string Name;
+ ReferenceToken Token;
+ SourceIdentificationExtension Extension;
+}
+struct SourceIdentificationExtension {
+ <anyXML> any;
+}
+struct SourceReference {
+ ReferenceToken Token;
+ <anyXML> any;
+ anyURI Type;
+}
+struct Space1DDescription {
+ anyURI URI;
+ FloatRange XRange;
+}
+struct Space2DDescription {
+ anyURI URI;
+ FloatRange XRange;
+ FloatRange YRange;
+}
+struct Split {
+ ObjectId from;
+ ObjectId to;
+}
+struct StorageReferencePath {
+ ReferenceToken StorageToken;
+ string RelativePath;
+ StorageReferencePathExtension Extension;
+}
+struct StorageReferencePathExtension {
+ <anyXML> any;
+}
+struct StreamSetup {
+ StreamType Stream;
+ Transport Transport;
+ <anyXML> any;
+}
+struct StringItems {
+ string Item;
+}
+struct StringLikelihood {
+ string _;
+ float Likelihood;
+}
+struct Subscribe {
+ EndpointReferenceType ConsumerReference;
+ FilterType Filter;
+ AbsoluteOrRelativeTimeType InitialTerminationTime;
+ SubscriptionPolicy SubscriptionPolicy;
+ <anyXML> any;
+}
+struct SubscribeCreationFailedFaultType {
+}
+struct SubscribeResponse {
+ EndpointReferenceType SubscriptionReference;
+ dateTime CurrentTime;
+ dateTime TerminationTime;
+ <anyXML> any;
+}
+struct SubscriptionManagerRP {
+ EndpointReferenceType ConsumerReference;
+ FilterType Filter;
+ SubscriptionPolicyType SubscriptionPolicy;
+ dateTime CreationTime;
+}
+struct SubscriptionPolicy {
+ <anyXML> any;
+}
+struct SubscriptionPolicyType {
+ <anyXML> any;
+}
+struct SupportInformation {
+ AttachmentData Binary;
+ string String;
+}
+struct SupportedAnalyticsModules {
+ anyURI AnalyticsModuleContentSchemaLocation;
+ ConfigDescription AnalyticsModuleDescription;
+ SupportedAnalyticsModulesExtension Extension;
+ int Limit;
+}
+struct SupportedAnalyticsModulesExtension {
+ <anyXML> any;
+}
+struct SupportedEnvType {
+ QName qname;
+}
+struct SupportedRules {
+ anyURI RuleContentSchemaLocation;
+ ConfigDescription RuleDescription;
+ SupportedRulesExtension Extension;
+ int Limit;
+}
+struct SupportedRulesExtension {
+ <anyXML> any;
+}
+struct SystemCapabilities {
+ boolean DiscoveryResolve;
+ boolean DiscoveryBye;
+ boolean RemoteDiscovery;
+ boolean SystemBackup;
+ boolean SystemLogging;
+ boolean FirmwareUpgrade;
+ OnvifVersion SupportedVersions;
+ SystemCapabilitiesExtension Extension;
+}
+struct SystemCapabilitiesExtension {
+ <anyXML> any;
+ boolean HttpFirmwareUpgrade;
+ boolean HttpSystemBackup;
+ boolean HttpSystemLogging;
+ boolean HttpSupportInformation;
+ SystemCapabilitiesExtension2 Extension;
+}
+struct SystemCapabilitiesExtension2 {
+ <anyXML> any;
+}
+struct SystemDateTime {
+ SetDateTimeType DateTimeType;
+ boolean DaylightSavings;
+ TimeZone TimeZone;
+ DateTime UTCDateTime;
+ DateTime LocalDateTime;
+ SystemDateTimeExtension Extension;
+}
+struct SystemDateTimeExtension {
+ <anyXML> any;
+}
+struct SystemLog {
+ AttachmentData Binary;
+ string String;
+}
+struct SystemLogUri {
+ SystemLogType Type;
+ anyURI Uri;
+ <anyXML> any;
+}
+struct SystemLogUriList {
+ SystemLogUri SystemLog;
+}
+struct TLSConfiguration {
+ token CertificateID;
+ <anyXML> any;
+}
+struct Time {
+ int Hour;
+ int Minute;
+ int Second;
+}
+struct TimeZone {
+ token TZ;
+}
+struct ToneCompensation {
+ string Mode;
+ float Level;
+ ToneCompensationExtension Extension;
+}
+struct ToneCompensationExtension {
+ <anyXML> any;
+}
+struct ToneCompensationOptions {
+ string Mode;
+ boolean Level;
+ <anyXML> any;
+}
+struct Topic {
+ ConcreteTopicExpression parent;
+}
+struct TopicExpressionDialectUnknownFaultType {
+}
+struct TopicExpressionType {
+ <anyXML> any;
+ anyURI Dialect;
+}
+struct TopicNamespaceType {
+ Topic Topic;
+ <anyXML> any;
+ NCName name;
+ anyURI targetNamespace;
+ boolean final;
+}
+struct TopicNotSupportedFaultType {
+}
+struct TopicSetType {
+ <anyXML> any;
+}
+struct TopicType {
+ QueryExpressionType MessagePattern;
+ TopicType Topic;
+ <anyXML> any;
+ NCName name;
+ anonymous messageTypes;
+ boolean final;
+}
+struct Tops {
+ string Category;
+ ColorDescriptor Color;
+ string Grain;
+ string Style;
+ <anyXML> any;
+}
+struct TrackAttributes {
+ TrackInformation TrackInformation;
+ VideoAttributes VideoAttributes;
+ AudioAttributes AudioAttributes;
+ MetadataAttributes MetadataAttributes;
+ TrackAttributesExtension Extension;
+}
+struct TrackAttributesExtension {
+ <anyXML> any;
+}
+struct TrackConfiguration {
+ TrackType TrackType;
+ Description Description;
+ <anyXML> any;
+}
+struct TrackInformation {
+ TrackReference TrackToken;
+ TrackType TrackType;
+ Description Description;
+ dateTime DataFrom;
+ dateTime DataTo;
+ <anyXML> any;
+}
+struct Transformation {
+ Vector Translate;
+ Vector Scale;
+ TransformationExtension Extension;
+}
+struct TransformationExtension {
+ <anyXML> any;
+}
+struct Transport {
+ TransportProtocol Protocol;
+ Transport Tunnel;
+}
+struct Umbrella {
+ ColorDescriptor Color;
+ boolean Open;
+ <anyXML> any;
+}
+struct UnableToCreatePullPointFaultType {
+}
+struct UnableToDestroyPullPointFaultType {
+}
+struct UnableToDestroySubscriptionFaultType {
+}
+struct UnableToGetMessagesFaultType {
+}
+struct UnacceptableInitialTerminationTimeFaultType {
+ dateTime MinimumTime;
+ dateTime MaximumTime;
+}
+struct UnacceptableTerminationTimeFaultType {
+ dateTime MinimumTime;
+ dateTime MaximumTime;
+}
+struct UnrecognizedPolicyRequestFaultType {
+ QName UnrecognizedPolicy;
+}
+struct Unsubscribe {
+ <anyXML> any;
+}
+struct UnsubscribeResponse {
+ <anyXML> any;
+}
+struct UnsupportedPolicyRequestFaultType {
+ QName UnsupportedPolicy;
+}
+struct UpgradeType {
+ SupportedEnvType SupportedEnvelope;
+}
+struct UseRaw {
+}
+struct User {
+ string Username;
+ string Password;
+ UserLevel UserLevel;
+ UserExtension Extension;
+}
+struct UserExtension {
+ <anyXML> any;
+}
+struct Vector {
+ float x;
+ float y;
+}
+struct Vector1D {
+ float x;
+ anyURI space;
+}
+struct Vector2D {
+ float x;
+ float y;
+ anyURI space;
+}
+struct VehicleInfo {
+ StringLikelihood Type;
+ StringLikelihood Brand;
+ StringLikelihood Model;
+ <anyXML> any;
+}
+struct VideoAnalyticsConfiguration {
+ AnalyticsEngineConfiguration AnalyticsEngineConfiguration;
+ RuleEngineConfiguration RuleEngineConfiguration;
+ <anyXML> any;
+}
+struct VideoAnalyticsStream {
+ Frame Frame;
+ VideoAnalyticsStreamExtension Extension;
+ <anyXML> any;
+}
+struct VideoAnalyticsStreamExtension {
+ <anyXML> any;
+}
+struct VideoAttributes {
+ int Bitrate;
+ int Width;
+ int Height;
+ string Encoding;
+ float Framerate;
+ <anyXML> any;
+}
+struct VideoDecoderConfigurationOptions {
+ JpegDecOptions JpegDecOptions;
+ H264DecOptions H264DecOptions;
+ Mpeg4DecOptions Mpeg4DecOptions;
+ VideoDecoderConfigurationOptionsExtension Extension;
+}
+struct VideoDecoderConfigurationOptionsExtension {
+ <anyXML> any;
+}
+struct VideoEncoder2Configuration {
+ string Encoding;
+ VideoResolution2 Resolution;
+ VideoRateControl2 RateControl;
+ MulticastConfiguration Multicast;
+ float Quality;
+ <anyXML> any;
+ int GovLength;
+ string Profile;
+ boolean GuaranteedFrameRate;
+}
+struct VideoEncoder2ConfigurationOptions {
+ string Encoding;
+ FloatRange QualityRange;
+ VideoResolution2 ResolutionsAvailable;
+ IntRange BitrateRange;
+ <anyXML> any;
+ IntList GovLengthRange;
+ FloatList FrameRatesSupported;
+ StringAttrList ProfilesSupported;
+ boolean ConstantBitRateSupported;
+ boolean GuaranteedFrameRateSupported;
+}
+struct VideoEncoderConfiguration {
+ VideoEncoding Encoding;
+ VideoResolution Resolution;
+ float Quality;
+ VideoRateControl RateControl;
+ Mpeg4Configuration MPEG4;
+ H264Configuration H264;
+ MulticastConfiguration Multicast;
+ duration SessionTimeout;
+ <anyXML> any;
+ boolean GuaranteedFrameRate;
+}
+struct VideoEncoderConfigurationOptions {
+ IntRange QualityRange;
+ JpegOptions JPEG;
+ Mpeg4Options MPEG4;
+ H264Options H264;
+ VideoEncoderOptionsExtension Extension;
+ boolean GuaranteedFrameRateSupported;
+}
+struct VideoEncoderOptionsExtension {
+ <anyXML> any;
+ JpegOptions2 JPEG;
+ Mpeg4Options2 MPEG4;
+ H264Options2 H264;
+ VideoEncoderOptionsExtension2 Extension;
+}
+struct VideoEncoderOptionsExtension2 {
+ <anyXML> any;
+}
+struct VideoOutput {
+ Layout Layout;
+ VideoResolution Resolution;
+ float RefreshRate;
+ float AspectRatio;
+ VideoOutputExtension Extension;
+}
+struct VideoOutputConfiguration {
+ ReferenceToken OutputToken;
+ <anyXML> any;
+}
+struct VideoOutputConfigurationOptions {
+ <anyXML> any;
+}
+struct VideoOutputExtension {
+ <anyXML> any;
+}
+struct VideoRateControl {
+ int FrameRateLimit;
+ int EncodingInterval;
+ int BitrateLimit;
+}
+struct VideoRateControl2 {
+ float FrameRateLimit;
+ int BitrateLimit;
+ <anyXML> any;
+ boolean ConstantBitRate;
+}
+struct VideoResolution {
+ int Width;
+ int Height;
+}
+struct VideoResolution2 {
+ int Width;
+ int Height;
+ <anyXML> any;
+}
+struct VideoSource {
+ float Framerate;
+ VideoResolution Resolution;
+ ImagingSettings Imaging;
+ VideoSourceExtension Extension;
+}
+struct VideoSourceConfiguration {
+ ReferenceToken SourceToken;
+ IntRectangle Bounds;
+ <anyXML> any;
+ VideoSourceConfigurationExtension Extension;
+ string ViewMode;
+}
+struct VideoSourceConfigurationExtension {
+ Rotate Rotate;
+ VideoSourceConfigurationExtension2 Extension;
+}
+struct VideoSourceConfigurationExtension2 {
+ LensDescription LensDescription;
+ SceneOrientation SceneOrientation;
+ <anyXML> any;
+}
+struct VideoSourceConfigurationOptions {
+ IntRectangleRange BoundsRange;
+ ReferenceToken VideoSourceTokensAvailable;
+ VideoSourceConfigurationOptionsExtension Extension;
+ int MaximumNumberOfProfiles;
+}
+struct VideoSourceConfigurationOptionsExtension {
+ <anyXML> any;
+ RotateOptions Rotate;
+ VideoSourceConfigurationOptionsExtension2 Extension;
+}
+struct VideoSourceConfigurationOptionsExtension2 {
+ SceneOrientationMode SceneOrientationMode;
+ <anyXML> any;
+}
+struct VideoSourceExtension {
+ <anyXML> any;
+ ImagingSettings20 Imaging;
+ VideoSourceExtension2 Extension;
+}
+struct VideoSourceExtension2 {
+ <anyXML> any;
+}
+struct WhiteBalance {
+ WhiteBalanceMode Mode;
+ float CrGain;
+ float CbGain;
+ <anyXML> any;
+}
+struct WhiteBalance20 {
+ WhiteBalanceMode Mode;
+ float CrGain;
+ float CbGain;
+ WhiteBalance20Extension Extension;
+}
+struct WhiteBalance20Extension {
+ <anyXML> any;
+}
+struct WhiteBalanceOptions {
+ WhiteBalanceMode Mode;
+ FloatRange YrGain;
+ FloatRange YbGain;
+}
+struct WhiteBalanceOptions20 {
+ WhiteBalanceMode Mode;
+ FloatRange YrGain;
+ FloatRange YbGain;
+ WhiteBalanceOptions20Extension Extension;
+}
+struct WhiteBalanceOptions20Extension {
+ <anyXML> any;
+}
+struct WideDynamicRange {
+ WideDynamicMode Mode;
+ float Level;
+}
+struct WideDynamicRange20 {
+ WideDynamicMode Mode;
+ float Level;
+}
+struct WideDynamicRangeOptions {
+ WideDynamicMode Mode;
+ FloatRange Level;
+}
+struct WideDynamicRangeOptions20 {
+ WideDynamicMode Mode;
+ FloatRange Level;
+}
+struct ZoomLimits {
+ Space1DDescription Range;
+}
+struct base64Binary {
+ base64Binary _;
+ anonymous contentType;
+}
+struct detail {
+ <anyXML> any;
+}
+struct faultcode {
+ faultcodeEnum Value;
+ subcode Subcode;
+}
+struct faultreason {
+ reasontext Text;
+}
+struct hexBinary {
+ hexBinary _;
+ anonymous contentType;
+}
+struct reasontext {
+ string _;
+ anonymous lang;
+}
+struct subcode {
+ QName Value;
+ subcode Subcode;
+}
+token ConcreteTopicExpression
+token DNSName
+token Domain
+token FullTopicExpression
+token HwAddress
+token IPv4Address
+token IPv6Address
+union AbsoluteOrRelativeTimeType {,dateTime,duration}
+union FaultCodesOpenEnumType {,FaultCodesType,QName}
+union RelationshipTypeOpenEnum {,RelationshipType,anyURI}
+union anonymous {,language,anonymous}
