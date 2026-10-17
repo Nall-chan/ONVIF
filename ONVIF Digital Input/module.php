@@ -51,7 +51,6 @@ class ONVIFDigitalInput extends ONVIFModuleBase
                 'OPTIONS'      => json_encode(
                     [
                         [
-                            'ColorDisplay' => 16077123,
                             'Value'        => false,
                             'Caption'      => $this->Translate('open'),
                             'IconValue'    => '',
@@ -60,7 +59,6 @@ class ONVIFDigitalInput extends ONVIFModuleBase
                             'ColorValue'   => 1692672
                         ],
                         [
-                            'ColorDisplay' => 1692672,
                             'Value'        => true,
                             'Caption'      => $this->Translate('closed'),
                             'IconValue'    => '',
@@ -147,7 +145,6 @@ class ONVIFDigitalInput extends ONVIFModuleBase
                         'OPTIONS'      => json_encode(
                             [
                                 [
-                                    'ColorDisplay' => 16077123,
                                     'Value'        => false,
                                     'Caption'      => $this->Translate('open'),
                                     'IconValue'    => '',
@@ -156,7 +153,6 @@ class ONVIFDigitalInput extends ONVIFModuleBase
                                     'ColorValue'   => 1692672
                                 ],
                                 [
-                                    'ColorDisplay' => 1692672,
                                     'Value'        => true,
                                     'Caption'      => $this->Translate('closed'),
                                     'IconValue'    => '',

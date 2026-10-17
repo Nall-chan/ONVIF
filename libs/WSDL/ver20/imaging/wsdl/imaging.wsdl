@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="UTF-8"?>
 <?xml-stylesheet type="text/xsl" href="../../../ver20/util/onvif-wsdl-viewer.xsl"?>
 <!--
 Copyright (c) 2008-2019 by ONVIF: Open Network Video Interface Forum. All rights reserved.
@@ -600,11 +600,9 @@ IN NO EVENT WILL THE CORPORATION OR ITS MEMBERS OR THEIR AFFILIATES BE LIABLE FO
 			</wsdl:output>
 		</wsdl:operation>
 	</wsdl:binding>
-	<!--===============================-->
 	<wsdl:service name="ImagingService">
 		<wsdl:port name="ImagingPort" binding="timg:ImagingBinding">
 			<soap:address location=""/>
 		</wsdl:port>
 	</wsdl:service>
-	<!--===============================-->
 </wsdl:definitions>

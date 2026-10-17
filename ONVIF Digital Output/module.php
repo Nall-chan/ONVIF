@@ -74,7 +74,7 @@ class ONVIFDigitalOutput extends ONVIFModuleBase
         if ($DataIndex === false) {
             return '';
         }
-        $DataName = $EventProperty['Data'][$SourceIndex]['Name'];
+        $DataName = $EventProperty['Data'][$DataIndex]['Name'];
         $EventDataIndex = array_search($DataName, array_column($Data['DataValues'], 'Name'));
         if ($EventDataIndex === false) {
             return '';

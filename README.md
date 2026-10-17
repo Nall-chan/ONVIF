@@ -156,6 +156,14 @@ Für das Discovery werden Pakete über die Multicast-Adresse `239.255.255.250` a
 
 ### 2. Changelog
 
+**Version 2.60**  
+
+- Die Beschreibungen der ONVIF-Dienste (WSDL) wurden auf den Stand ONVIF 26.06 aktualisiert  
+- Relais-Ausgänge von Geräten mit DeviceIO-Dienst konnten nicht geschaltet werden  
+- Digital Input: Ereignisse wurden wegen einer fehlerhaften Darstellung der Statusvariable nicht übernommen  
+- Digital Output: Bei Geräten mit mehreren Datenwerten im Ereignis wurde der Zustand des Ausgangs ggf. aus dem falschen Wert gelesen  
+- Lehnte ein Gerät eine Anfrage ohne SOAP-Antwort ab (HTTP 400), wurde dies nicht als Fehler erkannt (z.B. „Renew ohne Antwort“ nach einem Neustart des Geräts)  
+
 **Version 2.55**  
 
 - Szenen (Preset) Variable hat die Namen der Presets nicht genutzt  

@@ -37,14 +37,17 @@ list StringList {string}
 list anonymous {QName}
 string AFModes {OnceAfterMove}
 string AudioClassType {gun_shot, scream, glass_breaking, tire_screech}
+string AudioClassification {GunShot, Scream, GlassBreaking, TireScreech, Alarm}
 string AudioEncoding {G711, G726, AAC}
 string AudioEncodingMimeNames {PCMU, G726, MP4A-LATM, mpeg4-generic}
 string AutoFocusMode {AUTO, MANUAL}
 string AuxiliaryData
 string BacklightCompensationMode {OFF, ON}
+string BagCategory {ShoulderBag, Backpack, ToteBag, Briefcase, Suitcase, SingleShoulderBag, Other}
+string BarcodeType {Code-39, Code-49, Code-93, Code-128, Code-11, Code-25-Interleaved, Code-25-NonInterleaved, DataMatrix, Maxicode, Postnet, RM4SCC, ISBN-13, ISBN-13-Dual, ISBN-10, ITF-14, EAN-2, EAN-8, EAN-13, EAN-14, EAN-18, EAN-99, EAN-128, SCC-14, SSCC-18, UPC-A, UPC-E, PDF417, QRCode}
 string BodyShape {Fat, Thin, Other}
 string BottomsCategory {Trousers, Shorts, Skirt, Other}
-string BottomsStyle {FornalPants, Jeans, Other}
+string BottomsStyle {FormalPants, Jeans, Other}
 string CapabilityCategory {All, Analytics, Device, Events, Imaging, Media, PTZ}
 string CartCategory {BabyCarriage, TwoWheelVehicle, Tricyle, Other}
 string Chin {Double, Pointed, Round}
@@ -53,7 +56,6 @@ string Complexion {White, Black, Asian, Other}
 string DefoggingMode {OFF, ON, AUTO}
 string Description
 string DigitalIdleState {closed, open}
-string Direction {Left, Right, Any}
 string DiscoveryMode {Discoverable, NonDiscoverable}
 string Dot11AuthAndMangementSuite {None, Dot1X, PSK, Extended}
 string Dot11Cipher {CCMP, TKIP, Any, Extended}
@@ -64,13 +66,15 @@ string Dot11StationMode {Ad-hoc, Infrastructure, Extended}
 string Duplex {Full, Half}
 string DynamicDNSType {NoUpdate, ClientUpdates, ServerUpdates}
 string EFlipMode {OFF, ON, Extended}
-string Ear {Round, Pointed, Narrow, BroadLobe, Other}
+string EarShape {Round, Pointed, Narrow, BroadLobe, Other}
 string Enabled {ENABLED, DISABLED}
+string EncryptionMode {CENC, CBCS}
 string Entity {Device, VideoSource, AudioSource}
 string ExposureMode {AUTO, MANUAL}
 string ExposurePriority {LowNoise, FrameRate}
 string Expression {Natural, Smile, RaisedEyebrows, Squint, Frown, Other}
-string EyeShape {Almond, Slitty, Round, Other}
+string ExtendedDirection {Left, Right, Any, Entering, Exiting, Approaching, Departing}
+string EyeShape {Almond, Round, Other}
 string Eyeball {Black, Blue, Brown, Gray, Green, Pink, Other}
 string EyebrowSpace {Joint, Separate}
 string EyebrowWidth {Long, Short}
@@ -82,6 +86,8 @@ string Gender {Male, Female}
 string Grain {Stria, Plaid, PureColour, Decal, Other}
 string H264Profile {Baseline, Main, Extended, High}
 string HairStyle {Straight, Wave, Curly, CrewCut, Bald, Ponytail, Pigtail, Other}
+string HatType {Cap}
+string HelmetType {ConstructionCap, CycleCap, RidingHat}
 string HumanActivity {Walking, Running, Fallen, Squatting, Sitting, Standing, Driving, Other}
 string IPAddressFilterType {Allow, Deny}
 string IPType {IPv4, IPv6}
@@ -90,7 +96,7 @@ string ImageSendingType {Embedded, LocalStorage, RemoteStorage}
 string ImageStabilizationMode {OFF, ON, AUTO, Extended}
 string IrCutFilterAutoBoundaryType {Common, ToOn, ToOff, Extended}
 string IrCutFilterMode {ON, OFF, AUTO}
-string KnapsackCategory {SingleShoulderBag, Backpack, Other}
+string LabelAuthority {ISO_3864, ISO_7010, UNECE_ADR, UNECE_GHS}
 string Length {Long, Medium, Short}
 string Lip {Full, Medium, Thin}
 string MetadataCompressionType {None, GZIP, EXI}
@@ -106,7 +112,7 @@ string NoseEnd {Snub, Turnedup, Flat, Hooked, Other}
 string NoseLength {Short, Long}
 string NoseWing {Narrow, Broad}
 string OSDType {Text, Image, Extended}
-string ObjectType {Animal, HumanFace, Human, Bicycle, Vehicle, LicensePlate, Bike}
+string ObjectType {Animal, HumanFace, Human, Bicycle, Vehicle, LicensePlate, Bike, Barcode, Fire, Smoke}
 string PTZPresetTourDirection {Forward, Backward, Extended}
 string PTZPresetTourOperation {Start, Stop, Pause, Extended}
 string PTZPresetTourState {Idle, Touring, Paused, Extended}
@@ -128,13 +134,16 @@ string SceneOrientationOption {Below, Horizon, Above}
 string ScopeDefinition {Fixed, Configurable}
 string SearchState {Queued, Searching, Completed, Unknown}
 string SetDateTimeType {Manual, NTP}
-string ShoesCategory {LeatherShoes, Sneakers, Sandal, Slipper, Other}
+string ShoesCategory {Boots, LeatherShoes, Sneakers, Sandal, Slipper, Other}
 string Smoking {NoSmoking, Cigar, ElectronicCigarettes, Other}
+string SrtpSecurityAlgorithms {NONE, AES_CM_128_HMAC_SHA1_80, AEAD_AES_128_GCM, AEAD_AES_256_GCM}
+string StorageStrategy {External, Local, Both}
 string StreamType {RTP-Unicast, RTP-Multicast}
 string SystemLogType {System, Access}
+string TargetFormat {MP4, CMAF}
 string ToneCompensationMode {OFF, ON, AUTO}
-string TopsCategory {LongSleeve, ShortSleeve, Other}
-string TopsStyle {Tailor, Jacket, Sweater, Overcoat, Dress, Other}
+string TopsCategory {LongSleeve, ShortSleeve, Sleeveless, Other}
+string TopsStyle {Tailor, Jacket, Shirt, Sweater, Overcoat, Dress, Vest, SafetyVest, Other}
 string TrackType {Video, Audio, Metadata, Extended}
 string TransportProtocol {UDP, TCP, RTSP, HTTP}
 string UserLevel {Administrator, Operator, User, Anonymous, Extended}
@@ -144,6 +153,8 @@ string VideoEncoding {JPEG, MPEG4, H264}
 string VideoEncodingMimeNames {JPEG, MPV4-ES, H264, H265}
 string VideoEncodingProfiles {Simple, AdvancedSimple, Baseline, Main, Main10, Extended, High}
 string ViewModes {tt:Fisheye, tt:360Panorama, tt:180Panorama, tt:Quad, tt:Original, tt:LeftHalf, tt:RightHalf, tt:Dewarp}
+string WeaponCategory {Knife, Rifle, Pistol, Revolver}
+string WeaponPose {InHolster, InHand, Aiming}
 string WhiteBalanceMode {AUTO, MANUAL}
 string WideDynamicMode {OFF, ON}
 string XPathExpression
@@ -176,6 +187,7 @@ struct Accessory {
 struct AccessoryDescription {
  boolean Wear;
  ColorDescriptor Color;
+ string Subtype;
  <anyXML> any;
 }
 struct ActionEngineEventPayload {
@@ -280,6 +292,9 @@ struct Appearance {
  HumanBody HumanBody;
  anyURI ImageRef;
  base64Binary Image;
+ BarcodeInfo BarcodeInfo;
+ SphericalCoordinate SphericalCoordinate;
+ LabelInfo Label;
  <anyXML> any;
 }
 struct AppearanceExtension {
@@ -290,6 +305,18 @@ struct ArrayOfFileProgress {
  ArrayOfFileProgressExtension Extension;
 }
 struct ArrayOfFileProgressExtension {
+ <anyXML> any;
+}
+struct AspectRatioTransformation {
+ Vector Translate;
+ Vector Scale;
+ <anyXML> any;
+ float ratio;
+}
+struct AsymmetricEncryption {
+ string CertificateID;
+ duration KeyRotationDuration;
+ string AdditionalInfo;
  <anyXML> any;
 }
 struct AttachmentData {
@@ -334,6 +361,13 @@ struct AudioClassDescriptor {
 struct AudioClassDescriptorExtension {
  <anyXML> any;
 }
+struct AudioDecoder2Options {
+ string Encoding;
+ IntItems BitrateList;
+ IntItems SampleRateList;
+ int RTPPayloadType;
+ <anyXML> any;
+}
 struct AudioDecoderConfiguration {
  <anyXML> any;
 }
@@ -356,12 +390,14 @@ struct AudioEncoder2Configuration {
  int Bitrate;
  int SampleRate;
  <anyXML> any;
+ string SecureStreamingProtocolAlgorithm;
 }
 struct AudioEncoder2ConfigurationOptions {
  string Encoding;
  IntItems BitrateList;
  IntItems SampleRateList;
  <anyXML> any;
+ StringAttrList SecureStreamingProtocolAlgorithms;
 }
 struct AudioEncoderConfiguration {
  AudioEncoding Encoding;
@@ -393,6 +429,8 @@ struct AudioOutputConfigurationOptions {
  ReferenceToken OutputTokensAvailable;
  anyURI SendPrimacyOptions;
  IntRange OutputLevelRange;
+ boolean EQPresetScheduleSupport;
+ EQPreset EQPresets;
  <anyXML> any;
 }
 struct AudioSource {
@@ -435,6 +473,12 @@ struct Bag {
  ColorDescriptor Color;
  <anyXML> any;
 }
+struct BarcodeInfo {
+ StringLikelihood Data;
+ StringLikelihood Type;
+ float PPM;
+ <anyXML> any;
+}
 struct BaseFaultType {
  <anyXML> any;
  dateTime Timestamp;
@@ -448,6 +492,7 @@ struct Behaviour {
  Idle Idle;
  BehaviourExtension Extension;
  float Speed;
+ GeoOrientation Direction;
  <anyXML> any;
 }
 struct Behaviour {
@@ -466,6 +511,13 @@ struct Belonging {
  Box Box;
  Cart Cart;
  boolean Weapon;
+ <anyXML> any;
+}
+struct Belongings {
+ Bag Bag;
+ Umbrella Umbrella;
+ Cart Cart;
+ Weapon Weapon;
  <anyXML> any;
 }
 struct BinaryData {
@@ -595,10 +647,6 @@ struct ClassDescriptor {
 struct ClassDescriptorExtension {
  <anyXML> any;
  OtherType OtherTypes;
- ClassDescriptorExtension2 Extension;
-}
-struct ClassDescriptorExtension2 {
- <anyXML> any;
 }
 struct Clothing {
  Scarf Scarf;
@@ -899,6 +947,15 @@ struct EFlipOptions {
 struct EFlipOptionsExtension {
  <anyXML> any;
 }
+struct EQPreset {
+ ReferenceToken Token;
+ string Name;
+ boolean isDefault;
+ string ScheduleToken;
+ boolean isFrequencyDecibelEditable;
+ FrequencyDecibelPair FrequencyDecibelPair;
+ <anyXML> any;
+}
 struct EapMethodExtension {
  <anyXML> any;
 }
@@ -1036,6 +1093,10 @@ struct Fault {
 struct FaultCause {
  <anyXML> any;
 }
+struct FieldOfView {
+ float hfov;
+ float vfov;
+}
 struct FileProgress {
  string FileName;
  float Progress;
@@ -1070,6 +1131,28 @@ struct FindMetadataResult {
 struct FindMetadataResultList {
  SearchState SearchState;
  FindMetadataResult Result;
+}
+struct FindNLSearchResult {
+ string ObjectUUID;
+ anyURI TargetImageURI;
+ dateTime Time;
+ float Similarity;
+ RecordingReference RecordingToken;
+}
+struct FindNLSearchResultList {
+ SearchState SearchState;
+ FindNLSearchResult Result;
+}
+struct FindObjectImageResult {
+ string ObjectUUID;
+ anyURI TargetImageURI;
+ dateTime Time;
+ float Similarity;
+ RecordingReference RecordingToken;
+}
+struct FindObjectImageResultList {
+ SearchState SearchState;
+ FindObjectImageResult Result;
 }
 struct FindPTZPositionResult {
  RecordingReference RecordingToken;
@@ -1156,6 +1239,7 @@ struct Frame {
  FrameExtension Extension;
  anyURI SceneImageRef;
  base64Binary SceneImage;
+ AspectRatioTransformation AspectRatioTransformation;
  <anyXML> any;
  dateTime UtcTime;
  string Colorspace;
@@ -1167,6 +1251,11 @@ struct FrameExtension {
  FrameExtension2 Extension;
 }
 struct FrameExtension2 {
+ <anyXML> any;
+}
+struct FrequencyDecibelPair {
+ int CenterFrequency;
+ float Decibel;
  <anyXML> any;
 }
 struct G711DecOptions {
@@ -1326,6 +1415,7 @@ struct HumanBody {
  Clothing Clothing;
  Belonging Belonging;
  Behaviour Behaviour;
+ Belongings Belongings;
  <anyXML> any;
 }
 struct HumanFace {
@@ -1337,7 +1427,7 @@ struct HumanFace {
  Hair Hair;
  Eyebrow Eyebrow;
  Eye Eye;
- Ear Ear;
+ string Ear;
  Nose Nose;
  FacialHair FacialHair;
  string Lip;
@@ -1619,6 +1709,12 @@ struct JpegOptions2 {
  IntRange BitrateRange;
  <anyXML> any;
 }
+struct LabelInfo {
+ string Authority;
+ string ID;
+ <anyXML> any;
+ float Likelihood;
+}
 struct Layout {
  PaneLayout PaneLayout;
  LayoutExtension Extension;
@@ -1758,20 +1854,24 @@ struct MetadataConfiguration {
  duration SessionTimeout;
  <anyXML> any;
  AnalyticsEngineConfiguration AnalyticsEngineConfiguration;
+ SensorDataFilter SensorData;
  MetadataConfigurationExtension Extension;
  string CompressionType;
  boolean GeoLocation;
  boolean ShapePolygon;
+ string SecureStreamingProtocolAlgorithm;
 }
 struct MetadataConfigurationExtension {
  <anyXML> any;
 }
 struct MetadataConfigurationOptions {
  PTZStatusFilterOptions PTZStatusFilterOptions;
+ SensorDataFilterOptions SensorDataFilterOptions;
  <anyXML> any;
  MetadataConfigurationOptionsExtension Extension;
  boolean GeoLocation;
  int MaxContentFilterSize;
+ StringAttrList SecureStreamingProtocolAlgorithms;
 }
 struct MetadataConfigurationOptionsExtension {
  string CompressionType;
@@ -1801,6 +1901,7 @@ struct MetadataStream {
  PTZStream PTZ;
  EventStream Event;
  MetadataStreamExtension Extension;
+ SensorData SensorData;
  <anyXML> any;
 }
 struct MetadataStreamExtension {
@@ -1873,11 +1974,39 @@ struct Mpeg4Options2 {
  IntRange BitrateRange;
  <anyXML> any;
 }
+struct MulticastAudioDecoderConfiguration {
+ boolean Enable;
+ ReferenceToken AudioOutputToken;
+ string Encoding;
+ int Bitrate;
+ int SamplingRate;
+ MulticastReceiverConfiguration Multicast;
+ int RTPPayloadType;
+ int Priority;
+ string MediaFormatParameters;
+ SRTPPreShared SRTPPreSharedParameters;
+ <anyXML> any;
+}
+struct MulticastAudioDecoderConfigurationOptions {
+ AudioDecoder2Options EncodingOptions;
+ IntRange PriorityRange;
+ StringList AudioOutputTokens;
+ <anyXML> any;
+ StringList SecureStreamingProtocolAlgorithms;
+}
 struct MulticastConfiguration {
  IPAddress Address;
  int Port;
  int TTL;
  boolean AutoStart;
+ <anyXML> any;
+}
+struct MulticastReceiverConfiguration {
+ IPAddress Address;
+ int Port;
+ int TTL;
+ ReferenceToken InterfaceToken;
+ IPAddress SourceSpecificMulticast;
  <anyXML> any;
 }
 struct MultipleTopicsSpecifiedFaultType {
@@ -2126,12 +2255,20 @@ struct Object {
  ObjectExtension Extension;
  <anyXML> any;
  integer Parent;
+ string ParentUUID;
 }
 struct ObjectExtension {
  <anyXML> any;
 }
 struct ObjectId {
  integer ObjectId;
+ string UUID;
+}
+struct ObjectState {
+ dateTime CaptureTime;
+}
+struct ObjectTrack {
+ ObjectState ObjectState;
 }
 struct ObjectTree {
  Rename Rename;
@@ -2212,6 +2349,7 @@ struct PTZConfigurationOptions2 {
 struct PTZFilter {
  boolean Status;
  boolean Position;
+ boolean FieldOfView;
 }
 struct PTZMoveStatus {
  MoveStatus PanTilt;
@@ -2347,6 +2485,7 @@ struct PTZStatus {
  PTZMoveStatus MoveStatus;
  string Error;
  dateTime UtcTime;
+ FieldOfView FieldOfView;
  <anyXML> any;
 }
 struct PTZStatusFilterOptions {
@@ -2356,6 +2495,7 @@ struct PTZStatusFilterOptions {
  boolean PanTiltPositionSupported;
  boolean ZoomPositionSupported;
  PTZStatusFilterOptionsExtension Extension;
+ boolean FieldOfViewSupported;
 }
 struct PTZStatusFilterOptionsExtension {
  <anyXML> any;
@@ -2414,17 +2554,6 @@ struct PolygonOptions {
 }
 struct Polyline {
  Vector Point;
-}
-struct PolylineArray {
- Polyline Segment;
- PolylineArrayExtension Extension;
-}
-struct PolylineArrayConfiguration {
- PolylineArray PolylineArray;
- <anyXML> any;
-}
-struct PolylineArrayExtension {
- <anyXML> any;
 }
 struct PoseAngle {
  GeoOrientation PoseAngles;
@@ -2536,7 +2665,16 @@ struct RecordingConfiguration {
  RecordingSourceInformation Source;
  Description Content;
  duration MaximumRetentionTime;
+ RecordingTargetConfiguration Target;
  <anyXML> any;
+}
+struct RecordingEncryption {
+ string KID;
+ hexBinary Key;
+ string Track;
+ AsymmetricEncryption AsymmetricEncryption;
+ <anyXML> any;
+ string Mode;
 }
 struct RecordingEventFilter {
  Filter Filter;
@@ -2612,12 +2750,25 @@ struct RecordingSourceInformation {
  Description Location;
  Description Description;
  anyURI Address;
+ ReferenceToken VideoSourceToken;
  <anyXML> any;
 }
 struct RecordingSummary {
  dateTime DataFrom;
  dateTime DataUntil;
  int NumberRecordings;
+ <anyXML> any;
+}
+struct RecordingTargetConfiguration {
+ ReferenceToken Storage;
+ string Format;
+ string Prefix;
+ string Postfix;
+ duration SpanDuration;
+ duration SegmentDuration;
+ RecordingEncryption Encryption;
+ SegmentDurationOverride SegmentDurationOverride;
+ string StorageStrategy;
  <anyXML> any;
 }
 struct Rectangle {
@@ -2707,6 +2858,7 @@ struct Rotate {
  RotateMode Mode;
  int Degree;
  RotateExtension Extension;
+ boolean Mirror;
 }
 struct RotateExtension {
  <anyXML> any;
@@ -2716,6 +2868,7 @@ struct RotateOptions {
  IntItems DegreeList;
  RotateOptionsExtension Extension;
  boolean Reboot;
+ boolean Mirror;
 }
 struct RotateOptionsExtension {
  <anyXML> any;
@@ -2726,6 +2879,12 @@ struct RuleEngineConfiguration {
 }
 struct RuleEngineConfigurationExtension {
  <anyXML> any;
+}
+struct SRTPPreShared {
+ string SRTPPSK;
+ int ROCExtMapID;
+ <anyXML> any;
+ string SecureStreamingProtocolAlgorithm;
 }
 struct Scarf {
  ColorDescriptor Color;
@@ -2743,6 +2902,8 @@ struct Scope {
 struct SearchCapabilities {
  anyURI XAddr;
  boolean MetadataSearch;
+ boolean NLSearch;
+ boolean ImageSearch;
  <anyXML> any;
 }
 struct SearchScope {
@@ -2774,6 +2935,27 @@ struct SecurityCapabilitiesExtension2 {
  boolean Dot1X;
  int SupportedEAPMethod;
  boolean RemoteUserHandling;
+ <anyXML> any;
+}
+struct SegmentDurationOverride {
+ duration Duration;
+ duration Expiration;
+}
+struct SensorData {
+ string Type;
+ float Value;
+ <anyXML> any;
+ dateTime UtcTime;
+ string SensorID;
+}
+struct SensorDataFilter {
+ string SensorID;
+ string Type;
+ <anyXML> any;
+}
+struct SensorDataFilterOptions {
+ boolean SensorIDFilterSupported;
+ boolean TypeFilterSupported;
  <anyXML> any;
 }
 struct ShapeDescriptor {
@@ -2820,6 +3002,12 @@ struct Space2DDescription {
  anyURI URI;
  FloatRange XRange;
  FloatRange YRange;
+}
+struct SphericalCoordinate {
+ <anyXML> any;
+ float Distance;
+ float ElevationAngle;
+ float AzimuthAngle;
 }
 struct Split {
  ObjectId from;
@@ -3035,7 +3223,10 @@ struct TransformationExtension {
 }
 struct Transport {
  TransportProtocol Protocol;
- Transport Tunnel;
+ Tunnel Tunnel;
+}
+struct Tunnel {
+ <anyXML> any;
 }
 struct Umbrella {
  ColorDescriptor Color;
@@ -3082,7 +3273,12 @@ struct User {
  UserExtension Extension;
 }
 struct UserExtension {
+ StringList Roles;
  <anyXML> any;
+}
+struct UserRole {
+ string Name;
+ StringList Functions;
 }
 struct Vector {
  float x;
@@ -3101,6 +3297,7 @@ struct VehicleInfo {
  StringLikelihood Type;
  StringLikelihood Brand;
  StringLikelihood Model;
+ ColorDescriptor Color;
  <anyXML> any;
 }
 struct VideoAnalyticsConfiguration {
@@ -3141,8 +3338,11 @@ struct VideoEncoder2Configuration {
  float Quality;
  <anyXML> any;
  int GovLength;
+ int AnchorFrameDistance;
  string Profile;
  boolean GuaranteedFrameRate;
+ boolean Signed;
+ string SecureStreamingProtocolAlgorithm;
 }
 struct VideoEncoder2ConfigurationOptions {
  string Encoding;
@@ -3151,10 +3351,14 @@ struct VideoEncoder2ConfigurationOptions {
  IntRange BitrateRange;
  <anyXML> any;
  IntList GovLengthRange;
+ int MaxAnchorFrameDistance;
  FloatList FrameRatesSupported;
  StringAttrList ProfilesSupported;
  boolean ConstantBitRateSupported;
+ boolean AverageBitRateSupported;
  boolean GuaranteedFrameRateSupported;
+ StringAttrList SecureStreamingProtocolAlgorithms;
+ boolean SigningSupported;
 }
 struct VideoEncoderConfiguration {
  VideoEncoding Encoding;
@@ -3211,6 +3415,7 @@ struct VideoRateControl {
 struct VideoRateControl2 {
  float FrameRateLimit;
  int BitrateLimit;
+ int AverageBitRate;
  <anyXML> any;
  boolean ConstantBitRate;
 }
@@ -3266,6 +3471,12 @@ struct VideoSourceExtension {
  VideoSourceExtension2 Extension;
 }
 struct VideoSourceExtension2 {
+ <anyXML> any;
+}
+struct Weapon {
+ string Category;
+ ColorDescriptor Color;
+ string Pose;
  <anyXML> any;
 }
 struct WhiteBalance {
@@ -3350,6 +3561,7 @@ token HwAddress
 token IPv4Address
 token IPv6Address
 union AbsoluteOrRelativeTimeType {,dateTime,duration}
+union Direction {,ExtendedDirection}
 union FaultCodesOpenEnumType {,FaultCodesType,QName}
 union RelationshipTypeOpenEnum {,RelationshipType,anyURI}
 union anonymous {,language,anonymous}

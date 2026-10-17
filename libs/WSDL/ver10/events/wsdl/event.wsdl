@@ -1,24 +1,24 @@
-<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="UTF-8"?>
 <?xml-stylesheet type="text/xsl" href="../../../ver20/util/onvif-wsdl-viewer.xsl"?>
 <!--
 Note that the location of the document has been changed to reflect the namespace. 
-Copyright (c) 2008-2022 by ONVIF: Open Network Video Interface Forum. All rights reserved.
+Copyright (c) 2008-2024 by ONVIF: Open Network Video Interface Forum. All rights reserved.
 
 Recipients of this document may copy, distribute, publish, or display this document so long as this copyright notice, license and disclaimer are retained with all copies of the document. No license is granted to modify this document.
 
 THIS DOCUMENT IS PROVIDED "AS IS," AND THE CORPORATION AND ITS MEMBERS AND THEIR AFFILIATES, MAKE NO REPRESENTATIONS OR WARRANTIES, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO, WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, NON-INFRINGEMENT, OR TITLE; THAT THE CONTENTS OF THIS DOCUMENT ARE SUITABLE FOR ANY PURPOSE; OR THAT THE IMPLEMENTATION OF SUCH CONTENTS WILL NOT INFRINGE ANY PATENTS, COPYRIGHTS, TRADEMARKS OR OTHER RIGHTS.
 IN NO EVENT WILL THE CORPORATION OR ITS MEMBERS OR THEIR AFFILIATES BE LIABLE FOR ANY DIRECT, INDIRECT, SPECIAL, INCIDENTAL, PUNITIVE OR CONSEQUENTIAL DAMAGES, ARISING OUT OF OR RELATING TO ANY USE OR DISTRIBUTION OF THIS DOCUMENT, WHETHER OR NOT (1) THE CORPORATION, MEMBERS OR THEIR AFFILIATES HAVE BEEN ADVISED OF THE POSSIBILITY OF SUCH DAMAGES, OR (2) SUCH DAMAGES WERE REASONABLY FORESEEABLE, AND ARISING OUT OF OR RELATING TO ANY USE OR DISTRIBUTION OF THIS DOCUMENT.  THE FOREGOING DISCLAIMER AND LIMITATION ON LIABILITY DO NOT APPLY TO, INVALIDATE, OR LIMIT REPRESENTATIONS AND WARRANTIES MADE BY THE MEMBERS AND THEIR RESPECTIVE AFFILIATES TO THE CORPORATION AND OTHER MEMBERS IN CERTAIN WRITTEN POLICIES OF THE CORPORATION.
 -->
-<wsdl:definitions xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap12/" xmlns:wsa="http://www.w3.org/2005/08/addressing" xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:wsnt="http://docs.oasis-open.org/wsn/b-2" xmlns:wstop="http://docs.oasis-open.org/wsn/t-1" xmlns:wsntw="http://docs.oasis-open.org/wsn/bw-2" xmlns:tev="http://www.onvif.org/ver10/events/wsdl" xmlns:wsrf-rw="http://docs.oasis-open.org/wsrf/rw-2" xmlns:wsaw="http://www.w3.org/2006/05/addressing/wsdl" xmlns:tns1="http://www.onvif.org/ver10/topics" targetNamespace="http://www.onvif.org/ver10/events/wsdl">
-	<wsdl:import namespace="http://docs.oasis-open.org/wsn/bw-2" location="../../../ver10/schema/bw-2.wsdl"/>
-	<wsdl:import namespace="http://docs.oasis-open.org/wsrf/rw-2" location="../../../ver10/schema/rw-2.wsdl"/>
+<wsdl:definitions xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap12/" xmlns:wsa="http://www.w3.org/2005/08/addressing" xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:wsnt="http://docs.oasis-open.org/wsn/b-2" xmlns:wstop="http://docs.oasis-open.org/wsn/t-1" xmlns:wsntw="http://docs.oasis-open.org/wsn/bw-2" xmlns:tev="http://www.onvif.org/ver10/events/wsdl" xmlns:wsrf-rw="http://docs.oasis-open.org/wsrf/rw-2" xmlns:wsaw="http://www.w3.org/2006/05/addressing/wsdl" targetNamespace="http://www.onvif.org/ver10/events/wsdl">
+	<wsdl:import namespace="http://docs.oasis-open.org/wsn/bw-2" location="../../schema/bw-2.wsdl"/>
+	<wsdl:import namespace="http://docs.oasis-open.org/wsrf/rw-2" location="../../schema/rw-2.wsdl"/>
 	<wsdl:types>
-		<xs:schema targetNamespace="http://www.onvif.org/ver10/events/wsdl" xmlns:wstop="http://docs.oasis-open.org/wsn/t-1" xmlns:wsnt="http://docs.oasis-open.org/wsn/b-2" xmlns:tns1="http://www.onvif.org/ver10/topics" elementFormDefault="qualified" version="22.06">
-			<xs:import namespace="http://www.w3.org/2005/08/addressing" schemaLocation="../../../ver10/schema/ws-addr.xsd"/>
-			<xs:import namespace="http://docs.oasis-open.org/wsn/t-1" schemaLocation="../../../ver10/schema/t-1.xsd"/>
-			<xs:import namespace="http://docs.oasis-open.org/wsn/b-2" schemaLocation="../../../ver10/schema/b-2.xsd"/>
-			<xs:import namespace="http://www.onvif.org/ver10/schema" schemaLocation="../../../ver10/schema/onvif.xsd"/>
-			<xs:import namespace="http://www.onvif.org/ver10/topics" schemaLocation="../../../ver10/schema/onvif.xsd"/>
+		<xs:schema xmlns:wstop="http://docs.oasis-open.org/wsn/t-1" xmlns:wsnt="http://docs.oasis-open.org/wsn/b-2" xmlns:tt="http://www.onvif.org/ver10/schema" xmlns:tns1="http://www.onvif.org/ver10/topics" targetNamespace="http://www.onvif.org/ver10/events/wsdl" elementFormDefault="qualified" version="24.12">
+			<xs:import namespace="http://www.w3.org/2005/08/addressing" schemaLocation="../../schema/ws-addr.xsd"/>
+			<xs:import namespace="http://docs.oasis-open.org/wsn/t-1" schemaLocation="../../schema/t-1.xsd"/>
+			<xs:import namespace="http://docs.oasis-open.org/wsn/b-2" schemaLocation="../../schema/b-2.xsd"/>
+			<xs:import namespace="http://www.onvif.org/ver10/schema" schemaLocation="../../schema/onvif.xsd"/>
+			<xs:import namespace="http://www.onvif.org/ver10/topics" schemaLocation="../../schema/onvif.xsd"/>
 			<!--  Message Request/Responses elements  -->
 			<!--===============================-->
 			<xs:element name="GetServiceCapabilities">
@@ -394,7 +394,7 @@ IN NO EVENT WILL THE CORPORATION OR ITS MEMBERS OR THEIR AFFILIATES BE LIABLE FO
 						<xs:annotation>
 							<xs:documentation>Concrete Topic Expression to select specific metadata topics to publish.</xs:documentation>
 						</xs:annotation>
-					</xs:element>					
+					</xs:element>				
 					<xs:any namespace="##any" processContents="lax" minOccurs="0" maxOccurs="unbounded"/>
 				</xs:sequence>
 				<xs:anyAttribute processContents="lax"/>
@@ -411,9 +411,9 @@ IN NO EVENT WILL THE CORPORATION OR ITS MEMBERS OR THEIR AFFILIATES BE LIABLE FO
 			<!--===============================-->
 			<xs:simpleType name="ConnectionStatus">
 				<xs:restriction base="xs:string">
-					<xs:enumeration value="Offline"></xs:enumeration>
-					<xs:enumeration value="Connecting"></xs:enumeration>
-					<xs:enumeration value="Connected"></xs:enumeration>
+					<xs:enumeration value="Offline"/>
+					<xs:enumeration value="Connecting"/>
+					<xs:enumeration value="Connected"/>
 				</xs:restriction>
 			</xs:simpleType>
 			<!--===============================-->
@@ -558,7 +558,7 @@ IN NO EVENT WILL THE CORPORATION OR ITS MEMBERS OR THEIR AFFILIATES BE LIABLE FO
 				deletion in a uniform way. When a client wants to synchronize its properties with the
 				properties of the device, it can request a synchronization point which repeats the current
 				status of all properties to which a client has subscribed. The PropertyOperation of all
-				produced notifications is set to “Initialized”. The Synchronization Point is
+				produced notifications is set to "Initialized". The Synchronization Point is
 				requested directly from the SubscriptionManager which was returned in either the
 				SubscriptionResponse or in the CreatePullPointSubscriptionResponse. The property update is
 				transmitted via the notification transportation of the notification interface. This method is mandatory.
@@ -570,10 +570,10 @@ IN NO EVENT WILL THE CORPORATION OR ITS MEMBERS OR THEIR AFFILIATES BE LIABLE FO
 			<wsdl:documentation>The device shall provide the following Unsubscribe command for all SubscriptionManager endpoints returned by the CreatePullPointSubscription command.<br/>
 				This command shall terminate the lifetime of a pull point.
 			</wsdl:documentation>
-			<wsdl:input  name="UnsubscribeRequest" message="wsntw:UnsubscribeRequest" />
-			<wsdl:output name="UnsubscribeResponse" message="wsntw:UnsubscribeResponse" />
-			<wsdl:fault  name="ResourceUnknownFault" message="wsrf-rw:ResourceUnknownFault" />
-			<wsdl:fault  name="UnableToDestroySubscriptionFault" message="wsntw:UnableToDestroySubscriptionFault" /> 
+			<wsdl:input name="UnsubscribeRequest" message="wsntw:UnsubscribeRequest"/>
+			<wsdl:output name="UnsubscribeResponse" message="wsntw:UnsubscribeResponse"/>
+			<wsdl:fault name="ResourceUnknownFault" message="wsrf-rw:ResourceUnknownFault"/>
+			<wsdl:fault name="UnableToDestroySubscriptionFault" message="wsntw:UnableToDestroySubscriptionFault"/> 
 		</wsdl:operation>
 	</wsdl:portType>
 	<wsdl:binding name="PullPointSubscriptionBinding" type="tev:PullPointSubscription">
@@ -951,7 +951,6 @@ IN NO EVENT WILL THE CORPORATION OR ITS MEMBERS OR THEIR AFFILIATES BE LIABLE FO
 			</wsdl:fault>
 		</wsdl:operation>
 	</wsdl:binding>
-		<!--===============================-->
 	<wsdl:service name="PullPointSubscriptionService">
 		<wsdl:port name="PullPointSubscriptionPort" binding="tev:PullPointSubscriptionBinding">
 			<soap:address location=""/>
@@ -981,7 +980,7 @@ IN NO EVENT WILL THE CORPORATION OR ITS MEMBERS OR THEIR AFFILIATES BE LIABLE FO
 		<wsdl:port name="PullPointPort" binding="tev:PullPointBinding">
 			<soap:address location=""/>
 		</wsdl:port>
-	</wsdl:service>		
+	</wsdl:service>
 	<wsdl:service name="CreatePullPointService">
 		<wsdl:port name="CreatePullPointPort" binding="tev:CreatePullPointBinding">
 			<soap:address location=""/>
@@ -991,6 +990,5 @@ IN NO EVENT WILL THE CORPORATION OR ITS MEMBERS OR THEIR AFFILIATES BE LIABLE FO
 		<wsdl:port name="PausableSubscriptionManagerPort" binding="tev:PausableSubscriptionManagerBinding">
 			<soap:address location=""/>
 		</wsdl:port>
-	</wsdl:service>	
-	<!--===============================-->	
+	</wsdl:service>
 </wsdl:definitions>

@@ -1,0 +1,80 @@
+{
+    "Source": "https://github.com/onvif/specs",
+    "Tag": "26.06",
+    "Commit": "68ee1b540a40f848c9599eba2c55b87547c588d6",
+    "CommitDate": "2026-08-18",
+    "Generator": "tools/update-wsdl.php",
+    "Rules": {
+        "P1": "wsdl:service/wsdl:port with empty soap:address added for every SOAP 1.2 binding (ext/soap requires a service, the address is set at runtime by the option location)",
+        "P2": "Remote imports (OASIS, W3C) redirected to local copies",
+        "P3": "wsdl:import of another ONVIF service WSDL removed (ext/soap: <message> already defined)",
+        "P4": "event.wsdl: imports for tt and tns1 added, some devices send events with a different namespace",
+        "P5": "event.wsdl: attribute WSPullPointSupport added to tev:Capabilities, it was removed upstream but is evaluated by the IO",
+        "P6": "Elements of a WSDL removed by P3 that are used by wsdl:part (e.g. tds:GetRelayOutputs in deviceio.wsdl) copied into an own xs:schema, otherwise ext/soap sends an empty body"
+    },
+    "Files": {
+        "ver10/device/wsdl/devicemgmt.wsdl": [
+            "P1"
+        ],
+        "ver10/media/wsdl/media.wsdl": [
+            "P1"
+        ],
+        "ver10/events/wsdl/event.wsdl": [
+            "P1",
+            "P2",
+            "P4",
+            "P5"
+        ],
+        "ver20/media/wsdl/media.wsdl": [
+            "P1"
+        ],
+        "ver20/ptz/wsdl/ptz.wsdl": [
+            "P1"
+        ],
+        "ver10/deviceio.wsdl": [
+            "P1",
+            "P3",
+            "P6"
+        ],
+        "ver20/imaging/wsdl/imaging.wsdl": [
+            "P1"
+        ],
+        "ver20/analytics/wsdl/analytics.wsdl": [
+            "P1"
+        ],
+        "ver10/analyticsdevice.wsdl": [
+            "P1"
+        ],
+        "ver10/recording.wsdl": [
+            "P1"
+        ],
+        "ver10/search.wsdl": [
+            "P1"
+        ],
+        "ver10/replay.wsdl": [
+            "P1"
+        ],
+        "ver10/schema/onvif.xsd": [
+            "P2"
+        ],
+        "ver10/schema/metadatastream.xsd": [
+            "P2"
+        ],
+        "ver10/schema/common.xsd": [],
+        "ver20/analytics/humanface.xsd": [],
+        "ver20/analytics/humanbody.xsd": []
+    },
+    "External": [
+        "ver10/schema/b-2.xsd",
+        "ver10/schema/bf-2.xsd",
+        "ver10/schema/bw-2.wsdl",
+        "ver10/schema/include.xsd",
+        "ver10/schema/r-2.xsd",
+        "ver10/schema/rw-2.wsdl",
+        "ver10/schema/soap-envelope.xsd",
+        "ver10/schema/t-1.xsd",
+        "ver10/schema/ws-addr.xsd",
+        "ver10/schema/xml.xsd",
+        "ver10/schema/xmlmime.xsd"
+    ]
+}

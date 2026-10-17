@@ -78,19 +78,18 @@ class ONVIFsoapClient extends \SoapClient
         }
         if (!is_bool($response)) {
             $Parts = explode("\r\n\r\n<?xml", $response);
-            $Headers = explode("\r\n\r\n", array_shift($Parts));
-            $LastHeader = array_pop($Headers);
-            if ($LastHeader == '') {
-                $LastHeader = array_pop($Headers);
-            }
-            $this->__last_response_headers = $LastHeader;
+            $Blocks = explode("\r\n\r\n", array_shift($Parts));
+            // letzter Header-Block; bei Antworten ohne XML folgt dahinter noch ein HTML- oder Text-Body
+            $HeaderBlocks = array_filter($Blocks, fn (string $Block): bool => str_starts_with($Block, 'HTTP/'));
+            $this->__last_response_headers = count($HeaderBlocks) ? end($HeaderBlocks) : (string) end($Blocks);
             if (count($Parts)) {
                 $response = '<?xml' . implode("\r\n\r\n<?xml", $Parts);
             } else {
                 $response = '';
             }
         }
-        if ($http_code > 400) {
+        // HTTP 400 mit SOAP-Fault wertet der SoapClient aus (Meldung des Geräts), ohne XML-Body gibt es nur den HTTP-Status
+        if (($http_code > 400) || (($http_code == 400) && ($response === ''))) {
             throw new \SoapFault('http:' . $http_code, explode("\r\n", $this->__last_response_headers)[0]);
             return null;
         }

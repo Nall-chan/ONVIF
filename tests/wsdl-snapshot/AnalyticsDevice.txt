@@ -40,6 +40,7 @@ list StringList {string}
 list anonymous {QName}
 string AFModes {OnceAfterMove}
 string AudioClassType {gun_shot, scream, glass_breaking, tire_screech}
+string AudioClassification {GunShot, Scream, GlassBreaking, TireScreech, Alarm}
 string AudioEncoding {G711, G726, AAC}
 string AudioEncodingMimeNames {PCMU, G726, MP4A-LATM, mpeg4-generic}
 string AutoFocusMode {AUTO, MANUAL}
@@ -49,7 +50,6 @@ string CapabilityCategory {All, Analytics, Device, Events, Imaging, Media, PTZ}
 string DefoggingMode {OFF, ON, AUTO}
 string Description
 string DigitalIdleState {closed, open}
-string Direction {Left, Right, Any}
 string DiscoveryMode {Discoverable, NonDiscoverable}
 string Dot11AuthAndMangementSuite {None, Dot1X, PSK, Extended}
 string Dot11Cipher {CCMP, TKIP, Any, Extended}
@@ -61,9 +61,11 @@ string Duplex {Full, Half}
 string DynamicDNSType {NoUpdate, ClientUpdates, ServerUpdates}
 string EFlipMode {OFF, ON, Extended}
 string Enabled {ENABLED, DISABLED}
+string EncryptionMode {CENC, CBCS}
 string Entity {Device, VideoSource, AudioSource}
 string ExposureMode {AUTO, MANUAL}
 string ExposurePriority {LowNoise, FrameRate}
+string ExtendedDirection {Left, Right, Any, Entering, Exiting, Approaching, Departing}
 string FactoryDefaultType {Hard, Soft}
 string H264Profile {Baseline, Main, Extended, High}
 string IPAddressFilterType {Allow, Deny}
@@ -102,8 +104,11 @@ string SceneOrientationOption {Below, Horizon, Above}
 string ScopeDefinition {Fixed, Configurable}
 string SearchState {Queued, Searching, Completed, Unknown}
 string SetDateTimeType {Manual, NTP}
+string SrtpSecurityAlgorithms {NONE, AES_CM_128_HMAC_SHA1_80, AEAD_AES_128_GCM, AEAD_AES_256_GCM}
+string StorageStrategy {External, Local, Both}
 string StreamType {RTP-Unicast, RTP-Multicast}
 string SystemLogType {System, Access}
+string TargetFormat {MP4, CMAF}
 string ToneCompensationMode {OFF, ON, AUTO}
 string TrackType {Video, Audio, Metadata, Extended}
 string TransportProtocol {UDP, TCP, RTSP, HTTP}
@@ -219,6 +224,18 @@ struct ArrayOfFileProgress {
 struct ArrayOfFileProgressExtension {
  <anyXML> any;
 }
+struct AspectRatioTransformation {
+ Vector Translate;
+ Vector Scale;
+ <anyXML> any;
+ float ratio;
+}
+struct AsymmetricEncryption {
+ string CertificateID;
+ duration KeyRotationDuration;
+ string AdditionalInfo;
+ <anyXML> any;
+}
 struct AttachmentData {
  Include Include;
  anonymous contentType;
@@ -253,6 +270,13 @@ struct AudioClassDescriptor {
 struct AudioClassDescriptorExtension {
  <anyXML> any;
 }
+struct AudioDecoder2Options {
+ string Encoding;
+ IntItems BitrateList;
+ IntItems SampleRateList;
+ int RTPPayloadType;
+ <anyXML> any;
+}
 struct AudioDecoderConfiguration {
  <anyXML> any;
 }
@@ -271,12 +295,14 @@ struct AudioEncoder2Configuration {
  int Bitrate;
  int SampleRate;
  <anyXML> any;
+ string SecureStreamingProtocolAlgorithm;
 }
 struct AudioEncoder2ConfigurationOptions {
  string Encoding;
  IntItems BitrateList;
  IntItems SampleRateList;
  <anyXML> any;
+ StringAttrList SecureStreamingProtocolAlgorithms;
 }
 struct AudioEncoderConfiguration {
  AudioEncoding Encoding;
@@ -308,6 +334,8 @@ struct AudioOutputConfigurationOptions {
  ReferenceToken OutputTokensAvailable;
  anyURI SendPrimacyOptions;
  IntRange OutputLevelRange;
+ boolean EQPresetScheduleSupport;
+ EQPreset EQPresets;
  <anyXML> any;
 }
 struct AudioSource {
@@ -718,6 +746,15 @@ struct EFlipOptions {
 struct EFlipOptionsExtension {
  <anyXML> any;
 }
+struct EQPreset {
+ ReferenceToken Token;
+ string Name;
+ boolean isDefault;
+ string ScheduleToken;
+ boolean isFrequencyDecibelEditable;
+ FrequencyDecibelPair FrequencyDecibelPair;
+ <anyXML> any;
+}
 struct EapMethodExtension {
  <anyXML> any;
 }
@@ -829,6 +866,10 @@ struct Fault {
 struct FaultCause {
  <anyXML> any;
 }
+struct FieldOfView {
+ float hfov;
+ float vfov;
+}
 struct FileProgress {
  string FileName;
  float Progress;
@@ -863,6 +904,28 @@ struct FindMetadataResult {
 struct FindMetadataResultList {
  SearchState SearchState;
  FindMetadataResult Result;
+}
+struct FindNLSearchResult {
+ string ObjectUUID;
+ anyURI TargetImageURI;
+ dateTime Time;
+ float Similarity;
+ RecordingReference RecordingToken;
+}
+struct FindNLSearchResultList {
+ SearchState SearchState;
+ FindNLSearchResult Result;
+}
+struct FindObjectImageResult {
+ string ObjectUUID;
+ anyURI TargetImageURI;
+ dateTime Time;
+ float Similarity;
+ RecordingReference RecordingToken;
+}
+struct FindObjectImageResultList {
+ SearchState SearchState;
+ FindObjectImageResult Result;
 }
 struct FindPTZPositionResult {
  RecordingReference RecordingToken;
@@ -939,6 +1002,11 @@ struct FocusStatus20 {
  FocusStatus20Extension Extension;
 }
 struct FocusStatus20Extension {
+ <anyXML> any;
+}
+struct FrequencyDecibelPair {
+ int CenterFrequency;
+ float Decibel;
  <anyXML> any;
 }
 struct G711DecOptions {
@@ -1486,20 +1554,24 @@ struct MetadataConfiguration {
  duration SessionTimeout;
  <anyXML> any;
  AnalyticsEngineConfiguration AnalyticsEngineConfiguration;
+ SensorDataFilter SensorData;
  MetadataConfigurationExtension Extension;
  string CompressionType;
  boolean GeoLocation;
  boolean ShapePolygon;
+ string SecureStreamingProtocolAlgorithm;
 }
 struct MetadataConfigurationExtension {
  <anyXML> any;
 }
 struct MetadataConfigurationOptions {
  PTZStatusFilterOptions PTZStatusFilterOptions;
+ SensorDataFilterOptions SensorDataFilterOptions;
  <anyXML> any;
  MetadataConfigurationOptionsExtension Extension;
  boolean GeoLocation;
  int MaxContentFilterSize;
+ StringAttrList SecureStreamingProtocolAlgorithms;
 }
 struct MetadataConfigurationOptionsExtension {
  string CompressionType;
@@ -1563,11 +1635,39 @@ struct Mpeg4Options2 {
  IntRange BitrateRange;
  <anyXML> any;
 }
+struct MulticastAudioDecoderConfiguration {
+ boolean Enable;
+ ReferenceToken AudioOutputToken;
+ string Encoding;
+ int Bitrate;
+ int SamplingRate;
+ MulticastReceiverConfiguration Multicast;
+ int RTPPayloadType;
+ int Priority;
+ string MediaFormatParameters;
+ SRTPPreShared SRTPPreSharedParameters;
+ <anyXML> any;
+}
+struct MulticastAudioDecoderConfigurationOptions {
+ AudioDecoder2Options EncodingOptions;
+ IntRange PriorityRange;
+ StringList AudioOutputTokens;
+ <anyXML> any;
+ StringList SecureStreamingProtocolAlgorithms;
+}
 struct MulticastConfiguration {
  IPAddress Address;
  int Port;
  int TTL;
  boolean AutoStart;
+ <anyXML> any;
+}
+struct MulticastReceiverConfiguration {
+ IPAddress Address;
+ int Port;
+ int TTL;
+ ReferenceToken InterfaceToken;
+ IPAddress SourceSpecificMulticast;
  <anyXML> any;
 }
 struct MultipleTopicsSpecifiedFaultType {
@@ -1866,6 +1966,7 @@ struct PTZConfigurationOptions2 {
 struct PTZFilter {
  boolean Status;
  boolean Position;
+ boolean FieldOfView;
 }
 struct PTZMoveStatus {
  MoveStatus PanTilt;
@@ -2001,6 +2102,7 @@ struct PTZStatus {
  PTZMoveStatus MoveStatus;
  string Error;
  dateTime UtcTime;
+ FieldOfView FieldOfView;
  <anyXML> any;
 }
 struct PTZStatusFilterOptions {
@@ -2010,6 +2112,7 @@ struct PTZStatusFilterOptions {
  boolean PanTiltPositionSupported;
  boolean ZoomPositionSupported;
  PTZStatusFilterOptionsExtension Extension;
+ boolean FieldOfViewSupported;
 }
 struct PTZStatusFilterOptionsExtension {
  <anyXML> any;
@@ -2060,17 +2163,6 @@ struct PolygonOptions {
 }
 struct Polyline {
  Vector Point;
-}
-struct PolylineArray {
- Polyline Segment;
- PolylineArrayExtension Extension;
-}
-struct PolylineArrayConfiguration {
- PolylineArray PolylineArray;
- <anyXML> any;
-}
-struct PolylineArrayExtension {
- <anyXML> any;
 }
 struct PrefixedIPv4Address {
  IPv4Address Address;
@@ -2177,7 +2269,16 @@ struct RecordingConfiguration {
  RecordingSourceInformation Source;
  Description Content;
  duration MaximumRetentionTime;
+ RecordingTargetConfiguration Target;
  <anyXML> any;
+}
+struct RecordingEncryption {
+ string KID;
+ hexBinary Key;
+ string Track;
+ AsymmetricEncryption AsymmetricEncryption;
+ <anyXML> any;
+ string Mode;
 }
 struct RecordingEventFilter {
  Filter Filter;
@@ -2253,12 +2354,25 @@ struct RecordingSourceInformation {
  Description Location;
  Description Description;
  anyURI Address;
+ ReferenceToken VideoSourceToken;
  <anyXML> any;
 }
 struct RecordingSummary {
  dateTime DataFrom;
  dateTime DataUntil;
  int NumberRecordings;
+ <anyXML> any;
+}
+struct RecordingTargetConfiguration {
+ ReferenceToken Storage;
+ string Format;
+ string Prefix;
+ string Postfix;
+ duration SpanDuration;
+ duration SegmentDuration;
+ RecordingEncryption Encryption;
+ SegmentDurationOverride SegmentDurationOverride;
+ string StorageStrategy;
  <anyXML> any;
 }
 struct Rectangle {
@@ -2341,6 +2455,7 @@ struct Rotate {
  RotateMode Mode;
  int Degree;
  RotateExtension Extension;
+ boolean Mirror;
 }
 struct RotateExtension {
  <anyXML> any;
@@ -2350,6 +2465,7 @@ struct RotateOptions {
  IntItems DegreeList;
  RotateOptionsExtension Extension;
  boolean Reboot;
+ boolean Mirror;
 }
 struct RotateOptionsExtension {
  <anyXML> any;
@@ -2360,6 +2476,12 @@ struct RuleEngineConfiguration {
 }
 struct RuleEngineConfigurationExtension {
  <anyXML> any;
+}
+struct SRTPPreShared {
+ string SRTPPSK;
+ int ROCExtMapID;
+ <anyXML> any;
+ string SecureStreamingProtocolAlgorithm;
 }
 struct SceneOrientation {
  SceneOrientationMode Mode;
@@ -2372,6 +2494,8 @@ struct Scope {
 struct SearchCapabilities {
  anyURI XAddr;
  boolean MetadataSearch;
+ boolean NLSearch;
+ boolean ImageSearch;
  <anyXML> any;
 }
 struct SearchScope {
@@ -2403,6 +2527,20 @@ struct SecurityCapabilitiesExtension2 {
  boolean Dot1X;
  int SupportedEAPMethod;
  boolean RemoteUserHandling;
+ <anyXML> any;
+}
+struct SegmentDurationOverride {
+ duration Duration;
+ duration Expiration;
+}
+struct SensorDataFilter {
+ string SensorID;
+ string Type;
+ <anyXML> any;
+}
+struct SensorDataFilterOptions {
+ boolean SensorIDFilterSupported;
+ boolean TypeFilterSupported;
  <anyXML> any;
 }
 struct SetAnalyticsEngineControl {
@@ -2452,6 +2590,12 @@ struct Space2DDescription {
  anyURI URI;
  FloatRange XRange;
  FloatRange YRange;
+}
+struct SphericalCoordinate {
+ <anyXML> any;
+ float Distance;
+ float ElevationAngle;
+ float AzimuthAngle;
 }
 struct StorageReferencePath {
  ReferenceToken StorageToken;
@@ -2652,7 +2796,10 @@ struct TransformationExtension {
 }
 struct Transport {
  TransportProtocol Protocol;
- Transport Tunnel;
+ Tunnel Tunnel;
+}
+struct Tunnel {
+ <anyXML> any;
 }
 struct UnableToCreatePullPointFaultType {
 }
@@ -2694,7 +2841,12 @@ struct User {
  UserExtension Extension;
 }
 struct UserExtension {
+ StringList Roles;
  <anyXML> any;
+}
+struct UserRole {
+ string Name;
+ StringList Functions;
 }
 struct Vector {
  float x;
@@ -2739,8 +2891,11 @@ struct VideoEncoder2Configuration {
  float Quality;
  <anyXML> any;
  int GovLength;
+ int AnchorFrameDistance;
  string Profile;
  boolean GuaranteedFrameRate;
+ boolean Signed;
+ string SecureStreamingProtocolAlgorithm;
 }
 struct VideoEncoder2ConfigurationOptions {
  string Encoding;
@@ -2749,10 +2904,14 @@ struct VideoEncoder2ConfigurationOptions {
  IntRange BitrateRange;
  <anyXML> any;
  IntList GovLengthRange;
+ int MaxAnchorFrameDistance;
  FloatList FrameRatesSupported;
  StringAttrList ProfilesSupported;
  boolean ConstantBitRateSupported;
+ boolean AverageBitRateSupported;
  boolean GuaranteedFrameRateSupported;
+ StringAttrList SecureStreamingProtocolAlgorithms;
+ boolean SigningSupported;
 }
 struct VideoEncoderConfiguration {
  VideoEncoding Encoding;
@@ -2809,6 +2968,7 @@ struct VideoRateControl {
 struct VideoRateControl2 {
  float FrameRateLimit;
  int BitrateLimit;
+ int AverageBitRate;
  <anyXML> any;
  boolean ConstantBitRate;
 }
@@ -2948,6 +3108,7 @@ token HwAddress
 token IPv4Address
 token IPv6Address
 union AbsoluteOrRelativeTimeType {,dateTime,duration}
+union Direction {,ExtendedDirection}
 union FaultCodesOpenEnumType {,FaultCodesType,QName}
 union RelationshipTypeOpenEnum {,RelationshipType,anyURI}
 union anonymous {,language,anonymous}

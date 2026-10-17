@@ -9,9 +9,9 @@ THIS DOCUMENT IS PROVIDED "AS IS," AND THE CORPORATION AND ITS MEMBERS AND THEIR
 IN NO EVENT WILL THE CORPORATION OR ITS MEMBERS OR THEIR AFFILIATES BE LIABLE FOR ANY DIRECT, INDIRECT, SPECIAL, INCIDENTAL, PUNITIVE OR CONSEQUENTIAL DAMAGES, ARISING OUT OF OR RELATING TO ANY USE OR DISTRIBUTION OF THIS DOCUMENT, WHETHER OR NOT (1) THE CORPORATION, MEMBERS OR THEIR AFFILIATES HAVE BEEN ADVISED OF THE POSSIBILITY OF SUCH DAMAGES, OR (2) SUCH DAMAGES WERE REASONABLY FORESEEABLE, AND ARISING OUT OF OR RELATING TO ANY USE OR DISTRIBUTION OF THIS DOCUMENT.  THE FOREGOING DISCLAIMER AND LIMITATION ON LIABILITY DO NOT APPLY TO, INVALIDATE, OR LIMIT REPRESENTATIONS AND WARRANTIES MADE BY THE MEMBERS AND THEIR RESPECTIVE AFFILIATES TO THE CORPORATION AND OTHER MEMBERS IN CERTAIN WRITTEN POLICIES OF THE CORPORATION.
 -->
 <wsdl:definitions xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap12/" xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:tds="http://www.onvif.org/ver10/device/wsdl" xmlns:tmd="http://www.onvif.org/ver10/deviceIO/wsdl" targetNamespace="http://www.onvif.org/ver10/deviceIO/wsdl">
-	<!--<wsdl:import namespace="http://www.onvif.org/ver10/device/wsdl" location="../ver10/device/wsdl/devicemgmt.wsdl"/>-->
+	<!-- update-wsdl P3: wsdl:import of ver10/device/wsdl/devicemgmt.wsdl removed -->
 	<wsdl:types>
-		<xs:schema targetNamespace="http://www.onvif.org/ver10/deviceIO/wsdl" xmlns:tt="http://www.onvif.org/ver10/schema" xmlns:xs="http://www.w3.org/2001/XMLSchema" elementFormDefault="qualified" version="21.06">
+		<xs:schema xmlns:tt="http://www.onvif.org/ver10/schema" xmlns:xs="http://www.w3.org/2001/XMLSchema" targetNamespace="http://www.onvif.org/ver10/deviceIO/wsdl" elementFormDefault="qualified" version="21.06">
 			<xs:import namespace="http://www.onvif.org/ver10/schema" schemaLocation="../ver10/schema/onvif.xsd"/>
 			<!--===============================-->
 			<xs:element name="GetServiceCapabilities">
@@ -786,6 +786,37 @@ IN NO EVENT WILL THE CORPORATION OR ITS MEMBERS OR THEIR AFFILIATES BE LIABLE FO
 				</xs:sequence>
 			</xs:complexType>
 		</xs:schema>
+		<xs:schema xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap12/" xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/" xmlns:tds="http://www.onvif.org/ver10/device/wsdl" xmlns:tt="http://www.onvif.org/ver10/schema" targetNamespace="http://www.onvif.org/ver10/device/wsdl" elementFormDefault="qualified" version="26.06">
+			<xs:import namespace="http://www.onvif.org/ver10/schema" schemaLocation="schema/onvif.xsd"/>
+			<!-- update-wsdl P6: copied from ver10/device/wsdl/devicemgmt.wsdl -->
+			<xs:element name="GetRelayOutputs">
+				<xs:complexType>
+					<xs:sequence>
+					</xs:sequence>
+				</xs:complexType>
+			</xs:element>
+			<xs:element name="GetRelayOutputsResponse">
+				<xs:complexType>
+					<xs:sequence>
+						<xs:element name="RelayOutputs" type="tt:RelayOutput" minOccurs="0" maxOccurs="unbounded"/>
+					</xs:sequence>
+				</xs:complexType>
+			</xs:element>
+			<xs:element name="SetRelayOutputState">
+				<xs:complexType>
+					<xs:sequence>
+						<xs:element name="RelayOutputToken" type="tt:ReferenceToken" minOccurs="1" maxOccurs="1"/>
+						<xs:element name="LogicalState" type="tt:RelayLogicalState" minOccurs="1" maxOccurs="1"/>
+					</xs:sequence>
+				</xs:complexType>
+			</xs:element>
+			<xs:element name="SetRelayOutputStateResponse">
+				<xs:complexType>
+					<xs:sequence>
+					</xs:sequence>
+				</xs:complexType>
+			</xs:element>
+		</xs:schema>
 	</wsdl:types>
 	<wsdl:message name="GetServiceCapabilitiesRequest">
 		<wsdl:part name="parameters" element="tmd:GetServiceCapabilities"/>
@@ -974,7 +1005,7 @@ IN NO EVENT WILL THE CORPORATION OR ITS MEMBERS OR THEIR AFFILIATES BE LIABLE FO
 					<li>
 					1) Device supports range PT1S to PT120S:
 					<pre>
-&lt;tmd:RelayOutputOptions token=&apos;44&apos;&gt;
+&lt;tmd:RelayOutputOptions token='44'&gt;
   &lt;tmd:Mode&gt;Monostable&lt;/tmd:Mode&gt;
   &lt;tmd:DelayTimes&gt;1 120&lt;/tmd:DelayTimes&gt;
 &lt;/tmd:RelayOutputOptions&gt;
@@ -983,7 +1014,7 @@ IN NO EVENT WILL THE CORPORATION OR ITS MEMBERS OR THEIR AFFILIATES BE LIABLE FO
 					<li>
 					2) Device supports values PT0.5S, PT1S, PT2s and PT1M:
 					<pre>
-&lt;tmd:RelayOutputOptions token=&apos;123&apos;&gt;
+&lt;tmd:RelayOutputOptions token='123'&gt;
   &lt;tmd:Mode&gt;Monostable&lt;/tmd:Mode&gt;
   &lt;tmd:DelayTimes&gt;0.5 1 2 60&lt;/tmd:DelayTimes&gt;
   &lt;tmd:Discrete&gt;True&lt;/tmd:Discrete&gt;
@@ -1411,11 +1442,9 @@ IN NO EVENT WILL THE CORPORATION OR ITS MEMBERS OR THEIR AFFILIATES BE LIABLE FO
 			</wsdl:output>
 		</wsdl:operation>
 	</wsdl:binding>
-	<!--===============================-->
 	<wsdl:service name="DeviceIOService">
 		<wsdl:port name="DeviceIOPort" binding="tmd:DeviceIOBinding">
 			<soap:address location=""/>
 		</wsdl:port>
 	</wsdl:service>
-	<!--===============================-->
 </wsdl:definitions>

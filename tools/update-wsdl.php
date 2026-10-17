@@ -49,6 +49,7 @@ class Rule
     public const RemoveServiceImport = 'P3';
     public const EventNamespaces = 'P4';
     public const EventPullPointSupport = 'P5';
+    public const CopyImportedElements = 'P6';
 
     public const Descriptions = [
         self::AddService            => 'wsdl:service/wsdl:port with empty soap:address added for every SOAP 1.2 binding (ext/soap requires a service, the address is set at runtime by the option location)',
@@ -56,6 +57,7 @@ class Rule
         self::RemoveServiceImport   => 'wsdl:import of another ONVIF service WSDL removed (ext/soap: <message> already defined)',
         self::EventNamespaces       => 'event.wsdl: imports for tt and tns1 added, some devices send events with a different namespace',
         self::EventPullPointSupport => 'event.wsdl: attribute WSPullPointSupport added to tev:Capabilities, it was removed upstream but is evaluated by the IO',
+        self::CopyImportedElements  => 'Elements of a WSDL removed by P3 that are used by wsdl:part (e.g. tds:GetRelayOutputs in deviceio.wsdl) copied into an own xs:schema, otherwise ext/soap sends an empty body',
     ];
 }
 
@@ -229,9 +231,14 @@ class WsdlGenerator
             if (in_array($Target, self::ExternalFiles, true) || !$this->isServiceWsdl($Target)) {
                 continue;
             }
+            $Namespace = $Import->getAttribute('namespace');
             $Comment = $Dom->createComment(' update-wsdl ' . Rule::RemoveServiceImport . ': wsdl:import of ' . $Target . ' removed ');
             $Import->parentNode->replaceChild($Comment, $Import);
             $Applied[Rule::RemoveServiceImport] = true;
+            // P6: Elemente aus der entfernten WSDL, auf die Nachrichten dieser Datei verweisen, übernehmen
+            if ($this->copyReferencedElements($Dom, $XPath, $Path, $Target, $Namespace)) {
+                $Applied[Rule::CopyImportedElements] = true;
+            }
         }
 
         if ($Path === \ONVIF\WSDL::Event) {
@@ -319,6 +326,97 @@ class WsdlGenerator
     {
         $XPath = self::createXPath(self::loadDom($this->readSource($Path), $Path));
         return $XPath->query('/wsdl:definitions/wsdl:binding')->length > 0;
+    }
+
+    /**
+     * P6: Kopiert die Elemente (und davon abhängige Typen) des Namensraums $Namespace aus der WSDL $Source,
+     * auf die wsdl:part dieser Datei verweisen, in ein eigenes xs:schema in wsdl:types.
+     */
+    private function copyReferencedElements(\DOMDocument $Dom, \DOMXPath $XPath, string $Path, string $Source, string $Namespace): bool
+    {
+        $Queue = [];
+        foreach ($XPath->query('/wsdl:definitions/wsdl:message/wsdl:part[@element]') as $Part) {
+            /** @var \DOMElement $Part */
+            [$Prefix, $Name] = self::splitQName($Part->getAttribute('element'));
+            if ($Part->lookupNamespaceURI($Prefix) === $Namespace) {
+                $Queue[] = ['element', $Name];
+            }
+        }
+        if (!count($Queue)) {
+            return false;
+        }
+        $SourceXPath = self::createXPath(self::loadDom($this->readSource($Source), $Source));
+        $SourceSchema = $SourceXPath->query('/wsdl:definitions/wsdl:types/xs:schema[@targetNamespace="' . $Namespace . '"]')->item(0);
+        if (!$SourceSchema instanceof \DOMElement) {
+            throw new \RuntimeException('Schema ' . $Namespace . ' not found in ' . $Source);
+        }
+        // Elemente und Typen dieses Namensraums rekursiv einsammeln, in der Reihenfolge der Quelle
+        $Found = [];
+        while (count($Queue)) {
+            [$Kind, $Name] = array_shift($Queue);
+            if (isset($Found[$Kind . ':' . $Name])) {
+                continue;
+            }
+            $Query = ($Kind === 'element') ? 'xs:element[@name="' . $Name . '"]' : '*[(local-name()="complexType" or local-name()="simpleType") and @name="' . $Name . '"]';
+            $Node = $SourceXPath->query($Query, $SourceSchema)->item(0);
+            if (!$Node instanceof \DOMElement) {
+                throw new \RuntimeException($Kind . ' ' . $Name . ' not found in ' . $Source);
+            }
+            $Found[$Kind . ':' . $Name] = $Node;
+            foreach ($SourceXPath->query('descendant-or-self::*/@type | descendant-or-self::*/@base | descendant-or-self::xs:element/@ref', $Node) as $Attribute) {
+                /** @var \DOMAttr $Attribute */
+                [$Prefix, $Reference] = self::splitQName($Attribute->value);
+                if ($Attribute->ownerElement->lookupNamespaceURI($Prefix) === $Namespace) {
+                    $Queue[] = [($Attribute->name === 'ref') ? 'element' : 'type', $Reference];
+                }
+            }
+        }
+        $Nodes = array_values($Found);
+        usort($Nodes, fn (\DOMElement $A, \DOMElement $B): int => $A->getLineNo() <=> $B->getLineNo());
+
+        $Types = $XPath->query('/wsdl:definitions/wsdl:types')->item(0);
+        if (!$Types instanceof \DOMElement) {
+            throw new \RuntimeException('wsdl:types not found in ' . $Path);
+        }
+        $XsdPrefix = $SourceSchema->prefix ?: 'xs';
+        $Before = ($Types->lastChild instanceof \DOMText) ? $Types->lastChild : null;
+        $Schema = self::insertElement($Types, $Before, XmlNS::Xsd, $XsdPrefix . ':schema', [], "\t\t");
+        // Präfixe in Attributwerten (z. B. tt:RelayOutput) brauchen dieselben Deklarationen wie in der Quelle
+        foreach ($SourceXPath->query('namespace::*', $SourceSchema) as $NamespaceNode) {
+            /** @var \DOMNameSpaceNode $NamespaceNode */
+            if (($NamespaceNode->prefix === 'xml') || ($NamespaceNode->prefix === '') || ($NamespaceNode->prefix === $XsdPrefix)) {
+                continue;
+            }
+            $Schema->setAttributeNS(XmlNS::Xmlns, 'xmlns:' . $NamespaceNode->prefix, $NamespaceNode->namespaceURI);
+        }
+        foreach (['targetNamespace', 'elementFormDefault', 'version'] as $Attribute) {
+            if ($SourceSchema->hasAttribute($Attribute)) {
+                $Schema->setAttribute($Attribute, $SourceSchema->getAttribute($Attribute));
+            }
+        }
+        foreach ($SourceXPath->query('xs:import[@schemaLocation]', $SourceSchema) as $SourceImport) {
+            /** @var \DOMElement $SourceImport */
+            $Location = trim($SourceImport->getAttribute('schemaLocation'));
+            $Location = isset(self::RemoteToLocal[$Location]) ? self::RemoteToLocal[$Location] : self::resolve($Source, $Location);
+            self::insertElement($Schema, null, XmlNS::Xsd, $XsdPrefix . ':import', ['namespace' => $SourceImport->getAttribute('namespace'), 'schemaLocation' => self::relativePath($Path, $Location)], "\t\t\t");
+        }
+        $Schema->appendChild($Dom->createTextNode("\n\t\t\t"));
+        $Schema->appendChild($Dom->createComment(' update-wsdl ' . Rule::CopyImportedElements . ': copied from ' . $Source . ' '));
+        foreach ($Nodes as $Node) {
+            $Schema->appendChild($Dom->createTextNode("\n\t\t\t"));
+            $Schema->appendChild($Dom->importNode($Node, true));
+        }
+        self::closeElement($Schema, "\t\t");
+        return true;
+    }
+
+    /**
+     * @return string[] [Präfix, lokaler Name]
+     */
+    private static function splitQName(string $QName): array
+    {
+        $Parts = explode(':', trim($QName), 2);
+        return count($Parts) === 2 ? $Parts : ['', $Parts[0]];
     }
 
     /**
