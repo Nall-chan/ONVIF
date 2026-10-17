@@ -11,6 +11,16 @@ eval('declare(strict_types=1);namespace ONVIFModuleBase {?>' . file_get_contents
 require_once __DIR__ . '/wsdl.php';
 
 /**
+ * Basisklasse der ONVIF-Gerätemodule, die über die IO-Instanz kommunizieren.
+ *
+ * @project       ONVIFModuleBase
+ * @file          ONVIFModuleBase.php
+ * @package       ONVIF
+ * @author        Michael Tröger <nall4chan@gmail.com>
+ * @copyright     2026 Michael Tröger
+ * @license       Custom Non-Commercial Share-Alike License (see LICENSE)
+ * @version       2.60
+ *
  * @property int $ParentID
  * @property string $EventTopic
  * @method void RegisterAttributeArray(string $name, mixed $Value, int $Size = 0)

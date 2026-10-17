@@ -6,6 +6,14 @@ namespace ONVIF
 {
     /**
      * WSDL Files
+     *
+     * @project       ONVIF
+     * @file          wsdl.php
+     * @package       ONVIF
+     * @author        Michael Tröger <nall4chan@gmail.com>
+     * @copyright     2026 Michael Tröger
+     * @license       Custom Non-Commercial Share-Alike License (see LICENSE)
+     * @version       2.60
      */
     class WSDL
     {

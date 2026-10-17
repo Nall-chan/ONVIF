@@ -10,6 +10,14 @@ namespace ONVIF\Tools;
  * Der Generator (tools/update-wsdl.php) schreibt sie nach tests/wsdl-snapshot/,
  * der Unit-Test (tests/WSDLTest.php) vergleicht sie. Der Git-Diff der Snapshots zeigt
  * bei einem Update der WSDL, welche Funktionen und Typen sich geändert haben.
+ *
+ * @project       ONVIF
+ * @file          WsdlSnapshot.php
+ * @package       ONVIF
+ * @author        Michael Tröger <nall4chan@gmail.com>
+ * @copyright     2026 Michael Tröger
+ * @license       Custom Non-Commercial Share-Alike License (see LICENSE)
+ * @version       2.60
  */
 class WsdlSnapshot
 {

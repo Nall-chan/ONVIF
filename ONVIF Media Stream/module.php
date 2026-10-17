@@ -5,6 +5,16 @@ declare(strict_types=1);
 require_once __DIR__ . '/../libs/ONVIFModuleBase.php';
 
 /**
+ * Videostream und PTZ-Steuerung eines ONVIF-Geräts.
+ *
+ * @project       ONVIFMediaStream
+ * @file          module.php
+ * @package       ONVIF
+ * @author        Michael Tröger <nall4chan@gmail.com>
+ * @copyright     2026 Michael Tröger
+ * @license       Custom Non-Commercial Share-Alike License (see LICENSE)
+ * @version       2.60
+ *
  * @property string $PTZ_token
  * @property string $PTZ_xAddr
  * @property array $PTZ_Presets

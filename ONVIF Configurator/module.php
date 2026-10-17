@@ -4,6 +4,17 @@ declare(strict_types=1);
 
 require_once dirname(__DIR__) . '/libs/ONVIFModuleBase.php';
 
+/**
+ * Konfigurator für ein ONVIF-Gerät, legt die Instanzen für Stream, Bilder, Ein-/Ausgänge, Ereignisse und Aufzeichnungen an.
+ *
+ * @project       ONVIFConfigurator
+ * @file          module.php
+ * @package       ONVIF
+ * @author        Michael Tröger <nall4chan@gmail.com>
+ * @copyright     2026 Michael Tröger
+ * @license       Custom Non-Commercial Share-Alike License (see LICENSE)
+ * @version       2.60
+ */
 class ONVIFConfigurator extends ONVIFModuleBase
 {
     public const wsdl = \ONVIF\WSDL::Management;

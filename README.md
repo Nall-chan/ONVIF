@@ -1,7 +1,7 @@
 [![SDK](https://img.shields.io/badge/Symcon-PHPModul-red.svg)](https://www.symcon.de/service/dokumentation/entwicklerbereich/sdk-tools/sdk-php/)
 [![Module Version](https://img.shields.io/badge/dynamic/json?url=https%3A%2F%2Fraw.githubusercontent.com%2FNall-chan%2FONVIF%2Frefs%2Fheads%2Fmaster%2Flibrary.json&query=%24.version&label=Modul%20Version&color=blue)](https://community.symcon.de/t/modul-onvif-profil-s-fuer-ip-kameras-und-encoder/52036)
 [![Symcon Version](https://img.shields.io/badge/dynamic/json?url=https%3A%2F%2Fraw.githubusercontent.com%2FNall-chan%2FONVIF%2Frefs%2Fheads%2Fmaster%2Flibrary.json&query=%24.compatibility.version&suffix=%3E&label=Symcon%20Version&color=green)](https://www.symcon.de/de/service/dokumentation/installation/migrationen/v80-v81-q3-2025/)  
-[![License](https://img.shields.io/badge/License-CC%20BY--NC--SA%204.0-green.svg)](https://creativecommons.org/licenses/by-nc-sa/4.0/)
+[![License](https://img.shields.io/badge/License-Custom--NC--SA-green.svg)](#6-lizenz)
 [![Check Style](https://github.com/Nall-chan/ONVIF/workflows/Check%20Style/badge.svg)](https://github.com/Nall-chan/ONVIF/actions)
 [![Run Tests](https://github.com/Nall-chan/ONVIF/workflows/Run%20Tests/badge.svg)](https://github.com/Nall-chan/ONVIF/actions)  
 [![PayPal.Me](https://img.shields.io/badge/PayPal-Me-lightblue.svg)](#3-spenden)[![Wunschliste](https://img.shields.io/badge/Wunschliste-Amazon-ff69fb.svg)](#3-spenden)  
@@ -24,6 +24,7 @@ Einbinden von ONVIF kompatiblen Geräten in IPS.
   - [2. Changelog](#2-changelog)
   - [3. Spenden](#3-spenden)
 - [6. Lizenz](#6-lizenz)
+  - [Fremde Quellen](#fremde-quellen)
 
 ----------
 
@@ -36,7 +37,7 @@ Einbinden von ONVIF kompatiblen Geräten in IPS.
 > Vielmehr liegt der Schwerpunkt auf eine einfache und unkomplizierte Integration bestimmter Bestandteile (LiveStream, Steuerung) und Funktionen (Events, Digital Ein-/Ausgänge) in Symcon.  
 > Dadurch ist es auch möglich Geräte in Symcon einzubinden welche ihrerseits die Spezifikationen nicht vollständig oder nicht korrekt umsetzen.  
 > Dennoch wird geprüft ob Geräte sich nicht an verpflichtende Funktionen halten und diese als Popup in der Konfiguration der IO-Instanzen gemeldet.  
-> Dies ist kein Fehler, sondern ein beabsichtigtes Verhalten.  
+> **Dies ist kein Fehler, sondern ein beabsichtigtes Verhalten.**  
 
 ----------
 
@@ -333,4 +334,28 @@ Für das Discovery werden Pakete über die Multicast-Adresse `239.255.255.250` a
 ## 6. Lizenz
 
   IPS-Modul:  
-  [CC BY-NC-SA 4.0](https://creativecommons.org/licenses/by-nc-sa/4.0/)  
+  [Custom NC-SA](LICENSE)  
+
+### Fremde Quellen
+
+Die WSDL- und Schema-Dateien unter `libs/WSDL` stammen nicht vom Autor dieser Library und unterliegen den Lizenzen ihrer Herausgeber. Die Copyright- und Lizenzhinweise in den Dateiköpfen bleiben erhalten.  
+Die ONVIF-Dateien werden mit `tools/update-wsdl.php` aus einem Release von [onvif/specs](https://github.com/onvif/specs) übernommen und für den PHP-SoapClient angepasst; Release und Anpassungen stehen in `libs/WSDL/VERSION.json`.  
+
+**Disclaimer regarding ONVIF WSDL files**  
+
+The WSDL and XSD files included in this repository are derived from the official ONVIF specifications but have been modified and adapted for compatibility with this library's custom PHP SoapClient wrapper.  
+
+These files are not official, unmodified ONVIF specifications.  
+
+This project is an independent open-source wrapper and is not officially affiliated with, endorsed by, or certified by ONVIF (Axis Communications, Bosch, Sony).  
+
+All original ONVIF copyrights and trademarks remain with their respective owners.  
+
+| Dateien | Herausgeber | Copyright | Lizenz |
+| ------- | ----------- | --------- | ------ |
+| ONVIF-Dienste und -Schemas (alle Dateien unter `libs/WSDL` außer den folgenden) | [ONVIF](https://www.onvif.org/) | © 2008–2026 ONVIF | Lizenzhinweis im Dateikopf (Kopieren, Verbreiten, Veröffentlichen und Anzeigen erlaubt, solange Copyright, Lizenz und Haftungsausschluss erhalten bleiben) |
+| WS-BaseNotification und WS-Topics (`ver10/schema/b-2.xsd`, `bw-2.wsdl`, `t-1.xsd`) | [OASIS](https://docs.oasis-open.org/wsn/) | © OASIS Open 2004–2006 | OASIS-Copyright-Hinweis im Dateikopf |
+| WS-BaseFaults und WS-Resource (`ver10/schema/bf-2.xsd`, `r-2.xsd`, `rw-2.wsdl`) | [OASIS](https://docs.oasis-open.org/wsrf/) | © OASIS Open 2005 | OASIS-Copyright-Hinweis im Dateikopf |
+| WS-Addressing und XML Media Types (`ver10/schema/ws-addr.xsd`, `xmlmime.xsd`) | [W3C](https://www.w3.org/) | © 2005 W3C | [W3C Software License](https://www.w3.org/Consortium/Legal/2002/copyright-software-20021231) |
+| SOAP 1.2 Envelope (`ver10/schema/soap-envelope.xsd`) | [W3C](https://www.w3.org/) | © 2003 W3C | [W3C Software License](https://www.w3.org/Consortium/Legal/copyright-software-19980720) |
+| XML-Namensraum und XOP Include (`ver10/schema/xml.xsd`, `include.xsd`) | [W3C](https://www.w3.org/) | W3C | kein Lizenzhinweis in der Datei, Quelle [xml.xsd](https://www.w3.org/2001/xml.xsd) und [XOP Include](https://www.w3.org/2004/08/xop/include) |

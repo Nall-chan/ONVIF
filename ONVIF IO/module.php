@@ -10,6 +10,16 @@ require_once dirname(__DIR__) . '/libs/wsdl.php';
 require_once dirname(__DIR__) . '/libs/ONVIF.inc.php';
 
 /**
+ * IO-Instanz für die Kommunikation mit einem ONVIF-Gerät (SOAP-Anfragen und Ereignisse).
+ *
+ * @project       ONVIFIO
+ * @file          module.php
+ * @package       ONVIF
+ * @author        Michael Tröger <nall4chan@gmail.com>
+ * @copyright     2026 Michael Tröger
+ * @license       Custom Non-Commercial Share-Alike License (see LICENSE)
+ * @version       2.60
+ *
  * @property string $Host
  * @property string $MyIP
  * @property integer $MyPort

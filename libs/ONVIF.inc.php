@@ -4,6 +4,17 @@ declare(strict_types=1);
 
 namespace ONVIF;
 
+/**
+ * SoapClient mit HTTP-Transport über cURL (Digest-Authentifizierung, Mitschnitt der HTTP-Header).
+ *
+ * @project       ONVIF
+ * @file          ONVIF.inc.php
+ * @package       ONVIF
+ * @author        Michael Tröger <nall4chan@gmail.com>
+ * @copyright     2026 Michael Tröger
+ * @license       Custom Non-Commercial Share-Alike License (see LICENSE)
+ * @version       2.60
+ */
 class ONVIFsoapClient extends \SoapClient
 {
     private string $User;
@@ -15,16 +26,8 @@ class ONVIFsoapClient extends \SoapClient
     public function __construct(string $wsdl, array $options = [])
     {
         parent::__construct($wsdl, $options);
-        if (isset($options['login'])) {
-            $this->User = $options['login'];
-        } else {
-            $this->User = '';
-        }
-        if (isset($options['password'])) {
-            $this->Pass = $options['password'];
-        } else {
-            $this->User = '';
-        }
+        $this->User = $options['login'] ?? '';
+        $this->Pass = $options['password'] ?? '';
         $this->Options = $options;
         $this->__last_request_headers = null;
         $this->__last_response_headers = null;
@@ -97,6 +100,17 @@ class ONVIFsoapClient extends \SoapClient
     }
 }
 
+/**
+ * Erzeugt den SoapClient für einen ONVIF-Dienst und den WS-Security-Header.
+ *
+ * @project       ONVIF
+ * @file          ONVIF.inc.php
+ * @package       ONVIF
+ * @author        Michael Tröger <nall4chan@gmail.com>
+ * @copyright     2026 Michael Tröger
+ * @license       Custom Non-Commercial Share-Alike License (see LICENSE)
+ * @version       2.60
+ */
 class ONVIF
 {
     public ONVIFsoapClient $client;

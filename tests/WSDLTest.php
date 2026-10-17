@@ -11,11 +11,20 @@ require_once __DIR__ . '/../tools/WsdlSnapshot.php';
 
 /**
  * Prüft die WSDL-Dateien unter libs/WSDL (erzeugt mit tools/update-wsdl.php).
+ *
+ * @project       ONVIF
+ * @file          WSDLTest.php
+ * @package       ONVIF
+ * @author        Michael Tröger <nall4chan@gmail.com>
+ * @copyright     2026 Michael Tröger
+ * @license       Custom Non-Commercial Share-Alike License (see LICENSE)
+ * @version       2.60
  */
 class WSDLTest extends TestCase
 {
     private const WsdlDir = __DIR__ . '/../libs/WSDL';
     private const SnapshotDir = __DIR__ . '/wsdl-snapshot';
+    private const ModificationMarker = 'has been modified from the original ONVIF specification';
 
     /**
      * SOAP-Funktionen, die die Module über SendData aufrufen.
@@ -88,6 +97,21 @@ class WSDLTest extends TestCase
             }
         }
         $this->assertSame([], $Remote, 'libs/WSDL must not load schemas from the network');
+    }
+
+    public function testModifiedFilesCarryNotice(): void
+    {
+        $VersionFile = self::WsdlDir . '/VERSION.json';
+        $this->assertFileExists($VersionFile, 'libs/WSDL/VERSION.json missing, run tools/update-wsdl.php');
+        $Version = json_decode((string) file_get_contents($VersionFile), true);
+        $Wrong = [];
+        foreach ($Version['Files'] as $Path => $Rules) {
+            $HasNotice = str_contains((string) file_get_contents(self::WsdlDir . '/' . $Path), self::ModificationMarker);
+            if ($HasNotice !== (count($Rules) > 0)) {
+                $Wrong[] = $Path . (count($Rules) ? ': modified, notice missing' : ': unmodified, notice present');
+            }
+        }
+        $this->assertSame([], $Wrong, 'Modification notice (tools/update-wsdl.php) does not match the applied rules');
     }
 
     private function requireSoap(): void

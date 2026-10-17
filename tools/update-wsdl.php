@@ -21,6 +21,14 @@ declare(strict_types=1);
  *
  * Die Dateien unterliegen der Lizenz der jeweiligen Herausgeber (ONVIF, OASIS, W3C); die Kopfzeilen
  * mit Copyright und Lizenz bleiben beim Anpassen erhalten.
+ *
+ * @project       ONVIF
+ * @file          update-wsdl.php
+ * @package       ONVIF
+ * @author        Michael Tröger <nall4chan@gmail.com>
+ * @copyright     2026 Michael Tröger
+ * @license       Custom Non-Commercial Share-Alike License (see LICENSE)
+ * @version       2.60
  */
 
 namespace ONVIF\Tools;
@@ -102,6 +110,16 @@ class WsdlGenerator
         'ver10/schema/xml.xsd',
         'ver10/schema/xmlmime.xsd',
     ];
+
+    /**
+     * Hinweis in jeder angepassten Datei (der Lizenzhinweis von ONVIF erlaubt keine Änderungen)
+     */
+    public const ModificationNotice = "\n" .
+        '  NOTE: This WSDL file has been modified from the original ONVIF specification' . "\n" .
+        '  specifically to ensure compatibility with the custom PHP cURL SoapClient implementation' . "\n" .
+        '  in this library (https://github.com/Nall-chan/ONVIF).' . "\n" .
+        '  These are NOT official, unmodified ONVIF standard files, and this project is' . "\n" .
+        '  not affiliated with, endorsed by, or certified by ONVIF.' . "\n";
 
     private const OnvifSchema = 'ver10/schema/onvif.xsd';
 
@@ -265,6 +283,7 @@ class WsdlGenerator
         }
 
         if (count($Applied)) {
+            $this->addModificationNotice($Dom);
             $Content = $Dom->saveXML();
             if (str_contains($Raw, "\r\n")) {
                 $Content = str_replace("\n", "\r\n", $Content);
@@ -326,6 +345,15 @@ class WsdlGenerator
     {
         $XPath = self::createXPath(self::loadDom($this->readSource($Path), $Path));
         return $XPath->query('/wsdl:definitions/wsdl:binding')->length > 0;
+    }
+
+    /**
+     * Fügt den Modifikationshinweis als Kommentar vor dem Wurzelelement ein,
+     * also hinter dem Copyright- und Lizenzkopf von ONVIF, der unverändert bleibt.
+     */
+    private function addModificationNotice(\DOMDocument $Dom): void
+    {
+        $Dom->insertBefore($Dom->createComment(self::ModificationNotice), $Dom->documentElement);
     }
 
     /**

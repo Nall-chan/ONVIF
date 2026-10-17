@@ -4,6 +4,16 @@ declare(strict_types=1);
 
 require_once __DIR__ . '/../libs/ONVIFModuleBase.php';
 /**
+ * Aufzeichnungen (Recording-Jobs) eines ONVIF-Geräts.
+ *
+ * @project       ONVIFRecording
+ * @file          module.php
+ * @package       ONVIF
+ * @author        Michael Tröger <nall4chan@gmail.com>
+ * @copyright     2026 Michael Tröger
+ * @license       Custom Non-Commercial Share-Alike License (see LICENSE)
+ * @version       2.60
+ *
  * @property array $Capabilities
  */
 class ONVIFRecording extends ONVIFModuleBase
