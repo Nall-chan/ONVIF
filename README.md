@@ -163,10 +163,6 @@ Für das Discovery werden Pakete über die Multicast-Adresse `239.255.255.250` a
 > Neue IO-Instanzen prüfen das HTTPS-Zertifikat des Geräts. Bestehende Instanzen behalten das bisherige Verhalten (keine Prüfung), die Option `HTTPS-Zertifikat prüfen` kann in der Konfiguration des IO eingeschaltet werden. Geräte mit selbstsignierten Zertifikaten müssen dann ggf. ohne Prüfung betrieben werden.  
 > Die Adresse des Ereignis-Hooks (jetzt `/hook/ONVIF/<Instanz-ID>/<Token>`) enthält nun ein geheimes Token und ändert sich dadurch. Sie wird beim Update automatisch neu am Gerät angemeldet. Wurde die Adresse manuell an anderer Stelle eingetragen (z.B. Portweiterleitung mit Pfadprüfung), muss sie dort angepasst werden.  
 
-**Neue Funktionen und Aktionen**
-
-- Digital Output, Recording: Testcenter in der Konfiguration  
-
 **Sicherheit**  
 
 - Discovery: Antworten von Geräten werden streng geprüft, manipulierte Antworten im Netzwerk konnten Code in Symcon einschleusen. Geräte dürfen weiterhin per IP-Adresse oder DNS-Namen gemeldet werden  
