@@ -157,6 +157,28 @@ Für das Discovery werden Pakete über die Multicast-Adresse `239.255.255.250` a
 
 ### 2. Changelog
 
+**Version 2.61**  
+
+> [!IMPORTANT]
+> Neue IO-Instanzen prüfen das HTTPS-Zertifikat des Geräts. Bestehende Instanzen behalten das bisherige Verhalten (keine Prüfung), die Option `HTTPS-Zertifikat prüfen` kann in der Konfiguration des IO eingeschaltet werden. Geräte mit selbstsignierten Zertifikaten müssen dann ggf. ohne Prüfung betrieben werden.  
+> Die Adresse des Ereignis-Hooks (jetzt `/hook/ONVIF/<Instanz-ID>/<Token>`) enthält nun ein geheimes Token und ändert sich dadurch. Sie wird beim Update automatisch neu am Gerät angemeldet. Wurde die Adresse manuell an anderer Stelle eingetragen (z.B. Portweiterleitung mit Pfadprüfung), muss sie dort angepasst werden.  
+
+**Neue Funktionen und Aktionen**
+
+- Digital Output, Recording: Testcenter in der Konfiguration  
+
+**Sicherheit**  
+
+- Discovery: Antworten von Geräten werden streng geprüft, manipulierte Antworten im Netzwerk konnten Code in Symcon einschleusen. Geräte dürfen weiterhin per IP-Adresse oder DNS-Namen gemeldet werden  
+- IO: Option `HTTPS-Zertifikat prüfen` (für neue Instanzen aktiv), gilt auch für den Snapshot-Abruf des Image Grabbers  
+- IO: Der Ereignis-Hook akzeptiert nur noch Nachrichten mit dem geheimen Token in der Adresse  
+- Zugangsdaten werden nicht mehr im Debug angezeigt (Discovery, Image Grabber, Media Stream, HTTP-Header der SOAP-Anfragen)  
+- Image Grabber: Zugangsdaten sind nicht mehr Teil der Snapshot-Adresse  
+
+**Fehlerbehebungen**
+
+- Recording: Aufzeichnungsjobs, deren Token Zeichen wie `-` enthalten (z.B. `Cam1Rec0-1`), wurden wegen eines ungültigen Idents nicht als Statusvariable angelegt  
+
 **Version 2.60**  
 
 - Die Beschreibungen der ONVIF-Dienste (WSDL) wurden auf den Stand ONVIF 26.06 aktualisiert  

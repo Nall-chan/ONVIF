@@ -9,6 +9,7 @@ eval('declare(strict_types=1);namespace ONVIFModuleBase {?>' . file_get_contents
 eval('declare(strict_types=1);namespace ONVIFModuleBase {?>' . file_get_contents(__DIR__ . '/../libs/helper/ParentIOHelper.php') . '}');
 eval('declare(strict_types=1);namespace ONVIFModuleBase {?>' . file_get_contents(__DIR__ . '/../libs/helper/AttributeArrayHelper.php') . '}');
 require_once __DIR__ . '/wsdl.php';
+require_once __DIR__ . '/Security.php';
 
 /**
  * Basisklasse der ONVIF-Gerätemodule, die über die IO-Instanz kommunizieren.
@@ -19,7 +20,7 @@ require_once __DIR__ . '/wsdl.php';
  * @author        Michael Tröger <nall4chan@gmail.com>
  * @copyright     2026 Michael Tröger
  * @license       Custom Non-Commercial Share-Alike License (see LICENSE)
- * @version       2.60
+ * @version       2.61
  *
  * @property int $ParentID
  * @property string $EventTopic
@@ -235,6 +236,11 @@ class ONVIFModuleBase extends IPSModuleStrict
         ];
     }
 
+    /**
+     * Liest Zugangsdaten und die Zertifikatsprüfung vom übergeordneten IO.
+     *
+     * @return array Schlüssel Username, Password (string) und VerifyCertificate (bool).
+     */
     protected function GetCredentials(): array
     {
         if ($this->ParentID > 0) {
@@ -245,10 +251,10 @@ class ONVIFModuleBase extends IPSModuleStrict
                     $this->SendDebug('GetCredentials', 'No valid answer', 0);
                     throw new Exception($this->Translate('No valid answer.'), E_USER_NOTICE);
                 }
-                return unserialize($answer);
+                return unserialize($answer, ['allowed_classes' => false]);
             }
         }
-        return ['Username' => '', 'Password' => ''];
+        return ['Username' => '', 'Password' => '', 'VerifyCertificate' => true];
     }
     protected function GetUrl(): string
     {

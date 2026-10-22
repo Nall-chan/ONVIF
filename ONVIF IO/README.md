@@ -57,6 +57,7 @@ Diese Instanz wird automatisch angelegt, wenn im ['Discovery-Modul'](../ONVIF%20
 | Address                         | Adresse                          | string  | URL von dem Gerät (z.B. `http://192.168.1.111:8080`)                   |
 | Username                        | Benutzername                     | string  | Benutzername für die Anmeldung                                         |
 | Password                        | Passwort                         | string  | Passwort zum Benutzernamen                                             |
+| VerifyCertificate               | HTTPS-Zertifikat prüfen          | bool    | true prüft bei `https` das Zertifikat des Geräts (neue Instanzen: true, bestehende: false) |
 | EventHandler                    | Ereignisse verarbeiten           | Bitmask | Bit0: Subscribe, Bit1: PullPoint                                       |
 | WebHookIP                       | Experteneinstellung (Abonnieren) | string  | IP Adresse unter welcher IPS von dem Gerät aus erreichbar ist          |
 | WebHookPort                     | Experteneinstellung (Abonnieren) | int     | Port unter welchem IPS von dem Gerät aus erreichbar ist (3777)         |
@@ -85,6 +86,12 @@ Die IP-Adresse des `Ereignis-Hook` wird automatisch ermittelt, je nachdem über 
 > [!CAUTION]
 > **Bei der Nutzung von NAT:**  
 > Es müssen die [Spezialschalter](https://www.symcon.de/service/dokumentation/entwicklerbereich/spezialschalter/) `NATSupport` und `NATPublicIP` von Symcon korrekt eingestellt werden</span>  
+
+Die Adresse des `Ereignis-Hook` (`/hook/ONVIF/<Instanz-ID>/<Token>`) enthält ein zufälliges, geheimes Token, welches der IO selbst erzeugt und dauerhaft speichert. Nachrichten an den Hook ohne dieses Token werden mit 404 abgelehnt.  
+Die Adresse ist bewusst kurz gehalten: Manche Geräte (z.B. Bosch) kürzen sie auf 64 Zeichen und senden dann keine Ereignisse. Bei einer sehr langen `IP für Ereignis-Hook` (z.B. langer DNS-Name) kann das passieren, der IO weist dann im Debug darauf hin.  
+
+> [!IMPORTANT]
+> Geräte mit selbstsigniertem Zertifikat können nur mit ausgeschalteter Option `HTTPS-Zertifikat prüfen` angesprochen werden. Dann ist die Verbindung nicht gegen Manipulation geschützt.
 
 Sollte es nötig sein, so können bei Bedarf die eigene IP und der Port, sowie die Verwendung von https anstatt http, in den  `Experteneinstellungen (Ereignisse abonnieren)` geändert und fixiert werden.
 

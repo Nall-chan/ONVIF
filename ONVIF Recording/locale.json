@@ -3,6 +3,7 @@
         "de": {
             "Events of recording": "Ereignisse für die Aufzeichnung",
             "Emulate Status": "Status simulieren",
+            "Recording job not found.": "Aufzeichnungsjob nicht gefunden.",
             "Configuration is valid": "Konfiguration ist gültig",
             "Event missing": "Ereignis fehlt",
             "Event not valid": "Ereignis ist nicht gültig",

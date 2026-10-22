@@ -13,7 +13,7 @@ require_once __DIR__ . '/../libs/ONVIFModuleBase.php';
  * @author        Michael Tröger <nall4chan@gmail.com>
  * @copyright     2026 Michael Tröger
  * @license       Custom Non-Commercial Share-Alike License (see LICENSE)
- * @version       2.60
+ * @version       2.61
  *
  * @property string $PTZ_token
  * @property string $PTZ_xAddr
@@ -1367,7 +1367,7 @@ class ONVIFMediaStream extends ONVIFModuleBase
             $Uri['pass'] = $Credentials['Password'];
         }
         $MediaURL = self::unparse_url($Uri);
-        $this->SendDebug('MediaURL', $MediaURL, 0);
+        $this->SendDebug('MediaURL', \ONVIF\Security::MaskUrl($MediaURL), 0);
         return $MediaURL;
     }
 

@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace ONVIF;
 
+require_once __DIR__ . '/Security.php';
+
 /**
  * SoapClient mit HTTP-Transport über cURL (Digest-Authentifizierung, Mitschnitt der HTTP-Header).
  *
@@ -13,7 +15,7 @@ namespace ONVIF;
  * @author        Michael Tröger <nall4chan@gmail.com>
  * @copyright     2026 Michael Tröger
  * @license       Custom Non-Commercial Share-Alike License (see LICENSE)
- * @version       2.60
+ * @version       2.61
  */
 class ONVIFsoapClient extends \SoapClient
 {
@@ -35,7 +37,8 @@ class ONVIFsoapClient extends \SoapClient
 
     public function __getLastRequestHeaders(): ?string
     {
-        return $this->__last_request_headers;
+        // Authorization-Header (Basic enthält das Passwort) nie ungeschützt für Debug-Ausgaben liefern
+        return ($this->__last_request_headers === null) ? null : Security::MaskHeaders($this->__last_request_headers);
     }
 
     public function __getLastResponseHeaders(): ?string
@@ -56,8 +59,9 @@ class ONVIFsoapClient extends \SoapClient
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
         curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
         curl_setopt($ch, CURLOPT_TIMEOUT, $this->Options['connection_timeout']);
-        curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
-        curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, 0);
+        $Verify = (bool) ($this->Options['verify_certificate'] ?? false);
+        curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, $Verify);
+        curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, $Verify ? 2 : 0);
         curl_setopt($ch, CURLOPT_POST, true);
         curl_setopt($ch, CURLOPT_POSTFIELDS, $request);
         curl_setopt($ch, CURLOPT_HTTP_VERSION, CURL_HTTP_VERSION_1_1);
@@ -109,13 +113,13 @@ class ONVIFsoapClient extends \SoapClient
  * @author        Michael Tröger <nall4chan@gmail.com>
  * @copyright     2026 Michael Tröger
  * @license       Custom Non-Commercial Share-Alike License (see LICENSE)
- * @version       2.60
+ * @version       2.61
  */
 class ONVIF
 {
     public ONVIFsoapClient $client;
 
-    public function __construct(string $wsdl, string $service, ?string $username = null, ?string $password = null, array $Headers = [], int $Timeout = 5)
+    public function __construct(string $wsdl, string $service, ?string $username = null, ?string $password = null, array $Headers = [], int $Timeout = 5, bool $VerifyCertificate = false)
     {
         $Options = [
             'trace'              => true,
@@ -125,7 +129,8 @@ class ONVIF
             'user_agent'         => 'Symcon ONVIF-Lib by Nall-chan',
             'keep_alive'         => false,
             'soap_version'       => SOAP_1_2,
-            'location'           => $service
+            'location'           => $service,
+            'verify_certificate' => $VerifyCertificate
         ];
         if (($username != null) || ($password != null)) {
             $username = $username ?? '';

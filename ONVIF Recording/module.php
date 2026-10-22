@@ -12,7 +12,7 @@ require_once __DIR__ . '/../libs/ONVIFModuleBase.php';
  * @author        Michael Tröger <nall4chan@gmail.com>
  * @copyright     2026 Michael Tröger
  * @license       Custom Non-Commercial Share-Alike License (see LICENSE)
- * @version       2.60
+ * @version       2.61
  *
  * @property array $Capabilities
  */
@@ -69,7 +69,7 @@ class ONVIFRecording extends ONVIFModuleBase
         if ($EventSourceIndex === false) {
             return '';
         }
-        $Ident = 'JobState' . $Data['Sources'][$EventSourceIndex]['Value'];
+        $Ident = $this->GetJobIdent((string) $Data['Sources'][$EventSourceIndex]['Value']);
         $Name = 'JobState:' . $Data['Sources'][$EventSourceIndex]['Value'];
         $DataName = $EventProperty['Data'][$SourceIndex]['Name'];
         $EventDataIndex = array_search($DataName, array_column($Data['DataValues'], 'Name'));
@@ -92,9 +92,12 @@ class ONVIFRecording extends ONVIFModuleBase
 
     public function SetRecordingJobMode(string $Ident, bool $State): bool
     {
-        if (stripos($Ident, 'JobState') === 0) {
-            $JobToken = substr($Ident, 8);
-        } else {
+        if (stripos($Ident, 'JobState') !== 0) {
+            return false;
+        }
+        $JobToken = $this->GetJobToken($Ident);
+        if ($JobToken === null) {
+            trigger_error($this->Translate('Recording job not found.'), E_USER_NOTICE);
             return false;
         }
         $Capabilities = $this->Capabilities;
@@ -105,7 +108,7 @@ class ONVIFRecording extends ONVIFModuleBase
         $SetRecordingJobModeResult = $this->SendData($Capabilities['XAddr'][\ONVIF\NS::Recording], 'SetRecordingJobMode', true, $Params);
         if ($SetRecordingJobModeResult) {
             if (($this->ReadPropertyBoolean(\ONVIF\Output\Property::EmulateStatus))) {
-                $Ident = 'JobState' . $JobToken;
+                $Ident = $this->GetJobIdent($JobToken);
                 $Name = 'JobState:' . $JobToken;
                 $this->RegisterVariableBoolean(
                     $Ident,
@@ -181,7 +184,7 @@ class ONVIFRecording extends ONVIFModuleBase
             return false;
         }
         $Value = $GetRecordingJobStateResult->State->State;
-        $Ident = 'JobState' . $JobToken;
+        $Ident = $this->GetJobIdent($JobToken);
         $Name = 'JobState:' . $JobToken;
         $this->RegisterVariableBoolean(
             $Ident,
@@ -194,6 +197,51 @@ class ONVIFRecording extends ONVIFModuleBase
         $this->EnableAction($Ident);
         $this->SetValueBoolean($Ident, (strtolower($Value) == 'active'));
         return true;
+    }
+
+    /**
+     * Erzeugt den Ident der Statusvariable eines Recording-Jobs.
+     *
+     * Idents dürfen nur Buchstaben, Zahlen und '_' enthalten, Tokens der Geräte aber z.B. auch '-'.
+     * Bestehende Idents (Token nur aus Buchstaben, Zahlen und '_') bleiben unverändert.
+     * Bei anderen Zeichen werden diese entfernt und ein Hash des Tokens angehängt, damit der Ident eindeutig bleibt.
+     *
+     * @param string $JobToken Token des Recording-Jobs.
+     *
+     * @return string Gültiger Ident.
+     */
+    protected function GetJobIdent(string $JobToken): string
+    {
+        if (preg_match('/^[A-Za-z0-9_]+$/', $JobToken)) {
+            return 'JobState' . $JobToken;
+        }
+        return 'JobState' . preg_replace('/[^A-Za-z0-9_]/', '', $JobToken) . substr(md5($JobToken), 0, 8);
+    }
+
+    /**
+     * Ermittelt das Token eines Recording-Jobs aus dem Ident der Statusvariable.
+     *
+     * @param string $Ident Ident der Statusvariable.
+     *
+     * @return ?string Token oder null, wenn das Gerät keinen passenden Job meldet.
+     */
+    protected function GetJobToken(string $Ident): ?string
+    {
+        $Capabilities = $this->Capabilities;
+        $RecordingJobsResult = $this->SendData($Capabilities['XAddr'][\ONVIF\NS::Recording], 'GetRecordingJobs', true);
+        if (is_bool($RecordingJobsResult)) {
+            return null;
+        }
+        $RecordingJobs = json_decode(json_encode($RecordingJobsResult->JobItem), true);
+        if (isset($RecordingJobs['JobToken'])) {
+            $RecordingJobs = [$RecordingJobs];
+        }
+        foreach ((array) $RecordingJobs as $RecordingJob) {
+            if ($this->GetJobIdent((string) $RecordingJob['JobToken']) === $Ident) {
+                return (string) $RecordingJob['JobToken'];
+            }
+        }
+        return null;
     }
 
 }

@@ -12,7 +12,7 @@ require_once __DIR__ . '/../libs/ONVIFModuleBase.php';
  * @author        Michael Tröger <nall4chan@gmail.com>
  * @copyright     2026 Michael Tröger
  * @license       Custom Non-Commercial Share-Alike License (see LICENSE)
- * @version       2.60
+ * @version       2.61
  *
  * @property string $ImageURL
  */
@@ -50,7 +50,17 @@ class ONVIFImageGrabber extends ONVIFModuleBase
         curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 2);
         curl_setopt($ch, CURLOPT_TIMEOUT_MS, 5000);
         curl_setopt($ch, CURLOPT_HTTPAUTH, CURLAUTH_BASIC | CURLAUTH_DIGEST);
-        $this->SendDebug('Request Image', $URL, 0);
+        // Zertifikatsprüfung wie im IO eingestellt
+        $Credentials = $this->GetCredentials();
+        $Verify = (bool) ($Credentials['VerifyCertificate'] ?? true);
+        curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, $Verify);
+        curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, $Verify ? 2 : 0);
+        // Zugangsdaten nie Teil der URL (und damit nie im Debug), sondern getrennt an cURL übergeben
+        if (($Credentials['Username'] != '') || ($Credentials['Password'] != '')) {
+            curl_setopt($ch, CURLOPT_USERNAME, $Credentials['Username']);
+            curl_setopt($ch, CURLOPT_PASSWORD, $Credentials['Password']);
+        }
+        $this->SendDebug('Request Image', \ONVIF\Security::MaskUrl($URL), 0);
         $Result = curl_exec($ch);
         $http_code = curl_getinfo($ch, CURLINFO_RESPONSE_CODE);
         $Error = curl_error($ch);
@@ -427,12 +437,8 @@ class ONVIFImageGrabber extends ONVIFModuleBase
             $Uri = parse_url($SnapshotUriResult['MediaUri']['Uri']);
         }
 
-        $Credentials = $this->GetCredentials();
         $Uri['host'] = parse_url($this->GetUrl(), PHP_URL_HOST);
-        if (($Credentials['Username'] != '') || ($Credentials['Password'] != '')) {
-            $Uri['user'] = $Credentials['Username'];
-            $Uri['pass'] = $Credentials['Password'];
-        }
+        unset($Uri['user'], $Uri['pass']);
         $MediaURL = self::unparse_url($Uri);
         $this->SendDebug('MediaURL', $MediaURL, 0);
         return $MediaURL;

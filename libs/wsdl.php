@@ -13,7 +13,7 @@ namespace ONVIF
      * @author        Michael Tröger <nall4chan@gmail.com>
      * @copyright     2026 Michael Tröger
      * @license       Custom Non-Commercial Share-Alike License (see LICENSE)
-     * @version       2.60
+     * @version       2.61
      */
     class WSDL
     {
@@ -220,6 +220,7 @@ namespace ONVIF\IO
         public const Address = 'Address';
         public const Username = 'Username';
         public const Password = 'Password';
+        public const VerifyCertificate = 'VerifyCertificate';
         public const EventHandler = 'EventHandler';
         public const WebHookIP = 'WebHookIP';
         public const WebHookHTTPS = 'WebHookHTTPS';
@@ -232,6 +233,7 @@ namespace ONVIF\IO
     }
     class Attribute
     {
+        public const HookToken = 'HookToken';
         public const VideoSources = 'VideoSources';
         public const AudioSources = 'AudioSources';
         public const VideoSourcesJPEG = 'VideoSourcesJPEG';

@@ -13,7 +13,7 @@ require_once __DIR__ . '/../libs/ONVIFModuleBase.php';
  * @author        Michael Tröger <nall4chan@gmail.com>
  * @copyright     2026 Michael Tröger
  * @license       Custom Non-Commercial Share-Alike License (see LICENSE)
- * @version       2.60
+ * @version       2.61
  */
 class ONVIFDigitalInput extends ONVIFModuleBase
 {

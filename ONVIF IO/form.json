@@ -46,6 +46,11 @@
             ]
         },
         {
+            "type": "CheckBox",
+            "name": "VerifyCertificate",
+            "caption": "Verify HTTPS certificate"
+        },
+        {
             "type": "Select",
             "name": "EventHandler",
             "caption": "Event handling",

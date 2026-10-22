@@ -18,7 +18,7 @@ require_once dirname(__DIR__) . '/libs/ONVIF.inc.php';
  * @author        Michael Tröger <nall4chan@gmail.com>
  * @copyright     2026 Michael Tröger
  * @license       Custom Non-Commercial Share-Alike License (see LICENSE)
- * @version       2.60
+ * @version       2.61
  *
  * @property string $Host
  * @property string $MyIP
@@ -43,6 +43,21 @@ class ONVIFIO extends IPSModuleStrict
     use \ONVIFIO\BufferHelper;
     use \ONVIFIO\AttributeArrayHelper;
     use \ONVIFIO\Semaphore;
+    /**
+     * Maximale Größe einer empfangenen Ereignis-Nachricht in Bytes.
+     */
+    protected const MaxEventSize = 1048576;
+
+    /**
+     * Länge des geheimen Tokens in der Hook-Adresse (Hex-Zeichen).
+     * Kurz gehalten, da z.B. Bosch-Kameras die Adresse für Ereignisse auf 64 Zeichen kürzen.
+     */
+    protected const HookTokenLength = 16;
+
+    /**
+     * Länge der Hook-Adresse, ab der manche Geräte sie abschneiden.
+     */
+    protected const MaxConsumerAddressLength = 64;
     protected $lastSOAPError = '';
 
     public function Create(): void
@@ -53,6 +68,7 @@ class ONVIFIO extends IPSModuleStrict
         $this->RegisterPropertyString(\ONVIF\IO\Property::Address, '');
         $this->RegisterPropertyString(\ONVIF\IO\Property::Username, '');
         $this->RegisterPropertyString(\ONVIF\IO\Property::Password, '');
+        $this->RegisterPropertyBoolean(\ONVIF\IO\Property::VerifyCertificate, true);
         $this->RegisterPropertyInteger(\ONVIF\IO\Property::EventHandler, \ONVIF\EventHandler::Automatic);
         $this->RegisterPropertyString(\ONVIF\IO\Property::WebHookIP, '');
         $this->RegisterPropertyBoolean(\ONVIF\IO\Property::WebHookHTTPS, false);
@@ -85,6 +101,7 @@ class ONVIFIO extends IPSModuleStrict
         $this->RegisterAttributeBoolean(\ONVIF\IO\Attribute::WSSubscriptionPolicySupport, false);
         $this->RegisterAttributeBoolean(\ONVIF\IO\Attribute::WSPullPointSupport, false);
         $this->RegisterAttributeString(\ONVIF\IO\Attribute::ConsumerAddress, '');
+        $this->RegisterAttributeString(\ONVIF\IO\Attribute::HookToken, '');
         $this->RegisterAttributeString(\ONVIF\IO\Attribute::SubscriptionReference, '');
         $this->RegisterAttributeString(\ONVIF\IO\Attribute::SubscriptionId, '');
         $this->RegisterAttributeInteger(\ONVIF\IO\Attribute::CapabilitiesVersion, 0);
@@ -132,6 +149,19 @@ class ONVIFIO extends IPSModuleStrict
         }
     }
 
+    /**
+     * Interne Funktion des SDK.
+     * Bestehende Instanzen behalten das bisherige Verhalten (Zertifikat wird nicht geprüft), neue Instanzen prüfen es.
+     */
+    public function Migrate(string $JSONData): string
+    {
+        $j = json_decode($JSONData);
+        if (isset($j->configuration) && !isset($j->configuration->VerifyCertificate)) {
+            $j->configuration->VerifyCertificate = false;
+        }
+        return json_encode($j);
+    }
+
     public function ApplyChanges(): void
     {
         if ($this->GetStatus() == IS_ACTIVE) { // block childs
@@ -143,9 +173,15 @@ class ONVIFIO extends IPSModuleStrict
         }
         //Never delete this line!
         parent::ApplyChanges();
+        // Geheimer Teil der Ereignis-URL, schützt den Hook vor gefälschten Ereignissen
+        if (strlen($this->ReadAttributeString(\ONVIF\IO\Attribute::HookToken)) != self::HookTokenLength) {
+            $this->WriteAttributeString(\ONVIF\IO\Attribute::HookToken, bin2hex(random_bytes(self::HookTokenLength / 2)));
+        }
         if (IPS_GetKernelRunlevel() != KR_READY) {
             return;
         }
+        // Hook-Name aus früheren Versionen entfernen
+        $this->UnregisterHook('ONVIFEvents/IO/' . $this->InstanceID);
         $this->StartConnection();
     }
 
@@ -185,6 +221,7 @@ class ONVIFIO extends IPSModuleStrict
         if ($Data['Function'] == 'GetCredentials') {
             $Credentials[\ONVIF\IO\Property::Username] = $this->ReadPropertyString(\ONVIF\IO\Property::Username);
             $Credentials[\ONVIF\IO\Property::Password] = $this->ReadPropertyString(\ONVIF\IO\Property::Password);
+            $Credentials[\ONVIF\IO\Property::VerifyCertificate] = $this->ReadPropertyBoolean(\ONVIF\IO\Property::VerifyCertificate);
             return serialize($Credentials);
         }
         if ($Data['Function'] == 'GetEvents') {
@@ -360,20 +397,20 @@ class ONVIFIO extends IPSModuleStrict
         $EventHandler = $this->ReadPropertyInteger(\ONVIF\IO\Property::EventHandler);
         switch ($EventHandler) {
             case \ONVIF\EventHandler::None:
-                $Form['elements'][4]['visible'] = false;
                 $Form['elements'][5]['visible'] = false;
+                $Form['elements'][6]['visible'] = false;
                 break;
             case \ONVIF\EventHandler::Subscribe:
-                $Form['elements'][4]['visible'] = true;
-                $Form['elements'][5]['visible'] = false;
+                $Form['elements'][5]['visible'] = true;
+                $Form['elements'][6]['visible'] = false;
                 break;
             case \ONVIF\EventHandler::PullPoint:
-                $Form['elements'][4]['visible'] = false;
-                $Form['elements'][5]['visible'] = true;
+                $Form['elements'][5]['visible'] = false;
+                $Form['elements'][6]['visible'] = true;
                 break;
             case \ONVIF\EventHandler::Automatic:
-                $Form['elements'][4]['visible'] = true;
                 $Form['elements'][5]['visible'] = true;
+                $Form['elements'][6]['visible'] = true;
                 break;
         }
         if ($this->GetStatus() == IS_ACTIVE) {
@@ -825,10 +862,10 @@ class ONVIFIO extends IPSModuleStrict
                 } else {
                     //WSSubscription
                     if ($AllowedEventHandler == \ONVIF\EventHandler::PullPoint) {
-                        $this->UnregisterHook('ONVIFEvents/IO/' . $this->InstanceID);
+                        $this->UnregisterHook($this->GetHookName());
                         IPS_RunScriptText('IPS_Sleep(1000);IPS_RequestAction(' . $this->InstanceID . ',"CreatePullPointSubscription",true);');
                     } else {
-                        $this->RegisterHook('ONVIFEvents/IO/' . $this->InstanceID);
+                        $this->RegisterHook($this->GetHookName());
                         if ($this->GetConsumerAddress()) { // yeah, we can receive events
                             IPS_RunScriptText('IPS_Sleep(1000);IPS_RequestAction(' . $this->InstanceID . ',"Subscribe",true);');
                         } else { // we cannot receive events :(
@@ -1047,8 +1084,12 @@ class ONVIFIO extends IPSModuleStrict
             }
             $Debug = 'ConsumerAddress';
         }
-        $Url = ($this->MyHTTPS ? 'https://' : 'http://') . $ip . ':' . $this->MyPort . '/hook/ONVIFEvents/IO/' . $this->InstanceID;
-        $this->SendDebug($Debug, $Url, 0);
+        $Token = $this->ReadAttributeString(\ONVIF\IO\Attribute::HookToken);
+        $Url = ($this->MyHTTPS ? 'https://' : 'http://') . $ip . ':' . $this->MyPort . '/hook/' . $this->GetHookName() . '/' . $Token;
+        if (strlen($Url) > self::MaxConsumerAddressLength) {
+            $this->SendDebug('ConsumerAddress', $this->Translate('The address of the event hook is too long, some devices cut it off and send no events.'), 0);
+        }
+        $this->SendDebug($Debug, str_replace($Token, '***', $Url), 0);
         $this->UpdateFormField('EventHookRow', 'visible', true);
         $this->UpdateFormField('EventHook', 'caption', $Url);
         $this->WriteAttributeString(\ONVIF\IO\Attribute::ConsumerAddress, $Url);
@@ -2115,7 +2156,7 @@ class ONVIFIO extends IPSModuleStrict
         $this->SendDebug('Send URI', $URI, 0);
         $this->SendDebug('Send wsdl', $wsdl, 0);
         $this->SendDebug('Send Function', $Function, 0);
-        $this->SendDebug('Send Params', $Params, 0);
+        $this->SendDebug('Send Params', $this->MaskHookToken($Params), 0);
         $wsdl = dirname(__DIR__) . '/libs/WSDL/' . $wsdl;
         if ($UseLogin) {
             if ($this->Profile->HasProfile(\ONVIF\Profile::S) || ($Function == 'GetScopes')) { // Nur Profile S Geräte können WSSecurity
@@ -2123,9 +2164,9 @@ class ONVIFIO extends IPSModuleStrict
                     $Header[] = \ONVIF\ONVIF::soapClientWSSecurityHeader($this->ReadPropertyString(\ONVIF\IO\Property::Username), $this->ReadPropertyString(\ONVIF\IO\Property::Password), $this->ReadAttributeInteger(\ONVIF\IO\Attribute::Timestamp_Offset));
                 }
             }
-            $ONVIFClient = new \ONVIF\ONVIF($wsdl, $URI, $this->ReadPropertyString(\ONVIF\IO\Property::Username), $this->ReadPropertyString(\ONVIF\IO\Property::Password), $Header, $Timeout);
+            $ONVIFClient = new \ONVIF\ONVIF($wsdl, $URI, $this->ReadPropertyString(\ONVIF\IO\Property::Username), $this->ReadPropertyString(\ONVIF\IO\Property::Password), $Header, $Timeout, $this->ReadPropertyBoolean(\ONVIF\IO\Property::VerifyCertificate));
         } else {
-            $ONVIFClient = new \ONVIF\ONVIF($wsdl, $URI, null, null, $Header, $Timeout);
+            $ONVIFClient = new \ONVIF\ONVIF($wsdl, $URI, null, null, $Header, $Timeout, $this->ReadPropertyBoolean(\ONVIF\IO\Property::VerifyCertificate));
         }
         try {
             if (count($Params) == 0) {
@@ -2135,7 +2176,7 @@ class ONVIFIO extends IPSModuleStrict
             }
             $Response = $ONVIFClient->client->__getLastResponse();
             $this->SendDebug('Soap Request Headers', $ONVIFClient->client->__getLastRequestHeaders(), 0);
-            $this->SendDebug('Soap Request', $ONVIFClient->client->__getLastRequest(), 0);
+            $this->SendDebug('Soap Request', $this->MaskHookToken($ONVIFClient->client->__getLastRequest()), 0);
             $this->SendDebug('Soap Response Headers', $ONVIFClient->client->__getLastResponseHeaders(), 0);
             $this->SendDebug('Soap Response', $Response, 0);
             $this->SendDebug('Soap Result', $Result, 0);
@@ -2143,7 +2184,7 @@ class ONVIFIO extends IPSModuleStrict
         } catch (SoapFault $e) {
             $Response = $ONVIFClient->client->__getLastResponse();
             $this->SendDebug('Soap Request Headers Error', $ONVIFClient->client->__getLastRequestHeaders(), 0);
-            $this->SendDebug('Soap Request Error', $ONVIFClient->client->__getLastRequest(), 0);
+            $this->SendDebug('Soap Request Error', $this->MaskHookToken($ONVIFClient->client->__getLastRequest()), 0);
             $this->SendDebug('Soap Response Headers Error', $ONVIFClient->client->__getLastResponseHeaders(), 0);
             $this->SendDebug('Soap Response Error', $Response, 0);
             $this->SendDebug('Soap Response Error (' . $e->getCode() . ')', $e->getMessage(), 0);
@@ -2183,7 +2224,7 @@ class ONVIFIO extends IPSModuleStrict
     }
     protected function ProcessHookData(): void
     {
-        if (($this->ReadPropertyBoolean(\ONVIF\IO\Property::Active) == false) || ($this->GetTimerInterval(\ONVIF\IO\Timer::RenewSubscription) == 0)) {
+        if (($this->ReadPropertyBoolean(\ONVIF\IO\Property::Active) == false) || ($this->GetTimerInterval(\ONVIF\IO\Timer::RenewSubscription) == 0) || (!$this->IsValidHookToken())) {
             http_response_code(404);
             header('Connection: close');
             header('Server: Symcon ' . IPS_GetKernelVersion());
@@ -2203,7 +2244,8 @@ class ONVIFIO extends IPSModuleStrict
         header('Cache-Control: no-cache');
         header('Content-Type: text/plain');
 
-        $Data = file_get_contents('php://input');
+        // Ereignisse sind klein, die Größe wird begrenzt
+        $Data = (string) file_get_contents('php://input', false, null, 0, self::MaxEventSize);
         $this->SendDebug('Event', $Data, 0);
         if ($this->WaitForFirstEvent) {
             $this->WaitForFirstEvent = false;
@@ -2213,11 +2255,63 @@ class ONVIFIO extends IPSModuleStrict
         }
         $this->DecodeNotificationMessage($Data);
     }
+    /**
+     * Ersetzt das geheime Token der Hook-Adresse durch *** (für Debug-Ausgaben).
+     *
+     * @param mixed $Data Text oder Array.
+     *
+     * @return mixed Daten ohne das Token.
+     */
+    protected function MaskHookToken(mixed $Data): mixed
+    {
+        $Token = $this->ReadAttributeString(\ONVIF\IO\Attribute::HookToken);
+        if ($Token === '') {
+            return $Data;
+        }
+        if (is_array($Data)) {
+            array_walk_recursive($Data, function (mixed &$Value) use ($Token)
+            {
+                if (is_string($Value)) {
+                    $Value = str_replace($Token, '***', $Value);
+                }
+            });
+            return $Data;
+        }
+        return is_string($Data) ? str_replace($Token, '***', $Data) : $Data;
+    }
+
+    /**
+     * Name des Hooks dieser Instanz. Kurz gehalten, siehe HookTokenLength.
+     *
+     * @return string Hook-Name ohne '/hook/'.
+     */
+    protected function GetHookName(): string
+    {
+        return 'ONVIF/' . $this->InstanceID;
+    }
+
+    /**
+     * Prüft, ob der angefragte Hook-Pfad das geheime Token dieser Instanz enthält.
+     *
+     * @return bool true wenn das letzte Pfadsegment dem Token entspricht.
+     */
+    protected function IsValidHookToken(): bool
+    {
+        $Token = $this->ReadAttributeString(\ONVIF\IO\Attribute::HookToken);
+        $Path = (string) parse_url($_SERVER['REQUEST_URI'] ?? '', PHP_URL_PATH);
+        $Given = substr(strrchr('/' . $Path, '/'), 1);
+        if (($Token === '') || !hash_equals($Token, $Given)) {
+            // Das übergebene Token (oder was davon ankam) wird nicht ausgegeben, nur die Länge hilft bei der Fehlersuche
+            $this->SendDebug('Event', $this->Translate('Invalid event hook token') . ' (' . sprintf($this->Translate('length of path: %d, length of token: %d'), strlen($Path), strlen($Given)) . ')', 0);
+            return false;
+        }
+        return true;
+    }
     protected function DecodeNotificationMessage(string $NotificationMessageXML): bool
     {
         $xml = new DOMDocument();
         /** @var mixed $validXML */
-        $validXML = @$xml->loadXML($NotificationMessageXML);
+        $validXML = @$xml->loadXML($NotificationMessageXML, LIBXML_NONET);
         if (!$validXML) {
             $this->LogMessage($this->Translate('Malformed XML event received'), KL_ERROR);
             $this->SendDebug('Event', $this->Translate('Malformed XML event received'), 0);

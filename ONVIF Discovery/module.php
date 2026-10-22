@@ -7,6 +7,7 @@ eval('declare(strict_types=1);namespace ONVIFDiscovery {?>' . file_get_contents(
 eval('declare(strict_types=1);namespace ONVIFDiscovery {?>' . file_get_contents(__DIR__ . '/../libs/helper/SemaphoreHelper.php') . '}');
 require_once dirname(__DIR__) . '/libs/wsdl.php';
 require_once dirname(__DIR__) . '/libs/ONVIF.inc.php';
+require_once dirname(__DIR__) . '/libs/Security.php';
 
 /**
  * Sucht ONVIF-Geräte im Netzwerk (WS-Discovery) und legt Konfiguratoren an.
@@ -17,7 +18,7 @@ require_once dirname(__DIR__) . '/libs/ONVIF.inc.php';
  * @author        Michael Tröger <nall4chan@gmail.com>
  * @copyright     2026 Michael Tröger
  * @license       Custom Non-Commercial Share-Alike License (see LICENSE)
- * @version       2.60
+ * @version       2.61
  *
  * @property array $Devices
  * @property array $DevicesError
@@ -103,7 +104,10 @@ class ONVIFDiscovery extends IPSModuleStrict
             $ScriptText = 'IPS_RequestAction(' . $this->InstanceID . ', \'StartDiscover\',true);';
             IPS_RunScriptText($ScriptText);
         }
-        $this->SendDebug('FORM', json_encode($Form), 0);
+        // Das Formular enthält das Passwort, daher nur maskiert ausgeben
+        $DebugForm = $Form;
+        $DebugForm['actions'][0]['items'][0]['items'][1]['value'] = '***';
+        $this->SendDebug('FORM', json_encode($DebugForm), 0);
         $this->SendDebug('FORM', json_last_error_msg(), 0);
         return json_encode($Form);
     }
@@ -127,8 +131,24 @@ class ONVIFDiscovery extends IPSModuleStrict
         }
 
         if ($Ident == 'ScanDevice') {
-            $Data = unserialize($Value);
-            $this->ScanDevice($Data['IP'], $Data['xAddrs']);
+            // Der Wert wird als Base64 von JSON übergeben und hier erneut geprüft (RequestAction ist auch extern aufrufbar)
+            $Data = json_decode((string) base64_decode((string) $Value, true), true);
+            if (!is_array($Data) || !isset($Data['IP'], $Data['xAddrs']) || !is_string($Data['IP']) || !is_array($Data['xAddrs']) || (filter_var(preg_replace('/%.*$/', '', $Data['IP']), FILTER_VALIDATE_IP) === false)) {
+                $this->SendDebug('ScanDevice', 'Invalid data', 0);
+                return;
+            }
+            $xAddrs = [];
+            foreach ($Data['xAddrs'] as $xAddr) {
+                $Clean = is_string($xAddr) ? \ONVIF\Security::SanitizeXAddr($xAddr, $Data['IP']) : null;
+                if ($Clean !== null) {
+                    $xAddrs[] = $Clean;
+                }
+            }
+            if (count($xAddrs) == 0) {
+                $this->SendDebug('ScanDevice', 'No valid address', 0);
+                return;
+            }
+            $this->ScanDevice($Data['IP'], $xAddrs);
         }
         if ($Ident == 'Freeze') {
             $this->EnableErrorPopup = false;
@@ -224,7 +244,8 @@ class ONVIFDiscovery extends IPSModuleStrict
         $this->DevicesProcessed = 0;
         foreach ($discoveryList as $IP => $Device) {
             $i++;
-            $ScriptText = 'IPS_RequestAction(' . $this->InstanceID . ', \'ScanDevice\',\'' . serialize(['IP' => $IP, 'xAddrs' => $Device]) . '\');';
+            // Base64 enthält keine Zeichen, die den Skripttext verlassen können
+            $ScriptText = 'IPS_RequestAction(' . $this->InstanceID . ', \'ScanDevice\', \'' . base64_encode(json_encode(['IP' => $IP, 'xAddrs' => $Device])) . '\');';
             IPS_RunScriptText($ScriptText);
             if ($i % 3) {
                 IPS_Sleep(400);
@@ -454,19 +475,14 @@ class ONVIFDiscovery extends IPSModuleStrict
                 $matches = array_merge($matches, explode(' ', $addrsNode->nodeValue));
             }
         }
-        $filtermatches = array_filter($matches, function (string $item) use ($ip)
-        {
-            return strpos($item, $ip);
-        });
-        $filtermatches = array_values($filtermatches);
-        array_walk($filtermatches, function (string &$item)
-        {
-            $item = str_replace('/onvif/device_service', '', $item);
-            if (strpos($item, ':80', -3)) {
-                $item = substr($item, 0, -3);
+        $filtermatches = [];
+        foreach ($matches as $item) {
+            $Clean = \ONVIF\Security::SanitizeXAddr($item, $ip);
+            if ($Clean !== null) {
+                $filtermatches[] = $Clean;
             }
-        });
-        return $filtermatches;
+        }
+        return array_values(array_unique($filtermatches));
     }
 
     /**
