@@ -7,7 +7,7 @@ namespace ONVIF\Tools;
 /**
  * Stabile Textdarstellung der Funktionen und Typen, die ext/soap aus einer WSDL liest.
  *
- * Der Generator (tools/update-wsdl.php) schreibt sie nach tests/wsdl-snapshot/,
+ * Der Generator (.tools/update-wsdl.php) schreibt sie nach tests/wsdl-snapshot/,
  * der Unit-Test (tests/WSDLTest.php) vergleicht sie. Der Git-Diff der Snapshots zeigt
  * bei einem Update der WSDL, welche Funktionen und Typen sich geändert haben.
  *

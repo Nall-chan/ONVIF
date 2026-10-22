@@ -7,10 +7,10 @@ use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
 
 require_once __DIR__ . '/../libs/wsdl.php';
-require_once __DIR__ . '/../tools/WsdlSnapshot.php';
+require_once __DIR__ . '/../.tools/WsdlSnapshot.php';
 
 /**
- * Prüft die WSDL-Dateien unter libs/WSDL (erzeugt mit tools/update-wsdl.php).
+ * Prüft die WSDL-Dateien unter libs/WSDL (erzeugt mit .tools/update-wsdl.php).
  *
  * @project       ONVIF
  * @file          WSDLTest.php
@@ -57,7 +57,7 @@ class WSDLTest extends TestCase
     {
         $this->requireSoap();
         $Snapshot = self::SnapshotDir . '/' . WsdlSnapshot::fileName($Name);
-        $this->assertFileExists($Snapshot, 'Snapshot missing, run tools/update-wsdl.php');
+        $this->assertFileExists($Snapshot, 'Snapshot missing, run .tools/update-wsdl.php');
         $this->assertSame(
             str_replace("\r\n", "\n", (string) file_get_contents($Snapshot)),
             WsdlSnapshot::create(self::WsdlDir . '/' . $Path),
@@ -102,7 +102,7 @@ class WSDLTest extends TestCase
     public function testModifiedFilesCarryNotice(): void
     {
         $VersionFile = self::WsdlDir . '/VERSION.json';
-        $this->assertFileExists($VersionFile, 'libs/WSDL/VERSION.json missing, run tools/update-wsdl.php');
+        $this->assertFileExists($VersionFile, 'libs/WSDL/VERSION.json missing, run .tools/update-wsdl.php');
         $Version = json_decode((string) file_get_contents($VersionFile), true);
         $Wrong = [];
         foreach ($Version['Files'] as $Path => $Rules) {
@@ -111,7 +111,7 @@ class WSDLTest extends TestCase
                 $Wrong[] = $Path . (count($Rules) ? ': modified, notice missing' : ': unmodified, notice present');
             }
         }
-        $this->assertSame([], $Wrong, 'Modification notice (tools/update-wsdl.php) does not match the applied rules');
+        $this->assertSame([], $Wrong, 'Modification notice (.tools/update-wsdl.php) does not match the applied rules');
     }
 
     private function requireSoap(): void

@@ -357,7 +357,7 @@ Für das Discovery werden Pakete über die Multicast-Adresse `239.255.255.250` a
 ### Fremde Quellen
 
 Die WSDL- und Schema-Dateien unter `libs/WSDL` stammen nicht vom Autor dieser Library und unterliegen den Lizenzen ihrer Herausgeber. Die Copyright- und Lizenzhinweise in den Dateiköpfen bleiben erhalten.  
-Die ONVIF-Dateien werden mit `tools/update-wsdl.php` aus einem Release von [onvif/specs](https://github.com/onvif/specs) übernommen und für den PHP-SoapClient angepasst; Release und Anpassungen stehen in `libs/WSDL/VERSION.json`.  
+Die ONVIF-Dateien werden mit `.tools/update-wsdl.php` aus einem Release von [onvif/specs](https://github.com/onvif/specs) übernommen und für den PHP-SoapClient angepasst; Release und Anpassungen stehen in `libs/WSDL/VERSION.json`.  
 
 **Disclaimer regarding ONVIF WSDL files**  
 

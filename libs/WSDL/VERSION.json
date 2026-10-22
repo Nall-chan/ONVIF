@@ -3,7 +3,7 @@
     "Tag": "26.06",
     "Commit": "68ee1b540a40f848c9599eba2c55b87547c588d6",
     "CommitDate": "2026-08-18",
-    "Generator": "tools/update-wsdl.php",
+    "Generator": ".tools/update-wsdl.php",
     "Rules": {
         "P1": "wsdl:service/wsdl:port with empty soap:address added for every SOAP 1.2 binding (ext/soap requires a service, the address is set at runtime by the option location)",
         "P2": "Remote imports (OASIS, W3C) redirected to local copies",

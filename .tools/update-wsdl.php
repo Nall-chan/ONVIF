@@ -10,8 +10,8 @@ declare(strict_types=1);
  * und passt sie für den PHP SoapClient (ext/soap) an. Die Anpassungen sind feste Regeln (siehe Rule).
  *
  * Aufruf (aus dem Hauptordner der Library):
- *   php tools/update-wsdl.php <Tag>                 libs/WSDL und tests/wsdl-snapshot aus dem Tag erzeugen
- *   php tools/update-wsdl.php --check               prüfen, ob libs/WSDL dem Tag aus VERSION.json entspricht
+ *   php .tools/update-wsdl.php <Tag>                 libs/WSDL und tests/wsdl-snapshot aus dem Tag erzeugen
+ *   php .tools/update-wsdl.php --check               prüfen, ob libs/WSDL dem Tag aus VERSION.json entspricht
  *
  * Optionen:
  *   --source=<Verzeichnis>     vorhandener Checkout von onvif/specs statt git clone
@@ -639,7 +639,7 @@ class UpdateWsdl
             $this->Tag = $this->readVersion()['Tag'] ?? null;
         }
         if ($this->Tag === null || !preg_match('/^\d{2}\.\d{2}$/', $this->Tag)) {
-            fwrite(STDERR, 'Usage: php tools/update-wsdl.php <Tag, e.g. 26.06> [--source=<dir>] [--target=<dir>] [--snapshots=<dir>] [--prune] | --check' . "\n");
+            fwrite(STDERR, 'Usage: php .tools/update-wsdl.php <Tag, e.g. 26.06> [--source=<dir>] [--target=<dir>] [--snapshots=<dir>] [--prune] | --check' . "\n");
             return 2;
         }
         $SpecsDir = $this->Source ?? $this->fetchUpstream($this->Tag);
@@ -748,7 +748,7 @@ class UpdateWsdl
             'Tag'        => $this->Tag,
             'Commit'     => $Commit,
             'CommitDate' => $CommitDate,
-            'Generator'  => 'tools/update-wsdl.php',
+            'Generator'  => '.tools/update-wsdl.php',
             'Rules'      => Rule::Descriptions,
             'Files'      => $Generator->rules(),
             'External'   => WsdlGenerator::ExternalFiles,
