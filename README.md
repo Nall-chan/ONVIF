@@ -161,7 +161,7 @@ Für das Discovery werden Pakete über die Multicast-Adresse `239.255.255.250` a
 
 - IO (PullPoint): Ereignis-Abonnements wurden zu spät verlängert und von manchen Geräten (z.B. Tapo) regelmäßig beendet („Fehler bei Renew“)  
 - IO (PullPoint): Fehlerbehandlung verbessert: Ein verlorenes Abonnement wird einmalig neu angelegt, ein unerwartet beendeter Ereignisabruf setzt den IO in den Fehlerzustand  
-- Fehlermeldungen im Log beim Update bzw. Neuladen der Library behoben  
+- Fehlermeldungen im Log beim Update bzw. Neuladen der Library (hoffentlich) behoben  
 
 **Version 2.61**  
 
