@@ -20,7 +20,7 @@ require_once __DIR__ . '/Security.php';
  * @author        Michael Tröger <nall4chan@gmail.com>
  * @copyright     2026 Michael Tröger
  * @license       Custom Non-Commercial Share-Alike License (see LICENSE)
- * @version       2.61
+ * @version       2.62
  *
  * @property int $ParentID
  * @property string $EventTopic
@@ -98,6 +98,12 @@ class ONVIFModuleBase extends IPSModuleStrict
 
     public function MessageSink(int $TimeStamp, int $SenderID, int $Message, array $Data): void
     {
+        // Während eines Module-Reloads können Nachrichten (z.B. IM_CHANGESTATUS des IO) eintreffen,
+        // wenn diese Instanz bereits abgebaut ist. Der Buffer liefert dann false und der BufferHelper
+        // bräche mit unserialize(false) ab. Die Instanz wird ohnehin neu erstellt.
+        if (@$this->GetBuffer('ParentID') === false) {
+            return;
+        }
         $this->IOMessageSink($TimeStamp, $SenderID, $Message, $Data);
 
         switch ($Message) {

@@ -18,7 +18,7 @@ require_once dirname(__DIR__) . '/libs/ONVIF.inc.php';
  * @author        Michael Tröger <nall4chan@gmail.com>
  * @copyright     2026 Michael Tröger
  * @license       Custom Non-Commercial Share-Alike License (see LICENSE)
- * @version       2.61
+ * @version       2.62
  *
  * @property string $Host
  * @property string $MyIP
@@ -29,6 +29,9 @@ require_once dirname(__DIR__) . '/libs/ONVIF.inc.php';
  * @property \ONVIF\EventHandler $usedEventHandler
  * @property \ONVIF\Profile $Profile
  * @property string $TerminationTime
+ * @property int $RenewDue
+ * @property bool $PullPointRecoveryUsed
+ * @property int $LastPullMessages
  * @property array $Warnings
  * @method void RegisterAttributeArray(string $name, mixed $Value, int $Size = 0)
  * @method mixed ReadAttributeArray(string $name)
@@ -58,6 +61,13 @@ class ONVIFIO extends IPSModuleStrict
      * Länge der Hook-Adresse, ab der manche Geräte sie abschneiden.
      */
     protected const MaxConsumerAddressLength = 64;
+
+    /** Ergebnis eines PullMessages-Durchlaufs: Schleife fortsetzen */
+    private const PullLoopContinue = 0;
+    /** Ergebnis eines PullMessages-Durchlaufs: Schleife beenden (abgemeldet) */
+    private const PullLoopStop = 1;
+    /** Ergebnis eines PullMessages-Durchlaufs: Subscription verloren (Renew oder PullMessages mit Fault) */
+    private const PullLoopLost = 2;
     protected $lastSOAPError = '';
 
     public function Create(): void
@@ -106,6 +116,7 @@ class ONVIFIO extends IPSModuleStrict
         $this->RegisterAttributeString(\ONVIF\IO\Attribute::SubscriptionId, '');
         $this->RegisterAttributeInteger(\ONVIF\IO\Attribute::CapabilitiesVersion, 0);
         $this->RegisterTimer(\ONVIF\IO\Timer::RenewSubscription, 0, 'IPS_RequestAction(' . $this->InstanceID . ',"Renew",true);');
+        $this->RegisterTimer(\ONVIF\IO\Timer::PullMessagesWatchdog, 0, 'IPS_RequestAction(' . $this->InstanceID . ',"' . \ONVIF\IO\Timer::PullMessagesWatchdog . '",true);');
         $this->Host = '';
         $this->MyIP = '';
         $this->MyPort = 3777;
@@ -114,6 +125,9 @@ class ONVIFIO extends IPSModuleStrict
         $this->Profile = new \ONVIF\Profile();
         $this->usedEventHandler = new \ONVIF\EventHandler();
         $this->TerminationTime = 'PT1M0S';
+        $this->RenewDue = 0;
+        $this->PullPointRecoveryUsed = false;
+        $this->LastPullMessages = 0;
         $this->Warnings = [];
         $this->WaitForFirstEvent = false;
         if (IPS_GetKernelRunlevel() == KR_READY) {
@@ -168,9 +182,13 @@ class ONVIFIO extends IPSModuleStrict
             $this->SetStatus(IS_INACTIVE);
         }
         $this->SetTimerInterval(\ONVIF\IO\Timer::RenewSubscription, 0);
+        $this->SetTimerInterval(\ONVIF\IO\Timer::PullMessagesWatchdog, 0);
         if ($this->isSubscribed) {
             $this->Unsubscribe();
         }
+        $this->RenewDue = 0;
+        $this->PullPointRecoveryUsed = false;
+        $this->LastPullMessages = 0;
         //Never delete this line!
         parent::ApplyChanges();
         // Geheimer Teil der Ereignis-URL, schützt den Hook vor gefälschten Ereignissen
@@ -335,6 +353,9 @@ class ONVIFIO extends IPSModuleStrict
                 return;
             case 'Renew':
                 $this->Renew();
+                return;
+            case \ONVIF\IO\Timer::PullMessagesWatchdog:
+                $this->CheckPullMessagesLoop();
                 return;
             case 'Reload':
                 if ($this->GetStatus() == IS_INACTIVE) {
@@ -1159,66 +1180,51 @@ class ONVIFIO extends IPSModuleStrict
         $this->isSubscribed = true;
         $this->usedEventHandler = new \ONVIF\EventHandler(\ONVIF\EventHandler::PullPoint);
         $this->SetRenewInterval($CreatePullPointResult);
+        // Watchdog für die PullMessages-Schleife, die gleich (bzw. beim Neuanlegen in der Schleife weiter) läuft
+        $this->LastPullMessages = time();
+        $this->SetTimerInterval(\ONVIF\IO\Timer::PullMessagesWatchdog, $this->GetPullLoopTimeLimit() * 1000);
         $this->SetSynchronizationPoint();
         $this->unlock(\ONVIF\IO\Property::EventHandler);
         $this->LogMessage($this->Translate(\ONVIF\IO\State::ACTIVE), KL_MESSAGE);
         $this->SetStatus(IS_ACTIVE);
         return true;
     }
+    /**
+     * Ein Durchlauf der PullMessages-Schleife. Startet sich danach per Once-Timer selbst neu.
+     *
+     * Die Sperre verhindert eine zweite Schleife (z.B. nach ApplyChanges, während ein alter Durchlauf noch wartet).
+     * Geht die Subscription verloren (Renew oder PullMessages mit Fault), wird einmal eine neue angelegt.
+     * Scheitert auch das, bleibt der IO im Fehlerzustand, bis ein ApplyChanges (z.B. durch die Ereignissteuerung) ihn neu verbindet.
+     */
     protected function PullMessages(): void
     {
-        if (!$this->isSubscribed) {
-            // Exit PullMessages loop
+        if (!$this->lock(\ONVIF\IO\Locks::PullMessages)) {
+            $this->SendDebug('PullMessages', 'duplicated loop, exit', 0);
             return;
         }
-        $SubscriptionReference = $this->ReadAttributeString(\ONVIF\IO\Attribute::SubscriptionReference);
-        if ($SubscriptionReference == '') {
-            $this->SendDebug('ERROR PullMessages', 'No SubscriptionReference', 0);
-            $this->LogMessage($this->Translate('Call PullMessages with no SubscriptionReference'), KL_ERROR);
-            $this->SetStatus(IS_EBASE + 3);
-            $this->LogMessage($this->Translate(\ONVIF\IO\State::CONNECTION_LOST), KL_ERROR);
-            return;
-        }
-        $Timeout = $this->ReadPropertyInteger(\ONVIF\IO\Property::PullPointTimeout);
-        $Action = 'http://www.onvif.org/ver10/events/wsdl/PullPointSubscription/PullMessagesRequest';
-        $Header = $this->GenerateSOAPHeader($Action, $SubscriptionReference);
-        $Params = [
-            'Timeout'     => 'PT' . (string) $Timeout . 'S',
-            'MessageLimit'=> $this->ReadPropertyInteger(\ONVIF\IO\Property::MessageLimit)
-        ];
-        $Response = '';
-        $ResponseTime = time() + $Timeout;
-        $PullMessagesResult = $this->SendData($SubscriptionReference, \ONVIF\WSDL::Event, 'PullMessages', true, $Params, $Response, $Header, $Timeout + 5);
-        if ($Response) {
-            if (is_a($PullMessagesResult, 'SoapFault')) {
-                if ($this->isSubscribed) {
-                    /** @var SoapFault $PullMessagesResult */
-                    $this->SendDebug('ERROR PullMessages', 'No Response', 0);
-                    $this->LogMessage($this->Translate('Error PullMessages with:') . $PullMessagesResult->getMessage(), KL_ERROR);
-                    $this->SetStatus(IS_EBASE + 3);
-                    $this->isSubscribed = false;
+        $this->LastPullMessages = time();
+        try {
+            $Result = $this->PullMessagesOnce();
+            if ($Result == self::PullLoopLost) {
+                if ($this->PullPointRecoveryUsed) {
+                    // Exit PullMessages loop, Status bleibt auf Fehler
+                    return;
                 }
-                return;
-            }
-        }
-        if ($this->isSubscribed) {
-            if (is_object($PullMessagesResult)) {
-                if (!property_exists($PullMessagesResult, 'NotificationMessage')) {
-                    if (time() < $ResponseTime) {
-                        $this->LogMessage($this->Translate("Device ignore timeout in PullMessagesRequest!\r\nThis can lead to increased network traffic, CPU load or a slow Symcon.\r\nIf possible, switch to subscribe to avoid this error from the device."), KL_WARNING);
-                        IPS_Sleep(($ResponseTime - time()) * 1000);
-                    }
+                $this->PullPointRecoveryUsed = true;
+                $this->LogMessage($this->Translate('Event subscription lost, create new PullPoint subscription'), KL_WARNING);
+                if (!$this->CreatePullPointSubscription()) {
+                    // Exit PullMessages loop
+                    return;
                 }
+                $Result = self::PullLoopContinue;
             }
-            // Continue PullMessages loop when subscribed
-            $this->RegisterOnceTimer('PullMessages', 'IPS_RequestAction(' . $this->InstanceID . ',"PullMessages",true);');
-        }
-        if (is_object($PullMessagesResult)) {
-            if (property_exists($PullMessagesResult, 'NotificationMessage')) {
-                $this->DecodeNotificationMessage($Response);
+            if (($Result == self::PullLoopContinue) && $this->isSubscribed && (IPS_GetKernelRunlevel() == KR_READY)) {
+                // Continue PullMessages loop when subscribed
+                $this->RegisterOnceTimer(\ONVIF\IO\Timer::PullMessages, 'IPS_RequestAction(' . $this->InstanceID . ',"PullMessages",true);');
             }
+        } finally {
+            $this->unlock(\ONVIF\IO\Locks::PullMessages);
         }
-        return;
     }
     protected function Subscribe(): bool
     {
@@ -1404,6 +1410,8 @@ class ONVIFIO extends IPSModuleStrict
         }
         $this->lock(\ONVIF\IO\Property::EventHandler);
         $this->SetTimerInterval(\ONVIF\IO\Timer::RenewSubscription, 0);
+        $this->SetTimerInterval(\ONVIF\IO\Timer::PullMessagesWatchdog, 0);
+        $this->RenewDue = 0;
         $this->isSubscribed = false;
         $this->UpdateFormField('SubscriptionReference', 'caption', '');
         $this->UpdateFormField('SubscriptionReferenceRow', 'visible', false);
@@ -2264,8 +2272,9 @@ class ONVIFIO extends IPSModuleStrict
      */
     protected function MaskHookToken(mixed $Data): mixed
     {
-        $Token = $this->ReadAttributeString(\ONVIF\IO\Attribute::HookToken);
-        if ($Token === '') {
+        $Token = @$this->ReadAttributeString(\ONVIF\IO\Attribute::HookToken);
+        // false, wenn die Instanz bereits abgebaut ist (z.B. ein PullMessages-Durchlauf endet während eines Module-Reloads)
+        if (!is_string($Token) || ($Token === '')) {
             return $Data;
         }
         if (is_array($Data)) {
@@ -2385,6 +2394,72 @@ class ONVIFIO extends IPSModuleStrict
                 substr($uuid, 20, 12);
         return $MessageID;
     }
+
+    /**
+     * Führt fällige Renews aus und sendet einen PullMessages-Request.
+     *
+     * @return int self::PullLoopContinue, self::PullLoopStop (Schleife beenden) oder self::PullLoopLost (Subscription verloren)
+     */
+    private function PullMessagesOnce(): int
+    {
+        if (!$this->isSubscribed) {
+            return self::PullLoopStop;
+        }
+        $SubscriptionReference = $this->ReadAttributeString(\ONVIF\IO\Attribute::SubscriptionReference);
+        if ($SubscriptionReference == '') {
+            $this->SendDebug('ERROR PullMessages', 'No SubscriptionReference', 0);
+            $this->LogMessage($this->Translate('Call PullMessages with no SubscriptionReference'), KL_ERROR);
+            $this->SetStatus(IS_EBASE + 3);
+            $this->LogMessage($this->Translate(\ONVIF\IO\State::CONNECTION_LOST), KL_ERROR);
+            return self::PullLoopStop;
+        }
+        // Renew im PullPoint-Modus hier statt per Timer: Die Timer einer Instanz laufen nacheinander,
+        // ein Renew-Timer würde erst nach dem laufenden PullMessages ausgeführt und käme zu spät.
+        $RenewDue = $this->RenewDue;
+        if (($RenewDue > 0) && (time() >= $RenewDue)) {
+            if (!$this->Renew()) {
+                return self::PullLoopLost;
+            }
+            // Subscription funktioniert, ein späterer Verlust darf wieder einmal neu anlegen
+            $this->PullPointRecoveryUsed = false;
+        }
+        $Timeout = $this->ReadPropertyInteger(\ONVIF\IO\Property::PullPointTimeout);
+        $Action = 'http://www.onvif.org/ver10/events/wsdl/PullPointSubscription/PullMessagesRequest';
+        $Header = $this->GenerateSOAPHeader($Action, $SubscriptionReference);
+        $Params = [
+            'Timeout'     => 'PT' . (string) $Timeout . 'S',
+            'MessageLimit'=> $this->ReadPropertyInteger(\ONVIF\IO\Property::MessageLimit)
+        ];
+        $Response = '';
+        $ResponseTime = time() + $Timeout;
+        $PullMessagesResult = $this->SendData($SubscriptionReference, \ONVIF\WSDL::Event, 'PullMessages', true, $Params, $Response, $Header, $Timeout + 5);
+        if (!$this->isSubscribed) {
+            // Während des Wartens abgemeldet (Unsubscribe, ApplyChanges)
+            return self::PullLoopStop;
+        }
+        if ($SubscriptionReference != $this->ReadAttributeString(\ONVIF\IO\Attribute::SubscriptionReference)) {
+            // Während des Wartens wurde eine neue Subscription angelegt, die Antwort gehört zur alten
+            return self::PullLoopContinue;
+        }
+        if ($Response && is_a($PullMessagesResult, 'SoapFault')) {
+            /** @var SoapFault $PullMessagesResult */
+            $this->SendDebug('ERROR PullMessages', $PullMessagesResult->getMessage(), 0);
+            $this->LogMessage($this->Translate('Error PullMessages with:') . $PullMessagesResult->getMessage(), KL_ERROR);
+            $this->SetStatus(IS_EBASE + 3);
+            $this->isSubscribed = false;
+            $this->RenewDue = 0;
+            return self::PullLoopLost;
+        }
+        if (is_object($PullMessagesResult)) {
+            if (property_exists($PullMessagesResult, 'NotificationMessage')) {
+                $this->DecodeNotificationMessage($Response);
+            } elseif (time() < $ResponseTime) {
+                $this->LogMessage($this->Translate("Device ignore timeout in PullMessagesRequest!\r\nThis can lead to increased network traffic, CPU load or a slow Symcon.\r\nIf possible, switch to subscribe to avoid this error from the device."), KL_WARNING);
+                IPS_Sleep(($ResponseTime - time()) * 1000);
+            }
+        }
+        return self::PullLoopContinue;
+    }
     private function GetEventMessageValues(DOMNodeList $xmlNodes): array
     {
         $Results = [];
@@ -2425,23 +2500,125 @@ class ONVIFIO extends IPSModuleStrict
         $Header[] = new SoapHeader(\ONVIF\NS::Addressing, 'MessageID', new SoapVar(self::generateMessageID(), XSD_ANYURI, '', \ONVIF\NS::Addressing));
         return $Header;
     }
+    /**
+     * Watchdog der PullMessages-Schleife.
+     *
+     * Bricht die Schleife unerwartet ab (z.B. Fatal Error), bleibt sonst der Status aktiv, obwohl keine Ereignisse mehr ankommen.
+     * Ein gewolltes Ende (Unsubscribe, ApplyChanges, Schließen des IO) setzt isSubscribed zurück und stoppt diesen Timer;
+     * beim Beenden des Kernels wird nicht geprüft.
+     */
+    private function CheckPullMessagesLoop(): void
+    {
+        if (!$this->isSubscribed || ($this->usedEventHandler->Type != \ONVIF\EventHandler::PullPoint)) {
+            $this->SetTimerInterval(\ONVIF\IO\Timer::PullMessagesWatchdog, 0);
+            return;
+        }
+        if (IPS_GetKernelRunlevel() != KR_READY) {
+            return;
+        }
+        $Age = time() - $this->LastPullMessages;
+        if ($Age <= $this->GetPullLoopTimeLimit()) {
+            return;
+        }
+        $this->SetTimerInterval(\ONVIF\IO\Timer::PullMessagesWatchdog, 0);
+        $this->SendDebug('ERROR PullMessages', 'loop stopped ' . $Age . ' seconds ago', 0);
+        $this->LogMessage($this->Translate('PullMessages loop stopped unexpectedly'), KL_ERROR);
+        $this->isSubscribed = false;
+        $this->RenewDue = 0;
+        $this->SetStatus(IS_EBASE + 3);
+        $this->LogMessage($this->Translate(\ONVIF\IO\State::CONNECTION_LOST), KL_ERROR);
+    }
+
+    /**
+     * Längste erwartete Dauer eines PullMessages-Durchlaufs in Sekunden (zugleich Intervall des Watchdogs).
+     *
+     * Ein Durchlauf kann PullMessages (Timeout + 5 s), Renew, Neuanlegen und das Abwarten eines Geräts enthalten,
+     * das den Timeout ignoriert (bis Timeout).
+     *
+     * @return int
+     */
+    private function GetPullLoopTimeLimit(): int
+    {
+        return (2 * $this->ReadPropertyInteger(\ONVIF\IO\Property::PullPointTimeout)) + 30;
+    }
+
+    /**
+     * Berechnet aus der Antwort von CreatePullPointSubscription, Subscribe oder Renew die Laufzeit der Subscription
+     * und plant den nächsten Renew.
+     *
+     * Subscribe: per Timer 5 Sekunden vor Ablauf.
+     * PullPoint: in der PullMessages-Schleife, PullPointTimeout + 10 Sekunden vor Ablauf (höchstens zur halben Laufzeit),
+     * weil ein Timer erst nach dem laufenden PullMessages ausgeführt wird.
+     *
+     * @param object $Result Antwort mit TerminationTime und (optional) CurrentTime
+     */
     private function SetRenewInterval(object $Result): void
     {
-        $CurrentTime = DateTimeImmutable::createFromFormat(DATE_W3C, $Result->CurrentTime);
-        $TerminationTime = DateTimeImmutable::createFromFormat(DATE_W3C, $Result->TerminationTime);
-        $TimeDiff = $CurrentTime->diff($TerminationTime);
-        $Interval = $TerminationTime->getTimestamp() - $CurrentTime->getTimestamp();
-        if ($Interval < 10) { // Falls Gerät falsche Timestamps liefert ()
+        $TerminationTime = self::ParseDeviceTime($Result->TerminationTime ?? null);
+        $CurrentTime = self::ParseDeviceTime($Result->CurrentTime ?? null);
+        if ($CurrentTime === null) {
+            // CurrentTime ist im RenewResponse optional: Gerätezeit aus eigener Uhr und Zeitversatz zum Gerät
+            $CurrentTime = time() - $this->ReadAttributeInteger(\ONVIF\IO\Attribute::Timestamp_Offset);
+        }
+        $isPullPoint = ($this->usedEventHandler->Type == \ONVIF\EventHandler::PullPoint);
+        if ($TerminationTime === null) {
+            // Ohne gültige TerminationTime die konfigurierte Laufzeit annehmen
+            $Minutes = $this->ReadPropertyInteger($isPullPoint ? \ONVIF\IO\Property::PullPointInitialTerminationTime : \ONVIF\IO\Property::SubscribeInitialTerminationTime);
+            $Interval = $Minutes * 60;
+            $this->SendDebug('Warning', 'No valid TerminationTime, use ' . $Interval . ' seconds', 0);
+        } else {
+            $Interval = $TerminationTime - $CurrentTime;
+        }
+        if ($Interval < 10) { // Falls Gerät falsche Timestamps liefert
             $this->TerminationTime = 'PT10S';
             $Interval = 10;
         } elseif ($Interval == 60) { // 1 Minute ist üblich, aber viele China Böller können kein XML-DateTime, sondern wollen immer PT60S.
             $this->TerminationTime = 'PT60S';
         } else {
-            $this->TerminationTime = $TimeDiff->format('PT%iM%sS');
+            $this->TerminationTime = self::FormatDuration($Interval);
         }
         $this->SendDebug('TerminationTime', $this->TerminationTime, 0);
+        if ($isPullPoint) {
+            $Margin = min($this->ReadPropertyInteger(\ONVIF\IO\Property::PullPointTimeout) + 10, intdiv($Interval, 2));
+            $this->SetTimerInterval(\ONVIF\IO\Timer::RenewSubscription, 0);
+            $this->RenewDue = time() + $Interval - $Margin;
+            $this->SendDebug('Renew Interval', $Interval - $Margin, 0);
+            return;
+        }
+        $this->RenewDue = 0;
         $this->SendDebug('Renew Interval', $Interval - 5, 0);
         $this->SetTimerInterval(\ONVIF\IO\Timer::RenewSubscription, ($Interval - 5) * 1000);
+    }
+
+    /**
+     * Wandelt eine xsd:dateTime des Geräts in einen Unix-Zeitstempel (auch mit Sekundenbruchteilen).
+     *
+     * @param mixed $Value Zeitangabe aus der SOAP-Antwort
+     * @return int|null Zeitstempel oder null, wenn der Wert fehlt oder ungültig ist
+     */
+    private static function ParseDeviceTime(mixed $Value): ?int
+    {
+        if (!is_string($Value) || ($Value === '')) {
+            return null;
+        }
+        try {
+            return (new \DateTimeImmutable($Value))->getTimestamp();
+        } catch (\Exception $e) {
+            return null;
+        }
+    }
+
+    /**
+     * Formatiert Sekunden als xsd:duration (z.B. PT2M0S, PT1H30M0S).
+     *
+     * @param int $Seconds Dauer in Sekunden
+     * @return string
+     */
+    private static function FormatDuration(int $Seconds): string
+    {
+        $Hours = intdiv($Seconds, 3600);
+        $Minutes = intdiv($Seconds % 3600, 60);
+        return 'PT' . ($Hours ? $Hours . 'H' : '') . $Minutes . 'M' . ($Seconds % 60) . 'S';
     }
     private static function GetNodeBoolValue(\DOMNode $Node): bool
     {

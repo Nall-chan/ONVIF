@@ -13,7 +13,7 @@ namespace ONVIF
      * @author        Michael Tröger <nall4chan@gmail.com>
      * @copyright     2026 Michael Tröger
      * @license       Custom Non-Commercial Share-Alike License (see LICENSE)
-     * @version       2.61
+     * @version       2.62
      */
     class WSDL
     {
@@ -264,6 +264,12 @@ namespace ONVIF\IO
     class Timer
     {
         public const RenewSubscription = 'RenewSubscription';
+        public const PullMessages = 'PullMessages';
+        public const PullMessagesWatchdog = 'PullMessagesWatchdog';
+    }
+    class Locks
+    {
+        public const PullMessages = 'PullMessages';
     }
     class State
     {

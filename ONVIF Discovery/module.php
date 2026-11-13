@@ -18,7 +18,7 @@ require_once dirname(__DIR__) . '/libs/Security.php';
  * @author        Michael Tröger <nall4chan@gmail.com>
  * @copyright     2026 Michael Tröger
  * @license       Custom Non-Commercial Share-Alike License (see LICENSE)
- * @version       2.61
+ * @version       2.62
  *
  * @property array $Devices
  * @property array $DevicesError

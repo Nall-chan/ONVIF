@@ -60,6 +60,8 @@
             "This device send a invalid Subscription-Reference.": "Dieses Gerät sendet eine ungültige Abonnement-Referenz.",
             "Call PullMessages with no SubscriptionReference": "PullMessages wurde ohne SubscriptionReference gestartet",
             "Error PullMessages with:": "Fehler bei PullMessages mit:",
+            "Event subscription lost, create new PullPoint subscription": "Ereignis-Abonnement verloren, lege neues PullPoint-Abonnement an",
+            "PullMessages loop stopped unexpectedly": "PullMessages-Schleife unerwartet beendet",
             "Error PullMessages with no Response": "Fehler, PullMessage ohne Antwort",
             "Call Renew with no SubscriptionReference": "Renew wurde ohne SubscriptionReference gestartet",
             "Error Renew Subscription with:": "Fehler bei Renew mit:",

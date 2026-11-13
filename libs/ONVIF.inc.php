@@ -15,7 +15,7 @@ require_once __DIR__ . '/Security.php';
  * @author        Michael Tröger <nall4chan@gmail.com>
  * @copyright     2026 Michael Tröger
  * @license       Custom Non-Commercial Share-Alike License (see LICENSE)
- * @version       2.61
+ * @version       2.62
  */
 class ONVIFsoapClient extends \SoapClient
 {
@@ -113,7 +113,7 @@ class ONVIFsoapClient extends \SoapClient
  * @author        Michael Tröger <nall4chan@gmail.com>
  * @copyright     2026 Michael Tröger
  * @license       Custom Non-Commercial Share-Alike License (see LICENSE)
- * @version       2.61
+ * @version       2.62
  */
 class ONVIF
 {
